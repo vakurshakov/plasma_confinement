@@ -1,0 +1,9 @@
+.ipynb_checkpoints/
+**/__pycache__
+*.exe
+*.o
+*.xlsx
+*.gif
+*.png
+*.txt
+*.zip
