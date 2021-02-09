@@ -37,9 +37,9 @@ vector3 vector3::cross(const vector3 &other) const
 {
 		vector3 temp;
 
-		temp.x() = m_y*other.z() - m_z*other.y();
+		temp.x() = + ( m_y*other.z() - m_z*other.y() );
 		temp.y() = - ( m_x*other.z() - m_z*other.x() );
-		temp.z() = m_x*other.y() - m_y*other.x();
+		temp.z() = + ( m_x*other.y() - m_y*other.x() );
 
 		return temp;		
 }

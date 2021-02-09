@@ -26,6 +26,7 @@
 #include <ctime>
 #include <cmath>
 #include <omp.h>
+#include <dir.h>
 
 //-------- functions -------------------------------------------------------------------
 double frand() { return ((double)rand()/RAND_MAX); }

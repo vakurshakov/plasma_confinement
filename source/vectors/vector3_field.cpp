@@ -22,7 +22,17 @@ int reflecting_y(const vector3_field& _F, Axis field_component)
 	return 0;
 }
 
-int periodic(const vector3_field& _F, Axis field_component)
+int periodic_X(const vector3_field& _F, Axis field_component)
+{
+	switch (field_component) {
+		case X: return _F.size_x();
+		case Y: return _F.size_x();
+		case Z: return _F.size_x();
+	}
+	return 0;
+}
+
+int periodic_Y(const vector3_field& _F, Axis field_component)
 {
 	switch (field_component) {
 		case X: return _F.size_y();
@@ -64,10 +74,10 @@ vector3 reflective_vector3_field::field_at(const int i, const int j) const
 //-------------------------------------------------------------------------------------------------
 
 int periodic_vector3_field::end_x(Axis field_component) const
-{ return periodic(*this, field_component); }
+{ return periodic_X(*this, field_component); }
 
 int periodic_vector3_field::end_y(Axis field_component) const
-{ return periodic(*this, field_component); }
+{ return periodic_Y(*this, field_component); }
 
 vector3& periodic_vector3_field::field_at(const int i, const int j)
 {
@@ -98,7 +108,7 @@ int rh_pv_vector3_field::end_x(Axis field_component) const
 { return reflecting_x(*this, field_component); }
 
 int rh_pv_vector3_field::end_y(Axis field_component) const
-{ return periodic(*this, field_component); }
+{ return periodic_Y(*this, field_component); }
 
 vector3& rh_pv_vector3_field::field_at(const int i, const int j)
 {
@@ -129,7 +139,7 @@ vector3 rh_pv_vector3_field::field_at(const int i, const int j) const
 //  reflective verticaly & periodic horisontaly
 
 int rv_ph_vector3_field::end_x(Axis field_component) const
-{ return periodic(*this, field_component); }
+{ return periodic_X(*this, field_component); }
 
 int rv_ph_vector3_field::end_y(Axis field_component) const
 { return reflecting_y(*this, field_component); }
@@ -162,23 +172,23 @@ vector3 rv_ph_vector3_field::field_at(const int i, const int j) const
 void write_vector3_field(const vector3_field& F, Axis axis, std::ofstream &os)
 {
 	for (int y = 0; y < F.size_y(); ++y) {
-		for (int x = 0; x < F.size_x(); ++x) {
-			switch (axis)
-			{
-				case X:
-					os << F.x(y,x) << ",";
-					break;
-				case Y:
-					os << F.y(y,x) << ",";
-					break;
-				case Z:
-					os << F.z(y,x) << ",";
-					break;
-				default:
-					return;
-			}
+	for (int x = 0; x < F.size_x(); ++x) {
+		switch (axis)
+		{
+			case X:
+				os << F.x(y,x) << " ";
+				break;
+			case Y:
+				os << F.y(y,x) << " ";
+				break;
+			case Z:
+				os << F.z(y,x) << " ";
+				break;
+			default:
+				return;
 		}
-		os << " ";
+	}
+		os << "\t";
 	}
 	os << std::endl;
 }

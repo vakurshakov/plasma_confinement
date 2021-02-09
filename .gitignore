@@ -1,4 +1,5 @@
 .ipynb_checkpoints/
+diagnostics/
 **/__pycache__
 *.exe
 *.o

@@ -107,8 +107,8 @@ void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 		for (long int y = nearest_edge_to_ry - charge_cloud; y <= nearest_edge_to_ry + charge_cloud; ++y) {
 	
 			#pragma omp atomic
-			j.z(y,x) += - q/Np*vz/3.*((	shape_at(r.x() - x*dx, dx) + 0.5*shape_at(r0.x() - x*dx, dx))*shape_at(r.y() - y*dy, dy)+
-								   (0.5*shape_at(r.x() - x*dx, dx) +	 shape_at(r0.x() - x*dx, dx))*shape_at(r0.y() - y*dy, dy));
+			j.z(y,x) += - q/Np*vz/3.*((	shape_at(r.x) - (x*dx, dx) + 0.5*shape_at(r0.x) - (x*dx, dx))*shape_at(r.y(  - (y*dy, dy)+
+								   (0.5*shape_at(r.x) - (x*dx, dx) +	 shape_at(r0.x) - (x*dx, dx))*shape_at(r0.y) - (y*dy, dy));
 			}
 		}
 	}
