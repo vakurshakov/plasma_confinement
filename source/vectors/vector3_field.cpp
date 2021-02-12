@@ -52,7 +52,7 @@ int reflective_vector3_field::end_y(Axis field_component) const
 
 vector3& reflective_vector3_field::field_at(const int i, const int j)
 {
-	if ((i >= 0 && i < msize_y) && (j >= 0 && j < msize_x)){
+	if ((i >= 1 && i < msize_y-1) && (j >= 1 && j < msize_x-1)){
 		return field[i*msize_x + j]; 
 	} else {
 		zero.x() = 0;
@@ -64,7 +64,7 @@ vector3& reflective_vector3_field::field_at(const int i, const int j)
 
 vector3 reflective_vector3_field::field_at(const int i, const int j) const
 {
-	if ((i >= 0 && i < msize_y) && (j >= 0 && j < msize_x)){
+	if ((i >= 1 && i < msize_y-1) && (j >= 1 && j < msize_x-1)){
 		return field[i*msize_x + j]; 
 	} else {
 		return zero;
