@@ -14,14 +14,11 @@
 #endif
 
 void Boris_pusher(const sort_of_particles& SORT, particle& PARTICLE,
-				  const vector3_field& E, const vector3_field& B,
-				  double dt, double dx, double dy);
+				  const vector3_field& E, const vector3_field& B);
 
 void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 									 const particle& PARTICLE,
 									 const vector2& r0,
-									 vector3_field& J,
-									 double dt, double dx, double dy);
+									 vector3_field& J);
 
-void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& j,
-		  	 double dt, double dx, double dy);
+void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& j);

@@ -8,6 +8,11 @@
 	#include "../particles/particles.hpp"
 #endif
 
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+	#include "../constants.h"
+#endif
+
 #include <cmath>
 
 enum SHAPE {
@@ -18,8 +23,7 @@ enum SHAPE {
 void Boris_pusher(const sort_of_particles& SORT,
 				  particle& PARTICLE,
 				  const vector3_field& E,
-				  const vector3_field& B,
-				  double dt, double dx, double dy)
+				  const vector3_field& B)
 {
 	// getting a usefull variabels from %SORT and %PARTICLE
 	vector2 r = PARTICLE.r();
@@ -37,7 +41,6 @@ void Boris_pusher(const sort_of_particles& SORT,
 	vector2 shape[2];
 	//	shape[noshift] -- shape((i, j) - r)
 	//	shape[shifted] -- shape((i + 1./2, j + 1./2) - r)
-
 		
 	for(int y = nearest_edge_to_ry-charge_cloud; y <= nearest_edge_to_ry+charge_cloud; ++y) {
 		shape[noshift].y() = shape_at( y*dy - r.y(), dy);

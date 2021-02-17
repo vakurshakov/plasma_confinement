@@ -169,7 +169,7 @@ vector3 rv_ph_vector3_field::field_at(const int i, const int j) const
 	};
 }
 
-void write_vector3_field(const vector3_field& F, Axis axis, std::ofstream &os)
+void write_vector3_field(const vector3_field& F, Axis axis, std::ofstream& os)
 {
 	for (int y = 0; y < F.size_y(); ++y) {
 	for (int x = 0; x < F.size_x(); ++x) {

@@ -1,6 +1,6 @@
 #ifndef PARTICLES_H
 #define PARTICLES_H
-	#include "particles.hpp"
+	#include "./particles.hpp"
 #endif
 
 void reflective_Xboundaries_for(particle& _particle, double SIZE_X)
@@ -36,3 +36,5 @@ void periodic_Yboundaries_for(particle& _particle, double SIZE_Y)
 	if 		( _particle.r().y() < 0 	 ) { _particle.r().y() += SIZE_Y; }
 	else if ( _particle.r().y() > SIZE_Y ) { _particle.r().y() -= SIZE_Y; }
 }
+
+double frand() { return ((double)rand()/RAND_MAX); };

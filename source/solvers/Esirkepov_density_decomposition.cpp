@@ -13,6 +13,11 @@
 	#include "../particles/particles.hpp"
 #endif
 
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+	#include "../constants.h"
+#endif
+
 #include <cmath>
 #include <omp.h>
 
@@ -25,16 +30,18 @@
 void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 									 const particle& PARTICLE,
 									 const vector2& r0,
-									 vector3_field& j,
-									 double dt, double dx, double dy)
+									 vector3_field& j)
 {
-	double gamma = sqrt(1 + PARTICLE.p().dot(PARTICLE.p())/(SORT.m()*SORT.m()));
-	double vz = PARTICLE.p().z()/gamma;
-	vector2 r = PARTICLE.r();
 	double q  = SORT.q();
+	double n  = SORT.n();
 	double Np = SORT.Np();
 	int charge_cloud = SORT.charge_cloud();
 	double (*shape_at)(double, double) = SORT.form_factor();
+
+
+	double gamma = sqrt(1 + PARTICLE.p().dot(PARTICLE.p())/(SORT.m()*SORT.m()));
+	double vz = PARTICLE.p().z()/gamma;
+	vector2 r = PARTICLE.r();
 
 	periodic_vector3_field temp_j(2*charge_cloud+1, 2*charge_cloud+1); 
 
@@ -48,8 +55,8 @@ void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 		for (long int x = -charge_cloud, y = -charge_cloud; y <= +charge_cloud; ++y) {
 			node_y = nearest_edge_to_ry + y;
 	
-			temp_j.x(y,x) = - q/Np*0.5*dx/dt*(shape_at(r.x() - node_x*dx, dx) - shape_at(r0.x() - node_x*dx, dx))*
-									 		 (shape_at(r.y() - node_y*dy, dy) + shape_at(r0.y() - node_y*dy, dy));
+			temp_j.x(y,x) = - q*n/Np*0.5*dx/dt*(shape_at(r.x() - node_x*dx, dx) - shape_at(r0.x() - node_x*dx, dx))*
+									 		   (shape_at(r.y() - node_y*dy, dy) + shape_at(r0.y() - node_y*dy, dy));
 	
 			#pragma omp atomic
 			j.x(node_y,node_x) += temp_j.x(y,x);
@@ -62,8 +69,8 @@ void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 			for (long int x = -charge_cloud+1; x <= +charge_cloud; ++x) {
 				node_x = nearest_edge_to_rx + x;
 	
-				temp_j.x(y,x) = temp_j.x(y,x-1) - q/Np*0.5*dx/dt*(shape_at(r.x() - node_x*dx, dx) - shape_at(r0.x() - node_x*dx, dx))*
-																 (shape_at(r.y() - node_y*dy, dy) + shape_at(r0.y() - node_y*dy, dy));
+				temp_j.x(y,x) = temp_j.x(y,x-1) - q*n/Np*0.5*dx/dt*(shape_at(r.x() - node_x*dx, dx) - shape_at(r0.x() - node_x*dx, dx))*
+																   (shape_at(r.y() - node_y*dy, dy) + shape_at(r0.y() - node_y*dy, dy));
 	
 				#pragma omp atomic
 				j.x(node_y, node_x) += temp_j.x(y,x);
@@ -79,8 +86,8 @@ void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 		for (long int y = -charge_cloud, x = -charge_cloud; x <= +charge_cloud; ++x) {
 			node_x = nearest_edge_to_rx + x;
 	
-			temp_j.y(y,x) = - q/Np*0.5*dy/dt*(shape_at(r.x() - node_x*dx, dx) + shape_at(r0.x() - node_x*dx, dx))*
-											 (shape_at(r.y() - node_y*dy, dy) - shape_at(r0.y() - node_y*dy, dy));
+			temp_j.y(y,x) = - q*n/Np*0.5*dy/dt*(shape_at(r.x() - node_x*dx, dx) + shape_at(r0.x() - node_x*dx, dx))*
+											   (shape_at(r.y() - node_y*dy, dy) - shape_at(r0.y() - node_y*dy, dy));
 		
 			#pragma omp atomic
 			j.y(node_y, node_x) += temp_j.y(y,x);
@@ -92,8 +99,8 @@ void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 			for (long int x = -charge_cloud; x <= +charge_cloud; ++x) {
 				node_x = nearest_edge_to_rx + x;
 	
-				temp_j.y(y,x) += temp_j.y(y-1,x) - q/Np*0.5*dy/dt*(shape_at(r.x() - node_x*dx, dx) + shape_at(r0.x() - node_x*dx, dx))*
-																  (shape_at(r.y() - node_y*dy, dy) - shape_at(r0.y() - node_y*dy, dy));
+				temp_j.y(y,x) += temp_j.y(y-1,x) - q*n/Np*0.5*dy/dt*(shape_at(r.x() - node_x*dx, dx) + shape_at(r0.x() - node_x*dx, dx))*
+																    (shape_at(r.y() - node_y*dy, dy) - shape_at(r0.y() - node_y*dy, dy));
 			
 				#pragma omp atomic
 				j.y(node_y, node_x) += temp_j.y(y,x);
@@ -107,8 +114,8 @@ void Esirkepov_density_decomposition(const sort_of_particles& SORT,
 		for (long int y = nearest_edge_to_ry - charge_cloud; y <= nearest_edge_to_ry + charge_cloud; ++y) {
 	
 			#pragma omp atomic
-			j.z(y,x) += - q/Np*vz/3.*((	shape_at(r.x) - (x*dx, dx) + 0.5*shape_at(r0.x) - (x*dx, dx))*shape_at(r.y(  - (y*dy, dy)+
-								   (0.5*shape_at(r.x) - (x*dx, dx) +	 shape_at(r0.x) - (x*dx, dx))*shape_at(r0.y) - (y*dy, dy));
+			j.z(y,x) += - q*n/Np*vz/3.*((	shape_at(r.x) - (x*dx, dx) + 0.5*shape_at(r0.x) - (x*dx, dx))*shape_at(r.y(  - (y*dy, dy)+
+									   (0.5*shape_at(r.x) - (x*dx, dx) +	 shape_at(r0.x) - (x*dx, dx))*shape_at(r0.y) - (y*dy, dy));
 			}
 		}
 	}

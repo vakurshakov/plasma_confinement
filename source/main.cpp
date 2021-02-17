@@ -5,31 +5,37 @@ int main()
 
 	auto start = std::chrono::system_clock::now();
 
-	
-	//---- diagnostics -----------------------------------------------------------------
+
+	// setup settings
+	std::cout << "\n\n\tCOMMENT SECTION:" << std::endl;
+	std::cout << "\tt:\t" << TIME << ",\tSIZE_X:\t" << SIZE_X << ",\tSIZE_Y:\t" << SIZE_Y << std::endl;
+	std::cout << "\tNp:\t" << Np << std::endl;
+
+//---- diagnostics -----------------------------------------------------------------
 
 	
 	//#### making directiories #########################################################
 	
-	std::string current_path = "../diagnostics/InfTest" +
-								std::to_string(SIZE_X) + "cell" + 
-								std::to_string(int(Np)) + "Np" +
+	std::string current_path = "../diagnostics/Beam" +
+								std::to_string(SIZE_X) + "cellX" +
+								std::to_string(SIZE_Y) + "cellY" +  
+								std::to_string(int(2*Np)) + "Np" +
 								"Rand" +
 								"Tx" + std::to_string(Tx).substr(0, 3) +
-								"Ty" + std::to_string(Tx).substr(0, 3) +
-								"Tz" + std::to_string(Tx).substr(0, 3) +
-								"OscX";
+								"Ty" + std::to_string(Ty).substr(0, 3) +
+								"Tz" + std::to_string(Tz).substr(0, 3) +
+								"_nb" + std::to_string(nb).substr(0, 4) +
+								 "np" + std::to_string(np).substr(0, 4) ;
 
 	mkdir(current_path.c_str());
 	mkdir((current_path + "/energy_conservation" ).c_str());
 	mkdir((current_path + "/fields_configuration").c_str());
-	//mkdir((current_path + "/particles" ).c_str());	
+	mkdir((current_path + "/phase" ).c_str());	
 
 	//##################################################################################
 	
 	
-	std::ofstream fout_field, fout_field_at, fout_energy, fout_particles;
-
+	std::ofstream fout_field, fout_field_at, fout_energy, fout_phase;
 	
 	fout_field.open((current_path + "/fields_configuration/2D_anim._values.txt").c_str());
 	fout_field << TIME << std::endl;
@@ -45,96 +51,73 @@ int main()
 	fout_energy << std::setprecision(20) << std::fixed;
 	
 
-	// fout_particles.open((current_path + "/particles/particles_data.txt").c_str());
-	// fout_particles << TIME << " " << dt << std::endl;
-	// fout_particles << SIZE_X << " " << SIZE_Y << std::endl;
-	// fout_particles << std::setprecision(10) << std::fixed;
-
-	//----------------------------------------------------------------------------------
+	fout_phase.open((current_path + "/phase/phase_data.txt").c_str());
+	
+//----------------------------------------------------------------------------------
 	
 	// initalization (%_vector3_fields)
-	periodic_vector3_field E(SIZE_X, SIZE_Y);
-	periodic_vector3_field B(SIZE_X, SIZE_Y);
-	periodic_vector3_field j(SIZE_X, SIZE_Y);
+	reflective_vector3_field E(SIZE_X, SIZE_Y);
+	reflective_vector3_field B(SIZE_X, SIZE_Y);
+	reflective_vector3_field j(SIZE_X, SIZE_Y);
 
 	double energy = 0;
 	
 	// load Particle Distribution
-	srand(time(NULL));
-	sort_of_particles electrons(-e, me, Np, second_order_spline, spline_width);
+	vector3 p0(0.3/sqrt(1-0.3*0.3), 0, 0);
+	electrons beam_electrons(nb, Np, p0);
 
-	std::cout << "\n\tload of particles:\n" << std::endl;
+	p0.x() = - nb*p0.x();
+	electrons plasma_electrons(np, Np, p0);
 
-	int err = 0;
-	for (size_t i = 0; i < (size_t)electrons.Np()*SIZE_X*SIZE_Y + err; ++i) {
-
-		double x = frand()*SIZE_X*dx; // (8. + 0.5*frand()*SIZE_X)*dx; // (3./8. + 1./4.*frand())*SIZE_X*dx;  
-		double y = frand()*SIZE_Y*dy; // (8. + 0.5*frand()*SIZE_Y)*dy; // (3./8. + 1./4.*frand())*SIZE_Y*dy;  
-		
-		double px = 0.01*cos(2.*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*electrons.m()/mec2)*log(frand())); // 0.01*cos(2.*M_PI*x/(SIZE_X*dx)) + 
-		double py = sin(2.*M_PI*frand())*sqrt(-2.*(Ty*electrons.m()/mec2)*log(frand()));
-		double pz = 0; // sin(2.*M_PI*frand())*sqrt(-2.*(Tz*electrons.m()/mec2)*log(frand()));
-
-		if (std::isinf(px) | std::isinf(py) | std::isinf(pz)) { 
-			std::cout << "\t\tpx, py or pz is inf!" << std::endl;
-			++err;
-			continue;
-		}
-		
-		vector2 r(x, y);
-		vector3 p(px, py, pz);		
-	
-		particle electron(r, p);
-		electrons.particles().push_back(electron);		
-
-		energy += sqrt( (electrons.m()*electrons.m() + p.dot(p)) - electrons.m() )*dx*dy/electrons.Np();
-	}
-
-	std::cout << "\n\t" << electrons.amount() << " particles has been loaded;\n\n\trunning main cycle:\n" << std::endl;
-
-	fout_energy << energy << std::endl;
+	std::vector<sort_of_particles> particles = {beam_electrons, plasma_electrons};
 
 	// boundaries condition along the X and Y axes
-	void (*Xboundaries_for)(particle&, double) = periodic_Xboundaries_for;
-	void (*Yboundaries_for)(particle&, double) = periodic_Yboundaries_for;
+	void (*Xboundaries_for)(particle&, double) = reflective_Xboundaries_for;
+	void (*Yboundaries_for)(particle&, double) = reflective_Yboundaries_for;
 
-	for (size_t t = 0; t < TIME; ++t) {
+	circular_current_init(j, ni, vi, d);	
+
+	for (int t = 0; t < TIME; ++t) {
 		energy = 0;
 
-		#pragma omp parallel shared(electrons, E, B, j), num_threads(8)
+		#pragma omp parallel shared(particles, E, B, j), num_threads(8)
 		{	
-			#pragma omp for reduction(+: energy)
-			for (auto it = electrons.particles().begin(); it != electrons.particles().end(); ++it) {
-				vector2 r0 = (*it).r();
-				
-				Boris_pusher(electrons, (*it), E, B, dt, dx, dy); 
-				
-				Esirkepov_density_decomposition(electrons, (*it), r0, j, dt, dx, dy);
-				
-				Xboundaries_for((*it), SIZE_X*dx);
-				Yboundaries_for((*it), SIZE_Y*dy);
-				
-				energy += sqrt( ( electrons.m()*electrons.m() + (*it).p().dot((*it).p()) ) - electrons.m() )*dx*dy/electrons.Np();
+
+			for (auto& sort : particles)	
+				#pragma omp for // reduction(+: energy)
+				for (int i = 0; i < sort.amount(); ++i) {
+					vector2 r0 = sort.element(i).r();
+					
+					Boris_pusher(sort, sort.element(i), E, B); 
+					
+					Esirkepov_density_decomposition(sort, sort.element(i), r0, j);
+					
+					Xboundaries_for(sort.element(i), SIZE_X*dx);
+					Yboundaries_for(sort.element(i), SIZE_Y*dy);
 			}
 		}
-		fout_energy << energy << " ";
-	
-		FDTD_2D(E, B, j, dt, dx, dy);
 		
+		FDTD_2D(E, B, j);
+		
+	//#### diagnostics ################################################################
+	
 		#pragma omp parallel shared(E, B) reduction(+: energy), num_threads(8)
 		{
 			#pragma omp for 
 			for (int y = 0; y < SIZE_Y; ++y) {
 			for (int x = 0; x < SIZE_X; ++x) {
-				energy += 0.5*(E.x(y,x)*E.x(y,x) + E.y(y,x)*E.y(y,x) + E.z(y,x)*E.z(y,x) +
-						   	   B.x(y,x)*B.x(y,x) + B.y(y,x)*B.y(y,x) + B.z(y,x)*B.z(y,x) )*dx*dy;
+				energy += 0.5*( E.x(y,x)*E.x(y,x) + E.y(y,x)*E.y(y,x) + E.z(y,x)*E.z(y,x) +
+						   	    B.x(y,x)*B.x(y,x) + B.y(y,x)*B.y(y,x) + B.z(y,x)*B.z(y,x) )*dx*dy;
 			}
 			}
 		}
 	
 		fout_energy << energy << std::endl;
 		fout_field_at << E.x(SRC_POS_Y, SRC_POS_X) << std::endl;
-		if (t % 5 == 0 ) { write_vector3_field(E, X, fout_field); }
+		if (t % 5 == 0) { write_vector3_field(E, X, fout_field); };
+
+	//##################################################################################
+	
 	}
 
 	// picture of a field condition at the last step
@@ -146,16 +129,12 @@ int main()
 	//write_vector3_field(B, Y, fout_field);
 	//write_vector3_field(B, Z, fout_field);
 
+	phase_px_x(particles, -1, 1, 0, SIZE_X, fout_phase);
+	
 	fout_field.close();
 	fout_field_at.close();
 	fout_energy.close();
-	//fout_particles.close();
-
-	// setup settings
-	std::cout << "\n\n\tCOMMENT SECTION:" << std::endl;
-	std::cout << "\tt:\t" << TIME << ",\tSIZE_X:\t" << SIZE_X << ",\tSIZE_Y:\t" << SIZE_Y << std::endl;
-	//std::cout << "\tdensity:\t" << electrons.Np() << std::endl;
-	std::cout << "\tcoordinate:\t(SPX, SPY)" << std::endl;
+	fout_phase.close();
 
 	auto end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed = end - start;

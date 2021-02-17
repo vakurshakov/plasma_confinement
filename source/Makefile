@@ -4,10 +4,11 @@ MAIN = main.o
 VECTORS = vector_classes.o vector3_field.o 
 SOLVERS = FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o
 PARTICLES = particles_form-factors.o boundaries_for_particle.o
+DIAGNOSTICS = phase_diagram.o
 .PHONY: clean, run
 
-2d_simulation: $(MAIN) $(VECTORS) $(SOLVERS) $(PARTICLES)
-	g++ -fopenmp $(MAIN) $(VECTORS) $(SOLVERS) $(PARTICLES) -o ../2d_simulation
+2d_simulation: $(VECTORS) $(PARTICLES) $(SOLVERS) $(DIAGNOSTICS) $(MAIN)
+	g++ -fopenmp $(VECTORS) $(PARTICLES) $(SOLVERS) $(DIAGNOSTICS) $(MAIN) -o ../2d_simulation
 	make clean
 	make run
 
@@ -33,10 +34,13 @@ boundaries_for_particle.o:
 	g++ -c ./particles/boundaries_for_particle.cpp
 
 particles_form-factors.o:
-	g++ -c ./particles/particles_Form-factors.cpp
+	g++ -c ./particles/particles_form-factors.cpp
+
+phase_diagram.o:
+	g++ -c -fopenmp ./diagnostics/phase_diagram.cpp
 
 run:
 	../2d_simulation.exe
 
 clean:
-	del $(MAIN) $(VECTORS) $(SOLVERS) $(PARTICLES) /Q
+	del $(VECTORS) $(PARTICLES) $(SOLVERS) $(DIAGNOSTICS) $(MAIN) /Q
