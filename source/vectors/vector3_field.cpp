@@ -168,27 +168,3 @@ vector3 rv_ph_vector3_field::field_at(const int i, const int j) const
 		return zero;
 	};
 }
-
-void write_vector3_field(const vector3_field& F, Axis axis, std::ofstream& os)
-{
-	for (int y = 0; y < F.size_y(); ++y) {
-	for (int x = 0; x < F.size_x(); ++x) {
-		switch (axis)
-		{
-			case X:
-				os << F.x(y,x) << " ";
-				break;
-			case Y:
-				os << F.y(y,x) << " ";
-				break;
-			case Z:
-				os << F.z(y,x) << " ";
-				break;
-			default:
-				return;
-		}
-	}
-		os << "\t";
-	}
-	os << std::endl;
-}

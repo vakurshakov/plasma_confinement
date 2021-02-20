@@ -20,7 +20,7 @@ enum SHAPE {
 	shifted = 1
 };
 
-void Boris_pusher(const sort_of_particles& SORT,
+void Boris_pusher(const class_particles& SORT,
 				  particle& PARTICLE,
 				  const vector3_field& E,
 				  const vector3_field& B)

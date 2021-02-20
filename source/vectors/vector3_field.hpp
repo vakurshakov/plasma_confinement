@@ -32,6 +32,13 @@ public:
 	double y(int i, int j) const { return field_at(i,j).y(); }
 	double z(int i, int j) const { return field_at(i,j).z(); }
 
+/*
+NOTE: можно сделать вот такую реализацию, где E(x,y).x, если для класса vector2(3) убрать инкапсуляцию
+
+	vector3& operator(int i, int j) = 0;
+	vector3 operator(int i, int j) const = 0; 
+*/
+
 protected:
 	int msize_x, msize_y;
 	vector3* field;
@@ -97,5 +104,3 @@ private:
 	vector3& field_at(int i, int j) override;
 	vector3 field_at(int i, int j) const override;
 };
-
-void write_vector3_field(const vector3_field& F, Axis axis, std::ofstream &os);

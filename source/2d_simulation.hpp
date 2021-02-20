@@ -21,7 +21,7 @@
 
 #ifndef SOLVERS_H
 #define SOLVERS_H
-	#include "./solvers/solvers.hpp"
+	#include "./solvers/solvers_manager.hpp"
 #endif
 
 #ifndef DIAGNOSTICS_H
@@ -38,4 +38,3 @@
 #include <ctime>
 #include <cmath>
 #include <omp.h>
-#include <dir.h>

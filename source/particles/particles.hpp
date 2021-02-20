@@ -1,5 +1,3 @@
-#define PARTICLES_H
-
 #ifndef VECTOR_CLASSES_H
 #define VECTOR_CLASSES_H
 	#include "../vectors/vector_classes.hpp"
@@ -15,8 +13,8 @@
 	#include "../constants.h"
 #endif
 
-#include <iostream>
 #include <vector>
+#include <string>
 #include <ctime>
 #include <cmath>
 
@@ -26,7 +24,6 @@ public:
 	particle(): m_r(), m_p() {};
 	particle(vector2& r, vector3& p): m_r(r), m_p(p) {};
 	
-
 	vector2& r() { return m_r; };
 	double& x() { return m_r.x(); };
 	double& y() { return m_r.y(); };
@@ -44,7 +41,6 @@ public:
 	double px() const { return m_p.x(); };
 	double py() const { return m_p.y(); };
 	double pz() const { return m_p.z(); };
-
 
 private:
 	vector2 m_r;
@@ -64,18 +60,20 @@ double fifth_order_spline(double x, double grid_mesh);
 
 double frand();
 
-class sort_of_particles {
+class class_particles {
 public:
-	sort_of_particles(double q, double m, double n, double Np,
-					 double (*form_factor)(double, double),
-					 int charge_cloud) {
-		m_q = q;
-		m_m = m;
-		m_n = n;
-		m_Np = Np;
-		m_form_factor = form_factor;
-		m_charge_cloud = charge_cloud;
-	}
+	class_particles(double q, double m, double n, double Np,
+					double (*form_factor)(double, double), int charge_cloud,
+					std::string XY_distrib, vector2 p0);
+	
+	class_particles(double q, double m, double n, double Np,
+					double (*form_factor)(double, double), int charge_cloud,
+					std::string XY_distrib, vector3 p0);
+
+	class_particles(double q, double m, double n, double Np,
+					double (*form_factor)(double, double), int charge_cloud,
+					std::string XY_distrib, std::string P_distrib);
+
 
 	double q() const { return m_q; };
 	double m() const { return m_m; };
@@ -99,34 +97,25 @@ protected:
 };
 
 
-class electrons : public sort_of_particles {
+class electrons : public class_particles {
 public:
-	electrons(double n, double Np, vector3& p0) : sort_of_particles(-e, me, n, Np,
-		third_order_spline, spline_width) {
+	electrons(double n, double Np, std::string XY_distrib, vector2 p0)
+	: class_particles(-e, me, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+	electrons(double n, double Np, std::string XY_distrib, vector3 p0)
+	: class_particles(-e, me, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+	electrons(double n, double Np, std::string XY_distrib, std::string P_distrib)
+	: class_particles(-e, me, n, Np, second_order_spline, spline_width, XY_distrib, P_distrib) {};
 
-	srand(time(NULL));
+};
 
-	int err = 0;
-	for (int i = 0; i < (int)Np*SIZE_X*SIZE_Y + err; ++i) {
 
-		double x = frand()*SIZE_X*dx;  
-		double y = frand()*SIZE_Y*dy;  
-		
-		double px = p0.x() + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*me/mec2)*log(frand())); 
-		double py = p0.y() + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*me/mec2)*log(frand()));
-		double pz = p0.z(); // sin(2.*M_PI*frand())*sqrt(-2.*(Tz*me/mec2)*log(frand()));
+class protons : public class_particles {
+public: 
+	protons(double n, double Np, std::string XY_distrib, vector2 p0)
+	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+	protons(double n, double Np, std::string XY_distrib, vector3 p0)
+	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+	protons(double n, double Np, std::string XY_distrib, std::string P_distrib)
+	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, P_distrib) {};
 
-		if (std::isinf(px) | std::isinf(py) | std::isinf(pz)) { 
-			//std::cout << "\t\tpx, py or pz is inf!" << std::endl;
-			++err;
-			continue;
-		}
-		
-		vector2 r(x, y);
-		vector3 p(px, py, pz);		
-		
-		particle temp_(r, p);
-		m_particles.push_back(temp_);		
-	}
-	}
 };

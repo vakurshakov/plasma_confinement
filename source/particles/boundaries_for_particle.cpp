@@ -36,5 +36,3 @@ void periodic_Yboundaries_for(particle& _particle, double SIZE_Y)
 	if 		( _particle.r().y() < 0 	 ) { _particle.r().y() += SIZE_Y; }
 	else if ( _particle.r().y() > SIZE_Y ) { _particle.r().y() -= SIZE_Y; }
 }
-
-double frand() { return ((double)rand()/RAND_MAX); };

@@ -39,6 +39,8 @@ public:
 	vector3 operator/(const double a) const;
 	vector2 squeeze(const Axes axes) const;
 
+	
+
 private:
 	double m_x; 
 	double m_y;

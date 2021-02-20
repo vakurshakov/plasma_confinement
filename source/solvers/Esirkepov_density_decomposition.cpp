@@ -27,7 +27,7 @@
 
 */
 
-void Esirkepov_density_decomposition(const sort_of_particles& SORT,
+void Esirkepov_density_decomposition(const class_particles& SORT,
 									 const particle& PARTICLE,
 									 const vector2& r0,
 									 vector3_field& j)

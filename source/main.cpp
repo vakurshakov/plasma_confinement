@@ -1,65 +1,21 @@
 #include "2d_simulation.hpp"
 
+void add_circular_current(vector3_field& j, class_particles& sort, double v_inj, double Bz);
+
 int main()
 {
+	diagnostics_manager DM(head_folder, names_of_diagnostics);
+	// solvers_manager SM(solvers, configuration);
 
-	auto start = std::chrono::system_clock::now();
-
-
-	// setup settings
-	std::cout << "\n\n\tCOMMENT SECTION:" << std::endl;
-	std::cout << "\tt:\t" << TIME << ",\tSIZE_X:\t" << SIZE_X << ",\tSIZE_Y:\t" << SIZE_Y << std::endl;
-	std::cout << "\tNp:\t" << Np << std::endl;
-
-//---- diagnostics -----------------------------------------------------------------
-
-	
-	//#### making directiories #########################################################
-	
-	std::string current_path = "../diagnostics/Beam" +
-								std::to_string(SIZE_X) + "cellX" +
-								std::to_string(SIZE_Y) + "cellY" +  
-								std::to_string(int(2*Np)) + "Np" +
-								"Rand" +
-								"Tx" + std::to_string(Tx).substr(0, 3) +
-								"Ty" + std::to_string(Ty).substr(0, 3) +
-								"Tz" + std::to_string(Tz).substr(0, 3) +
-								"_nb" + std::to_string(nb).substr(0, 4) +
-								 "np" + std::to_string(np).substr(0, 4) ;
-
-	mkdir(current_path.c_str());
-	mkdir((current_path + "/energy_conservation" ).c_str());
-	mkdir((current_path + "/fields_configuration").c_str());
-	mkdir((current_path + "/phase" ).c_str());	
-
-	//##################################################################################
-	
-	
-	std::ofstream fout_field, fout_field_at, fout_energy, fout_phase;
-	
-	fout_field.open((current_path + "/fields_configuration/2D_anim._values.txt").c_str());
-	fout_field << TIME << std::endl;
-	fout_field << SIZE_X << " " << SIZE_Y << " " << std::endl;
-	fout_field << std::setprecision(10) << std::fixed;
-
-	fout_field_at.open((current_path + "/fields_configuration/field_at.txt").c_str());
-	fout_field_at << TIME << " " << dt << std::endl;
-	fout_field_at << std::setprecision(10) << std::fixed;
-
-	fout_energy.open((current_path + "/energy_conservation/energy_values.txt").c_str());
-	fout_energy << TIME << " " << dt << std::endl;
-	fout_energy << std::setprecision(20) << std::fixed;
-	
-
-	fout_phase.open((current_path + "/phase/phase_data.txt").c_str());
-	
-//----------------------------------------------------------------------------------
-	
-	// initalization (%_vector3_fields)
+/*
+	// initialisation (%_vector3_fields)
 	reflective_vector3_field E(SIZE_X, SIZE_Y);
 	reflective_vector3_field B(SIZE_X, SIZE_Y);
 	reflective_vector3_field j(SIZE_X, SIZE_Y);
+*/
+	protons el(np, Np, XY_distrib, vector2(0,0));
 
+/*
 	double energy = 0;
 	
 	// load Particle Distribution
@@ -75,7 +31,7 @@ int main()
 	void (*Xboundaries_for)(particle&, double) = reflective_Xboundaries_for;
 	void (*Yboundaries_for)(particle&, double) = reflective_Yboundaries_for;
 
-	circular_current_init(j, ni, vi, d);	
+	circular_current_init(j, ni, vi, mi, d);	
 
 	for (int t = 0; t < TIME; ++t) {
 		energy = 0;
@@ -119,17 +75,13 @@ int main()
 	//##################################################################################
 	
 	}
-
-	// picture of a field condition at the last step
-	//write_vector3_field(E, X, fout_field);
-	//write_vector3_field(E, Y, fout_field);
-	//write_vector3_field(E, Z, fout_field);
-
-	//write_vector3_field(B, X, fout_field);
-	//write_vector3_field(B, Y, fout_field);
-	//write_vector3_field(B, Z, fout_field);
-
+	
 	phase_px_x(particles, -1, 1, 0, SIZE_X, fout_phase);
+	
+	add_circular_current(j, injected_ion, v_inj, Bz);
+
+	write_vector3_field(j, X, fout_field);
+	write_vector3_field(j, Y, fout_field);
 	
 	fout_field.close();
 	fout_field_at.close();
@@ -139,6 +91,6 @@ int main()
 	auto end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed = end - start;
 	std::cout << "\truntime:\t" << elapsed.count() << "s\n" << std::endl << std::endl;
-
+*/
 	return 0;
 }
