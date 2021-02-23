@@ -9,6 +9,8 @@ enum Axis { X, Y, Z };
 
 class vector3_field {
 public:
+	vector3_field() = default;
+
 	vector3_field(int SIZE_X, int SIZE_Y) : msize_x(SIZE_X), msize_y(SIZE_Y) {
 		field = new vector3[msize_x*msize_y];
 	};

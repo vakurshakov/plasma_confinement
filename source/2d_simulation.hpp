@@ -16,7 +16,7 @@
 
 #ifndef PARTICLES_H
 #define PARTICLES_H
-	#include "./particles/particles.hpp"
+	#include "./particles/class_particles.hpp"
 #endif
 
 #ifndef SOLVERS_H
@@ -29,11 +29,16 @@
 	#include "./diagnostics/diagnostics.hpp" 
 #endif
 
+#ifndef MANAGER_H
+#define MANAGER_H
+	#include "./manager.hpp"
+#endif
+
 //-------- main libraries --------------------------------------------------------------
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <cassert>
+#include <memory>
 #include <chrono>
 #include <ctime>
 #include <cmath>

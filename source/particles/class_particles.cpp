@@ -1,6 +1,10 @@
-#include "./particles.hpp"
+#ifndef PARTICLES_H
+#define PARTICLES_H
+	#include "./class_particles.hpp"
+#endif
 
 #include <iostream>
+
 
 double frand() { return ((double)rand()/RAND_MAX); };
 

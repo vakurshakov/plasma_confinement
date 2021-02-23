@@ -10,7 +10,7 @@
 
 #ifndef PARTICLES_H
 #define PARTICLES_H
-	#include "../particles/particles.hpp"
+	#include "../particles/class_particles.hpp"
 #endif
  
 #ifndef CONSTANTS_H

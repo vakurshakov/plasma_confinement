@@ -9,20 +9,29 @@ using namespace std;
 	const double me 	= 1;
 	const double mpr 	= 1836;
 
+//-------- initializer -----------------------------------------------------------------
+	const string initializer = "./manager_initializer.txt";
+
 //-------- diagnostics -----------------------------------------------------------------
 	const string head_folder = "../diagnostics/circular_current_test";
 	const vector<string> names_of_diagnostics = { "energy",
-												  "field configuration",
-												  "field at point",
-												  "phase diagram" };
+												  "field_configuration",
+												  "field_at_point",
+												  "phase_diagram" };
 
 //-------- solvers ---------------------------------------------------------------------
-	const vector<string> solvers = { "FDTD",
-									 "Boris_pusher",
+	const vector<string> solvers = { "Boris_pusher",
 									 "Esirkepov_density_decomposition",
+									 "FDTD_2D",
 									 "circular_current" };
 
-//-------- configurarion ---------------------------------------------------------------
+//-------- configuration ---------------------------------------------------------------
+	const int 	SIZE_X 	= 5,	SIZE_Y 	= 5;
+	const int 	TIME	= 1;
+	const double dx 	= 0.04, dy 		= 0.04;
+	const double dt 	= 0.02;
+	const string boundaries = "periodic";
+	
 	const double Np = 8;
 	const double Tx = 1;
 	const double Ty = 1;
@@ -34,9 +43,8 @@ using namespace std;
 	const double Bz 	= 1;
 
 	const int spline_width = 4;
-	
-	const double d = 0.04;
-	const double dx = d, dy = d; 
-	const double dt = 0.02;
-	const int TIME = 1;
-	const int SIZE_X = 1, SIZE_Y = 1;
+
+	const vector<string> configuration = { to_string(SIZE_X), to_string(SIZE_Y),
+										   boundaries, 
+										   to_string(Np), to_string(np),
+										   XY_distrib };	
