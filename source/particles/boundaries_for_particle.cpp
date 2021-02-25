@@ -1,7 +1,4 @@
-#ifndef PARTICLES_H
-#define PARTICLES_H
-	#include "./class_particles.hpp"
-#endif
+#include "./class_particles.hpp"
 
 void reflective_Xboundary(particle& _particle, double SIZE_X)
 {

@@ -1,38 +1,20 @@
 //-------- self-written libs -----------------------------------------------------------
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-	#include "./constants.h"
-#endif
+#include "./constants.h"
 
-#ifndef VECTOR_CLASSES_H
-#define VECTOR_CLASSES_H
-	#include "./vectors/vector_classes.hpp"
-#endif
+#include "./vectors/vector_classes.hpp"
 
-#ifndef VECTOR3_FIELD_H
-#define VECTOR3_FIELD_H
-	#include "./vectors/vector3_field.hpp"
-#endif
+#include "./vectors/vector3_field.hpp"
 
-#ifndef PARTICLES_H
-#define PARTICLES_H
-	#include "./particles/class_particles.hpp"
-#endif
+#include "./particles/class_particles.hpp"
 
-#ifndef SOLVERS_H
-#define SOLVERS_H
-	#include "./solvers/solvers_manager.hpp"
-#endif
+#include "./managers/fields_manager.hpp"
 
-#ifndef DIAGNOSTICS_H
-#define DIAGNOSTICS_H
-	#include "./diagnostics/diagnostics.hpp" 
-#endif
+#include "./managers/particles_manager.hpp"
 
-#ifndef MANAGER_H
-#define MANAGER_H
-	#include "./manager.hpp"
-#endif
+#include "./managers/manager.hpp"
+
+#include "./diagnostics/diagnostics.hpp" 
+
 
 //-------- main libraries --------------------------------------------------------------
 #include <iostream>

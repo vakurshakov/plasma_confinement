@@ -1,7 +1,4 @@
-#ifndef PARTICLES_H
-#define PARTICLES_H
-	#include "./class_particles.hpp"
-#endif
+#include "./class_particles.hpp"
 
 #include <iostream>
 

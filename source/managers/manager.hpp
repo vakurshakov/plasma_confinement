@@ -1,39 +1,32 @@
-#include "2d_simulation.hpp"
+#include "./fields_manager.hpp"
+#include "./particles_manager.hpp"
+#include "../constants.h"
 
 using namespace std;
-using up_v3f = unique_ptr<vector3_field>;
 
+#ifndef MANAGER_H
+#define MANAGER_H
+
+//#################################################################################################
 
 class Manager {
 private:
-
-	up_v3f E, B, j;
-	// NOTE: class fields_manager F () 
-	vector<class_particles> particles;
-	// NOTE: перенести в частицы толкатель и диагностики для отдельного сорта
-
-	solvers_manager 	SM;	
-	diagnostics_manager DM;
-
-	//	particles_manager PM;
-	//	fields_manager 	  FM;
+	Fields_manager 	  FM;
+	Particles_manager PM;
 
 	//int TIME;
 
 public:
 	Manager(string initializer_) {
-		// NOTE: пока я сделаю так, потом нужно будет добавить 
-		//		 парсер, чтобы он обрабатывал файл с начальными данными
+		// TODO: нужен сюда нормальный парсер, пока данные частично берутся из файла
+		//		 constants.h, как это было раньше
 
-		SM.initialisation(E, B, j, particles, solvers, configuration);
-		DM.initialisation(head_folder, names_of_diagnostics);
+		FM.initialisation(field_solver, field_configuration);
+		PM.initialisation(particles_solvers, particles_configuration);
 	}
 
-
+/*
 	void Calculate() {
-
-		//FM.Ex(y,x) = 1;
-		PM.push( &FM )
 
 		auto start = std::chrono::system_clock::now();
 
@@ -43,7 +36,7 @@ public:
 			// ADDITIONAL SECTION
 			SM.add_circular_current(j, particles[0], v_inj, Bz0, t);
 				
-		/*
+		
 			for (auto& sort : PM.particles())	
 					#pragma omp for
 					for (int i = 0; i < sort.amount(); ++i) {
@@ -62,13 +55,16 @@ public:
 			
 			FM.Propogate_fields();
 			
-		*/
-			DM.diagnose_t(E, B, j, particles);
+		
 		}
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = end - start;
 		std::cout << "\n\n\truntime:\t" << elapsed.count() << "s\n\n" << std::endl;
 	}
-
+*/
 
 };
+
+//#################################################################################################
+
+#endif

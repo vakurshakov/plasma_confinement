@@ -1,9 +1,9 @@
-#ifndef VECTOR_CLASSES_H
-#define VECTOR_CLASSES_H
-	#include "vector_classes.hpp"
-#endif
+#include "./vector_classes.hpp"
 
-#include <fstream>
+#ifndef VECTOR3_FIELD_H
+#define VECTOR3_FIELD_H
+
+//#################################################################################################
 
 enum Axis { X, Y, Z };
 
@@ -35,7 +35,8 @@ public:
 	double z(int i, int j) const { return field_at(i,j).z(); }
 
 /*
-NOTE: можно сделать вот такую реализацию, где E(x,y).x, если для класса vector2(3) убрать инкапсуляцию
+NOTE: можно сделать вот такую реализацию, где E(x,y).x,
+		если для класса vector2(3) убрать инкапсуляцию
 
 	vector3& operator(int i, int j) = 0;
 	vector3 operator(int i, int j) const = 0; 
@@ -106,3 +107,7 @@ private:
 	vector3& field_at(int i, int j) override;
 	vector3 field_at(int i, int j) const override;
 };
+
+//#################################################################################################
+
+#endif

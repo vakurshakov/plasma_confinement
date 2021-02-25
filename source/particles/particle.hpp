@@ -1,13 +1,11 @@
-#ifndef VECTOR_CLASSES_H
-#define VECTOR_CLASSES_H
-	#include "../vectors/vector_classes.hpp"
-#endif
+#include "../vectors/vector_classes.hpp"
+#include "../vectors/vector3_field.hpp"
 
-#ifndef VECTOR3_FIELD_H
-#define VECTOR3_FIELD_H
-	#include "../vectors/vector3_field.hpp"
-#endif
 
+#ifndef PARTICLE_H
+#define PARTICLE_H
+
+//#################################################################################################
 
 class particle {
 public:
@@ -47,3 +45,7 @@ double second_order_spline(double x, double grid_mesh);
 double third_order_spline(double x, double grid_mesh);
 double fourth_order_spline(double x, double grid_mesh);
 double fifth_order_spline(double x, double grid_mesh);
+
+//#################################################################################################
+
+#endif

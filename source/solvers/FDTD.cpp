@@ -1,12 +1,5 @@
-#ifndef VECTOR3_FIELD_H
-#define VECTOR3_FIELD_H
-	#include "../vectors/vector3_field.hpp"
-#endif
-
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-	#include "../constants.h"
-#endif
+#include "../vectors/vector3_field.hpp"
+#include "../constants.h"
 
 #include <omp.h>
 

@@ -2,16 +2,17 @@ all: 2d_simulation
 
 MAIN 		= main.o
 VECTORS 	= vector_classes.o vector3_field.o 
-SOLVERS 	= solvers_manager.o FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o add_circular_current.o
+SOLVERS 	= FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o
 PARTICLES 	= class_particles.o particles_form-factors.o boundaries_for_particle.o
 DIAGNOSTICS = diagnostics.o energy.o field_configuration.o field_at_point.o phase_diagram.o
+MANAGERS 	= fields_manager.o particles_manager.o
 
 KEYS  = -c -fopenmp
 
 .PHONY: clean, clean_o, run
 
-2d_simulation: $(VECTORS) $(PARTICLES) $(SOLVERS) $(DIAGNOSTICS) $(MAIN)
-	g++ -fopenmp $(VECTORS) $(PARTICLES) $(SOLVERS) $(DIAGNOSTICS) $(MAIN) -o ../2d_simulation
+2d_simulation: $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(DIAGNOSTICS) $(MAIN)
+	g++ -fopenmp $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(DIAGNOSTICS) $(MAIN) -o ../2d_simulation
 	make clean
 	make run
 
@@ -25,9 +26,6 @@ vector_classes.o:
 vector3_field.o:
 	g++ $(KEYS) ./vectors/vector3_field.cpp
 
-solvers_manager.o:
-	g++ $(KEYS) ./solvers/solvers_manager.cpp
-
 Boris_pusher.o:
 	g++ $(KEYS) ./solvers/Boris_pusher.cpp
 
@@ -37,9 +35,6 @@ FDTD.o:
 Esirkepov_density_decomposition.o:
 	g++ $(KEYS) ./solvers/Esirkepov_density_decomposition.cpp
 
-add_circular_current.o:
-	g++ $(KEYS) ./solvers/add_circular_current.cpp
-
 class_particles.o:
 	g++ $(KEYS) ./particles/class_particles.cpp
 
@@ -48,6 +43,12 @@ boundaries_for_particle.o:
 
 particles_form-factors.o:
 	g++ $(KEYS) ./particles/particles_form-factors.cpp
+
+fields_manager.o:
+	g++ $(KEYS) ./managers/fields_manager.cpp
+
+particles_manager.o:
+	g++ $(KEYS) ./managers/particles_manager.cpp
 
 energy.o:
 	g++ $(KEYS) ./diagnostics/energy.cpp

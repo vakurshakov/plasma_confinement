@@ -1,28 +1,16 @@
-#ifndef VECTOR_CLASSES_H
-#define VECTOR_CLASSES_H
-	#include "../vectors/vector_classes.hpp"
-#endif
-
-#ifndef VECTOR3_FIELD_H
-#define VECTOR3_FIELD_H
-	#include "../vectors/vector3_field.hpp"
-#endif
- 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-	#include "../constants.h"
-#endif
-
-#ifndef PARTICLE_H
-#define PARTICLE_H
-	#include "./particle.hpp"
-#endif
+#include "../vectors/vector3_field.hpp" 
+#include "../constants.h"
+#include "./particle.hpp"
 
 #include <vector>
 #include <string>
 #include <ctime>
 #include <cmath>
 
+#ifndef CLASS_PARTICLES_H
+#define CLASS_PARTICLES_H
+
+//#################################################################################################
 
 double frand();
 
@@ -94,3 +82,7 @@ public:
 	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, P_distrib) {};
 	
 };
+
+//#################################################################################################
+
+#endif

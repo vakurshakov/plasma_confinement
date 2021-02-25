@@ -1,11 +1,11 @@
-#include "2d_simulation.hpp"
+#include "./2d_simulation.hpp"
 
 int main()
 {
 
 	Manager Nerpa(initializer);
 
-	Nerpa.Calculate();
+	//Nerpa.Calculate();
 
 	return 0;
 }

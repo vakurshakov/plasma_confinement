@@ -1,3 +1,8 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
+//#################################################################################################
+
 #include <string>
 #include <vector>
 
@@ -20,10 +25,9 @@ using namespace std;
 												  "phase_diagram" };
 
 //-------- solvers ---------------------------------------------------------------------
-	const vector<string> solvers = { "Boris_pusher",
-									 "Esirkepov_density_decomposition",
-									 "FDTD_2D",
-									 "circular_current" };
+	const string field_solver = "FDTD_2D"; 
+	const vector<string> particles_solvers = { "Boris_pusher",
+											"Esirkepov_density_decomposition"};
 
 //-------- configuration ---------------------------------------------------------------
 	const int 	SIZE_X 	= 100,	SIZE_Y 	= 100;
@@ -38,14 +42,18 @@ using namespace std;
 	const double Tz = 0;
 
 	const string XY_distrib = "circle";
-	const double n0 	= 1;			// plasma density according to ions, n0
+	const double n0 	= 1;		// plasma density according to ions, n0
 	const double ni 	= 4428;		// ion density, ni
 	const double v_inj 	= 0.00565;
 	const double Bz0 	= 1;
 
 	const int spline_width = 4;
 
-	const vector<string> configuration = { to_string(SIZE_X), to_string(SIZE_Y),
-										   boundaries, 
-										   to_string(Np), to_string(n0), to_string(ni),
-										   XY_distrib };	
+	const vector<string> field_configuration = { to_string(SIZE_X), to_string(SIZE_Y), boundaries };
+	const vector<string> particles_configuration = { boundaries, to_string(n0), to_string(ni),
+			to_string(Np), XY_distrib };	
+
+//#################################################################################################
+
+#endif
+										   
