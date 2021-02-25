@@ -28,6 +28,8 @@ double frand();
 
 class class_particles {
 public:
+	class_particles(double q, double m, double n);
+
 	class_particles(double q, double m, double n, double Np,
 					double (*form_factor)(double, double), int charge_cloud,
 					std::string XY_distrib, vector2 p0);
@@ -67,8 +69,10 @@ class electrons : public class_particles {
 public:
 	electrons(double n, double Np, std::string XY_distrib, vector2 p0)
 	: class_particles(-e, me, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+
 	electrons(double n, double Np, std::string XY_distrib, vector3 p0)
 	: class_particles(-e, me, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+
 	electrons(double n, double Np, std::string XY_distrib, std::string P_distrib)
 	: class_particles(-e, me, n, Np, second_order_spline, spline_width, XY_distrib, P_distrib) {};
 
@@ -77,11 +81,16 @@ public:
 
 class protons : public class_particles {
 public: 
+	protons(double n)
+	: class_particles(+e, mpr, n) {};
+	
 	protons(double n, double Np, std::string XY_distrib, vector2 p0)
 	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+	
 	protons(double n, double Np, std::string XY_distrib, vector3 p0)
 	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, p0) {};
+	
 	protons(double n, double Np, std::string XY_distrib, std::string P_distrib)
 	: class_particles(+e, mpr, n, Np, second_order_spline, spline_width, XY_distrib, P_distrib) {};
-
+	
 };

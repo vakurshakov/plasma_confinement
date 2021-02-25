@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-enum CONF { SX, SY, BOUND, NP, np_, XY_ };
+enum CONF { SX, SY, BOUND, NP, n0_, ni_, XY_ };
 enum SOLV { PUSHER, DECOMP, FIELDS, ADDITIONAL };
 
 //	NOTE:
@@ -13,7 +13,7 @@ enum SOLV { PUSHER, DECOMP, FIELDS, ADDITIONAL };
 //		нужно, конечно, это переделать но пока я очень не хочу
 
 
-void solvers_manager::initialisation(up_v3f& E, up_v3f& B, up_v3f& j, vector<class_particles> particles,
+void solvers_manager::initialisation(up_v3f& E, up_v3f& B, up_v3f& j, vector<class_particles>& particles,
 									 vector<string> solvers, vector<string> configuration) {
 //######## configuration initialization ###########################################################
 
@@ -55,13 +55,19 @@ void solvers_manager::initialisation(up_v3f& E, up_v3f& B, up_v3f& j, vector<cla
 		y_boundary = reflective_Yboundary;
 	}
 
-	double np = stod(configuration[np_]);
+	double n0 = stod(configuration[n0_]);
+	double ni = stod(configuration[ni_]);
 	double Np = stod(configuration[NP]);
 	string XY_distrib = configuration[XY_];
 
-	protons el(np, Np, XY_distrib, vector2(0,0));
+	// for (int s = SORT; s < NUM_OF_SORTS; ++s) {
+	//	if (sort[s] == "protons") {
+	//
+	
+	protons pr_(ni);
+	electrons el_(n0, Np, XY_distrib, vector2(0,0));
 
-	particles = { el };
+	particles = { pr_, el_ };
 	
 //#################################################################################################
 
@@ -100,4 +106,56 @@ void solvers_manager::Propogate_fields(up_v3f& E, up_v3f& B, up_v3f& j) {
 	Propogate_fields_(*E, *B, *j);
 };
 
+void solvers_manager::add_circular_current(up_v3f& J, const class_particles& sort, double v_inj_, double Bz0_, int t)
+{
+	double q = sort.q();
+	double m = sort.m();
+	double n = sort.n();
+	
+	double gamma = 1./sqrt(1 - v_inj_*v_inj_);
+	int r_larm = gamma*m*v_inj_/(q*Bz0_)/dx;
 
+	double dphi, ds = 1, f = 0.05;	// NOTE: как аккуратно заполнять массив так, чтобы
+									// в одно место дважды не попадать?
+	int x, y;
+	double vx, vy;
+
+
+	#pragma omp parallel num_threads(8)
+	{
+		for (int r = r_larm-ds; r < (r_larm + ds)+1; ++r)
+		{
+			dphi = dy/(r*dx);
+			
+			#pragma omp for
+			for (int j = 0; j < int(2*M_PI/dphi); ++j) {
+				
+				x = SIZE_X/2 + r*cos(j*(dphi + 0.001));
+				y = SIZE_Y/2 + r*sin(j*(dphi + 0.001));
+	
+				vx = + v_inj_*sin(j*dphi);
+				vy = - v_inj_*cos(j*dphi);
+	
+
+				if ( t*dt < 1/(4.*f) ) {
+					(*J).x(y,x) += sin(2*M_PI*f*t*dt)*q*n*vx;
+					(*J).y(y,x) += sin(2*M_PI*f*t*dt)*q*n*vy;
+				}
+				else if ( t*dt >= 1/(4.*f) ) {
+					(*J).x(y,x) += q*n*vx;
+					(*J).y(y,x) += q*n*vy;
+				}
+			}
+		}
+	}
+}
+
+void solvers_manager::add_Bz0(up_v3f& B, double Bz0_)
+{
+	#pragma omp parallel for shared(B)
+	for (int y = 0; y < (*B).size_y(); ++y) {
+	for (int x = 0; x < (*B).size_x(); ++x) {
+		(*B).z(y,x) += Bz0_;
+	}
+	}
+}

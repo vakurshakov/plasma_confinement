@@ -1,8 +1,8 @@
 all: 2d_simulation
 
-MAIN 		=  main.o
+MAIN 		= main.o
 VECTORS 	= vector_classes.o vector3_field.o 
-SOLVERS 	= solvers_manager.o FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o circular_current.o
+SOLVERS 	= solvers_manager.o FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o add_circular_current.o
 PARTICLES 	= class_particles.o particles_form-factors.o boundaries_for_particle.o
 DIAGNOSTICS = diagnostics.o energy.o field_configuration.o field_at_point.o phase_diagram.o
 
@@ -37,8 +37,8 @@ FDTD.o:
 Esirkepov_density_decomposition.o:
 	g++ $(KEYS) ./solvers/Esirkepov_density_decomposition.cpp
 
-circular_current.o:
-	g++ $(KEYS) ./solvers/circular_current.cpp
+add_circular_current.o:
+	g++ $(KEYS) ./solvers/add_circular_current.cpp
 
 class_particles.o:
 	g++ $(KEYS) ./particles/class_particles.cpp

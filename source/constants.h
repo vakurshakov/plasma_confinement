@@ -26,25 +26,26 @@ using namespace std;
 									 "circular_current" };
 
 //-------- configuration ---------------------------------------------------------------
-	const int 	SIZE_X 	= 5,	SIZE_Y 	= 5;
-	const int 	TIME	= 1;
+	const int 	SIZE_X 	= 100,	SIZE_Y 	= 100;
+	const int 	TIME	= 51;
 	const double dx 	= 0.04, dy 		= 0.04;
 	const double dt 	= 0.02;
-	const string boundaries = "periodic";
+	const string boundaries = "reflective";
 	
 	const double Np = 8;
 	const double Tx = 1;
 	const double Ty = 1;
 	const double Tz = 0;
 
-	const string XY_distrib = "random";
-	const double np 	= 0.5;
-	const double v_inj 	= 0.5;
-	const double Bz 	= 1;
+	const string XY_distrib = "circle";
+	const double n0 	= 1;			// plasma density according to ions, n0
+	const double ni 	= 4428;		// ion density, ni
+	const double v_inj 	= 0.00565;
+	const double Bz0 	= 1;
 
 	const int spline_width = 4;
 
 	const vector<string> configuration = { to_string(SIZE_X), to_string(SIZE_Y),
 										   boundaries, 
-										   to_string(Np), to_string(np),
+										   to_string(Np), to_string(n0), to_string(ni),
 										   XY_distrib };	

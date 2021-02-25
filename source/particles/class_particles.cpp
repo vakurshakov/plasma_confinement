@@ -29,7 +29,14 @@ void coordinate_loader(std::string XY_distrib, int i, double& x, double& y)
 		x = ((i/int(Np)) % SIZE_X)*dx + ((i%int(Np)) % divider)*dx/divider;
 		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
 	}
+	else if (XY_distrib == "circle") {
+			
+	}
 };
+
+class_particles::class_particles(double q, double m, double n)
+		: m_q(q), m_m(m), m_n(n) {};
+
 
 class_particles::class_particles(double q, double m, double n, double Np,
 		double (*form_factor)(double, double), int charge_cloud,

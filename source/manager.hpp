@@ -6,11 +6,17 @@ using up_v3f = unique_ptr<vector3_field>;
 
 class Manager {
 private:
+
 	up_v3f E, B, j;
+	// NOTE: class fields_manager F () 
 	vector<class_particles> particles;
+	// NOTE: перенести в частицы толкатель и диагностики для отдельного сорта
 
 	solvers_manager 	SM;	
 	diagnostics_manager DM;
+
+	//	particles_manager PM;
+	//	fields_manager 	  FM;
 
 	//int TIME;
 
@@ -25,36 +31,44 @@ public:
 
 
 	void Calculate() {
+
+		//FM.Ex(y,x) = 1;
+		PM.push( &FM )
+
 		auto start = std::chrono::system_clock::now();
 
+		SM.add_Bz0(B, Bz0);
+
 		for (int t = 0; t < TIME; ++t) {
-			//#pragma omp parallel shared(SM.data()), num_threads(8)
-			#pragma omp parallel shared(particles, E, B, j), num_threads(8)
-			{	
-	
-				for (auto& sort : particles)	
+			// ADDITIONAL SECTION
+			SM.add_circular_current(j, particles[0], v_inj, Bz0, t);
+				
+		/*
+			for (auto& sort : PM.particles())	
 					#pragma omp for
 					for (int i = 0; i < sort.amount(); ++i) {
 						
 						vector2 r0 = sort.element(i).r();
 						
-						SM.Particle_push(sort, sort.element(i), E, B);
+						PM.Particle_push(sort, sort.element(i), E, B);
 
-						SM.Density_decomposition(sort, sort.element(i), r0, j);
+						PM.Density_decomposition(sort, sort.element(i), r0, j);
 						
-						SM.Boundaries_processing(sort.element(i), SIZE_X*dx, SIZE_Y*dy);
+						PM.Boundaries_processing(sort.element(i), SIZE_X*dx, SIZE_Y*dy);
+					
+					sort.diagnose();
+				}
 			}
 			
-			SM.Propogate_fields(E, B, j);
+			FM.Propogate_fields();
 			
-			//DM.diagnose_t( E, B, j, particles );
+		*/
+			DM.diagnose_t(E, B, j, particles);
 		}
-	
-		//DM.diagnose( E, B, j, particles );
-
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = end - start;
 		std::cout << "\n\n\truntime:\t" << elapsed.count() << "s\n\n" << std::endl;
 	}
+
 
 };
