@@ -8,7 +8,7 @@
 
 
 using namespace std;
-using up_v3f = unique_ptr<vector3_field>;
+using v3f_up = unique_ptr<vector3_field>;
 
 #ifndef PARTICLES_MANAGER_H
 #define PARTICLES_MANAGER_H
@@ -28,10 +28,10 @@ private:
 
 public:
 	Particles_manager() = default;
-	void initialisation(vector<string> solvers, vector<string> configuration);
+	void initialization(vector<string> solvers, vector<string> configuration);
 
-	void Particle_push(const class_particles&, particle&, const up_v3f& E, const up_v3f& B); 
-	void Density_decomposition(const class_particles&, const particle&, const vector2& r0, up_v3f& j);
+	void Particle_push(const class_particles&, particle&, const v3f_up& E, const v3f_up& B); 
+	void Density_decomposition(const class_particles&, const particle&, const vector2& r0, v3f_up& j);
 	void Boundaries_processing(particle&, double size_x, double size_y);
 };
 

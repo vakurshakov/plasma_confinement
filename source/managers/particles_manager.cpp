@@ -4,7 +4,7 @@
 enum SOLV { PUSHER, DECOMP };
 enum CONF { BOUND, n0_, ni_, NP, XY_ };
 
-void Particles_manager::initialisation(vector<string> solvers,
+void Particles_manager::initialization(vector<string> solvers,
 	vector<string> configuration) {
 	
 	if ( solvers[PUSHER] == "Boris_pusher" ) {
@@ -48,15 +48,29 @@ void Particles_manager::initialisation(vector<string> solvers,
 	electrons el_(n0, Np, XY_distrib, vector2(0,0));
 
 	particles = { pr_, el_ };
+
+	//initialization of diagnostics
+	/*
+	for (auto& name : diagnostics_name) {
+		if ( name == "energy" ) {
+			diagnostics.emplace_back(make_unique<energy>(test_name_ + "/" + name));
+		}
+		else if ( name == "phase_diagram" ) {
+			diagnostics.emplace_back(make_unique<phase_diagram>(test_name_ + "/" + name));
+		}
+	}
+
+	diagnostics.shrink_to_fit();
+	*/
 }
 
 void Particles_manager::Particle_push(const class_particles& SORT, particle& PARTICLE,
-	const up_v3f& E, const up_v3f& B) {
+	const v3f_up& E, const v3f_up& B) {
 	Particle_push_(SORT, PARTICLE, *E, *B);
 }
 
 void Particles_manager::Density_decomposition(const class_particles& SORT, const particle& PARTICLE,
-	const vector2& r0, up_v3f& j) {
+	const vector2& r0, v3f_up& j) {
 	Density_decomposition_(SORT, PARTICLE, r0, *j);
 }
 

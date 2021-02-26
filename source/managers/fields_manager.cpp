@@ -2,14 +2,18 @@
 
 
 enum CONF { SX, SY, BOUND };
+enum DESC { FIELD, AXIS, PX, PY };
 
-void Fields_manager::initialisation(string solver, vector<string> configuration) {
-
+void Fields_manager::initialization(string solver, vector<string> configuration,
+	string test_name, map<string, vector<string>> diagnostics_description)
+{
+	// initalization of solver
 	if ( solver == "FDTD_2D" ) {
 		Propogate_fields_ = FDTD_2D;			
 	}
 
 
+	// initalization of configuration
 	int size_x = stoi(configuration[SX]);
 	int size_y = stoi(configuration[SY]);
 	string boundaries = configuration[BOUND];
@@ -20,84 +24,63 @@ void Fields_manager::initialisation(string solver, vector<string> configuration)
 	using rvph_v3f = rv_ph_vector3_field;
 	
 	if ( boundaries == "reflective" ) {
-		E = make_unique<ref__v3f>(size_x, size_y);
-		B = make_unique<ref__v3f>(size_x, size_y);
-		j = make_unique<ref__v3f>(size_x, size_y);
+		E_ = make_unique<ref__v3f>(size_x, size_y);
+		B_ = make_unique<ref__v3f>(size_x, size_y);
+		j_ = make_unique<ref__v3f>(size_x, size_y);
 	}
 	else if ( boundaries == "periodic" ) {
-		E = make_unique<per__v3f>(size_x, size_y);
-		B = make_unique<per__v3f>(size_x, size_y);
-		j = make_unique<per__v3f>(size_x, size_y);
+		E_ = make_unique<per__v3f>(size_x, size_y);
+		B_ = make_unique<per__v3f>(size_x, size_y);
+		j_ = make_unique<per__v3f>(size_x, size_y);
 	}
 	else if ( boundaries == "rh_pv" ) {
-		E = make_unique<rhpv_v3f>(size_x, size_y);
-		B = make_unique<rhpv_v3f>(size_x, size_y);
-		j = make_unique<rhpv_v3f>(size_x, size_y);
+		E_ = make_unique<rhpv_v3f>(size_x, size_y);
+		B_ = make_unique<rhpv_v3f>(size_x, size_y);
+		j_ = make_unique<rhpv_v3f>(size_x, size_y);
 	}
 	else if ( boundaries == "rv_ph" ) {
-		E = make_unique<rvph_v3f>(size_x, size_y);
-		B = make_unique<rvph_v3f>(size_x, size_y);
-		j = make_unique<rvph_v3f>(size_x, size_y);
+		E_ = make_unique<rvph_v3f>(size_x, size_y);
+		B_ = make_unique<rvph_v3f>(size_x, size_y);
+		j_ = make_unique<rvph_v3f>(size_x, size_y);
 	}
-}
-
-void Fields_manager::Propogate_fields() {
-	Propogate_fields_(*E, *B, *j);
-}
-
-void Fields_manager::add_circular_current(const class_particles& sort,
-	double v_inj_, double Bz0_, int t)
-{
-	double q = sort.q();
-	double m = sort.m();
-	double n = sort.n();
-	
-	double gamma = 1./sqrt(1 - v_inj_*v_inj_);
-	int r_larm = gamma*m*v_inj_/(q*Bz0_)/dx;
-
-	// NOTE: как аккуратно заполнять массив так, чтобы
-	// в одно место дважды не попадать?
-
-	double dphi, ds = 1, f = 0.05;	
-	int x, y;
-	double vx, vy;
 
 
-	#pragma omp parallel num_threads(8)
-	{
-		for (int r = r_larm-ds; r < (r_larm + ds)+1; ++r)
-		{
-			dphi = dy/(r*dx);
-			
-			#pragma omp for
-			for (int k = 0; k < int(2*M_PI/dphi); ++k) {
-				
-				x = SIZE_X/2 + r*cos(k*(dphi + 0.001));
-				y = SIZE_Y/2 + r*sin(k*(dphi + 0.001));
-	
-				vx = + v_inj_*sin(k*dphi);
-				vy = - v_inj_*cos(k*dphi);
-	
+	// TODO: пока это просто инициализация по именам стандартными параметрами,
+	//			стоит сделать по-другому, на каждом создании указыввать не просто
+	//			путь, а добавлять описание вида: 
+	//				%"field_at_point"[FAT::FIELD, FAT::PX, FAT::PY]
 
-				if ( t*dt < 1/(4.*f) ) {
-					(*j).x(y,x) += sin(2*M_PI*f*t*dt)*q*n*vx;
-					(*j).y(y,x) += sin(2*M_PI*f*t*dt)*q*n*vy;
-				}
-				else if ( t*dt >= 1/(4.*f) ) {
-					(*j).x(y,x) += q*n*vx;
-					(*j).y(y,x) += q*n*vy;
-				}
-			}
+	// initalization of diagnostics
+	for (auto& diagnostic : diagnostics_description) {
+		if ( diagnostic.first == "energy" ) {
+			diagnostics.emplace_back(make_unique<fields_energy>(test_name + "/"
+				+ diagnostic.first));
+		}
+		else if ( diagnostic.first == "whole_field" ) {
+			diagnostics.emplace_back(make_unique<whole_field>(test_name + "/"
+				+ diagnostic.first, diagnostic.second[DESC::FIELD], 
+									stoi(diagnostic.second[DESC::AXIS]) ) );
+		}
+		else if ( diagnostic.first == "field_at_point" ) {
+			diagnostics.emplace_back(make_unique<field_at_point>(test_name + "/"
+				+ diagnostic.first, diagnostic.second[DESC::FIELD],
+									stoi(diagnostic.second[DESC::AXIS]), 
+									stoi(diagnostic.second[DESC::PX]),
+									stoi(diagnostic.second[DESC::PY]) ) );
 		}
 	}
+	
+	diagnostics.shrink_to_fit();
 }
 
-void Fields_manager::add_Bz0(double Bz0)
+void Fields_manager::Propogate_fields()
 {
-	#pragma omp parallel for shared(B)
-	for (int y = 0; y < (*B).size_y(); ++y) {
-	for (int x = 0; x < (*B).size_x(); ++x) {
-		(*B).z(y,x) += Bz0;
-	}
+	Propogate_fields_(*E_, *B_, *j_);
+}
+
+void Fields_manager::diagnose()
+{
+	for (auto& diagnostic : diagnostics) {
+		(*diagnostic).diagnose(*E_, *B_, *j_);
 	}
 }

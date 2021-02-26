@@ -2,6 +2,10 @@
 #include "./particles_manager.hpp"
 #include "../constants.h"
 
+#include <iostream>
+#include <chrono>
+#include <omp.h>
+
 using namespace std;
 
 #ifndef MANAGER_H
@@ -12,7 +16,7 @@ using namespace std;
 class Manager {
 private:
 	Fields_manager 	  FM;
-	Particles_manager PM;
+	//Particles_manager PM;
 
 	//int TIME;
 
@@ -20,18 +24,21 @@ public:
 	Manager(string initializer_) {
 		// TODO: нужен сюда нормальный парсер, пока данные частично берутся из файла
 		//		 constants.h, как это было раньше
+		mkdir(test_name.c_str());
 
-		FM.initialisation(field_solver, field_configuration);
-		PM.initialisation(particles_solvers, particles_configuration);
+		FM.initialization(field_solver, field_configuration,
+			test_name, field_diagnostics);
+		//PM.initialization(particles_solvers, particles_configuration, 
+		//	test_name, particles_diagnostics);
 	}
 
-/*
 	void Calculate() {
 
-		auto start = std::chrono::system_clock::now();
+		auto start = chrono::system_clock::now();
 
-		SM.add_Bz0(B, Bz0);
-
+		FM.add_Bz0(Bz0);
+		FM.diagnose();
+/*
 		for (int t = 0; t < TIME; ++t) {
 			// ADDITIONAL SECTION
 			SM.add_circular_current(j, particles[0], v_inj, Bz0, t);
@@ -53,15 +60,13 @@ public:
 				}
 			}
 			
-			FM.Propogate_fields();
-			
-		
+			FM.Propogate_fields();	
 		}
-		auto end = std::chrono::system_clock::now();
-		std::chrono::duration<double> elapsed = end - start;
-		std::cout << "\n\n\truntime:\t" << elapsed.count() << "s\n\n" << std::endl;
-	}
 */
+		auto end = chrono::system_clock::now();
+		chrono::duration<double> elapsed = end - start;
+		cout << "\n\n\truntime:\t" << elapsed.count() << "s\n\n" << endl;
+	}
 
 };
 
