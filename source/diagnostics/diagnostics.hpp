@@ -1,5 +1,10 @@
+#ifndef DIAGNOSTIC_H
+#define DIAGNOSTIC_H
+
+//#################################################################################################
+
 #include "../vectors/vector3_field.hpp"
-#include "../particles/class_particles.hpp"
+#include "../particles/species_description.hpp"
 #include "../constants.h"
 
 #include <fstream>
@@ -13,12 +18,8 @@
 
 using namespace std;
 using v3f = vector3_field;
-using vcp = vector<class_particles>; 
+using vcp = vector<species_description>;
 
-#ifndef DIAGNOSTIC_H
-#define DIAGNOSTIC_H
-
-//#################################################################################################
 
 class diagnostic {
 public:

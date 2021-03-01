@@ -1,5 +1,5 @@
 #include "../vectors/vector3_field.hpp"
-#include "../particles/class_particles.hpp"
+#include "../particles/species_description.hpp"
 #include "../constants.h"
 
 #include <cmath>
@@ -9,7 +9,7 @@ enum SHAPE {
 	shifted = 1
 };
 
-void Boris_pusher(const class_particles& SORT,
+void Boris_pusher(const species_description& SORT,
 				  particle& PARTICLE,
 				  const vector3_field& E,
 				  const vector3_field& B)

@@ -1,9 +1,10 @@
-#include "./vector_classes.hpp"
-
 #ifndef VECTOR3_FIELD_H
 #define VECTOR3_FIELD_H
 
 //#################################################################################################
+
+#include "./vector_classes.hpp"
+
 
 enum Axis { X, Y, Z };
 

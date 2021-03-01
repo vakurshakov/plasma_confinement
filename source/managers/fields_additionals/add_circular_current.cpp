@@ -1,7 +1,7 @@
 #include "../fields_manager.hpp"
 
 
-void Fields_manager::add_circular_current(const class_particles& sort,
+void Fields_manager::add_circular_current(const species_description& sort,
 	double v_inj, double Bz0, int t)
 {
 	double q = sort.q();

@@ -1,4 +1,4 @@
-#include "./class_particles.hpp"
+#include "./particle.hpp"
 
 void reflective_Xboundary(particle& _particle, double SIZE_X)
 {

@@ -1,11 +1,11 @@
-#include "../vectors/vector_classes.hpp"
-#include "../vectors/vector3_field.hpp"
-
-
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
 //#################################################################################################
+
+#include "../vectors/vector_classes.hpp"
+#include "../vectors/vector3_field.hpp"
+
 
 class particle {
 public:

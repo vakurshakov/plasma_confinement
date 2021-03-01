@@ -1,4 +1,4 @@
-#include "./class_particles.hpp"
+#include "./species_description.hpp"
 
 #include <iostream>
 
@@ -26,16 +26,15 @@ void coordinate_loader(std::string XY_distrib, int i, double& x, double& y)
 		x = ((i/int(Np)) % SIZE_X)*dx + ((i%int(Np)) % divider)*dx/divider;
 		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
 	}
-	else if (XY_distrib == "circle") {
-			
+	else if (XY_distrib == "circle_random") {
 	}
 };
 
-class_particles::class_particles(double q, double m, double n)
+species_description::species_description(double q, double m, double n)
 		: m_q(q), m_m(m), m_n(n) {};
 
 
-class_particles::class_particles(double q, double m, double n, double Np,
+species_description::species_description(double q, double m, double n, double Np,
 		double (*form_factor)(double, double), int charge_cloud,
 		std::string XY_distrib, vector2 p0)
 		: m_q(q), m_m(m), m_n(n), m_Np(Np), m_form_factor(form_factor), m_charge_cloud(charge_cloud) {
@@ -63,7 +62,7 @@ class_particles::class_particles(double q, double m, double n, double Np,
 	}
 }
 
-class_particles::class_particles(double q, double m, double n, double Np,
+species_description::species_description(double q, double m, double n, double Np,
 		double (*form_factor)(double, double), int charge_cloud,
 		std::string XY_distrib, vector3 p0)
 		: m_q(q), m_m(m), m_n(n), m_Np(Np), m_form_factor(form_factor), m_charge_cloud(charge_cloud) {
@@ -92,7 +91,7 @@ class_particles::class_particles(double q, double m, double n, double Np,
 	}
 }
 
-class_particles::class_particles(double q, double m, double n, double Np,
+species_description::species_description(double q, double m, double n, double Np,
 		double (*form_factor)(double, double), int charge_cloud,
 		std::string XY_distrib, std::string P_distrib)
 		: m_q(q), m_m(m), m_n(n), m_Np(Np), m_form_factor(form_factor), m_charge_cloud(charge_cloud) {

@@ -1,6 +1,6 @@
 #include "../vectors/vector_classes.hpp"
 #include "../vectors/vector3_field.hpp"
-#include "../particles/class_particles.hpp"
+#include "../particles/species_description.hpp"
 #include "../constants.h"
 
 #include <cmath>
@@ -12,7 +12,7 @@
 
 */
 
-void Esirkepov_density_decomposition(const class_particles& SORT,
+void Esirkepov_density_decomposition(const species_description& SORT,
 									 const particle& PARTICLE,
 									 const vector2& r0,
 									 vector3_field& j)

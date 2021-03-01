@@ -1,12 +1,10 @@
-#include "./particles_manager.hpp"
+enum SOLV_P { PUSHER, DECOMP };
+enum CONF 	{ BOUND, n_, NP, XY_, P_ };
 
-
-enum SOLV { PUSHER, DECOMP };
-enum CONF { BOUND, n0_, ni_, NP, XY_ };
-
-void Particles_manager::initialization(vector<string> solvers,
-	vector<string> configuration) {
-	
+void Particles::initialization(vector<string> solver, vector<string> configuration,
+	string test_name, map<string, vector<string>> diagnostics)
+{
+	// initialization of solvers
 	if ( solvers[PUSHER] == "Boris_pusher" ) {
 		Particle_push_ = Boris_pusher;
 	}
@@ -16,6 +14,7 @@ void Particles_manager::initialization(vector<string> solvers,
 	}
 
 
+	// initialization of configuration
 	string boundaries = configuration[BOUND];
 
 	if ( boundaries == "reflective" ) {
@@ -35,14 +34,11 @@ void Particles_manager::initialization(vector<string> solvers,
 		y_boundary = reflective_Yboundary;
 	}
 
-	// TODO: сделать перебор по сортам, которые так быстренько инициализируются
-	//		for (int s = SORT; s < NUM_OF_SORTS; ++s) {
-	//		if (sort[s] == "protons") {
-
 	double n0 = stod(configuration[n0_]);
 	double ni = stod(configuration[ni_]);
 	double Np = stod(configuration[NP]);
 	string XY_distrib = configuration[XY_];
+	string P_distrib = configuration[P_];
 
 	protons pr_(ni);
 	electrons el_(n0, Np, XY_distrib, vector2(0,0));
@@ -50,7 +46,6 @@ void Particles_manager::initialization(vector<string> solvers,
 	particles = { pr_, el_ };
 
 	//initialization of diagnostics
-	/*
 	for (auto& name : diagnostics_name) {
 		if ( name == "energy" ) {
 			diagnostics.emplace_back(make_unique<energy>(test_name_ + "/" + name));
@@ -61,20 +56,4 @@ void Particles_manager::initialization(vector<string> solvers,
 	}
 
 	diagnostics.shrink_to_fit();
-	*/
-}
-
-void Particles_manager::Particle_push(const class_particles& SORT, particle& PARTICLE,
-	const v3f_up& E, const v3f_up& B) {
-	Particle_push_(SORT, PARTICLE, *E, *B);
-}
-
-void Particles_manager::Density_decomposition(const class_particles& SORT, const particle& PARTICLE,
-	const vector2& r0, v3f_up& j) {
-	Density_decomposition_(SORT, PARTICLE, r0, *j);
-}
-
-void Particles_manager::Boundaries_processing(particle& PARTICLE, double size_x, double size_y) {
-	x_boundary(PARTICLE, size_x);
-	y_boundary(PARTICLE, size_y);
 }

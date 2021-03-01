@@ -1,15 +1,15 @@
-#include "./fields_manager.hpp" 
+#include "./fields.hpp" 
 
 
 enum CONF { SX, SY, BOUND };
 enum DESC { FIELD, AXIS, PX, PY };
 
-void Fields_manager::initialization(string solver, vector<string> configuration,
+void Fields::initialization(string solver, vector<string> configuration,
 	string test_name, map<string, vector<string>> diagnostics_description)
 {
 	// initalization of solver
 	if ( solver == "FDTD_2D" ) {
-		Propogate_fields_ = FDTD_2D;			
+		propogate_ = FDTD_2D;			
 	}
 
 
@@ -45,11 +45,6 @@ void Fields_manager::initialization(string solver, vector<string> configuration,
 	}
 
 
-	// TODO: пока это просто инициализация по именам стандартными параметрами,
-	//			стоит сделать по-другому, на каждом создании указыввать не просто
-	//			путь, а добавлять описание вида: 
-	//				%"field_at_point"[FAT::FIELD, FAT::PX, FAT::PY]
-
 	// initalization of diagnostics
 	for (auto& diagnostic : diagnostics_description) {
 		if ( diagnostic.first == "energy" ) {
@@ -73,12 +68,12 @@ void Fields_manager::initialization(string solver, vector<string> configuration,
 	diagnostics.shrink_to_fit();
 }
 
-void Fields_manager::Propogate_fields()
+void Fields::propogate()
 {
-	Propogate_fields_(*E_, *B_, *j_);
+	propogate_(*E_, *B_, *j_);
 }
 
-void Fields_manager::diagnose()
+void Fields::diagnose()
 {
 	for (auto& diagnostic : diagnostics) {
 		(*diagnostic).diagnose(*E_, *B_, *j_);
