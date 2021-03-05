@@ -1,11 +1,13 @@
 #include "./fields.hpp" 
+#include <iostream>
+
 
 
 enum CONF { BOUND, SX, SY };
 enum FD_DESC { FIELD, AXIS, PX, PY };
 
 void Fields::initialize(string solver, vector<string> configuration,
-	string test_name, map<string, vector<string>> diagnostics_description)
+	string test_name, multimap<string, vector<string>> diagnostics_description)
 {
 	// initalization of solver
 	if ( solver == "FDTD_2D" ) {
@@ -48,24 +50,26 @@ void Fields::initialize(string solver, vector<string> configuration,
 	// initalization of diagnostics
 	for (auto& diagnostic : diagnostics_description) {
 		if ( diagnostic.first == "energy" ) {
-			diagnostics_.emplace_back(make_unique<fields_energy>(test_name + "/"
+			diagnostics_.push_back(make_unique<fields_energy>(test_name + "/"
 				+ diagnostic.first));
 		}
 		else if ( diagnostic.first == "whole_field" ) {
-			diagnostics_.emplace_back(make_unique<whole_field>(test_name + "/"
-				+ diagnostic.first, diagnostic.second[FD_DESC::FIELD], 
-									stoi(diagnostic.second[FD_DESC::AXIS]) ) );
+			diagnostics_.push_back(make_unique<whole_field>(test_name + "/"
+				+ diagnostic.first,
+				diagnostic.second[FIELD] + diagnostic.second[AXIS],
+				diagnostic.second[FIELD], diagnostic.second[AXIS] ) );
 		}
 		else if ( diagnostic.first == "field_at_point" ) {
-			diagnostics_.emplace_back(make_unique<field_at_point>(test_name + "/"
-				+ diagnostic.first, diagnostic.second[FD_DESC::FIELD],
-									stoi(diagnostic.second[FD_DESC::AXIS]), 
-									stoi(diagnostic.second[FD_DESC::PX]),
-									stoi(diagnostic.second[FD_DESC::PY]) ) );
+			diagnostics_.push_back(make_unique<field_at_point>(test_name + "/"
+				+ diagnostic.first,
+				diagnostic.second[FIELD] + diagnostic.second[AXIS],
+				diagnostic.second[FIELD], diagnostic.second[AXIS], 
+				stoi(diagnostic.second[PX]), stoi(diagnostic.second[PY]) ) );
 		}
 	}
 	
 	diagnostics_.shrink_to_fit();
+	cout << endl << endl;
 }
 
 void Fields::propogate()

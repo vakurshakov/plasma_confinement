@@ -18,9 +18,9 @@ using namespace std;
 	const double me 	= 1;
 	const double mpr 	= 1836;
 
-	const int 	TIME	= 3000;
+	const int 	TIME	= 20;
 //-------- field configuration --------------------------------------------------------------------
-	const int 	SIZE_X 	= 32,	SIZE_Y 	= 32;
+	const int 	SIZE_X 	= 64,	SIZE_Y 	= 64;
 	const double dx 	= 0.04, dy 		= 0.04;
 	const double dt 	= 0.02;
 	const string boundaries = "reflective";
@@ -28,34 +28,38 @@ using namespace std;
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 	
 	const double Np = 8;
-	const double Tx = 0.1;
-	const double Ty = 0.1;
+	const double Tx = 30e-3;
+	const double Ty = 30e-3;
 	const double Tz = 0;
 
 	const string XY_distrib = "circle_random";
-	const double n0 	= 1;		// plasma density according to ions, n0
-	const double ni 	= 4428;		// ion density, ni
-	const double v_inj 	= 0.00565;
-	const double Bz0 	= 1;
-	const double r_larm = 10;		// это просто число, нужно посчитать аккуратнее
+									// ожидаемые параметры:
+	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
+	const double ni 	= 0.013;	// ni   = 1.291e11 [cm^(-3)]
+	const double v_inj 	= 0.00565;	// Ek 	= 15 [keV] 
+	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]
+	const double r_larm = 1;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_prop = 1.13;		// r_plasma/r_larm = 1.13
+	const double f 		= 50;		// время нарастания сигнала
 
 	const int spline_width = 4;
 
-	const map<string, vector<vector<string>>> species = {
+	// TODO: частицы без диагностик вызывают ошибку файловой системы!
+	const multimap<string, vector<vector<string>>> species = {
 		{ "Electrons", { { boundaries, to_string(n0), to_string(Np), XY_distrib, "vector2", "0 0"},
-						 { "energy", "phase_diagram" } } },
-		{ "Protons -d", { { to_string(ni) },
-						  { "" } } }
+						 { "energy" } } },
 		};	
 
 //-------- initializer ----------------------------------------------------------------------------
 	const string initializer = "./manager_initializer.txt";
 
 //-------- diagnostics ----------------------------------------------------------------------------	
-	const map<string, vector<string>> field_diagnostics = {
+	const multimap<string, vector<string>> field_diagnostics = {
 		{ "energy", { "" } },
-		{ "whole_field", { "j", "1" } },
-		//{ "field_at_point", { "B", "3", to_string(int(SIZE_X/2)), to_string(int(SIZE_Y/2)) } }
+		{ "whole_field", { "j", "x" } },
+		{ "whole_field", { "E", "x" } },
+		{ "whole_field", { "B", "z" } },
+		// { "field_at_point", { "B", "3", to_string(int(SIZE_X/2)), to_string(int(SIZE_Y/2)) } }
 		};	
 
 //-------- solvers --------------------------------------------------------------------------------

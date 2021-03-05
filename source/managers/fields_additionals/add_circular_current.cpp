@@ -1,52 +1,45 @@
 #include "../fields.hpp"
+#include <cmath>
 
-
-void Fields::add_circular_current(const Species_description& sort,
-	double v_inj, double Bz0, int t)
+double get_continuous_x_current(int x, int y)
 {
-	double q = sort.q();
-	double m = sort.m();
-	double n = sort.n();
-	
-	/*
-		double gamma = 1./sqrt(1 - v_inj*v_inj);
-		int r_larm = gamma*m*v_inj/(q*Bz0)/dx;
-	*/
+	// TODO: нормальный список параметров!
+	// это задаёт просто циркулярные токи везде
 
-	// NOTE: как аккуратно заполнять массив так, чтобы
-	// в одно место дважды не попадать? Если это прои-
-	// сходит, мы увеличиваем лишний раз ток
+	double r = sqrt( x*x + y*y )*dx;
+	if ( fabs( (r - r_larm) ) < 0.2 ) {
+		return +cos(0.5*M_PI*(r - r_larm)/0.2)*e*ni*v_inj * (y*dx)/r;
+	}
+	else {
+		return 0;
+	}
+}
 
-	double dphi;
-	double ds = 1;
-	double f = 1./50.;
-	double vx, vy;
-	
-	int x, y;
+double get_continuous_y_current(int x, int y)
+{
+	double r = sqrt( x*x + y*y )*dx;
+	if ( fabs( (r - r_larm) ) < 1. ) {
+		return -cos(0.5*M_PI*(r - r_larm))*e*ni*v_inj * (x*dx)/r;
+	}
+	else {
+		return 0;
+	}
+}
 
-
-	for (double r = r_larm-ds; r < (r_larm + ds)+1 ; r += ds)
-	{
-		dphi = dy/(r*dx);
-		
-		for (double phi = 0; phi < 2*M_PI; phi += dphi) {
-			
-			x = SIZE_X/2 + r*cos(phi);
-			y = SIZE_Y/2 + r*sin(phi);
-	
-			vx = + v_inj*sin(phi);
-			vy = - v_inj*cos(phi);
-
-
-			if ( t < 1/(4.*f) ) {
-				(*j_).x(y,x) += cos((r - r_larm)*2./M_PI)*sin(2*M_PI*f*t)*q*n*vx;
-				(*j_).y(y,x) += cos((r - r_larm)*2./M_PI)*sin(2*M_PI*f*t)*q*n*vy;
-			}
-			else if ( t >= 1/(4.*f) ) {
-				(*j_).x(y,x) += cos((r - r_larm)*2./M_PI)*q*n*vx;
-				(*j_).y(y,x) += cos((r - r_larm)*2./M_PI)*q*n*vy;
-			}
+void Fields::add_circular_current(int t)
+{
+	#pragma omp parallel for shared(j_), num_threads(8)
+	for (int y = 0; y < (*j_).size_y(); ++y) {
+	for (int x = 0; x < (*j_).size_x(); ++x) {
+		if ( t < 1/(4.*f) ) {
+			(*j_).x(y,x) += sin(2*M_PI*f*t)*get_continuous_x_current((x+0.5),(y+0.5));
+			(*j_).y(y,x) += sin(2*M_PI*f*t)*get_continuous_y_current((x+0.5),(y+0.5));
 		}
+		else if ( t >= 1/(4.*f) ) {
+			(*j_).x(y,x) += get_continuous_x_current((x+0.5),(y+0.5));
+			(*j_).y(y,x) += get_continuous_y_current((x+0.5),(y+0.5));
+		}
+	}
 	}
 }
 

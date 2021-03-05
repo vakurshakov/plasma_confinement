@@ -1,24 +1,13 @@
 #include "./diagnostics.hpp" 
 
 
-void wf_diagnose(const v3f& F, int axis, ofstream& ofs)
+void wf_diagnose(const v3f& F, string axis, ofstream& ofs)
 {
 	for (int y = 0; y < F.size_y(); ++y) {
 	for (int x = 0; x < F.size_x(); ++x) {
-		switch (axis)
-		{
-			case X:
-				ofs << F.x(y,x) << " ";
-				break;
-			case Y:
-				ofs << F.y(y,x) << " ";
-				break;
-			case Z:
-				ofs << F.z(y,x) << " ";
-				break;
-			default:
-				return;
-		}
+		if (axis == "x") {	ofs << F.x(y,x) << " "; }
+		else if (axis == "y") {	ofs << F.y(y,x) << " "; }		
+		else if (axis == "z") { ofs << F.z(y,x) << " "; }
 	}
 		ofs << "\t";
 	}

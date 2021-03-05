@@ -22,7 +22,7 @@ class Fields {
 public:
 	Fields() = default;
 	void initialize(string solver, vector<string> configuration,
-		string test_name, map<string, vector<string>> diagnostics_description);
+		string test_name, multimap<string, vector<string>> diagnostics_description);
 
 	// getters
 	vector3_field& E() { return *E_; }
@@ -34,7 +34,7 @@ public:
 	void diagnose();
 
 	// additional
-	void add_circular_current(const Species_description& sort, double v_inj_, double Bz0_, int t);
+	void add_circular_current(int t);
 	void add_Bz0(double Bz0_);
 
 private:

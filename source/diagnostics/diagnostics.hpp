@@ -73,8 +73,8 @@ private:
 
 class whole_field : public Diagnostic {
 public:
-	whole_field(string path, string field, int axis)
-	: Diagnostic(path, "whole_field"), field_(field), axis_(axis-1) {
+	whole_field(string path, string name, string field, string axis)
+	: Diagnostic(path, name), field_(field), axis_(axis) {
 		initialize();
 	};
 
@@ -83,13 +83,13 @@ public:
 	
 private:
 	string field_;
-	int axis_;
+	string axis_;
 };
 
 class field_at_point : public Diagnostic {
 public:
-	field_at_point(string path, string field, int axis, int px, int py)
-	: Diagnostic(path, "field_at_point"), field_(field), axis_(axis-1), px_(px), py_(py) {
+	field_at_point(string path, string name, string field, string axis, int px, int py)
+	: Diagnostic(path, name), field_(field), axis_(axis), px_(px), py_(py) {
 		initialize();
 	};
 
@@ -98,7 +98,7 @@ public:
 	
 private:
 	string field_;
-	int axis_;
+	string axis_;
 	int px_;
 	int py_;
 };

@@ -37,6 +37,7 @@ public:
 			TODO: подумать как избавиться от if-else повторений
 		*/
 
+		/*
 		for (auto description : species) {
 			if ( description.first == "Electrons" ) {
 
@@ -47,13 +48,14 @@ public:
 
 				particles_.push_back(move(temp));
 			}
-			else if ( description.first == "Protons -d" ) {
+			else if ( description.first == "Protons" ) {
 
 				Protons temp(ni);
 
 				particles_.push_back(move(temp));
 			}
 		}
+		*/
 	}
 
 	void Calculate() {
@@ -64,8 +66,8 @@ public:
 		
 		for (int t = 0; t < TIME; ++t) {
 			
-			fields_.add_circular_current(particles_[1], v_inj, Bz0, t);
-		
+			fields_.add_circular_current(t);
+	/*
 			#pragma omp parallel num_threads(8)
 			{
 				for (auto& sort : particles_) {
@@ -85,7 +87,7 @@ public:
 					}
 				}
 			}
-		
+	*/
 			fields_.diagnose();
 
 			fields_.propogate();

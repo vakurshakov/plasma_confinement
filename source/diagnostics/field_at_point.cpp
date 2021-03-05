@@ -1,22 +1,11 @@
 #include "./diagnostics.hpp" 
 
 
-void fp_diagnose(const v3f& F, int axis, int px, int py, ofstream& ofs)
+void fp_diagnose(const v3f& F, string axis, int px, int py, ofstream& ofs)
 {
-	switch (axis)
-	{
-		case X:
-			ofs << F.x(py,px) << " ";
-			break;
-		case Y:
-			ofs << F.y(py,px) << " ";
-			break;
-		case Z:
-			ofs << F.z(py,px) << " ";
-			break;
-		default:
-			return;
-	}
+	if (axis == "x") {	ofs << F.x(py,px) << " "; }
+	else if (axis == "y") {	ofs << F.y(py,px) << " "; }		
+	else if (axis == "z") { ofs << F.z(py,px) << " "; }
 }
 
 void field_at_point::initialize() {}
