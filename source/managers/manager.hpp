@@ -16,66 +16,80 @@ using namespace std;
 
 class Manager {
 private:
-	Fields fields;
-	vector<Particles> particles;
+	Fields fields_;
+	vector<Particles> particles_;
 
 	//int TIME;
 
 public:
 	Manager(string initializer_) {
-		// TODO: нужен сюда нормальный парсер, пока данные частично берутся из файла
-		//		 constants.h, как это было раньше
+
+		/*
+			TODO: нужен сюда нормальный парсер, пока данные частично берутся из файла
+				constants.h, как это было раньше
+		*/
 		mkdir(test_name.c_str());
 
-		fields.initialization(field_solver, field_configuration,
+		fields_.initialize(field_solver, field_configuration,
 			test_name, field_diagnostics);
 
-		// TODO: сделать перебор по сортам, которые так быстренько инициализируются
-		//		for (int s = SORT; s < NUM_OF_SORTS; ++s) {
-		//		if (sort[s] == "protons") {
+		/*
+			TODO: подумать как избавиться от if-else повторений
+		*/
 
-		// TODO: перебор сортов будет прямо здесь, а для каждой вызывается инициализатор
-		// Particles temp
-		// temp.initialization(...);
-		// particles.push_back(temp)
-		// particles.initialization(particles_solvers, particles_configuration, 
-		
-		//	test_name, particles_diagnostics);
+		for (auto description : species) {
+			if ( description.first == "Electrons" ) {
+
+				Electrons temp;
+				
+				temp.initialize(particles_solvers, description.second[0], 
+					test_name, description.second[1]);
+
+				particles_.push_back(move(temp));
+			}
+			else if ( description.first == "Protons -d" ) {
+
+				Protons temp(ni);
+
+				particles_.push_back(move(temp));
+			}
+		}
 	}
 
 	void Calculate() {
 
 		auto start = chrono::system_clock::now();
 
-		fields.add_Bz0(Bz0);
-		fields.diagnose();
-
-
+		fields_.add_Bz0(Bz0);
+		
 		for (int t = 0; t < TIME; ++t) {
 			
-			fields.add_circular_current(particles[0], v_inj, Bz0, t);
+			fields_.add_circular_current(particles_[1], v_inj, Bz0, t);
+		
+			#pragma omp parallel num_threads(8)
+			{
+				for (auto& sort : particles_) {
+					#pragma omp for
+					for (int i = 0; i < sort.amount(); ++i) {
 				
+						vector2 r0 = sort.element(i).r();
+				
+						sort.particle_push(i, fields_.E(), fields_.B());
 			
-			for (auto& sort : particles) {
-				#pragma omp for num
-				for (int i = 0; i < sort.amount(); ++i) {
-			
-					vector2 r0 = sort.element(i).r();
-			
-					sort.particle_push(i, E, B);
-	
-					sort.density_decomposition(i, r0, j);
-			
-					sort.boundaries_processing(i, SIZE_X*dx, SIZE_Y*dy);
+						sort.density_decomposition(i, r0, fields_.j());
+				
+						sort.boundaries_processing(i, SIZE_X*dx, SIZE_Y*dy);
 
-					sort.diagnose();
+						// TODO: что-то не так с файловой системой, нужно будет решить
+						//sort.diagnose();
+					}
 				}
 			}
+		
+			fields_.diagnose();
 
-			fields.propogate();	
-			fields.diagnose();
+			fields_.propogate();
 		}
-
 
 		auto end = chrono::system_clock::now();
 		chrono::duration<double> elapsed = end - start;

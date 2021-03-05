@@ -52,22 +52,22 @@ int reflective_vector3_field::end_y(Axis field_component) const
 
 vector3& reflective_vector3_field::field_at(const int i, const int j)
 {
-	if ((i >= 1 && i < msize_y-1) && (j >= 1 && j < msize_x-1)){
-		return field[i*msize_x + j]; 
+	if ((i >= 1 && i < size_y_-1) && (j >= 1 && j < size_x_-1)){
+		return field_[i*size_x_ + j]; 
 	} else {
-		zero.x() = 0;
-		zero.y() = 0;
-		zero.z() = 0;
-		return zero;
+		zero_.x() = 0;
+		zero_.y() = 0;
+		zero_.z() = 0;
+		return zero_;
 	};
 }
 
 vector3 reflective_vector3_field::field_at(const int i, const int j) const
 {
-	if ((i >= 1 && i < msize_y-1) && (j >= 1 && j < msize_x-1)){
-		return field[i*msize_x + j]; 
+	if ((i >= 1 && i < size_y_-1) && (j >= 1 && j < size_x_-1)){
+		return field_[i*size_x_ + j]; 
 	} else {
-		return zero;
+		return zero_;
 	};
 }
 
@@ -82,23 +82,23 @@ int periodic_vector3_field::end_y(Axis field_component) const
 vector3& periodic_vector3_field::field_at(const int i, const int j)
 {
 	if (i < 0 && j < 0) {
-		return field[(msize_y + i%msize_y)*msize_x + (msize_x + j%msize_x)]; 
+		return field_[(size_y_ + i%size_y_)*size_x_ + (size_x_ + j%size_x_)]; 
 	} else if (i < 0) {
-		return field[(msize_y + i%msize_y)*msize_x + j%msize_x]; 
+		return field_[(size_y_ + i%size_y_)*size_x_ + j%size_x_]; 
 	} else if (j < 0) {
-		return field[(i%msize_y)*msize_x + (msize_x + j%msize_x)]; 
-	} else return field[(i%msize_y)*msize_x + j%msize_x];
+		return field_[(i%size_y_)*size_x_ + (size_x_ + j%size_x_)]; 
+	} else return field_[(i%size_y_)*size_x_ + j%size_x_];
 }
 
 vector3 periodic_vector3_field::field_at(const int i, const int j) const
 {
 	if (i < 0 && j < 0) {
-		return field[(msize_y + i%msize_y)*msize_x + (msize_x + j%msize_x)]; 
+		return field_[(size_y_ + i%size_y_)*size_x_ + (size_x_ + j%size_x_)]; 
 	} else if (i < 0) {
-		return field[(msize_y + i%msize_y)*msize_x + j%msize_x]; 
+		return field_[(size_y_ + i%size_y_)*size_x_ + j%size_x_]; 
 	} else if (j < 0) {
-		return field[(i%msize_y)*msize_x + (msize_x + j%msize_x)]; 
-	} else return field[(i%msize_y)*msize_x + j%msize_x];
+		return field_[(i%size_y_)*size_x_ + (size_x_ + j%size_x_)]; 
+	} else return field_[(i%size_y_)*size_x_ + j%size_x_];
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -112,26 +112,26 @@ int rh_pv_vector3_field::end_y(Axis field_component) const
 
 vector3& rh_pv_vector3_field::field_at(const int i, const int j)
 {
-	if (i < 0 && (j >= 0 && j < msize_x)) {
-		return field[(msize_y + i%msize_y)*msize_x + j]; 
-	} else if (j >= 0 && j < msize_x) {
-		return field[(i%msize_y)*msize_x + j]; 
+	if (i < 0 && (j >= 0 && j < size_x_)) {
+		return field_[(size_y_ + i%size_y_)*size_x_ + j]; 
+	} else if (j >= 0 && j < size_x_) {
+		return field_[(i%size_y_)*size_x_ + j]; 
 	} else {
-		zero.x() = 0;
-		zero.y() = 0;
-		zero.z() = 0;
-		return zero;
+		zero_.x() = 0;
+		zero_.y() = 0;
+		zero_.z() = 0;
+		return zero_;
 	};
 }
 
 vector3 rh_pv_vector3_field::field_at(const int i, const int j) const
 {
-	if (i < 0 && (j >= 0 && j < msize_x)) {
-		return field[(msize_y + i%msize_y)*msize_x + j]; 
-	} else if (j >= 0 && j < msize_x) {
-		return field[(i%msize_y)*msize_x + j]; 
+	if (i < 0 && (j >= 0 && j < size_x_)) {
+		return field_[(size_y_ + i%size_y_)*size_x_ + j]; 
+	} else if (j >= 0 && j < size_x_) {
+		return field_[(i%size_y_)*size_x_ + j]; 
 	} else {
-		return zero;
+		return zero_;
 	};
 }
 
@@ -146,25 +146,25 @@ int rv_ph_vector3_field::end_y(Axis field_component) const
 
 vector3& rv_ph_vector3_field::field_at(const int i, const int j)
 {
-	if ((i >= 0 && i < msize_y) && j < 0) {
-		return field[i*msize_x + (msize_x + j%msize_x)]; 
-	} else if (i >= 0 && i < msize_y) {
-		return field[i*msize_x + j%msize_x]; 
+	if ((i >= 0 && i < size_y_) && j < 0) {
+		return field_[i*size_x_ + (size_x_ + j%size_x_)]; 
+	} else if (i >= 0 && i < size_y_) {
+		return field_[i*size_x_ + j%size_x_]; 
 	} else {
-		zero.x() = 0;
-		zero.y() = 0;
-		zero.z() = 0;
-		return zero;
+		zero_.x() = 0;
+		zero_.y() = 0;
+		zero_.z() = 0;
+		return zero_;
 	};
 }
 
 vector3 rv_ph_vector3_field::field_at(const int i, const int j) const
 {
-	if ((i >= 0 && i < msize_y) && j < 0) {
-		return field[i*msize_x + (msize_x + j%msize_x)]; 
-	} else if (i >= 0 && i < msize_y) {
-		return field[i*msize_x + j%msize_x]; 
+	if ((i >= 0 && i < size_y_) && j < 0) {
+		return field_[i*size_x_ + (size_x_ + j%size_x_)]; 
+	} else if (i >= 0 && i < size_y_) {
+		return field_[i*size_x_ + j%size_x_]; 
 	} else {
-		return zero;
+		return zero_;
 	};
 }

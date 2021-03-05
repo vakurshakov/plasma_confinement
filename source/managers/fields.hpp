@@ -15,32 +15,32 @@
 
 using namespace std;
 using v3f_up = unique_ptr<vector3_field>;
-using diagnostic_up = unique_ptr<diagnostic>;
+using diagnostic_up = unique_ptr<Diagnostic>;
 
 
 class Fields {
 public:
 	Fields() = default;
-	void initialization(string solver, vector<string> configuration,
-		string test_name, map<string, vector<string>> diagnostics);
+	void initialize(string solver, vector<string> configuration,
+		string test_name, map<string, vector<string>> diagnostics_description);
 
 	// getters
-	v3f_up E() { return E_ }
-	v3f_up B() { return B_ }
-	v3f_up j() { return j_ }
+	vector3_field& E() { return *E_; }
+	vector3_field& B() { return *B_; }
+	vector3_field& j() { return *j_; }
 
 	// main Field's methods
 	void propogate();
 	void diagnose();
 
 	// additional
-	void add_circular_current(const species_description& sort, double v_inj_, double Bz0_, int t);
+	void add_circular_current(const Species_description& sort, double v_inj_, double Bz0_, int t);
 	void add_Bz0(double Bz0_);
 
 private:
 	v3f_up E_, B_, j_;
 
-	vector<diagnostic_up> diagnostics; 
+	vector<diagnostic_up> diagnostics_; 
 
 	function<void(vector3_field& E, vector3_field& B, vector3_field& j)> propogate_;
 };

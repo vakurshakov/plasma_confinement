@@ -12,18 +12,18 @@ class vector3_field {
 public:
 	vector3_field() = default;
 
-	vector3_field(int SIZE_X, int SIZE_Y) : msize_x(SIZE_X), msize_y(SIZE_Y) {
-		field = new vector3[msize_x*msize_y];
+	vector3_field(int size_x, int size_y) : size_x_(size_x), size_y_(size_y) {
+		field_ = new vector3[size_x_*size_y_];
 	};
-	vector3_field(int SIZE) : msize_x(SIZE), msize_y(SIZE) {
-		field = new vector3[msize_x*msize_y];
+	vector3_field(int size) : size_x_(size), size_y_(size) {
+		field_ = new vector3[size_x_*size_y_];
 	};
 	~vector3_field() {
-		delete[] field;
+		delete[] field_;
 	}
 
-	int size_x() const { return msize_x; }
-	int size_y() const { return msize_y; }
+	int size_x() const { return size_x_; }
+	int size_y() const { return size_y_; }
 	virtual int end_x(Axis field_component) const = 0;
 	virtual int end_y(Axis field_component) const = 0;
 
@@ -44,8 +44,8 @@ NOTE: можно сделать вот такую реализацию, где E
 */
 
 protected:
-	int msize_x, msize_y;
-	vector3* field;
+	int size_x_, size_y_;
+	vector3* field_;
 	
 	virtual vector3& field_at(int i, int j) = 0;
 	virtual vector3 field_at(int i, int j) const = 0;
@@ -53,14 +53,14 @@ protected:
 
 class reflective_vector3_field : public vector3_field {
 public:
-	reflective_vector3_field(int SIZE_X, int SIZE_Y) : vector3_field(SIZE_X, SIZE_Y) {};
-	reflective_vector3_field(int SIZE) : vector3_field(SIZE) {};
+	reflective_vector3_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
+	reflective_vector3_field(int size) : vector3_field(size) {};
 	
 	int end_x(Axis field_component) const override;
 	int end_y(Axis field_component) const override;
 
 private:
-	vector3 zero;
+	vector3 zero_;
 
 	vector3& field_at(int i, int j) override;
 	vector3 field_at(int i, int j) const override;
@@ -68,8 +68,8 @@ private:
 
 class periodic_vector3_field : public vector3_field {
 public:
-	periodic_vector3_field(int SIZE_X, int SIZE_Y) : vector3_field(SIZE_X, SIZE_Y) {};
-	periodic_vector3_field(int SIZE) : vector3_field(SIZE) {};
+	periodic_vector3_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
+	periodic_vector3_field(int size) : vector3_field(size) {};
 
 	int end_x(Axis field_component) const override;
 	int end_y(Axis field_component) const override;
@@ -81,14 +81,14 @@ private:
 
 class rh_pv_vector3_field : public vector3_field {
 public:
-	rh_pv_vector3_field(int SIZE_X, int SIZE_Y) : vector3_field(SIZE_X, SIZE_Y) {};
-	rh_pv_vector3_field(int SIZE) : vector3_field(SIZE) {};
+	rh_pv_vector3_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
+	rh_pv_vector3_field(int size) : vector3_field(size) {};
 
 	int end_x(Axis field_component) const override;
 	int end_y(Axis field_component) const override;
 
 private:
-	vector3 zero;
+	vector3 zero_;
 
 	vector3& field_at(int i, int j) override;
 	vector3 field_at(int i, int j) const override;
@@ -96,14 +96,14 @@ private:
 
 class rv_ph_vector3_field : public vector3_field {
 public:
-	rv_ph_vector3_field(int SIZE_X, int SIZE_Y) : vector3_field(SIZE_X, SIZE_Y) {};
-	rv_ph_vector3_field(int SIZE) : vector3_field(SIZE) {};
+	rv_ph_vector3_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
+	rv_ph_vector3_field(int size) : vector3_field(size) {};
 
 	int end_x(Axis field_component) const override;
 	int end_y(Axis field_component) const override;
 
 private:
-	vector3 zero;
+	vector3 zero_;
 
 	vector3& field_at(int i, int j) override;
 	vector3 field_at(int i, int j) const override;

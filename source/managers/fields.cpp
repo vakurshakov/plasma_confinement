@@ -1,10 +1,10 @@
 #include "./fields.hpp" 
 
 
-enum CONF { SX, SY, BOUND };
-enum DESC { FIELD, AXIS, PX, PY };
+enum CONF { BOUND, SX, SY };
+enum FD_DESC { FIELD, AXIS, PX, PY };
 
-void Fields::initialization(string solver, vector<string> configuration,
+void Fields::initialize(string solver, vector<string> configuration,
 	string test_name, map<string, vector<string>> diagnostics_description)
 {
 	// initalization of solver
@@ -48,24 +48,24 @@ void Fields::initialization(string solver, vector<string> configuration,
 	// initalization of diagnostics
 	for (auto& diagnostic : diagnostics_description) {
 		if ( diagnostic.first == "energy" ) {
-			diagnostics.emplace_back(make_unique<fields_energy>(test_name + "/"
+			diagnostics_.emplace_back(make_unique<fields_energy>(test_name + "/"
 				+ diagnostic.first));
 		}
 		else if ( diagnostic.first == "whole_field" ) {
-			diagnostics.emplace_back(make_unique<whole_field>(test_name + "/"
-				+ diagnostic.first, diagnostic.second[DESC::FIELD], 
-									stoi(diagnostic.second[DESC::AXIS]) ) );
+			diagnostics_.emplace_back(make_unique<whole_field>(test_name + "/"
+				+ diagnostic.first, diagnostic.second[FD_DESC::FIELD], 
+									stoi(diagnostic.second[FD_DESC::AXIS]) ) );
 		}
 		else if ( diagnostic.first == "field_at_point" ) {
-			diagnostics.emplace_back(make_unique<field_at_point>(test_name + "/"
-				+ diagnostic.first, diagnostic.second[DESC::FIELD],
-									stoi(diagnostic.second[DESC::AXIS]), 
-									stoi(diagnostic.second[DESC::PX]),
-									stoi(diagnostic.second[DESC::PY]) ) );
+			diagnostics_.emplace_back(make_unique<field_at_point>(test_name + "/"
+				+ diagnostic.first, diagnostic.second[FD_DESC::FIELD],
+									stoi(diagnostic.second[FD_DESC::AXIS]), 
+									stoi(diagnostic.second[FD_DESC::PX]),
+									stoi(diagnostic.second[FD_DESC::PY]) ) );
 		}
 	}
 	
-	diagnostics.shrink_to_fit();
+	diagnostics_.shrink_to_fit();
 }
 
 void Fields::propogate()
@@ -75,7 +75,7 @@ void Fields::propogate()
 
 void Fields::diagnose()
 {
-	for (auto& diagnostic : diagnostics) {
+	for (auto& diagnostic : diagnostics_) {
 		(*diagnostic).diagnose(*E_, *B_, *j_);
 	}
 }

@@ -3,6 +3,7 @@
 #include "../particles/species_description.hpp"
 #include "../constants.h"
 
+#include <functional>
 #include <cmath>
 #include <omp.h>
 
@@ -12,21 +13,21 @@
 
 */
 
-void Esirkepov_density_decomposition(const species_description& SORT,
-									 const particle& PARTICLE,
+void Esirkepov_density_decomposition(const Species_description& sort,
+									 const Particle& particle,
 									 const vector2& r0,
 									 vector3_field& j)
 {
-	double q  = SORT.q();
-	double n  = SORT.n();
-	double Np = SORT.Np();
-	int charge_cloud = SORT.charge_cloud();
-	double (*shape_at)(double, double) = SORT.form_factor();
+	double q  = sort.q();
+	double n  = sort.n();
+	double Np = sort.Np();
+	int charge_cloud = sort.charge_cloud();
+	function<double(double, double)> shape_at = sort.form_factor();
 
 
-	double gamma = sqrt(1 + PARTICLE.p().dot(PARTICLE.p())/(SORT.m()*SORT.m()));
-	double vz = PARTICLE.p().z()/gamma;
-	vector2 r = PARTICLE.r();
+	double gamma = sqrt(1 + particle.p().dot(particle.p())/(sort.m()*sort.m()));
+	double vz = particle.p().z()/gamma;
+	vector2 r = particle.r();
 
 	periodic_vector3_field temp_j(2*charge_cloud+1, 2*charge_cloud+1); 
 

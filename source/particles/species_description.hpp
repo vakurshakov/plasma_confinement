@@ -4,8 +4,6 @@
 //#################################################################################################
 
 #include "../vectors/vector3_field.hpp" 
-#include "../diagnostics/diagnostics.hpp"
-#include "../solvers/solvers.hpp"
 #include "./particle.hpp"
 #include "../constants.h"
 
@@ -17,8 +15,6 @@
 #include <cmath>
 
 using namespace std;
-using v3f = vector3_field;
-using diagnostic_up = unique_ptr<diagnostic>;
 
 
 double frand();
@@ -27,44 +23,51 @@ class Species_description {
 public:
 	Species_description() = default;
 
-	Species_description(double q, double m, double n);
-	
-	Species_description(double q, double m, double n, double Np,
-		double (*form_factor)(double, double), int charge_cloud,
-		string XY_distrib, vector2 p0);
-	
-	Species_description(double q, double m, double n, double Np,
-		double (*form_factor)(double, double), int charge_cloud,
-		string XY_distrib, vector3 p0);
+	Species_description(double q, double m,
+		function<double(double, double)> form_factor, int charge_cloud)
+	: q_(q), m_(m), form_factor_(form_factor), charge_cloud_(charge_cloud) {};
 
-	Species_description(double q, double m, double n, double Np, 
-		double (*form_factor)(double, double), int charge_cloud,
-		string XY_distrib, string P_distrib);
-
+	Species_description(double q, double m, double n,
+		function<double(double, double)> form_factor, int charge_cloud)
+	: q_(q), m_(m), n_(n), form_factor_(form_factor), charge_cloud_(charge_cloud) {};
 
 	// getters
-	double q() const { return m_q; };
-	double m() const { return m_m; };
-	double n() const { return m_n; };
-	double Np() const { return m_Np; };
-	auto form_factor() const { return m_form_factor; };
-	int charge_cloud() const { return m_charge_cloud; };
-	int amount() const { return m_particles.size(); };
+	double q() const { return q_; };
+	double m() const { return m_; };
+	double n() const { return n_; };
+	double Np() const { return Np_; };
+	auto form_factor() const { return form_factor_; };
+	int charge_cloud() const { return charge_cloud_; };
+	int amount() const { return particles_.size(); };
 	
-	particle& element(int i) { return m_particles[i]; };
-	particle element(int i) const { return m_particles[i]; };
+	Particle& element(int i) { return particles_[i]; };
+	Particle element(int i) const { return particles_[i]; };
+
+	friend void load_p02d_particles(Species_description& sort, double Np,
+		string XY_distrib, const vector2& p0);
+	friend void load_p03d_particles(Species_description& sort, double Np,
+		string XY_distrib, const vector3& p0);
+	friend void load_chosen_distribution(Species_description& sort, double Np,
+		string XY_distrib, string P_distrib);
 
 protected:
 	// spescies parameters
-	double m_q;
-	double m_m;
-	double m_n;
-	double m_Np;
-	double (*m_form_factor)(double, double);
-	int m_charge_cloud;
-	vector<particle> m_particles;
+	double q_;
+	double m_;
+	double n_;
+	double Np_;
+	function<double(double, double)> form_factor_;
+	int charge_cloud_;
+	vector<Particle> particles_;
 
 };
+
+
+double second_order_spline(double x, double grid_mesh);
+double third_order_spline(double x, double grid_mesh);
+double fourth_order_spline(double x, double grid_mesh);
+double fifth_order_spline(double x, double grid_mesh);
+
 //#################################################################################################
 
 #endif

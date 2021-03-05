@@ -2,26 +2,28 @@
 #include "../particles/species_description.hpp"
 #include "../constants.h"
 
+#include <functional>
 #include <cmath>
+
 
 enum SHAPE {
 	noshift = 0,
 	shifted = 1
 };
 
-void Boris_pusher(const species_description& SORT,
-				  particle& PARTICLE,
+void Boris_pusher(const Species_description& sort,
+				  Particle& particle,
 				  const vector3_field& E,
 				  const vector3_field& B)
 {
-	// getting a usefull variabels from %SORT and %PARTICLE
-	vector2 r = PARTICLE.r();
-	vector3 p = PARTICLE.p();
+	// getting a usefull variabels from %sort and %particle
+	vector2 r = particle.r();
+	vector3 p = particle.p();
 
-	double  q = SORT.q(); 
-	double  m = SORT.m();
-	double (*shape_at)(double, double) = SORT.form_factor();
-	int charge_cloud = SORT.charge_cloud();
+	double  q = sort.q(); 
+	double  m = sort.m();
+	function<double(double, double)> shape_at = sort.form_factor();
+	int charge_cloud = sort.charge_cloud();
 
 	int nearest_edge_to_rx = int(roundf(r.x()/dx));
 	int nearest_edge_to_ry = int(roundf(r.y()/dy));
@@ -62,6 +64,6 @@ void Boris_pusher(const species_description& SORT,
 	energy = sqrt(m*m + p.dot(p));
 	r += p.squeeze(Axes::XY)/energy*dt;
 
-	PARTICLE.r() = r;
-	PARTICLE.p() = p;			
+	particle.r() = r;
+	particle.p() = p;			
 }

@@ -19,7 +19,7 @@ void fp_diagnose(const v3f& F, int axis, int px, int py, ofstream& ofs)
 	}
 }
 
-void field_at_point::initialization() {}
+void field_at_point::initialize() {}
 
 void field_at_point::diagnose(const v3f& E, const v3f& B, const v3f& j)
 {

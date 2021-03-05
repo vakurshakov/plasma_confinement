@@ -1,8 +1,8 @@
 #include "./diagnostics.hpp" 
 
 
-void fields_energy::initialization() {}
-void particles_energy::initialization() {}
+void fields_energy::initialize() {}
+void particles_energy::initialize() {}
 
 
 void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j)
@@ -19,18 +19,16 @@ void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j)
 	W = 0;
 }
 
-void particles_energy::diagnose(const vcp& particles)
+void particles_energy::diagnose(const Species_description& sort)
 {
-	for (auto& sort : particles)
-	{	
-		#pragma omp parallel for reduction(+: W), num_threads(8)
-		for (int i = 0; i < sort.amount(); ++i) {
-			W += sqrt( sort.m()*sort.m() +
-					   	sort.element(i).p().dot(sort.element(i).p()) )*
-							dx*dy*sort.n()/sort.Np();
-		}
+	#pragma omp parallel for reduction(+: W), num_threads(8)
+	for (int i = 0; i < sort.amount(); ++i) {
+		W += sqrt( sort.m()*sort.m() +
+				   	sort.element(i).p().dot(sort.element(i).p()) )*
+						dx*dy*sort.n()/sort.Np();
 	}
-	ofs_ << W << "\t";
+
+	ofs_ << W << " ";
 
 	W = 0;
 }

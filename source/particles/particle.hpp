@@ -7,44 +7,39 @@
 #include "../vectors/vector3_field.hpp"
 
 
-class particle {
+class Particle {
 public:
-	particle(): m_r(), m_p() {};
-	particle(vector2& r, vector3& p): m_r(r), m_p(p) {};
+	Particle(): r_(), p_() {};
+	Particle(vector2& r, vector3& p): r_(r), p_(p) {};
 	
-	vector2& r() { return m_r; };
-	double& x() { return m_r.x(); };
-	double& y() { return m_r.y(); };
+	vector2& r() { return r_; };
+	double& x() { return r_.x(); };
+	double& y() { return r_.y(); };
 	
-	vector2 r() const { return m_r; };
-	double x() const { return m_r.x(); };
-	double y() const { return m_r.y(); };
+	vector2 r() const { return r_; };
+	double x() const { return r_.x(); };
+	double y() const { return r_.y(); };
 
-	vector3& p() { return m_p; };
-	double& px() { return m_p.x(); };
-	double& py() { return m_p.y(); };
-	double& pz() { return m_p.z(); };
+	vector3& p() { return p_; };
+	double& px() { return p_.x(); };
+	double& py() { return p_.y(); };
+	double& pz() { return p_.z(); };
 	
-	vector3 p() const { return m_p; };
-	double px() const { return m_p.x(); };
-	double py() const { return m_p.y(); };
-	double pz() const { return m_p.z(); };
+	vector3 p() const { return p_; };
+	double px() const { return p_.x(); };
+	double py() const { return p_.y(); };
+	double pz() const { return p_.z(); };
 
 private:
-	vector2 m_r;
-	vector3 m_p;
+	vector2 r_;
+	vector3 p_;
 };
 
 
-void reflective_Xboundary(particle& particle_, double SIZE_X);
-void reflective_Yboundary(particle& particle_, double SIZE_Y);
-void periodic_Xboundary(particle& particle_, double SIZE_X);
-void periodic_Yboundary(particle& particle_, double SIZE_Y);
-
-double second_order_spline(double x, double grid_mesh);
-double third_order_spline(double x, double grid_mesh);
-double fourth_order_spline(double x, double grid_mesh);
-double fifth_order_spline(double x, double grid_mesh);
+void reflective_Xboundary(Particle& particle, double SIZE_X);
+void reflective_Yboundary(Particle& particle, double SIZE_Y);
+void periodic_Xboundary(Particle& particle, double SIZE_X);
+void periodic_Yboundary(Particle& particle, double SIZE_Y);
 
 //#################################################################################################
 

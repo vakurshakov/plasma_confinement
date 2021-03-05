@@ -25,7 +25,7 @@ void wf_diagnose(const v3f& F, int axis, ofstream& ofs)
 	ofs << std::endl;
 }
 
-void whole_field::initialization()
+void whole_field::initialize()
 {
 	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
 }

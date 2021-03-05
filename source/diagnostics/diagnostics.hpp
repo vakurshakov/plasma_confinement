@@ -18,14 +18,12 @@
 
 using namespace std;
 using v3f = vector3_field;
-using vcp = vector<species_description>;
 
-
-class diagnostic {
+class Diagnostic {
 public:
-	diagnostic() = default;
+	Diagnostic() = default;
 
-	diagnostic(string path, string name_)
+	Diagnostic(string path, string name_)
 		: path_(path), name_(name_) {
 		
 		mkdir(path_.c_str());
@@ -35,10 +33,10 @@ public:
 		ofs_ << setprecision(10) << fixed;
 	}
                       
-	virtual ~diagnostic() = default;
-	virtual void initialization() = 0;
+	virtual ~Diagnostic() = default;
+	virtual void initialize() = 0;
 	virtual void diagnose(const v3f& E, const v3f& B, const v3f& j) {};
-	virtual void diagnose(const vcp& particles) {};
+	virtual void diagnose(const Species_description& sort) {};
 
 protected:
 	string path_;
@@ -47,40 +45,40 @@ protected:
 };
 
 
-class fields_energy : public diagnostic {
+class fields_energy : public Diagnostic {
 public:
-	fields_energy(string path) : diagnostic(path, "fields_energy") {
-		initialization();
+	fields_energy(string path) : Diagnostic(path, "fields_energy") {
+		initialize();
 	}
 
-	void initialization() override;
+	void initialize() override;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
 	
 private:
 	double W = 0;
 };
 
-class particles_energy : public diagnostic {
+class particles_energy : public Diagnostic {
 public:
-	particles_energy(string path) : diagnostic(path, "particles_energy") {
-		initialization();
+	particles_energy(string path) : Diagnostic(path, "particles_energy") {
+		initialize();
 	};
 
-	void initialization() override;
-	void diagnose(const vcp& particles) override;
+	void initialize() override;
+	void diagnose(const Species_description& sort) override;
 	
 private:
 	double W = 0;
 };
 
-class whole_field : public diagnostic {
+class whole_field : public Diagnostic {
 public:
 	whole_field(string path, string field, int axis)
-	: diagnostic(path, "whole_field"), field_(field), axis_(axis-1) {
-		initialization();
+	: Diagnostic(path, "whole_field"), field_(field), axis_(axis-1) {
+		initialize();
 	};
 
-	void initialization() override;
+	void initialize() override;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
 	
 private:
@@ -88,14 +86,14 @@ private:
 	int axis_;
 };
 
-class field_at_point : public diagnostic {
+class field_at_point : public Diagnostic {
 public:
 	field_at_point(string path, string field, int axis, int px, int py)
-	: diagnostic(path, "field_at_point"), field_(field), axis_(axis-1), px_(px), py_(py) {
-		initialization();
+	: Diagnostic(path, "field_at_point"), field_(field), axis_(axis-1), px_(px), py_(py) {
+		initialize();
 	};
 
-	void initialization() override;
+	void initialize() override;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
 	
 private:
@@ -105,14 +103,14 @@ private:
 	int py_;
 };
 
-class phase_diagram : public diagnostic {
+class phase_diagram : public Diagnostic {
 public:
-	phase_diagram(string path) : diagnostic(path, "phase_diagram") {
-		initialization();
+	phase_diagram(string path) : Diagnostic(path, "phase_diagram") {
+		initialize();
 	};
 
-	void initialization() override;
-	void diagnose(const vcp& particles) override;
+	void initialize() override;
+	void diagnose(const Species_description& sort) override;
 	
 private:
 	double vmin_ = 0;
