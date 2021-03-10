@@ -8,7 +8,7 @@ enum CONF { BOUND, n_, Np_, XY_, P_type_, P_};
 //enum PD_DESC {  };
 
 void Particles::initialize(vector<string> solvers, vector<string> configuration,
-	string test_name, vector<string> diagnostics_description)
+	string dir_name, vector<string> diagnostics_description)
 {
 	// initialize of solvers
 	if ( solvers[PUSHER] == "Boris_pusher" ) {
@@ -86,10 +86,10 @@ void Particles::initialize(vector<string> solvers, vector<string> configuration,
 	//initialize of diagnostics
 	for (auto& diagnostic : diagnostics_description) {
 		if ( diagnostic == "energy" ) {
-			diagnostics_.emplace_back(make_unique<particles_energy>(test_name + "/" + diagnostic));
+			diagnostics_.emplace_back(make_unique<particles_energy>(dir_name + "/" + diagnostic));
 		}
 		else if ( diagnostic == "phase_diagram" ) {
-			diagnostics_.emplace_back(make_unique<phase_diagram>(test_name + "/" + diagnostic));
+			diagnostics_.emplace_back(make_unique<phase_diagram>(dir_name + "/" + diagnostic));
 		}
 		else {
 			diagnostics_.emplace_back(nullptr);

@@ -26,13 +26,13 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 
 
 	double gamma = sqrt(1 + particle.p().dot(particle.p())/(sort.m()*sort.m()));
-	double vz = particle.p().z()/gamma;
+	double vz = particle.p().z/gamma;
 	vector2 r = particle.r();
 
 	periodic_vector3_field temp_j(2*charge_cloud+1, 2*charge_cloud+1); 
 
-	size_t nearest_edge_to_rx = size_t(roundf(r.x()/dx));
-	size_t nearest_edge_to_ry = size_t(roundf(r.y()/dy));
+	size_t nearest_edge_to_rx = size_t(roundf(r.x/dx));
+	size_t nearest_edge_to_ry = size_t(roundf(r.y/dy));
 
 	{	// collecting jx(y,x) -------------------------------------------------------------------------
 		long int node_x, node_y;
@@ -41,8 +41,8 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		for (long int x = -charge_cloud, y = -charge_cloud; y <= +charge_cloud; ++y) {
 			node_y = nearest_edge_to_ry + y;
 	
-			temp_j.x(y,x) = - q*n/Np*0.5*dx/dt*(shape_at(r.x() - node_x*dx, dx) - shape_at(r0.x() - node_x*dx, dx))*
-									 		   (shape_at(r.y() - node_y*dy, dy) + shape_at(r0.y() - node_y*dy, dy));
+			temp_j.x(y,x) = - q*n/Np*0.5*dx/dt*(shape_at(r.x - node_x*dx, dx) - shape_at(r0.x - node_x*dx, dx))*
+									 		   (shape_at(r.y - node_y*dy, dy) + shape_at(r0.y - node_y*dy, dy));
 	
 			#pragma omp atomic
 			j.x(node_y,node_x) += temp_j.x(y,x);
@@ -55,8 +55,8 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 			for (long int x = -charge_cloud+1; x <= +charge_cloud; ++x) {
 				node_x = nearest_edge_to_rx + x;
 	
-				temp_j.x(y,x) = temp_j.x(y,x-1) - q*n/Np*0.5*dx/dt*(shape_at(r.x() - node_x*dx, dx) - shape_at(r0.x() - node_x*dx, dx))*
-																   (shape_at(r.y() - node_y*dy, dy) + shape_at(r0.y() - node_y*dy, dy));
+				temp_j.x(y,x) = temp_j.x(y,x-1) - q*n/Np*0.5*dx/dt*(shape_at(r.x - node_x*dx, dx) - shape_at(r0.x - node_x*dx, dx))*
+																   (shape_at(r.y - node_y*dy, dy) + shape_at(r0.y - node_y*dy, dy));
 	
 				#pragma omp atomic
 				j.x(node_y, node_x) += temp_j.x(y,x);
@@ -72,8 +72,8 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		for (long int y = -charge_cloud, x = -charge_cloud; x <= +charge_cloud; ++x) {
 			node_x = nearest_edge_to_rx + x;
 	
-			temp_j.y(y,x) = - q*n/Np*0.5*dy/dt*(shape_at(r.x() - node_x*dx, dx) + shape_at(r0.x() - node_x*dx, dx))*
-											   (shape_at(r.y() - node_y*dy, dy) - shape_at(r0.y() - node_y*dy, dy));
+			temp_j.y(y,x) = - q*n/Np*0.5*dy/dt*(shape_at(r.x - node_x*dx, dx) + shape_at(r0.x - node_x*dx, dx))*
+											   (shape_at(r.y - node_y*dy, dy) - shape_at(r0.y - node_y*dy, dy));
 		
 			#pragma omp atomic
 			j.y(node_y, node_x) += temp_j.y(y,x);
@@ -85,8 +85,8 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 			for (long int x = -charge_cloud; x <= +charge_cloud; ++x) {
 				node_x = nearest_edge_to_rx + x;
 	
-				temp_j.y(y,x) += temp_j.y(y-1,x) - q*n/Np*0.5*dy/dt*(shape_at(r.x() - node_x*dx, dx) + shape_at(r0.x() - node_x*dx, dx))*
-																    (shape_at(r.y() - node_y*dy, dy) - shape_at(r0.y() - node_y*dy, dy));
+				temp_j.y(y,x) += temp_j.y(y-1,x) - q*n/Np*0.5*dy/dt*(shape_at(r.x - node_x*dx, dx) + shape_at(r0.x - node_x*dx, dx))*
+																    (shape_at(r.y - node_y*dy, dy) - shape_at(r0.y - node_y*dy, dy));
 			
 				#pragma omp atomic
 				j.y(node_y, node_x) += temp_j.y(y,x);

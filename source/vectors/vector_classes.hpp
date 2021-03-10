@@ -7,34 +7,21 @@ enum Axes { XY, YZ, XZ };
 
 class vector2 {
 public:	
-	vector2() : x_(0), y_(0) {};
-	vector2(double x, double y) : x_(x), y_(y) {};
-	
-	double& x() { return x_; };
-	double& y() { return y_; };
-	double x() const { return x_; };
-	double y() const { return y_; };
+	vector2() : x(0), y(0) {};
+	vector2(double _x, double _y) : x(_x), y(_y) {};
 
 	vector2& operator+=(const vector2& other);
 	vector2 operator/(const double a) const;
 	vector2 operator*(const double a) const;
 	
-private:
-	double x_; 
-	double y_;
+	double x; 
+	double y;
 };
 
 class vector3 {
 public:
-	vector3() : x_(0), y_(0), z_(0) {};
-	vector3(double x, double y, double z) : x_(x), y_(y), z_(z) {};
-	
-	double& x() { return x_; };
-	double& y() { return y_; };
-	double& z() { return z_; };
-	double x() const { return x_; };
-	double y() const { return y_; };
-	double z() const { return z_; };
+	vector3() : x(0), y(0), z(0) {};
+	vector3(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {};
 
 	double dot(const vector3 &other) const;
 	vector3 cross(const vector3 &other) const;
@@ -44,12 +31,9 @@ public:
 	vector3 operator/(const double a) const;
 	vector2 squeeze(const Axes axes) const;
 
-	
-
-private:
-	double x_; 
-	double y_;
-	double z_;
+	double x; 
+	double y;
+	double z;
 };
 
 //#################################################################################################

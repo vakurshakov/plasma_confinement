@@ -59,7 +59,6 @@ protected:
 	function<double(double, double)> form_factor_;
 	int charge_cloud_;
 	vector<Particle> particles_;
-
 };
 
 

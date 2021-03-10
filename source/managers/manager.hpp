@@ -28,10 +28,10 @@ public:
 			TODO: нужен сюда нормальный парсер, пока данные частично берутся из файла
 				constants.h, как это было раньше
 		*/
-		mkdir(test_name.c_str());
+		mkdir(dir_name.c_str());
 
 		fields_.initialize(field_solver, field_configuration,
-			test_name, field_diagnostics);
+			dir_name, field_diagnostics);
 
 		/*
 			TODO: подумать как избавиться от if-else повторений
@@ -44,7 +44,7 @@ public:
 				Electrons temp;
 				
 				temp.initialize(particles_solvers, description.second[0], 
-					test_name, description.second[1]);
+					dir_name, description.second[1]);
 
 				particles_.push_back(move(temp));
 			}
@@ -62,12 +62,12 @@ public:
 
 		auto start = chrono::system_clock::now();
 
-		fields_.add_Bz0(Bz0);
+		//fields_.add_Bz0(Bz0);
 		
 		for (int t = 0; t < TIME; ++t) {
-			
-			fields_.add_circular_current(t);
 	/*
+			fields_.add_circular_current(t);
+
 			#pragma omp parallel num_threads(8)
 			{
 				for (auto& sort : particles_) {
@@ -82,17 +82,19 @@ public:
 				
 						sort.boundaries_processing(i, SIZE_X*dx, SIZE_Y*dy);
 
-						// TODO: что-то не так с файловой системой, нужно будет решить
+						// TODO: реализовать частицы и поля БЕЗ диагностик
 						//sort.diagnose();
 					}
 				}
 			}
 	*/
+			(fields_.E()).z(SIZE_Y/2, SIZE_X/2)+= 1;
+			(fields_.B()).z(SIZE_Y/2, SIZE_X/2)+= 1;
+
 			fields_.diagnose();
 
 			fields_.propogate();
 		}
-
 		auto end = chrono::system_clock::now();
 		chrono::duration<double> elapsed = end - start;
 		cout << "\n\n\truntime:\t" << elapsed.count() << "s\n\n" << endl;

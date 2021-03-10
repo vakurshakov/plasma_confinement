@@ -86,6 +86,38 @@ private:
 	string axis_;
 };
 
+class field_along_X : public Diagnostic {
+public:
+	field_along_X(string path, string name, string field, string axis, int Y)
+	: Diagnostic(path, name), field_(field), axis_(axis), Y_(Y) {
+		initialize();
+	};
+
+	void initialize() override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	
+private:
+	string field_;
+	string axis_;
+	int Y_;
+};
+
+class field_along_Y : public Diagnostic {
+public:
+	field_along_Y(string path, string name, string field, string axis, int X)
+	: Diagnostic(path, name), field_(field), axis_(axis), X_(X) {
+		initialize();
+	};
+
+	void initialize() override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	
+private:
+	string field_;
+	string axis_;
+	int X_;
+};
+
 class field_at_point : public Diagnostic {
 public:
 	field_at_point(string path, string name, string field, string axis, int px, int py)

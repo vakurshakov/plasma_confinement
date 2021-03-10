@@ -22,7 +22,7 @@ class Fields {
 public:
 	Fields() = default;
 	void initialize(string solver, vector<string> configuration,
-		string test_name, multimap<string, vector<string>> diagnostics_description);
+		string dir_name, multimap<string, vector<string>> diagnostics_description);
 
 	// getters
 	vector3_field& E() { return *E_; }

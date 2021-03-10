@@ -25,8 +25,8 @@ void Boris_pusher(const Species_description& sort,
 	function<double(double, double)> shape_at = sort.form_factor();
 	int charge_cloud = sort.charge_cloud();
 
-	int nearest_edge_to_rx = int(roundf(r.x()/dx));
-	int nearest_edge_to_ry = int(roundf(r.y()/dy));
+	int nearest_edge_to_rx = int(roundf(r.x/dx));
+	int nearest_edge_to_ry = int(roundf(r.y/dy));
 
 	vector3 local_E, local_B;
 	vector2 shape[2];
@@ -34,20 +34,20 @@ void Boris_pusher(const Species_description& sort,
 	//	shape[shifted] -- shape((i + 1./2, j + 1./2) - r)
 		
 	for(int y = nearest_edge_to_ry-charge_cloud; y <= nearest_edge_to_ry+charge_cloud; ++y) {
-		shape[noshift].y() = shape_at( y*dy - r.y(), dy);
-		shape[shifted].y() = shape_at((y + 0.5)*dy - r.y(), dy);
+		shape[noshift].y = shape_at( y*dy - r.y, dy);
+		shape[shifted].y = shape_at((y + 0.5)*dy - r.y, dy);
 		
 		for(int x = nearest_edge_to_rx-charge_cloud; x <= nearest_edge_to_rx+charge_cloud; ++x) {
-			shape[noshift].x() = shape_at( x*dx - r.x(), dx);
-			shape[shifted].x() = shape_at((x + 0.5)*dx - r.x(), dx);
+			shape[noshift].x = shape_at( x*dx - r.x, dx);
+			shape[shifted].x = shape_at((x + 0.5)*dx - r.x, dx);
 			
-			local_E.x() += E.x(y,x)*( shape[shifted].x() * shape[noshift].y() ); // noshift, shifted
-			local_E.y() += E.y(y,x)*( shape[noshift].x() * shape[shifted].y() ); // shifted, noshift
-			local_E.z() += E.z(y,x)*( shape[shifted].x() * shape[shifted].y() ); // shifted, shifted
+			local_E.x += E.x(y,x)*( shape[shifted].x * shape[noshift].y ); // noshift, shifted
+			local_E.y += E.y(y,x)*( shape[noshift].x * shape[shifted].y ); // shifted, noshift
+			local_E.z += E.z(y,x)*( shape[shifted].x * shape[shifted].y ); // shifted, shifted
 			
-			local_B.x() += B.x(y,x)*( shape[shifted].x() * shape[noshift].y() ); // shifted, noshift
-			local_B.y() += B.y(y,x)*( shape[noshift].x() * shape[shifted].y() ); // noshift, shifted
-			local_B.z() += B.z(y,x)*( shape[shifted].x() * shape[shifted].y() ); // noshift, noshift
+			local_B.x += B.x(y,x)*( shape[shifted].x * shape[noshift].y ); // shifted, noshift
+			local_B.y += B.y(y,x)*( shape[noshift].x * shape[shifted].y ); // noshift, shifted
+			local_B.z += B.z(y,x)*( shape[shifted].x * shape[shifted].y ); // noshift, noshift
 		}
 	}
 

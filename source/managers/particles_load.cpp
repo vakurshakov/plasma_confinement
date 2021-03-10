@@ -25,7 +25,7 @@ void coordinate_loader(string& XY_distrib, int i, double& x, double& y)
 		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
 	}
 	else if (XY_distrib == "circle_random") {
-		double r 	= frand()*r_larm*dx;  // 0 < r < r_larm
+		double r 	= frand()*r_larm*r_prop;  // 0 < r < r_larm
 		double phi 	= frand()*2*M_PI; 
 
 		x = 0.5*SIZE_X*dx + r*cos(phi);  
@@ -45,8 +45,8 @@ void load_p02d_particles(Species_description& sort, double Np,
 		double x, y;
 		coordinate_loader(XY_distrib, i, x, y);
 		
-		double px = p0.x() + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-		double py = p0.y() + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
 
 		if (isinf(px) | isinf(py)) { 
 			++err;
@@ -73,9 +73,9 @@ void load_p03d_particles(Species_description& sort, double Np,
 		double x, y;
 		coordinate_loader(XY_distrib, i, x, y);
 		
-		double px = p0.x() + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-		double py = p0.y() + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
-		double pz = p0.z() + sin(2.*M_PI*frand())*sqrt(-2.*(Tz*sort.m_/mec2)*log(frand()));
+		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+		double pz = p0.z + sin(2.*M_PI*frand())*sqrt(-2.*(Tz*sort.m_/mec2)*log(frand()));
 
 		if (isinf(px) | isinf(py) | isinf(pz)) { 
 			++err;

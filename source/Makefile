@@ -3,9 +3,9 @@ all: 2d_simulation
 MAIN 		= main.o
 VECTORS 	= vector_classes.o vector3_field.o 
 SOLVERS 	= FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o
-ADDITIONALS	= add_circular_current.o
+ADDITIONALS	= add_circular_current.o add_Bz0.o
 PARTICLES 	= particles_form-factors.o boundaries_for_particle.o
-DIAGNOSTICS = energy.o whole_field.o field_at_point.o phase_diagram.o
+DIAGNOSTICS = energy.o whole_field.o field_along_the_line.o field_at_point.o phase_diagram.o
 MANAGERS 	= fields.o particles.o particles_load.o
 
 KEYS  = -c -fopenmp
@@ -48,6 +48,9 @@ fields.o:
 add_circular_current.o:
 	g++ $(KEYS) ./managers/fields_additionals/add_circular_current.cpp
 
+add_Bz0.o:
+	g++ $(KEYS) ./managers/fields_additionals/add_Bz0.cpp
+
 particles.o:
 	g++ $(KEYS) ./managers/particles.cpp
 
@@ -59,6 +62,9 @@ energy.o:
 	
 whole_field.o:
 	g++ $(KEYS) ./diagnostics/whole_field.cpp
+
+field_along_the_line.o:
+	g++ $(KEYS) ./diagnostics/field_along_the_line.cpp
 
 field_at_point.o:
 	g++ $(KEYS) ./diagnostics/field_at_point.cpp

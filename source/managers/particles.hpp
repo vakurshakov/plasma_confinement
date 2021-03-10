@@ -32,7 +32,7 @@ public:
 	};
 
 	void initialize(vector<string> solvers, vector<string> configuration,
-	string test_name, vector<string> diagnostics);
+	string dir_name, vector<string> diagnostics);
 
 	// solvers & diagnostics
 	void particle_push(int i, const v3f& E, const v3f& B); 
