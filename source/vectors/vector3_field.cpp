@@ -42,25 +42,6 @@ int reflecting_end_y_E(const vector3_field& _F, Axis field_component)
 	return 0;
 }
 
-int reflecting_begin_x_B(const vector3_field& _F, Axis field_component)
-{
-	switch (field_component) {
-		case X: return 0;
-		case Y: return 0;
-		case Z: return 0;
-	}
-	return 0;
-}
-
-int reflecting_begin_y_B(const vector3_field& _F, Axis field_component)
-{
-	switch (field_component) {
-		case X: return 0;
-		case Y: return 0;
-		case Z: return 0;
-	}
-	return 0;
-}
 
 int reflecting_end_x_B(const vector3_field& _F, Axis field_component)
 {
@@ -82,10 +63,6 @@ int reflecting_end_y_B(const vector3_field& _F, Axis field_component)
 	return 0;
 }
 
-/*
-	int periodic_begin()
-	{ return 0; };
-*/
 
 int periodic_end_X(const vector3_field& _F, Axis field_component)
 {
@@ -108,7 +85,7 @@ int periodic_end_Y(const vector3_field& _F, Axis field_component)
 }
 
 
-//-------------------------------------------------------------------------------------------------
+//#################################################################################################
 
 
 int periodic_vector3_field::begin_x(Axis field_component) const
@@ -146,8 +123,31 @@ vector3 periodic_vector3_field::field_at(const int i, const int j) const
 }
 
 
-//-------------------------------------------------------------------------------------------------
+//#################################################################################################
 
+
+vector3& reflecting_vector3_field::field_at(const int i, const int j)
+{
+	if ((i >= 0 && i < size_y_) && (j >= 0 && j < size_x_)){
+		return field_[i*size_x_ + j]; 
+	} else {
+		zero_.x = 0;
+		zero_.y = 0;
+		zero_.z = 0;
+		return zero_;
+	};
+}
+
+vector3 reflecting_vector3_field::field_at(const int i, const int j) const
+{
+	if ((i >= 0 && i < size_y_) && (j >= 0 && j < size_x_)){
+		return field_[i*size_x_ + j]; 
+	} else {
+		return zero_;
+	};
+}
+
+//________________________________________________________________________
 
 int reflecting_Electric_field::begin_x(Axis field_component) const 
 { return reflecting_begin_x_E(*this, field_component); }
@@ -158,67 +158,22 @@ int reflecting_Electric_field::begin_y(Axis field_component) const
 int reflecting_Electric_field::end_x(Axis field_component) const
 { return reflecting_end_x_E(*this, field_component); }
 
-
 int reflecting_Electric_field::end_y(Axis field_component) const
 { return reflecting_end_y_E(*this, field_component); }
 
-
-vector3& reflecting_Electric_field::field_at(const int i, const int j)
-{
-	if ((i >= 0 && i < size_y_) && (j >= 0 && j < size_x_)){
-		return field_[i*size_x_ + j]; 
-	} else {
-		zero_.x = 0;
-		zero_.y = 0;
-		zero_.z = 0;
-		return zero_;
-	};
-}
-
-vector3 reflecting_Electric_field::field_at(const int i, const int j) const
-{
-	if ((i >= 0 && i < size_y_) && (j >= 0 && j < size_x_)){
-		return field_[i*size_x_ + j]; 
-	} else {
-		return zero_;
-	};
-}
-
-
-//-------------------------------------------------------------------------------------------------
-
+//________________________________________________________________________
 
 int reflecting_Magnetic_field::begin_x(Axis field_component) const 
-{ return reflecting_begin_x_B(*this, field_component); }
+{ return 0; }
 
 int reflecting_Magnetic_field::begin_y(Axis field_component) const
-{ return reflecting_begin_y_B(*this, field_component); }
+{ return 0; }
 
 int reflecting_Magnetic_field::end_x(Axis field_component) const
 { return reflecting_end_x_B(*this, field_component); }
-
 
 int reflecting_Magnetic_field::end_y(Axis field_component) const
 { return reflecting_end_y_B(*this, field_component); }
 
 
-vector3& reflecting_Magnetic_field::field_at(const int i, const int j)
-{
-	if ((i >= 0 && i < size_y_) && (j >= 0 && j < size_x_)){
-		return field_[i*size_x_ + j]; 
-	} else {
-		zero_.x = 0;
-		zero_.y = 0;
-		zero_.z = 0;
-		return zero_;
-	};
-}
-
-vector3 reflecting_Magnetic_field::field_at(const int i, const int j) const
-{
-	if ((i >= 0 && i < size_y_) && (j >= 0 && j < size_x_)){
-		return field_[i*size_x_ + j]; 
-	} else {
-		return zero_;
-	};
-}
+//#################################################################################################

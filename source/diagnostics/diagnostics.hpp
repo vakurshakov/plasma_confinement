@@ -7,16 +7,18 @@
 #include "../particles/species_description.hpp"
 #include "../constants.h"
 
+#include <filesystem>
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <memory>
 #include <vector>
 #include <cmath>
 #include <omp.h>
-#include <dir.h>
 
 
 using namespace std;
+namespace fs = std::filesystem;
 using v3f = vector3_field;
 
 class Diagnostic {
@@ -26,11 +28,11 @@ public:
 	Diagnostic(string path, string name_)
 		: path_(path), name_(name_) {
 		
-		mkdir(path_.c_str());
-		ofs_.open((path_ + "/" + name_ + ".txt").c_str());
+		create_directories(path_);
+		ofs_.open((path_ / fs::path{ name_ + ".txt" }).c_str());
 
-		ofs_ << TIME << " " << dt << endl;
-		ofs_ << setprecision(10) << fixed;
+		ofs_ << TIME << " " << dt << " " << diagnose_time_step << endl;
+		ofs_ << setprecision(5) << fixed;
 	}
                       
 	virtual ~Diagnostic() = default;
@@ -39,8 +41,8 @@ public:
 	virtual void diagnose(const Species_description& sort) {};
 
 protected:
-	string path_;
-	string name_;
+	fs::path path_;
+	fs::path name_;
 	ofstream ofs_;
 };
 
@@ -105,7 +107,7 @@ private:
 class field_along_Y : public Diagnostic {
 public:
 	field_along_Y(string path, string name, string field, string axis, int X)
-	: Diagnostic(path, name), field_(field), axis_(axis), X_(X) {
+	: Diagnostic(path , name), field_(field), axis_(axis), X_(X) {
 		initialize();
 	};
 

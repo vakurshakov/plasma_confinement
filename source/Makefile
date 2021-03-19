@@ -8,7 +8,7 @@ PARTICLES 	= particles_form-factors.o boundaries_for_particle.o
 DIAGNOSTICS = energy.o whole_field.o field_along_the_line.o field_at_point.o phase_diagram.o
 MANAGERS 	= fields.o particles.o particles_load.o
 
-KEYS  = -c -fopenmp
+KEYS  = -std=c++17 -fopenmp -c
 
 .PHONY: clean, run
 

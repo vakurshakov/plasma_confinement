@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <functional>
+#include <string>
 
 
 using namespace std;

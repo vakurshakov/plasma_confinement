@@ -2,7 +2,6 @@
 
 int main()
 {
-
 	Manager Nerpa(initializer);
 
 	Nerpa.Calculate();

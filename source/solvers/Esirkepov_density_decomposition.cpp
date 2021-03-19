@@ -38,7 +38,7 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		long int node_x, node_y;
 		node_x = nearest_edge_to_rx - charge_cloud;
 		
-		for (long int x = -charge_cloud, y = -charge_cloud; y <= +charge_cloud; ++y) {
+		for (int x = -charge_cloud, y = -charge_cloud; y <= +charge_cloud; ++y) {
 			node_y = nearest_edge_to_ry + y;
 	
 			temp_j.x(y,x) = - q*n/Np*0.5*dx/dt*(shape_at(r.x - node_x*dx, dx) - shape_at(r0.x - node_x*dx, dx))*
@@ -49,10 +49,10 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		}
 	
 	
-		for (long int y = -charge_cloud; y <= +charge_cloud; ++y) {
+		for (int y = -charge_cloud; y <= +charge_cloud; ++y) {
 			node_y = nearest_edge_to_ry + y;
 			
-			for (long int x = -charge_cloud+1; x <= +charge_cloud; ++x) {
+			for (int x = -charge_cloud+1; x <= +charge_cloud; ++x) {
 				node_x = nearest_edge_to_rx + x;
 	
 				temp_j.x(y,x) = temp_j.x(y,x-1) - q*n/Np*0.5*dx/dt*(shape_at(r.x - node_x*dx, dx) - shape_at(r0.x - node_x*dx, dx))*
@@ -69,7 +69,7 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		long int node_x, node_y;
 		node_y = nearest_edge_to_ry - charge_cloud;
 		
-		for (long int y = -charge_cloud, x = -charge_cloud; x <= +charge_cloud; ++x) {
+		for (int y = -charge_cloud, x = -charge_cloud; x <= +charge_cloud; ++x) {
 			node_x = nearest_edge_to_rx + x;
 	
 			temp_j.y(y,x) = - q*n/Np*0.5*dy/dt*(shape_at(r.x - node_x*dx, dx) + shape_at(r0.x - node_x*dx, dx))*
@@ -79,10 +79,10 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 			j.y(node_y, node_x) += temp_j.y(y,x);
 		}
 	
-		for (long int y = -charge_cloud+1; y <= +charge_cloud; ++y) {
+		for (int y = -charge_cloud+1; y <= +charge_cloud; ++y) {
 			node_y = nearest_edge_to_ry + y;
 	
-			for (long int x = -charge_cloud; x <= +charge_cloud; ++x) {
+			for (int x = -charge_cloud; x <= +charge_cloud; ++x) {
 				node_x = nearest_edge_to_rx + x;
 	
 				temp_j.y(y,x) += temp_j.y(y-1,x) - q*n/Np*0.5*dy/dt*(shape_at(r.x - node_x*dx, dx) + shape_at(r0.x - node_x*dx, dx))*
@@ -94,16 +94,16 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		}
 	}
 
-	/*
+/*
 	{	// collecting jz(y,x) -------------------------------------------------------------------------
-		for (long int x = nearest_edge_to_rx - charge_cloud; x <= nearest_edge_to_rx + charge_cloud; ++x) {
-		for (long int y = nearest_edge_to_ry - charge_cloud; y <= nearest_edge_to_ry + charge_cloud; ++y) {
+		for (int x = nearest_edge_to_rx - charge_cloud; x <= nearest_edge_to_rx + charge_cloud; ++x) {
+		for (int y = nearest_edge_to_ry - charge_cloud; y <= nearest_edge_to_ry + charge_cloud; ++y) {
 	
 			#pragma omp atomic
-			j.z(y,x) += - q*n/Np*vz/3.*((	shape_at(r.x) - (x*dx, dx) + 0.5*shape_at(r0.x) - (x*dx, dx))*shape_at(r.y(  - (y*dy, dy)+
-									   (0.5*shape_at(r.x) - (x*dx, dx) +	 shape_at(r0.x) - (x*dx, dx))*shape_at(r0.y) - (y*dy, dy));
+			j.z(y,x) += - q*n/Np*vz/3.*((	shape_at(r.x - (x*dx), dx) + 0.5*shape_at(r0.x - (x*dx), dx))*shape_at(r.y  -  (y*dy), dy)+
+									   (0.5*shape_at(r.x - (x*dx), dx) +	 shape_at(r0.x - (x*dx), dx))*shape_at(r0.y -  (y*dy), dy));
 			}
 		}
 	}
-	*/
+*/
 }

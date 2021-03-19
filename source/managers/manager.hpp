@@ -11,6 +11,7 @@
 #include <chrono>
 #include <omp.h>
 
+
 using namespace std;
 
 
@@ -28,8 +29,7 @@ public:
 			TODO: нужен сюда нормальный парсер, пока данные частично берутся из файла
 				constants.h, как это было раньше
 		*/
-		mkdir(dir_name.c_str());
-
+		
 		fields_.initialize(field_solver, field_configuration,
 			dir_name, field_diagnostics);
 
@@ -63,12 +63,12 @@ public:
 		auto start = chrono::system_clock::now();
 
 		//fields_.add_Bz0(Bz0);
-		
-		for (int t = 0; t < TIME; ++t) {
-	/*
-			fields_.add_circular_current(t);
 
-			#pragma omp parallel num_threads(8)
+		for (int t = 0; t < TIME; ++t) {
+
+			fields_.add_circular_current(t);
+	/*
+			#pragma omp parallel num_threads(THREAD_NUM)
 			{
 				for (auto& sort : particles_) {
 					#pragma omp for
@@ -87,11 +87,10 @@ public:
 					}
 				}
 			}
-	*/
-			(fields_.E()).z(SIZE_Y/2, SIZE_X/2)+= 1;
-			(fields_.B()).z(SIZE_Y/2, SIZE_X/2)+= 1;
-
-			fields_.diagnose();
+	*/	
+			if ( t % diagnose_time_step == 0 ) {
+				fields_.diagnose();
+			}
 
 			fields_.propogate();
 		}

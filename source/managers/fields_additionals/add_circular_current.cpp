@@ -4,10 +4,10 @@
 double get_continuous_x_current(int x, int y)
 {
 	// TODO: нормальный список параметров!
-
 	double r = sqrt( x*x + y*y )*dx;
-	if ( fabs( (r - r_larm) ) < ds ) {
-		return +cos(0.5*M_PI*(r - r_larm)/ds)*e*ni*v_inj * (y*dx)/r;
+
+	if ( fabs( (r - r_larm) ) <= dr ) {
+		return +cos(0.5*M_PI*(r - r_larm)/dr)*(0.25*M_PI*Bz0/dr) * (y*dy)/r;
 	}
 	else {
 		return 0;
@@ -15,10 +15,11 @@ double get_continuous_x_current(int x, int y)
 }
 
 double get_continuous_y_current(int x, int y)
-{
+{	
 	double r = sqrt( x*x + y*y )*dx;
-	if ( fabs( (r - r_larm) ) < ds ) {
-		return -cos(0.5*M_PI*(r - r_larm)/ds)*e*ni*v_inj * (x*dx)/r;
+
+	if ( fabs( (r - r_larm) ) <= dr ) {
+		return -cos(0.5*M_PI*(r - r_larm)/dr)*(0.25*M_PI*Bz0/dr) * (x*dx)/r;
 	}
 	else {
 		return 0;

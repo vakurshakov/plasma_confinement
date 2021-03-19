@@ -1,6 +1,11 @@
 #include "./diagnostics.hpp" 
 
 
+void whole_field::initialize()
+{
+	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
+}
+
 void wf_diagnose(const v3f& F, string axis, ofstream& ofs)
 {
 	for (int y = 0; y < F.size_y(); ++y) {
@@ -12,11 +17,6 @@ void wf_diagnose(const v3f& F, string axis, ofstream& ofs)
 		ofs << "\t";
 	}
 	ofs << std::endl;
-}
-
-void whole_field::initialize()
-{
-	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
 }
 
 void whole_field::diagnose(const v3f& E, const v3f& B, const v3f& j)

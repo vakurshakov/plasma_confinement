@@ -47,6 +47,8 @@ protected:
 };
 
 
+//-------------------------------------------------------------------------------------------------
+
 class periodic_vector3_field : public vector3_field {
 public:
 	periodic_vector3_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
@@ -62,16 +64,10 @@ private:
 	vector3 field_at(int i, int j) const override;
 };
 
-
-class reflecting_Electric_field : public vector3_field {
+class reflecting_vector3_field : public vector3_field {
 public:
-	reflecting_Electric_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
-	reflecting_Electric_field(int size) : vector3_field(size) {};
-	
-	int begin_x(Axis field_component) const override;
-	int begin_y(Axis field_component) const override;
-	int end_x(Axis field_component) const override;
-	int end_y(Axis field_component) const override;
+	reflecting_vector3_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
+	reflecting_vector3_field(int size) : vector3_field(size) {};
 
 private:
 	vector3 zero_;
@@ -80,22 +76,37 @@ private:
 	vector3 field_at(int i, int j) const override;
 };
 
-class reflecting_Magnetic_field : public vector3_field {
+//________________________________________________________________________
+
+class reflecting_Electric_field : public reflecting_vector3_field {
 public:
-	reflecting_Magnetic_field(int size_x, int size_y) : vector3_field(size_x, size_y) {};
-	reflecting_Magnetic_field(int size) : vector3_field(size) {};
+	reflecting_Electric_field(int size_x, int size_y)
+	: reflecting_vector3_field(size_x, size_y) {};
+	reflecting_Electric_field(int size)
+	: reflecting_vector3_field(size) {};
 	
 	int begin_x(Axis field_component) const override;
 	int begin_y(Axis field_component) const override;
 	int end_x(Axis field_component) const override;
 	int end_y(Axis field_component) const override;
-
-private:
-	vector3 zero_;
-
-	vector3& field_at(int i, int j) override;
-	vector3 field_at(int i, int j) const override;
 };
+
+//________________________________________________________________________
+
+class reflecting_Magnetic_field : public reflecting_vector3_field {
+public:
+	reflecting_Magnetic_field(int size_x, int size_y)
+	: reflecting_vector3_field(size_x, size_y) {};
+	reflecting_Magnetic_field(int size)
+	: reflecting_vector3_field(size) {};
+	
+	int begin_x(Axis field_component) const override;
+	int begin_y(Axis field_component) const override;
+	int end_x(Axis field_component) const override;
+	int end_y(Axis field_component) const override;
+};
+
+//-------------------------------------------------------------------------------------------------
 
 //#################################################################################################
 

@@ -51,27 +51,27 @@ void Fields::initialize(string solver, vector<string> configuration,
 				+ diagnostic.first));
 		}
 		else if ( diagnostic.first == "whole_field" ) {
-			diagnostics_.push_back(make_unique<whole_field>(dir_name + "/"
+			diagnostics_.push_back(make_unique<whole_field>(dir_name + "/fields/"
 				+ diagnostic.first,
 				diagnostic.second[FIELD] + diagnostic.second[AXIS],
 				diagnostic.second[FIELD], diagnostic.second[AXIS] ) );
 		}
 		else if ( diagnostic.first == "field_along_X" ) {
-			diagnostics_.push_back(make_unique<field_along_X>(dir_name + "/"
+			diagnostics_.push_back(make_unique<field_along_X>(dir_name + "/fields/"
 				+ diagnostic.first,
 				diagnostic.second[FIELD] + diagnostic.second[AXIS],
 				diagnostic.second[FIELD], diagnostic.second[AXIS],
 				stoi(diagnostic.second[PX]) ) );
 		}
 		else if ( diagnostic.first == "field_along_Y" ) {
-			diagnostics_.push_back(make_unique<field_along_Y>(dir_name + "/"
+			diagnostics_.push_back(make_unique<field_along_Y>(dir_name + "/fields/"
 				+ diagnostic.first,
 				diagnostic.second[FIELD] + diagnostic.second[AXIS],
 				diagnostic.second[FIELD], diagnostic.second[AXIS],
 				stoi(diagnostic.second[PX]) ) );
 		} 
 		else if ( diagnostic.first == "field_at_point" ) {
-			diagnostics_.push_back(make_unique<field_at_point>(dir_name + "/"
+			diagnostics_.push_back(make_unique<field_at_point>(dir_name + "/fields/"
 				+ diagnostic.first,
 				diagnostic.second[FIELD] + diagnostic.second[AXIS],
 				diagnostic.second[FIELD], diagnostic.second[AXIS], 

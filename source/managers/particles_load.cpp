@@ -25,7 +25,7 @@ void coordinate_loader(string& XY_distrib, int i, double& x, double& y)
 		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
 	}
 	else if (XY_distrib == "circle_random") {
-		double r 	= frand()*r_larm*r_prop;  // 0 < r < r_larm
+		double r 	= frand()*(r_larm + dr)*r_prop;  // 0 < r < r_larm
 		double phi 	= frand()*2*M_PI; 
 
 		x = 0.5*SIZE_X*dx + r*cos(phi);  
