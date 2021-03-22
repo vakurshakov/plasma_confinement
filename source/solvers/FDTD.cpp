@@ -8,6 +8,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J)
 	
 	#pragma omp parallel shared(E, B, J), num_threads(THREAD_NUM)
 	{
+	/*
 		// Bx(y, x+1/2) at t+1/2 ----------------------------------------------------
 		#pragma omp for 
 		for (int y = B.begin_y(X); y < B.end_y(X); ++y) {
@@ -23,7 +24,8 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J)
 					B.y(y,x) += 0.5*(E.z(y,x) - E.z(y,x-1))*dt/dx;
 			}
 		}
-
+	*/
+	
 		// Bz(y, x) at t+1/2 --------------------------------------------------------
 		#pragma omp for
 		for (int y = B.begin_y(Z); y < B.end_y(Z); ++y) {
@@ -50,6 +52,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J)
 			}		
 		}
 
+	/*
 		// Ez(y+1/2,x+1/2) at t+1 ---------------------------------------------------
 		#pragma omp for
 		for (int y = E.begin_y(Z); y < E.end_y(Z); ++y) {
@@ -74,6 +77,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J)
 					B.y(y,x) += 0.5*(E.z(y,x) - E.z(y,x-1))*dt/dx;
 			}
 		}
+	*/
 
 		// Bz(y, x) at t+1/2 --------------------------------------------------------
 		#pragma omp for

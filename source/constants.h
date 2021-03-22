@@ -24,7 +24,7 @@ using namespace std;
 	const double mpr 	= 1836;
 
 	const int 	TIME	= 50000;
-	const int 	diagnose_time_step = 10; 
+	const int 	diagnose_time_step = 50; 
 	const int 	THREAD_NUM = 8;
 //-------- field configuration --------------------------------------------------------------------
 	const int 	SIZE_X 	= 64;
@@ -50,7 +50,7 @@ using namespace std;
 	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]
 	const double r_larm = 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop = 1.13;		// r_plasma/r_larm = 1.13
-	const double t_inj 	= 5000.;		// время нарастания сигнала
+	const double t_inj 	= 5000.;	// время нарастания сигнала
 	const double dr 	= 0.16;
 
 	const int spline_width = 4;
@@ -76,27 +76,27 @@ using namespace std;
 		{ "whole_field", { "j", "y" } },
 		{ "whole_field", { "E", "x" } },
 		{ "whole_field", { "E", "y" } },
-		{ "whole_field", { "E", "z" } },
-		{ "whole_field", { "B", "x" } },
-		{ "whole_field", { "B", "y" } },
+		//{ "whole_field", { "E", "z" } },
+		//{ "whole_field", { "B", "x" } },
+		//{ "whole_field", { "B", "y" } },
 		{ "whole_field", { "B", "z" } },
 
 		//{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "E", "z", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "E", "z", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
 
 		{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "E", "y", to_string(SIZE_X/2) } },
-		{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },
-		{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
-		{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
+		//{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },
+		//{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
+		//{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "B", "z", to_string(SIZE_X/2) } },
 
 		{ "field_at_point", { "B", "z", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
