@@ -46,9 +46,9 @@ int reflecting_end_y_E(const vector3_field& _F, Axis field_component)
 int reflecting_end_x_B(const vector3_field& _F, Axis field_component)
 {
 	switch (field_component) {
-		case X: return _F.size_y()-1;
-		case Y: return _F.size_y();
-		case Z: return _F.size_y();
+		case X: return _F.size_x()-1;
+		case Y: return _F.size_x();
+		case Z: return _F.size_x();
 	}
 	return 0;
 }

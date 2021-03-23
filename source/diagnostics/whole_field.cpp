@@ -3,6 +3,7 @@
 
 void whole_field::initialize()
 {
+	create_directory(path_ / "animation");
 	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
 }
 

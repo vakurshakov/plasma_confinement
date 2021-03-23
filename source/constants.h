@@ -12,9 +12,6 @@
 
 using namespace std;
 
-	// Название пуска
-	//string dir_name = "../diagnostics/FRC ";	
-
 	const double M_PI = 3.14159265358979323846;
 
 //-------- particles constants --------------------------------------------------------------------
@@ -24,12 +21,12 @@ using namespace std;
 	const double mpr 	= 1836;
 
 	const int 	TIME	= 50000;
-	const int 	diagnose_time_step = 50; 
-	const int 	THREAD_NUM = 8;
+	const int 	diagnose_time_step = 25; 
+	const int 	THREAD_NUM = 16;
 //-------- field configuration --------------------------------------------------------------------
-	const int 	SIZE_X 	= 64;
-	const int 	SIZE_Y 	= 64;
-	const double dx 	= 0.04;
+	const int 	SIZE_X 	= 128;  // 5.12 c/wp 
+	const int 	SIZE_Y 	= 128;  // 5.12 c/wp
+	const double dx 	= 0.04; 
 	const double dy		= 0.04;
 	const double dt 	= 0.02;
 	const string boundaries = "reflective";
@@ -37,9 +34,9 @@ using namespace std;
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
 	
-	const double Np = 1;
-	const double Tx = 50e-3;
-	const double Ty = 50e-3;
+	const double Np = 8;
+	const double Tx = 30e-3;
+	const double Ty = 30e-3;
 	const double Tz = 0;
 
 	const string XY_distrib = "circle_random";
@@ -51,20 +48,20 @@ using namespace std;
 	const double r_larm = 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop = 1.13;		// r_plasma/r_larm = 1.13
 	const double t_inj 	= 5000.;	// время нарастания сигнала
-	const double dr 	= 0.16;
+	const double dr 	= 0.12;
 
 	const int spline_width = 4;
 
 	const string dir_name = "../diagnostics/FRC/" + boundaries + "_" + to_string(SIZE_X) + "Xcell_"
 	+ to_string(int(Np)) + "ppc_" + XY_distrib
-	+ "_j" + to_string(0.25*M_PI*Bz0/dr).substr(0,8) + "_dr" + to_string(dr).substr(0,4)
+	+ "_j" + to_string(0.25*M_PI*Bz0/dr).substr(0,5) + "_dr" + to_string(dr).substr(0,4)
 	+ "_Bz0" + to_string(Bz0).substr(0,4) + "_TIME" + to_string(TIME);
 
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
 		{ "Electrons", { { boundaries, to_string(n0), to_string(Np), XY_distrib, "vector2", "0 0"},
-						 { "energy" } } },
+						 { "density" } } },
 		};	
 
 //-------- initializer ----------------------------------------------------------------------------
@@ -76,12 +73,12 @@ using namespace std;
 		{ "whole_field", { "j", "y" } },
 		{ "whole_field", { "E", "x" } },
 		{ "whole_field", { "E", "y" } },
-		//{ "whole_field", { "E", "z" } },
-		//{ "whole_field", { "B", "x" } },
-		//{ "whole_field", { "B", "y" } },
+		{ "whole_field", { "E", "z" } },
+		{ "whole_field", { "B", "x" } },
+		{ "whole_field", { "B", "y" } },
 		{ "whole_field", { "B", "z" } },
 
-		//{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
 		{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
@@ -91,7 +88,7 @@ using namespace std;
 		{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
 
 		{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "E", "y", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },

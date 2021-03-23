@@ -31,7 +31,7 @@ public:
 		diagnostics_.emplace_back(nullptr);
 	};
 
-	void initialize(vector<string> solvers, vector<string> configuration,
+	void initialize(string name, vector<string> solvers, vector<string> configuration,
 	string dir_name, vector<string> diagnostics);
 
 	// solvers & diagnostics

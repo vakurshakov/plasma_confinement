@@ -7,7 +7,7 @@ enum SOLV { PUSHER, DECOMP };
 enum CONF { BOUND, n_, Np_, XY_, P_type_, P_};
 //enum PD_DESC {  };
 
-void Particles::initialize(vector<string> solvers, vector<string> configuration,
+void Particles::initialize(string p_name, vector<string> solvers, vector<string> configuration,
 	string dir_name, vector<string> diagnostics_description)
 {
 	// initialize of solvers
@@ -86,13 +86,13 @@ void Particles::initialize(vector<string> solvers, vector<string> configuration,
 	//initialize of diagnostics
 	for (auto& diagnostic : diagnostics_description) {
 		if ( diagnostic == "energy" ) {
-			diagnostics_.emplace_back(make_unique<particles_energy>(dir_name + "/" + diagnostic));
+			diagnostics_.emplace_back(make_unique<particles_energy>(dir_name + '/' + p_name + '/' + diagnostic));
 		}
 		else if ( diagnostic == "phase_diagram" ) {
-			diagnostics_.emplace_back(make_unique<phase_diagram>(dir_name + "/" + diagnostic));
+			diagnostics_.emplace_back(make_unique<phase_diagram>(dir_name + '/' + p_name + '/' + diagnostic));
 		}
-		else {
-			diagnostics_.emplace_back(nullptr);
+		else if ( diagnostic == "density" ) {
+			diagnostics_.emplace_back(make_unique<density>(dir_name + '/' + p_name + '/' + diagnostic));
 		}
  	}
 
@@ -121,9 +121,7 @@ void Particles::boundaries_processing(int i, double size_x, double size_y)
 
 void Particles::diagnose()
 {
-	if (diagnostics_[0] != nullptr) {
-		for (auto& diagnostic : diagnostics_) {
-			(*diagnostic).diagnose(*this);
-		}
+	for (auto& diagnostic : diagnostics_) {
+		(*diagnostic).diagnose(*this);
 	} 
 }

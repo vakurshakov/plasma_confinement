@@ -155,6 +155,19 @@ private:
 	int xmax_ = SIZE_X;		
 };
 
+class density : public Diagnostic {
+public:
+	density(string path) : Diagnostic(path, "density") {
+		initialize();
+	};
+
+	void initialize() override;
+	void diagnose(const Species_description& sort) override;
+	
+private:
+	vector<double> dens_;
+};
+
 //#################################################################################################
 
 #endif

@@ -5,7 +5,7 @@ VECTORS 	= vector_classes.o vector3_field.o
 SOLVERS 	= FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o
 ADDITIONALS	= add_circular_current.o add_Bz0.o
 PARTICLES 	= particles_form-factors.o boundaries_for_particle.o
-DIAGNOSTICS = energy.o whole_field.o field_along_the_line.o field_at_point.o phase_diagram.o
+DIAGNOSTICS = energy.o whole_field.o field_along_the_line.o field_at_point.o phase_diagram.o density.o
 MANAGERS 	= fields.o particles.o particles_load.o
 
 KEYS  = -std=c++17 -fopenmp -c
@@ -71,6 +71,9 @@ field_at_point.o:
 
 phase_diagram.o:
 	g++ $(KEYS) ./diagnostics/phase_diagram.cpp
+
+density.o:
+	g++ $(KEYS) ./diagnostics/density.cpp
 
 run:
 	../2d_simulation.exe
