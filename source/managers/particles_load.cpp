@@ -25,11 +25,14 @@ void coordinate_loader(string& XY_distrib, int i, double& x, double& y)
 		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
 	}
 	else if (XY_distrib == "circle_random") {
-		double r 	= frand()*(r_larm + dr)*r_prop;  // 0 < r < r_larm
-		double phi 	= frand()*2*M_PI; 
-
-		x = 0.5*SIZE_X*dx + r*cos(phi);  
-		y = 0.5*SIZE_Y*dy + r*sin(phi);	
+		//TODO: слишком плотное распределение в центре -- плохо!
+		double cx = 0.5*SIZE_X*dx;
+		double cy = 0.5*SIZE_Y*dy;
+		do
+		{
+			x = cx + (2*frand() - 1)*(r_larm + dr)*r_prop;  
+			y = cy + (2*frand() - 1)*(r_larm + dr)*r_prop;	
+		} 	while ((x - cx)*(x - cx) + (y - cy)*(y - cy) > (r_larm + dr)*(r_larm + dr)*r_prop*r_prop);
 	}
 }
 

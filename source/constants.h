@@ -20,12 +20,12 @@ using namespace std;
 	const double me 	= 1;
 	const double mpr 	= 1836;
 
-	const int 	TIME	= 50000;
-	const int 	diagnose_time_step = 25; 
-	const int 	THREAD_NUM = 16;
+	const int 	TIME	= 10000;
+	const int 	diagnose_time_step = 50; 
+	const int 	THREAD_NUM = 8;
 //-------- field configuration --------------------------------------------------------------------
-	const int 	SIZE_X 	= 128;  // 5.12 c/wp 
-	const int 	SIZE_Y 	= 128;  // 5.12 c/wp
+	const int 	SIZE_X 	= 64;  // 5.12 c/wp 
+	const int 	SIZE_Y 	= 64;  // 5.12 c/wp
 	const double dx 	= 0.04; 
 	const double dy		= 0.04;
 	const double dt 	= 0.02;
@@ -34,7 +34,7 @@ using namespace std;
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
 	
-	const double Np = 8;
+	const double Np = 1;
 	const double Tx = 30e-3;
 	const double Ty = 30e-3;
 	const double Tz = 0;
@@ -47,15 +47,17 @@ using namespace std;
 	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]
 	const double r_larm = 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop = 1.13;		// r_plasma/r_larm = 1.13
-	const double t_inj 	= 5000.;	// время нарастания сигнала
+	const int t_inj 	= 5000;		// время нарастания сигнала
 	const double dr 	= 0.12;
 
 	const int spline_width = 4;
 
-	const string dir_name = "../diagnostics/FRC/" + boundaries + "_" + to_string(SIZE_X) + "Xcell_"
+	const string dir_name = "../diagnostics/FRC/" + boundaries + "/" + to_string(SIZE_X) + "Xcell/"
 	+ to_string(int(Np)) + "ppc_" + XY_distrib
 	+ "_j" + to_string(0.25*M_PI*Bz0/dr).substr(0,5) + "_dr" + to_string(dr).substr(0,4)
-	+ "_Bz0" + to_string(Bz0).substr(0,4) + "_TIME" + to_string(TIME);
+	+ "_Bz0" + to_string(Bz0).substr(0,4)
+	+ "_TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj)
+	+ "/injection_system_and_field_reversing";
 
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
@@ -73,9 +75,9 @@ using namespace std;
 		{ "whole_field", { "j", "y" } },
 		{ "whole_field", { "E", "x" } },
 		{ "whole_field", { "E", "y" } },
-		{ "whole_field", { "E", "z" } },
-		{ "whole_field", { "B", "x" } },
-		{ "whole_field", { "B", "y" } },
+		//{ "whole_field", { "E", "z" } },
+		//{ "whole_field", { "B", "x" } },
+		//{ "whole_field", { "B", "y" } },
 		{ "whole_field", { "B", "z" } },
 
 		{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
