@@ -48,16 +48,17 @@ using namespace std;
 	const double r_larm = 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop = 1.13;		// r_plasma/r_larm = 1.13
 	const int t_inj 	= 5000;		// время нарастания сигнала
-	const double dr 	= 0.12;
+	const double dr 	= 0.4;
+	const double dr1    = 0.24;
 
 	const int spline_width = 4;
 
 	const string dir_name = "../diagnostics/FRC/" + boundaries + "/" + to_string(SIZE_X) + "Xcell/"
-	+ to_string(int(Np)) + "ppc_" + XY_distrib
-	+ "_j" + to_string(0.25*M_PI*Bz0/dr).substr(0,5) + "_dr" + to_string(dr).substr(0,4)
-	+ "_Bz0" + to_string(Bz0).substr(0,4)
+	//+ to_string(int(Np)) + "ppc_" + XY_distrib
+	//+ "j" + to_string(0.5*Bz0/dr).substr(0,5) + "_dr" + to_string(dr).substr(0,4)
+	//+ "_Bz0" + to_string(Bz0).substr(0,4)
 	+ "_TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj)
-	+ "/injection_system_and_field_reversing";
+	+ "/injection_system_and_field_reversing (qubic spline)";
 
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
