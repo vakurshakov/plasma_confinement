@@ -44,11 +44,11 @@ public:
 	Particle element(int i) const { return particles_[i]; };
 
 	friend void load_p02d_particles(Species_description& sort, double Np,
-		string XY_distrib, const vector2& p0);
+		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector2& p0);
 	friend void load_p03d_particles(Species_description& sort, double Np,
-		string XY_distrib, const vector3& p0);
+		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector3& p0);
 	friend void load_chosen_distribution(Species_description& sort, double Np,
-		string XY_distrib, string P_distrib);
+		string XY_distrib, double cX, double cY, double Xm, double Ym, string P_distrib);
 
 protected:
 	// spescies parameters

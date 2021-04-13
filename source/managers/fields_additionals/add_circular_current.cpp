@@ -1,42 +1,36 @@
 #include "../fields.hpp"
 #include <cmath>
 
+namespace qubic_shape_constants
+{
+	const double dr12 = dr1*dr1;
+	const double dr2 = dr*dr;
+ 
+	const double A = 2.*Bz0/(dr12*dr2); 
+	const double B = -6.*Bz0/(dr1*dr*(dr1 + dr));
+	const double C = 2.*Bz0/(dr1 + dr);
+	const double K = -2.*Bz0/(dr2*(dr2 - dr12));
+} 
+
+namespace qsc = qubic_shape_constants;
+
 double get_current_shape(double r)
 {
-	//quadratic-spline shape
-
-	double dr12 = dr1*dr1;
-	double dr2 = dr*dr;
- 
-	double A = 2.*Bz0/(dr12*dr2); 
-	double B = -6.*Bz0/(dr1*dr*(dr1 + dr));
-	double C = 2.*Bz0/(dr1 + dr);
-	double K = -2.*Bz0/(dr2*(dr2 - dr12));
+	//qubic-spline shape
 	
 	double abs_r = fabs(r);
 	double abs_r2 = abs_r*abs_r;
 	double abs_r3 = abs_r*abs_r*abs_r;
 
 	if ( abs_r <= dr1 ) {
-		return A*abs_r3 + B*abs_r2 + C;
+		return qsc::A*abs_r3 + qsc::B*abs_r2 + qsc::C;
 	}
 	else if ( dr1 < abs_r && abs_r < dr ) {
-		return K*(abs_r - dr)*(abs_r - dr)*(abs_r - dr);
+		return qsc::K*(abs_r - dr)*(abs_r - dr)*(abs_r - dr);
 	}
 	else {
 		return 0;
 	}	
-
-
-/*
-	if ( fabs(r) <= dr ) {
-		return Bz0/(2*dr)*( 1 + cos(M_PI*r/dr) );
-	}
-	else {
-		return 0;
-	}
-*/
-
 }
 
 double get_continuous_x_current(double x, double y)

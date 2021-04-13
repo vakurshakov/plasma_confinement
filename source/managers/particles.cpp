@@ -4,7 +4,7 @@
 
 
 enum SOLV { PUSHER, DECOMP };
-enum CONF { BOUND, n_, Np_, XY_, P_type_, P_};
+enum CONF { BOUND, n_, Np_, XY_, cX_, cY_, Xm_, Ym_, P_type_, P_};
 //enum PD_DESC {  };
 
 void Particles::initialize(string p_name, vector<string> solvers, vector<string> configuration,
@@ -44,6 +44,10 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 	double n 			= stod(configuration[CONF::n_]);
 	double Np 			= stod(configuration[CONF::Np_]);
 	string XY_distrib 	= 	   configuration[CONF::XY_];
+	double cX 			= stod(configuration[CONF::cX_]); 
+	double cY 			= stod(configuration[CONF::cY_]);
+	double Xm 			= stod(configuration[CONF::Xm_]);
+	double Ym 			= stod(configuration[CONF::Ym_]);
 	string P_type 		= 	   configuration[CONF::P_type_];
 	string P_distrib 	= 	   configuration[CONF::P_];
 
@@ -60,7 +64,7 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 
 		vector2 p0(px, py);
 
-		load_p02d_particles(*this, Np, XY_distrib, p0);
+		load_p02d_particles(*this, Np, XY_distrib, cX, cY, Xm, Ym, p0);
 	}
 	else if (P_type == "vector3") {
 		// P_distrib = "0.0, 0.0, 0.0"
@@ -76,10 +80,10 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 
 		vector3 p0(px, py, pz);
 	
-		load_p03d_particles(*this, Np, XY_distrib, p0);
+		load_p03d_particles(*this, Np, XY_distrib, cX, cY, Xm, Ym, p0);
 	}
 	else if (P_type == "string") {
-		load_chosen_distribution(*this, Np, XY_distrib, P_distrib);
+		load_chosen_distribution(*this, Np, XY_distrib, cX, cY, Xm, Ym, P_distrib);
 	}
 
 

@@ -34,8 +34,7 @@ public:
 		/*
 			TODO: подумать как избавиться от if-else повторений
 		*/
-
-		/*
+		if ( there_are_particles ) {
 		for (auto description : species) {
 			if ( description.first == "Electrons" ) {
 
@@ -47,20 +46,20 @@ public:
 				particles_.push_back(move(temp));
 			}
 		}
-		*/
+		}
 	}
 
 	void Calculate() {
 
 		auto start = chrono::system_clock::now();
 
-		//	fields_.add_Bz0(Bz0);
+		fields_.add_Bz0(Bz0);
 
 		for (int t = 0; t < TIME; ++t) {
 
 			fields_.add_circular_current(t);
-	
-	/*
+
+			if ( there_are_particles ) {
 			for (auto& sort : particles_) {
 				#pragma omp parallel for num_threads(THREAD_NUM)
 				for (int i = 0; i < sort.amount(); ++i) {
@@ -73,19 +72,29 @@ public:
 				
 					sort.boundaries_processing(i, SIZE_X*dx, SIZE_Y*dy);
 				}
-		
+
 				// TODO: реализовать частицы и поля БЕЗ диагностик
 				if ( t % diagnose_time_step == 0 ) {
 					sort.diagnose();
 				}
 			}
-	*/	
-		
+			}
+
 			if ( t % diagnose_time_step == 0 ) {
 				fields_.diagnose();
 			}
 
 			fields_.propogate();
+			
+			if ( t % (TIME/10) == 0 ) {
+				cout << "\t[";
+				for (int n = 0; n <= TIME; n+= TIME/10) {
+					if ( n <= t ) { cout << "#"; }
+					else { cout << " "; }
+				}
+				cout << "]" << endl;
+			}
+			
 		}
 		auto end = chrono::system_clock::now();
 		chrono::duration<double> elapsed = end - start;

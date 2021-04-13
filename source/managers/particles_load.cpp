@@ -3,11 +3,12 @@
 
 double frand() { return ((double)rand()/RAND_MAX); }
 
-void coordinate_loader(string& XY_distrib, int i, double& x, double& y)
+void coordinate_loader(string& XY_distrib, int i,
+	double cX, double cY, double Xm, double Ym, double& x, double& y)
 {
 	if (XY_distrib == "random") {
-		x = frand()*SIZE_X*dx;  
-		y = frand()*SIZE_Y*dy;  
+		x = cX + (2*Xm*frand() - Xm);  
+		y = cY + (2*Ym*frand() - Ym);  
 	}
 	else if (XY_distrib == "periodic") {
 		// i%Np -- номер от нуля до Np-1 частицы в одной ячейке
@@ -25,28 +26,26 @@ void coordinate_loader(string& XY_distrib, int i, double& x, double& y)
 		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
 	}
 	else if (XY_distrib == "circle_random") {
-		//TODO: слишком плотное распределение в центре -- плохо!
-		double cx = 0.5*SIZE_X*dx;
-		double cy = 0.5*SIZE_Y*dy;
 		do
 		{
-			x = cx + (2*frand() - 1)*(r_larm + dr)*r_prop;  
-			y = cy + (2*frand() - 1)*(r_larm + dr)*r_prop;	
-		} 	while ((x - cx)*(x - cx) + (y - cy)*(y - cy) > (r_larm + dr)*(r_larm + dr)*r_prop*r_prop);
+			x = cX + (2*Xm*frand() - Xm);  
+			y = cY + (2*Ym*frand() - Ym);	
+		} 	while ((x - cX)*(x - cX) + (y - cY)*(y - cY) > Xm*Ym);
 	}
 }
 
+
 void load_p02d_particles(Species_description& sort, double Np,
-		string XY_distrib, const vector2& p0)
+		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector2& p0)
 {
 	sort.Np_ = Np;
 
 	srand(time(NULL));
 	int err = 0;
-	for (int i = 0; i < (int)Np*SIZE_X*SIZE_Y + err; ++i) {
+	for (int i = 0; i < int(Np*M_PI*Xm*Xm/(dx*dy)) + err; ++i) {
 
 		double x, y;
-		coordinate_loader(XY_distrib, i, x, y);
+		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
 		
 		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
 		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
@@ -65,16 +64,16 @@ void load_p02d_particles(Species_description& sort, double Np,
 }
 
 void load_p03d_particles(Species_description& sort, double Np,
-		string XY_distrib, const vector3& p0)
+		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector3& p0)
 {
 	sort.Np_ = Np;
 
 	srand(time(NULL));
 	int err = 0;
-	for (int i = 0; i < (int)Np*SIZE_X*SIZE_Y + err; ++i) {
+	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
 
 		double x, y;
-		coordinate_loader(XY_distrib, i, x, y);
+		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
 		
 		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
 		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
@@ -94,16 +93,16 @@ void load_p03d_particles(Species_description& sort, double Np,
 }
 
 void load_chosen_distribution(Species_description& sort, double Np,
-		string XY_distrib, string P_distrib)
+		string XY_distrib, double cX, double cY, double Xm, double Ym, string P_distrib)
 {
 	sort.Np_ = Np;
 	
 	srand(time(NULL));
 	int err = 0;
-	for (int i = 0; i < (int)Np*SIZE_X*SIZE_Y + err; ++i) {
+	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
 
 		double x, y;
-		coordinate_loader(XY_distrib, i, x, y);
+		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
 		
 		double px, py;
 

@@ -3,11 +3,13 @@
 
 void field_along_X::initialize()
 {
+	create_directory( path_ / "animation" );
 	ofs_ << SIZE_X << endl;
 }
 
 void field_along_Y::initialize()
 {
+	create_directory( path_ / "animation" );
 	ofs_ << SIZE_Y << endl;
 }
 

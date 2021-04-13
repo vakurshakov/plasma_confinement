@@ -10,12 +10,12 @@ MANAGERS 	= fields.o particles.o particles_load.o
 
 KEYS  = -std=c++17 -fopenmp -c
 
-.PHONY: clean, run
+.PHONY: clean
 
 2d_simulation: $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN)
 	g++ -fopenmp $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN) -o ../2d_simulation
 	make clean
-	make run
+
 
 
 main.o:
@@ -75,8 +75,5 @@ phase_diagram.o:
 density.o:
 	g++ $(KEYS) ./diagnostics/density.cpp
 
-run:
-	../2d_simulation.exe
-
 clean:
-	del *.o /Q
+	rm *.o

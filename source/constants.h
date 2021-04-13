@@ -12,7 +12,7 @@
 
 using namespace std;
 
-	const double M_PI = 3.14159265358979323846;
+	//const double M_PI = 3.14159265358979323846;
 
 //-------- particles constants --------------------------------------------------------------------
 	const double mec2 	= 511;
@@ -20,20 +20,19 @@ using namespace std;
 	const double me 	= 1;
 	const double mpr 	= 1836;
 
-	const int 	TIME	= 10000;
-	const int 	diagnose_time_step = 50; 
-	const int 	THREAD_NUM = 8;
+	const int 	TIME	= 200000;
+	const int 	diagnose_time_step = 200; 
+	const int 	THREAD_NUM = 20;
 //-------- field configuration --------------------------------------------------------------------
-	const int 	SIZE_X 	= 64;  // 5.12 c/wp 
-	const int 	SIZE_Y 	= 64;  // 5.12 c/wp
-	const double dx 	= 0.04; 
-	const double dy		= 0.04;
-	const double dt 	= 0.02;
+	const int 	SIZE_X 	= 800;
+	const int 	SIZE_Y 	= 800;
+	const double dx 	= 0.01;
+	const double dy		= 0.01;
+	const double dt 	= 0.5*dx;
 	const string boundaries = "reflective";
 	
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
-	
 	const double Np = 1;
 	const double Tx = 30e-3;
 	const double Ty = 30e-3;
@@ -44,27 +43,35 @@ using namespace std;
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
 	const double v_inj 	= 0.0565;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]
-	const double r_larm = 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
-	const double r_prop = 1.13;		// r_plasma/r_larm = 1.13
-	const int t_inj 	= 5000;		// время нарастания сигнала
-	const double dr 	= 0.4;
-	const double dr1    = 0.24;
+	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]  { 0.197 }
+	const double r_larm	= 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
+	const int t_inj		= 100000;	// время нарастания сигнала
+	const double dr		= 0.36;
+	const double dr1	= 0.20;
 
 	const int spline_width = 4;
 
-	const string dir_name = "../diagnostics/FRC/" + boundaries + "/" + to_string(SIZE_X) + "Xcell/"
+	const string dir_name = "./diagnostics/FRC/" + boundaries + "/Lx8/" + to_string(SIZE_X) + "Xcell_"
+	+ to_string(dx).substr(0,4) + "dx/"
 	//+ to_string(int(Np)) + "ppc_" + XY_distrib
-	//+ "j" + to_string(0.5*Bz0/dr).substr(0,5) + "_dr" + to_string(dr).substr(0,4)
-	//+ "_Bz0" + to_string(Bz0).substr(0,4)
-	+ "_TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj)
-	+ "/injection_system_and_field_reversing (qubic spline)";
+	+ "injection_system_and_field_reversing/"
+	//+ "_j" + to_string(0.5*Bz0/(dr1*dr1*dr1*dr1/4. + dr1*dr1*dr1/3. + dr1 - (dr1 + dr)*(dr1 + dr)*(dr1 + dr)*(dr1 + dr)/4.)).substr(0,5)
+	+ "R_LARM" + to_string(r_larm).substr(0,4)
+	+ "_dr" + to_string(dr).substr(0,4) + "_dr1" + to_string(dr1).substr(0,4)
+	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj);
 
 
+	const bool there_are_particles = false;
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
-		{ "Electrons", { { boundaries, to_string(n0), to_string(Np), XY_distrib, "vector2", "0 0"},
-						 { "density" } } },
+		{ "Electrons", { { boundaries, to_string(n0), to_string(Np),
+			XY_distrib,
+			to_string(0.5*SIZE_X*dx), to_string(0.5*SIZE_Y*dy),
+			to_string(+(r_larm + dr)*r_prop), to_string(+(r_larm + dr)*r_prop),
+			"vector2", "0 0"},
+			
+			{ "density" } } },
 		};	
 
 //-------- initializer ----------------------------------------------------------------------------
