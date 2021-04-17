@@ -97,7 +97,7 @@ fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(10,12))
 set_a_whole_plot(field)
 draw_a_whole_plot(fig, axes, field)
 
-fig.savefig("Bz(0.5'Ly, 0.5'Ly, t).png")
+fig.savefig( "../" + str(list(field.keys())[0]) + "(0.5'Ly, 0.5'Ly, t).png")
 
 
 # In[ ]:
