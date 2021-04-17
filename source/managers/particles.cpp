@@ -22,19 +22,19 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 	// initialize of configuration
 	string boundaries = configuration[BOUND];
 
-	if ( boundaries == "reflective" ) {
+	if ( boundaries == "rx_ry" ) {
 		x_boundary_ = reflective_Xboundary;
 		y_boundary_ = reflective_Yboundary;
 	}
-	else if ( boundaries == "periodic" ) {
+	else if ( boundaries == "px_py" ) {
 		x_boundary_ = periodic_Xboundary;
 		y_boundary_ = periodic_Yboundary;
 	}
-	else if ( boundaries == "rh_pv" ) {
+	else if ( boundaries == "rx_py" ) {
 		x_boundary_ = reflective_Xboundary;
 		y_boundary_ = periodic_Yboundary;
 	}
-	else if ( boundaries == "rv_ph" ) {
+	else if ( boundaries == "px_ry" ) {
 		x_boundary_ = periodic_Xboundary;
 		y_boundary_ = reflective_Yboundary;
 	}
@@ -50,8 +50,6 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 	double Ym 			= stod(configuration[CONF::Ym_]);
 	string P_type 		= 	   configuration[CONF::P_type_];
 	string P_distrib 	= 	   configuration[CONF::P_];
-
-	n_ = n;
 
 	if (P_type == "vector2") {
 		// P_distrib = "0.0 0.0"

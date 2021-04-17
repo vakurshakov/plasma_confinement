@@ -20,28 +20,26 @@ void Fields::initialize(string solver, vector<string> configuration,
 	int size_y = stoi(configuration[SY]);
 	string boundaries = configuration[BOUND];
 	
-	if ( boundaries == "periodic" ) {
-		E_ = make_unique<periodic_vector3_field>(size_x, size_y);
-		B_ = make_unique<periodic_vector3_field>(size_x, size_y);
-		j_ = make_unique<periodic_vector3_field>(size_x, size_y);
+	if ( boundaries == "px_py" ) {
+		E_ = make_unique<px_py_vector3_field>(size_x, size_y);
+		B_ = make_unique<px_py_vector3_field>(size_x, size_y);
+		j_ = make_unique<px_py_vector3_field>(size_x, size_y);
 	}
-	else if ( boundaries == "reflective" ) {
-		E_ = make_unique<reflecting_Electric_field>(size_x, size_y);
-		B_ = make_unique<reflecting_Magnetic_field>(size_x, size_y);
-		j_ = make_unique<reflecting_Electric_field>(size_x, size_y);
+	else if ( boundaries == "rx_ry" ) {
+		E_ = make_unique<rx_ry_Electric_field>(size_x, size_y);
+		B_ = make_unique<rx_ry_Magnetic_field>(size_x, size_y);
+		j_ = make_unique<rx_ry_Electric_field>(size_x, size_y);
 	}
-/*
-	else if ( boundaries == "rh_pv" ) {
-		E_ = make_unique<rhpv_v3f>(size_x, size_y);
-		B_ = make_unique<rhpv_v3f>(size_x, size_y);
-		j_ = make_unique<rhpv_v3f>(size_x, size_y);
+	else if ( boundaries == "rx_py" ) {
+		E_ = make_unique<rx_py_Electric_field>(size_x, size_y);
+		B_ = make_unique<rx_py_Magnetic_field>(size_x, size_y);
+		j_ = make_unique<rx_py_Electric_field>(size_x, size_y);
 	}
-	else if ( boundaries == "rv_ph" ) {
-		E_ = make_unique<rvph_v3f>(size_x, size_y);
-		B_ = make_unique<rvph_v3f>(size_x, size_y);
-		j_ = make_unique<rvph_v3f>(size_x, size_y);
+	else if ( boundaries == "px_ry" ) {
+		E_ = make_unique<px_ry_Electric_field>(size_x, size_y);
+		B_ = make_unique<px_ry_Magnetic_field>(size_x, size_y);
+		j_ = make_unique<px_ry_Electric_field>(size_x, size_y);
 	}
-*/
 
 
 	// initalization of diagnostics
@@ -80,7 +78,7 @@ void Fields::initialize(string solver, vector<string> configuration,
 	}
 	
 	diagnostics_.shrink_to_fit();
-	cout << endl << endl;
+	
 }
 
 void Fields::propogate()

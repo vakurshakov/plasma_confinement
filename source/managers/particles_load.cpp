@@ -42,7 +42,7 @@ void load_p02d_particles(Species_description& sort, double Np,
 
 	srand(time(NULL));
 	int err = 0;
-	for (int i = 0; i < int(Np*M_PI*Xm*Xm/(dx*dy)) + err; ++i) {
+	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
 
 		double x, y;
 		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);

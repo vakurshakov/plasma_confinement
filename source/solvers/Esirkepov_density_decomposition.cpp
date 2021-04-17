@@ -29,7 +29,7 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 	double vz = particle.p().z/gamma;
 	vector2 r = particle.r();
 
-	periodic_vector3_field temp_j(2*charge_cloud+1, 2*charge_cloud+1); 
+	px_py_vector3_field temp_j(2*charge_cloud+1, 2*charge_cloud+1); 
 
 	size_t nearest_edge_to_rx = size_t(roundf(r.x/dx));
 	size_t nearest_edge_to_ry = size_t(roundf(r.y/dy));
@@ -94,7 +94,6 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		}
 	}
 
-/*
 	{	// collecting jz(y,x) -------------------------------------------------------------------------
 		for (int x = nearest_edge_to_rx - charge_cloud; x <= nearest_edge_to_rx + charge_cloud; ++x) {
 		for (int y = nearest_edge_to_ry - charge_cloud; y <= nearest_edge_to_ry + charge_cloud; ++y) {
@@ -105,5 +104,4 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 			}
 		}
 	}
-*/
 }

@@ -15,7 +15,7 @@ KEYS  = -std=c++17 -fopenmp -c
 2d_simulation: $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN)
 	g++ -fopenmp $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN) -o ../2d_simulation
 	make clean
-
+	make run
 
 
 main.o:
@@ -75,5 +75,8 @@ phase_diagram.o:
 density.o:
 	g++ $(KEYS) ./diagnostics/density.cpp
 
+run:
+	../2d_simulation.exe
+
 clean:
-	rm *.o
+	del *.o /Q

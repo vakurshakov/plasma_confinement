@@ -34,7 +34,9 @@ public:
 		/*
 			TODO: подумать как избавиться от if-else повторений
 		*/
-		if ( there_are_particles ) {
+
+		
+		if ( there_are_particles ) {
 		for (auto description : species) {
 			if ( description.first == "Electrons" ) {
 
@@ -58,7 +60,7 @@ public:
 		for (int t = 0; t < TIME; ++t) {
 
 			fields_.add_circular_current(t);
-
+			
 			if ( there_are_particles ) {
 			for (auto& sort : particles_) {
 				#pragma omp parallel for num_threads(THREAD_NUM)
@@ -74,31 +76,35 @@ public:
 				}
 
 				// TODO: реализовать частицы и поля БЕЗ диагностик
-				if ( t % diagnose_time_step == 0 ) {
+				if ( particles_are_diagnosed && (t % diagnose_time_step == 0) ) {
 					sort.diagnose();
 				}
 			}
 			}
 
-			if ( t % diagnose_time_step == 0 ) {
+
+			if ( fields_are_diagnosed && (t % diagnose_time_step == 0) ) {
 				fields_.diagnose();
 			}
 
 			fields_.propogate();
 			
+			
 			if ( t % (TIME/10) == 0 ) {
+				if ( t == 0 ) cout << endl;
+
 				cout << "\t[";
 				for (int n = 0; n <= TIME; n+= TIME/10) {
 					if ( n <= t ) { cout << "#"; }
 					else { cout << " "; }
 				}
 				cout << "]" << endl;
-			}
-			
+			}	
 		}
+			
 		auto end = chrono::system_clock::now();
 		chrono::duration<double> elapsed = end - start;
-		cout << "\n\n\truntime:\t" << elapsed.count() << "s\n\n" << endl;
+		cout << "\n\n\truntime:\t" << elapsed.count() << "s\n" << endl;
 	}
 
 };

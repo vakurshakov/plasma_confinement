@@ -12,7 +12,7 @@
 
 using namespace std;
 
-	//const double M_PI = 3.14159265358979323846;
+	const double M_PI = 3.14159265358979323846;
 
 //-------- particles constants --------------------------------------------------------------------
 	const double mec2 	= 511;
@@ -20,25 +20,25 @@ using namespace std;
 	const double me 	= 1;
 	const double mpr 	= 1836;
 
-	const int 	TIME	= 200000;
-	const int 	diagnose_time_step = 200; 
-	const int 	THREAD_NUM = 20;
+	const int 	TIME	= 50000;
+	const int 	diagnose_time_step = 50; 
+	const int 	THREAD_NUM = 8;
 //-------- field configuration --------------------------------------------------------------------
-	const int 	SIZE_X 	= 800;
-	const int 	SIZE_Y 	= 800;
-	const double dx 	= 0.01;
-	const double dy		= 0.01;
+	const int 	SIZE_X 	= 64;
+	const int 	SIZE_Y 	= 640;
+	const double dx 	= 0.04;
+	const double dy		= 0.04;
 	const double dt 	= 0.5*dx;
-	const string boundaries = "reflective";
+	const string boundaries = "px_ry";
 	
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
-	const double Np = 1;
+	const double Np = 16;
 	const double Tx = 30e-3;
 	const double Ty = 30e-3;
 	const double Tz = 0;
 
-	const string XY_distrib = "circle_random";
+	const string XY_distrib = "random";
 									// ожидаемые параметры:
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
@@ -46,67 +46,77 @@ using namespace std;
 	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]  { 0.197 }
 	const double r_larm	= 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
-	const int t_inj		= 100000;	// время нарастания сигнала
+	const int t_inj		= 25000;	// время нарастания сигнала
 	const double dr		= 0.36;
 	const double dr1	= 0.20;
 
 	const int spline_width = 4;
 
-	const string dir_name = "./diagnostics/FRC/" + boundaries + "/Lx8/" + to_string(SIZE_X) + "Xcell_"
-	+ to_string(dx).substr(0,4) + "dx/"
-	//+ to_string(int(Np)) + "ppc_" + XY_distrib
-	+ "injection_system_and_field_reversing/"
-	//+ "_j" + to_string(0.5*Bz0/(dr1*dr1*dr1*dr1/4. + dr1*dr1*dr1/3. + dr1 - (dr1 + dr)*(dr1 + dr)*(dr1 + dr)*(dr1 + dr)/4.)).substr(0,5)
-	+ "R_LARM" + to_string(r_larm).substr(0,4)
+	const string dir_name = "../diagnostics/FRC/" + boundaries + "/" + to_string(SIZE_X) + "Xcell/"
+	//+ to_string(dx).substr(0,4) + "dx/"
+	+ to_string(int(Np)) + "ppc_" + XY_distrib
+	//+ "injection_system_and_field_reversing/"
+	+ "/Jz" + to_string(0.5*Bz0/(dr1*dr1*dr1*dr1/4. + dr1*dr1*dr1/3. + dr1 - (dr1 - dr)*(dr1 - dr)*(dr1 - dr)*(dr1 - dr)/4.)).substr(0,5)
 	+ "_dr" + to_string(dr).substr(0,4) + "_dr1" + to_string(dr1).substr(0,4)
-	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj);
+	+ "_(R_LARM" + to_string(r_larm).substr(0,4) + ")"
+	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj) +
+	+ "/" + to_string(SIZE_Y) + "Ycell";
 
 
 	const bool there_are_particles = false;
+	const bool particles_are_diagnosed = false;
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
-		{ "Electrons", { { boundaries, to_string(n0), to_string(Np),
-			XY_distrib,
-			to_string(0.5*SIZE_X*dx), to_string(0.5*SIZE_Y*dy),
-			to_string(+(r_larm + dr)*r_prop), to_string(+(r_larm + dr)*r_prop),
-			"vector2", "0 0"},
-			
-			{ "density" } } },
+			{ "Electrons", 
+				{	
+					{
+						boundaries, to_string(n0), to_string(Np), XY_distrib,
+						to_string(0.5*SIZE_X*dx), to_string(0.5*SIZE_Y*dy),
+						to_string(0.5*SIZE_X*dx), to_string((r_larm + dr)*r_prop),
+						"vector2", "0 0"
+			  		},
+				
+					{	"density"	}
+				} 
+			},
 		};	
 
 //-------- initializer ----------------------------------------------------------------------------
 	const string initializer = "./manager_initializer.txt";
 
 //-------- diagnostics ----------------------------------------------------------------------------	
+	const bool fields_are_diagnosed = true;
 	const multimap<string, vector<string>> field_diagnostics = {
 		{ "whole_field", { "j", "x" } },
 		{ "whole_field", { "j", "y" } },
+		{ "whole_field", { "j", "z" } },
 		{ "whole_field", { "E", "x" } },
 		{ "whole_field", { "E", "y" } },
-		//{ "whole_field", { "E", "z" } },
-		//{ "whole_field", { "B", "x" } },
-		//{ "whole_field", { "B", "y" } },
+		{ "whole_field", { "E", "z" } },
+		{ "whole_field", { "B", "x" } },
+		{ "whole_field", { "B", "y" } },
 		{ "whole_field", { "B", "z" } },
 
-		{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "E", "z", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
 
 		{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "j", "z", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "E", "y", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
 		{ "field_along_Y", { "B", "z", to_string(SIZE_X/2) } },
 
-		{ "field_at_point", { "B", "z", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
+		{ "field_at_point", { "B", "x", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
 		};
 
 //-------- solvers --------------------------------------------------------------------------------

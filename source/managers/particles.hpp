@@ -27,9 +27,7 @@ public:
 	: Species_description(q, m, second_order_spline, spline_width) {};
 
 	Particles(double q, double m, double n)
-	: Species_description(q, m, n, second_order_spline, spline_width) {
-		diagnostics_.emplace_back(nullptr);
-	};
+	: Species_description(q, m, n, second_order_spline, spline_width) {};
 
 	void initialize(string name, vector<string> solvers, vector<string> configuration,
 	string dir_name, vector<string> diagnostics);
