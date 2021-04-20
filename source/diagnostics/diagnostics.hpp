@@ -32,7 +32,7 @@ public:
 		ofs_.open((path_ / fs::path{ name_ + ".txt" }).c_str());
 
 		ofs_ << TIME << " " << dt << " " << diagnose_time_step << endl;
-		ofs_ << setprecision(5) << fixed;
+		ofs_ << setprecision(10) << fixed;
 	}
                       
 	virtual ~Diagnostic() = default;

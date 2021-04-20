@@ -67,7 +67,7 @@ public:
 				for (int i = 0; i < sort.amount(); ++i) {
 			
 					vector2 r0 = sort.element(i).r();
-				
+					
 					sort.particle_push(i, fields_.E(), fields_.B());
 			
 					sort.density_decomposition(i, r0, fields_.j());
@@ -79,9 +79,9 @@ public:
 				if ( particles_are_diagnosed && (t % diagnose_time_step == 0) ) {
 					sort.diagnose();
 				}
+				
 			}
 			}
-
 
 			if ( fields_are_diagnosed && (t % diagnose_time_step == 0) ) {
 				fields_.diagnose();

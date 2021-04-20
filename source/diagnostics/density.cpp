@@ -2,10 +2,10 @@
 
 void collect_density(vector<double>& dens, const Species_description& sort)
 {
-	for (int i = 0; i < sort.amount(); ++i) {
-		double n  = sort.n();
-		double Np = sort.Np();
+	double n  = sort.n();
+	double Np = sort.Np();
 
+	for (int i = 0; i < sort.amount(); ++i) {
 		vector2 r = sort.element(i).r();
 
 		int nx = int(roundf(r.x/dx));

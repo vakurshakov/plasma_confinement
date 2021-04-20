@@ -43,41 +43,42 @@ void Fields::initialize(string solver, vector<string> configuration,
 
 
 	// initalization of diagnostics
-	for (auto& diagnostic : diagnostics_description) {
-		if ( diagnostic.first == "energy" ) {
-			diagnostics_.push_back(make_unique<fields_energy>(dir_name + "/"
-				+ diagnostic.first));
+	if (fields_are_diagnosed) {
+		for (auto& diagnostic : diagnostics_description) {
+			if ( diagnostic.first == "energy" ) {
+				diagnostics_.push_back(make_unique<fields_energy>(dir_name + "/"
+					+ diagnostic.first));
+			}
+			else if ( diagnostic.first == "whole_field" ) {
+				diagnostics_.push_back(make_unique<whole_field>(dir_name + "/fields/"
+					+ diagnostic.first,
+					diagnostic.second[FIELD] + diagnostic.second[AXIS],
+					diagnostic.second[FIELD], diagnostic.second[AXIS] ) );
+			}
+			else if ( diagnostic.first == "field_along_X" ) {
+				diagnostics_.push_back(make_unique<field_along_X>(dir_name + "/fields/"
+					+ diagnostic.first,
+					diagnostic.second[FIELD] + diagnostic.second[AXIS],
+					diagnostic.second[FIELD], diagnostic.second[AXIS],
+					stoi(diagnostic.second[PX]) ) );
+			}
+			else if ( diagnostic.first == "field_along_Y" ) {
+				diagnostics_.push_back(make_unique<field_along_Y>(dir_name + "/fields/"
+					+ diagnostic.first,
+					diagnostic.second[FIELD] + diagnostic.second[AXIS],
+					diagnostic.second[FIELD], diagnostic.second[AXIS],
+					stoi(diagnostic.second[PX]) ) );
+			} 
+			else if ( diagnostic.first == "field_at_point" ) {
+				diagnostics_.push_back(make_unique<field_at_point>(dir_name + "/fields/"
+					+ diagnostic.first,
+					diagnostic.second[FIELD] + diagnostic.second[AXIS],
+					diagnostic.second[FIELD], diagnostic.second[AXIS], 
+					stoi(diagnostic.second[PX]), stoi(diagnostic.second[PY]) ) );
+			}
 		}
-		else if ( diagnostic.first == "whole_field" ) {
-			diagnostics_.push_back(make_unique<whole_field>(dir_name + "/fields/"
-				+ diagnostic.first,
-				diagnostic.second[FIELD] + diagnostic.second[AXIS],
-				diagnostic.second[FIELD], diagnostic.second[AXIS] ) );
-		}
-		else if ( diagnostic.first == "field_along_X" ) {
-			diagnostics_.push_back(make_unique<field_along_X>(dir_name + "/fields/"
-				+ diagnostic.first,
-				diagnostic.second[FIELD] + diagnostic.second[AXIS],
-				diagnostic.second[FIELD], diagnostic.second[AXIS],
-				stoi(diagnostic.second[PX]) ) );
-		}
-		else if ( diagnostic.first == "field_along_Y" ) {
-			diagnostics_.push_back(make_unique<field_along_Y>(dir_name + "/fields/"
-				+ diagnostic.first,
-				diagnostic.second[FIELD] + diagnostic.second[AXIS],
-				diagnostic.second[FIELD], diagnostic.second[AXIS],
-				stoi(diagnostic.second[PX]) ) );
-		} 
-		else if ( diagnostic.first == "field_at_point" ) {
-			diagnostics_.push_back(make_unique<field_at_point>(dir_name + "/fields/"
-				+ diagnostic.first,
-				diagnostic.second[FIELD] + diagnostic.second[AXIS],
-				diagnostic.second[FIELD], diagnostic.second[AXIS], 
-				stoi(diagnostic.second[PX]), stoi(diagnostic.second[PY]) ) );
-		}
+		diagnostics_.shrink_to_fit();
 	}
-	
-	diagnostics_.shrink_to_fit();
 	
 }
 

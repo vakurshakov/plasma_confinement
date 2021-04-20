@@ -2,10 +2,8 @@
 # coding: utf-8
 
 # #### Animation of fields
-# 
-# I've added an appropriate colorbar, you can read the explanation at this link: https://joseph-long.com/writing/colorbars/, I also added saving option. Now, if you want to save it as a .gif file just delete '#' symol in corresponding line.
 
-# In[21]:
+# In[1]:
 
 
 def return_parameters(parameters_file : str):
@@ -20,7 +18,7 @@ def return_parameters(parameters_file : str):
         return TIME, dt, DTS, SIZE_X, SIZE_Y
 
 
-# In[22]:
+# In[2]:
 
 
 #TODO: itertools.islice(...)
@@ -40,49 +38,7 @@ def set_field_frame(t : int, field : list, field_to_read : str):
             field.append(list(map(float, temp[X].split(' ')[:-1])))
 
 
-# In[23]:
-
-
-from math import sqrt
-import numpy as np
-
-
-def set_cylindrical_components(field : str, ddata : dict, ddata_enum : dict, SIZE_X : int, SIZE_Y : int):
-    
-    fr   = [list(np.zeros(SIZE_X)) for i in range(SIZE_Y)]
-    fphi = [list(np.zeros(SIZE_X)) for i in range(SIZE_Y)]
-    
-    fx_ = field + "x"
-    fy_ = field + "y"
-    fd_ = ddata_enum['frame_data']
-    
-    fx = ((ddata[fx_])[fd_])
-    fy = ((ddata[fy_])[fd_])
-    
-    an_ = ddata_enum['axes_name']
-    
-    (ddata[fx_])[an_] = "$" + field + "_r$"
-    (ddata[fy_])[an_] = "$" + field + "_{\phi}$"
-    
-    for i in range(0, SIZE_Y):
-        for j in range(0, SIZE_X):
-            
-            y = (i) - SIZE_Y/2
-            x = j - SIZE_X/2    
-            r   = sqrt(x*x + y*y)
-            
-            if (r != 0):
-                fr[i][j]   = +fx[i][j]*(x/r) + fy[i][j]*(y/r)
-                fphi[i][j] = -fx[i][j]*(y/r) + fy[i][j]*(x/r)
-            else: 
-                fr[i][j]   = ( fx[i][j] + fy[i][j] )/2
-                fphi[i][j] = 0
-    
-            fx[i][j] = fr[i][j]   
-            fy[i][j] = fphi[i][j]
-
-
-# In[24]:
+# In[3]:
 
 
 import matplotlib.pyplot as plt
@@ -90,7 +46,7 @@ import matplotlib.pyplot as plt
 
 def set_imshow(subplot, Field: list, cmap_: str, v : tuple, SIZE_X : int, SIZE_Y : int):
     return subplot.imshow(
-        Field,
+        Field[:][:],
         cmap = plt.get_cmap(cmap_),
         interpolation="gaussian",
         animated=True,
@@ -100,12 +56,13 @@ def set_imshow(subplot, Field: list, cmap_: str, v : tuple, SIZE_X : int, SIZE_Y
     )
 
 
-# In[25]:
+# In[4]:
 
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
+
 
 def set_colorbar(mappable):
     last_axes = plt.gca()
@@ -120,16 +77,12 @@ def set_colorbar(mappable):
     return cbar
 
 
-# In[30]:
+# In[5]:
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-dr1 = 0.24
-dr  = 0.40
-d   = 0.04
-r_larm = 0.6
 
 def set_whole_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_X, SIZE_Y,
                  current_shape_is_shown = False):
@@ -143,27 +96,9 @@ def set_whole_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_
                      SIZE_X, SIZE_Y)
     
     cbars.append(set_colorbar(im_))
-    
-    if (current_shape_is_shown):
-        ax = axes[ ddata_name[ddata_enum['axes_position']] ]
-        
-        ax.plot([SIZE_X/2 + r_larm/d*np.cos(i) for i in np.arange(0, 2*np.pi, 0.01)],
-                [SIZE_Y/2 + r_larm/d*np.sin(i) for i in np.arange(0, 2*np.pi, 0.01)])
-        
-        ax.plot([SIZE_X/2 + (r_larm + dr1)/d*np.cos(i) for i in np.arange(0, 2*np.pi, 0.01)],
-                [SIZE_Y/2 + (r_larm + dr1)/d*np.sin(i) for i in np.arange(0, 2*np.pi, 0.01)])
-        
-        ax.plot([SIZE_X/2 + (r_larm - dr1)/d*np.cos(i) for i in np.arange(0, 2*np.pi, 0.01)],
-                [SIZE_Y/2 + (r_larm - dr1)/d*np.sin(i) for i in np.arange(0, 2*np.pi, 0.01)])
-        
-        ax.plot([SIZE_X/2 + (r_larm + dr)/d*np.cos(i) for i in np.arange(0, 2*np.pi, 0.01)],
-                [SIZE_Y/2 + (r_larm + dr)/d*np.sin(i) for i in np.arange(0, 2*np.pi, 0.01)])
-        
-        ax.plot([SIZE_X/2 + (r_larm - dr)/d*np.cos(i) for i in np.arange(0, 2*np.pi, 0.01)],
-                [SIZE_Y/2 + (r_larm - dr)/d*np.sin(i) for i in np.arange(0, 2*np.pi, 0.01)])
 
 
-# In[31]:
+# In[6]:
 
 
 def clear_whole_figure(axes, cbars, nrows, ncols):
@@ -175,7 +110,9 @@ def clear_whole_figure(axes, cbars, nrows, ncols):
         cbars[i].remove()
 
 
-# In[ ]:
+# In[7]:
+
+
 
 parameters_file = "jx.txt"
 TIME, dt, DTS, SIZE_X, SIZE_Y = return_parameters(parameters_file)
@@ -183,17 +120,23 @@ TIME, dt, DTS, SIZE_X, SIZE_Y = return_parameters(parameters_file)
 ddata = {
     
     #'name': ["file.txt", [frame_data], (axes_position), "axes_name", (vmin, vmax), "colormap"]
-    'jx': [ "jx.txt", [], (0,0), "$j_x$", (-0.05, 0.05), "plasma" ],
-    'jy': [ "jy.txt", [], (0,1), "$j_y$", (-0.5, 0.5), "plasma" ],
-    'Ex': [ "Ex.txt", [], (1,0), "$E_x$", (-0.01, 0.01), "plasma" ],
-    'Ey': [ "Ey.txt", [], (1,1), "$E_y$", (-0.01, 0.01), "plasma" ],
-    #'off_Ez': [ "Ez.txt", [], (0,4), "$E_z$", (0, 0), "plasma" ],
-    #'off_Bx': [ "Bx.txt", [], (1,2), "$B_x$", (0, 0), "plasma"],
-    #'off_By': [ "By.txt", [], (1,3), "$B_y$", (0, 0), "plasma"],
-    'Bz': [ "Bz.txt", [], (1,2), "$B_z$", (-0.2, 0), "plasma"],
-    'off_ne': [ "../../Electrons/density/density.txt", [], (0,2), "$n_e$", (0, 10), "Greys"], 
+    'jx': [ "jx.txt", [], (0), "$j_x$", (-5e-2, 5e-2), "plasma" ],
+    'jy': [ "jy.txt", [], (1), "$j_y$", (-5e-2, 5e-2), "plasma" ],
+    'jz': [ "jz.txt", [], (2), "$j_z$", (-5e-2, 5e-2),  "plasma" ],
     
-    #'off0': [ "", [], (0,2), "", (0,0), "" ],
+    #'Ex': [ "Ex.txt", [], (1,1), "$E_x$", (-5e-2, 5e-2), "plasma" ],
+    #'Ey': [ "Ey.txt", [], (1,2), "$E_y$", (-5e-2, 5e-2), "plasma" ],
+    #'Ez': [ "Ez.txt", [], (1,3), "$E_z$", (-5e-2, 5e-2), "plasma" ],
+    #
+    #'Bx': [ "Bx.txt", [], (2,1), "$B_x$", (0, 0.2), "plasma"],
+    #'By': [ "By.txt", [], (2,2), "$B_y$", (-5e-2, 5e-2), "plasma"],
+    #'Bz': [ "Bz.txt", [], (2,3), "$B_z$", (-5e-2, 5e-2),  "plasma"],
+    #
+    #'ne': [ "../../Electrons/density/density.txt", [], (0,0), "$n_e$", (0, 5), "Greys"], 
+    #
+    #'off1': [ "", [], (1,0), "", (), "" ],
+    #'off2': [ "", [], (2,0), "", (), "" ],
+
 }
 
 ddata_enum = {
@@ -207,13 +150,13 @@ ddata_enum = {
 
 }
 
-nrows = 2
+nrows = 1
 ncols = 3
 
-geometry_is_cylindrical = False
 
-fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(23,12))
+fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(18,12))
 
+'''
 from mpi4py import MPI
 
 comm = MPI.COMM_WORLD
@@ -221,8 +164,9 @@ rank = comm.Get_rank()
 proc_num = comm.Get_size()
 
 comm.Barrier()
+'''
 
-for t in range(rank, int(TIME/DTS), proc_num):
+for t in range(0, int(TIME/DTS)):
     imshows = []
     cbars = []
     
@@ -233,20 +177,15 @@ for t in range(rank, int(TIME/DTS), proc_num):
             
         else:
             continue
-    
-    if (geometry_is_cylindrical):
-        set_cylindrical_components('j', ddata, ddata_enum, SIZE_X, SIZE_Y)
-        set_cylindrical_components('E', ddata, ddata_enum, SIZE_X, SIZE_Y)
-            
+             
     for name in ddata.keys():
         if (name[:3] != 'off'):    
-            set_whole_ax(axes, cbars, ddata[name], ddata_enum, SIZE_X, SIZE_Y,
-                         current_shape_is_shown = True)
+            set_whole_ax(axes, cbars, ddata[name], ddata_enum, SIZE_X, SIZE_Y)
         
         else:
             axes[ ddata[name][ddata_enum['axes_position']] ].axis("off")
     
-    axes[0,1].text(0.35, 1.2, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes[0,1].transAxes, fontsize=20)
+    axes[0,2].text(-1.0, 1.2, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes[0,2].transAxes, fontsize=20)
 
     
     name = str(t).zfill(len(str(int(TIME/DTS)-1)))
@@ -256,7 +195,10 @@ for t in range(rank, int(TIME/DTS), proc_num):
 
 from os import system 
 
-os.system("cd ./animation/ && (ffmpeg -f image2 %03d.png -r 15 ../../../2d_fields.mp4)")
+os.system("cd ./animation/ && (ffmpeg -f image2 %02d.png -r 15 ../../2d_fields.mp4)")
+
+
+# In[ ]:
 
 
 

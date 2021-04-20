@@ -1,5 +1,5 @@
 #include "../particles/species_description.hpp"
-
+#include <iostream>
 
 double frand() { return ((double)rand()/RAND_MAX); }
 
@@ -42,6 +42,7 @@ void load_p02d_particles(Species_description& sort, double Np,
 
 	srand(time(NULL));
 	int err = 0;
+	
 	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
 
 		double x, y;
@@ -89,7 +90,7 @@ void load_p03d_particles(Species_description& sort, double Np,
 		
 		Particle temp_(r, p);
 		sort.particles_.push_back(temp_);
-	}
+	} 
 }
 
 void load_chosen_distribution(Species_description& sort, double Np,
