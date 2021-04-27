@@ -6,6 +6,7 @@
 #include "./fields.hpp"
 #include "./particles.hpp"
 #include "../constants.h"
+#include "./fields_additionals/magnetic_mirror.hpp"
 
 #include <iostream>
 #include <chrono>
@@ -55,11 +56,23 @@ public:
 
 		auto start = chrono::system_clock::now();
 
-		fields_.add_Bz0(Bz0);
+		#pragma omp parallel for num_threads(THREAD_NUM)
+		for (int y = 0; y < fields_.B().size_y(); ++y) {
+		for (int x = 0; x < fields_.B().size_x(); ++x) {
+	
+			double x0 = x*dx;
+			double y0 = y*dy; 
 
+			vector2 r(x0, y0);
+	
+			fields_.B().x(y,x) = ( mirror1.return_field(r) + mirror2.return_field(r) ).x;
+			fields_.B().y(y,x) = ( mirror1.return_field(r) + mirror2.return_field(r) ).y;
+		}
+		}
+		
 		for (int t = 0; t < TIME; ++t) {
-
-			fields_.add_circular_current(t);
+		
+			//fields_.add_circular_current(t);
 			
 			if ( there_are_particles ) {
 			for (auto& sort : particles_) {
@@ -82,14 +95,15 @@ public:
 				
 			}
 			}
-
+		
 			if ( fields_are_diagnosed && (t % diagnose_time_step == 0) ) {
 				fields_.diagnose();
 			}
 
-			fields_.propogate();
+
+		//	fields_.propogate();
 			
-			
+		/*	
 			if ( t % (TIME/10) == 0 ) {
 				if ( t == 0 ) cout << endl;
 
@@ -100,6 +114,7 @@ public:
 				}
 				cout << "]" << endl;
 			}	
+		*/
 		}
 			
 		auto end = chrono::system_clock::now();

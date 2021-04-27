@@ -14,7 +14,6 @@ void Fields::initialize(string solver, vector<string> configuration,
 		propogate_ = FDTD_2D;			
 	}
 
-
 	// initalization of configuration
 	int size_x = stoi(configuration[SX]);
 	int size_y = stoi(configuration[SY]);

@@ -1,3 +1,4 @@
+#include "./fields_additionals/magnetic_mirror.hpp"
 #include "../particles/species_description.hpp"
 #include <iostream>
 
@@ -71,26 +72,91 @@ void load_p03d_particles(Species_description& sort, double Np,
 
 	srand(time(NULL));
 	int err = 0;
-	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
-
-		double x, y;
-		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
-		
-		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
-		double pz = p0.z + sin(2.*M_PI*frand())*sqrt(-2.*(Tz*sort.m_/mec2)*log(frand()));
-
-		if (isinf(px) | isinf(py) | isinf(pz)) { 
-			++err;
-			continue;
+	if (not ( XY_distrib.find("constant_flux") >= 0 )) {
+		for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
+	
+			double x, y;
+			coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
+			
+			double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+			double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+			double pz = p0.z + sin(2.*M_PI*frand())*sqrt(-2.*(Tz*sort.m_/mec2)*log(frand()));
+	
+			if (isinf(px) | isinf(py) | isinf(pz)) { 
+				++err;
+				continue;
+			}
+			
+			vector2 r(x, y);
+			vector3 p(px, py, pz);
+			
+			Particle temp_(r, p);
+			sort.particles_.push_back(temp_);
 		}
-		
-		vector2 r(x, y);
-		vector3 p(px, py, pz);
-		
-		Particle temp_(r, p);
-		sort.particles_.push_back(temp_);
-	} 
+	} else {
+	// ####### constant flux initialization ###############################################################
+
+		int index = string("constant_flux").size() + 1;
+		int end   = XY_distrib.size();
+		string distrib = XY_distrib.substr(index, end);
+
+		std:: cout << distrib << std::endl;
+
+		double mirror_flux = 0;	// половина потока магнитого поля через поперечное сечение 
+		vector2 r(x_m1, 0); 
+
+		for (int ny = int(0.5*SIZE_Y); ny <= int(0.5*(SIZE_Y + plasma_width/dy)); ++ny) {
+			r.y = (ny+0.5)*dy;
+			mirror_flux += dy*( mirror1.return_field(r) + mirror2.return_field(r) ).x;
+		}
+
+		std::cout << mirror_flux << std::endl;
+
+		double flux = 0;
+		double ny_flux = 0;
+		r.x = 0;
+
+		for (int nx = 0; nx < SIZE_X; ++nx) {
+			r.x = (nx+0.5)*dx;
+
+			for (int ny = int(0.5*SIZE_Y); flux <= mirror_flux; ++ny){
+				r.y = (ny+0.5)*dy;
+				flux += dy*( mirror1.return_field(r) + mirror2.return_field(r) ).x;
+				ny_flux = ny;
+			}
+
+			std::cout << flux << ",\t" << ny_flux << ";" << std::endl;
+
+			for (int ny = (SIZE_Y - ny_flux); ny < ny_flux; ++ny) {
+
+				for (int i = 0; i < int(Np) + err; ++i) {
+	
+					double x, y;
+					coordinate_loader(distrib, i, (nx+0.5)*dx, (ny+0.5)*dy, Xm, Ym, x, y);
+					
+					double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+					double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+					double pz = p0.z + sin(2.*M_PI*frand())*sqrt(-2.*(Tz*sort.m_/mec2)*log(frand()));
+			
+					if (isinf(px) | isinf(py) | isinf(pz)) { 
+						++err;
+						continue;
+					}
+					
+					vector2 r(x, y);
+					vector3 p(px, py, pz);
+					
+					Particle temp_(r, p);
+					sort.particles_.push_back(temp_);
+				}
+				
+			}
+			flux = 0;
+		}		
+
+		std::cout << sort.particles_.size() << std::endl;
+	// ####################################################################################################
+	}
 }
 
 void load_chosen_distribution(Species_description& sort, double Np,

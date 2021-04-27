@@ -20,8 +20,8 @@ using namespace std;
 	const double me 	= 1;
 	const double mpr 	= 1836;
 
-	const int 	TIME	= 200;
-	const int 	diagnose_time_step = 2; 
+	const int 	TIME	= 1;
+	const int 	diagnose_time_step = 1; 
 	const int 	THREAD_NUM = 8;
 //-------- field configuration --------------------------------------------------------------------
 	const int 	SIZE_X 	= 200;
@@ -38,18 +38,29 @@ using namespace std;
 	const double Ty = 30e-3;
 	const double Tz = 0;
 
-	const string XY_distrib = "current_test";
+	const string XY_distrib = "constant_flux_random";
 									// ожидаемые параметры:
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
 	const double v_inj 	= 0.0565;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]  { 0.197 }
 	const double r_larm	= 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
 	const int t_inj		= 25000;	// время нарастания сигнала
 	const double dr		= 0.36;
 	const double dr1	= 0.20;
 
+	// Ширина плазменного столба в пробке 
+	const double plasma_width = 2;
+
+	//###### MAGNETIC MIRROR PARAMETERS ##############################################
+	const double Bz0  = 0.197;			  // Bz0  = 0.2 [T]  { 0.197 }
+	const double Bzl  = 0.1*Bz0; 
+	const double x_m1 = (0.5 + 10)*dx;
+	const double x_m2 = (SIZE_X+0.5 - 10)*dx;
+
+	//################################################################################
+
+	//###### NAMING A DIRECTORY ######################################################
 	const string dir_name = "../diagnostics/FRC/tests/" + boundaries + "/" 
 	//+ to_string(SIZE_X) + "Xcell/"
 	//+ to_string(dx).substr(0,4) + "dx/"
@@ -62,17 +73,20 @@ using namespace std;
 	+ "/TIME" + to_string(TIME); // + "_TINJ" + to_string(t_inj);
 	//+ "/" + to_string(SIZE_Y) + "Ycell";
 
+	//################################################################################
 
-	const bool there_are_particles = false;
-	const bool particles_are_diagnosed = false;
+	const bool there_are_particles = true;
+	const bool particles_are_diagnosed = true;
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
 			{ "Electrons", 
 				{	
 					{
 						boundaries, to_string(n0), to_string(Np), XY_distrib,
-						to_string(0.5*SIZE_X*dx), to_string(0.5*SIZE_Y*dy),
-						to_string(0.5*SIZE_X*dx), to_string((r_larm + dr)*r_prop),
+						//cX 		  cY
+						to_string(0), to_string(0),
+						//Xm 			   Ym
+						to_string(0.5*dx), to_string(0.5*dy),
 						"vector3", "0 0 0"
 			  		},
 				
@@ -85,18 +99,17 @@ using namespace std;
 	const string initializer = "./manager_initializer.txt";
 
 //-------- diagnostics ----------------------------------------------------------------------------	
-	//const bool there_are_fields = false;
-	const bool fields_are_diagnosed = true;
+	const bool fields_are_diagnosed = false;
 	const multimap<string, vector<string>> field_diagnostics = {
-		{ "whole_field", { "j", "x" } },
-		{ "whole_field", { "j", "y" } },
-		{ "whole_field", { "j", "z" } },
-		{ "whole_field", { "E", "x" } },
-		{ "whole_field", { "E", "y" } },
-		{ "whole_field", { "E", "z" } },
-		{ "whole_field", { "B", "x" } },
-		{ "whole_field", { "B", "y" } },
-		{ "whole_field", { "B", "z" } },
+		//{ "whole_field", { "j", "x" } },
+		//{ "whole_field", { "j", "y" } },
+		//{ "whole_field", { "j", "z" } },
+		//{ "whole_field", { "E", "x" } },
+		//{ "whole_field", { "E", "y" } },
+		//{ "whole_field", { "E", "z" } },
+		//{ "whole_field", { "B", "x" } },
+		//{ "whole_field", { "B", "y" } },
+		//{ "whole_field", { "B", "z" } },
 
 		//{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },

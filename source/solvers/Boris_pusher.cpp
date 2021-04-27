@@ -1,5 +1,6 @@
 #include "../vectors/vector3_field.hpp"
 #include "../particles/species_description.hpp"
+#include "../managers/fields_additionals/magnetic_mirror.hpp"
 #include "../constants.h"
 
 #include <functional>
@@ -50,6 +51,9 @@ void Boris_pusher(const Species_description& sort,
 			local_B.z += B.z(y,x)*( shape[shifted].x * shape[shifted].y ); // noshift, noshift
 		}
 	}
+
+	//	добавляем внешнее, аналитически вычисленное, маг. поле
+	local_B += ( mirror1.return_field(r) + mirror2.return_field(r) );
 
 	vector3 p_minus, h, s;
 	double energy;
