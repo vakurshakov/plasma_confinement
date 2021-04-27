@@ -21,15 +21,15 @@ using namespace std;
 	const double mpr 	= 1836;
 
 	const int 	TIME	= 200;
-	const int 	diagnose_time_step = 1; 
+	const int 	diagnose_time_step = 2; 
 	const int 	THREAD_NUM = 8;
 //-------- field configuration --------------------------------------------------------------------
-	const int 	SIZE_X 	= 32;
-	const int 	SIZE_Y 	= 32;
+	const int 	SIZE_X 	= 200;
+	const int 	SIZE_Y 	= 200;
 	const double dx 	= 0.04;
 	const double dy		= 0.04;
 	const double dt 	= 0.5*dx;
-	const string boundaries = "px_py";
+	const string boundaries = "px_ry";
 	
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
@@ -44,15 +44,13 @@ using namespace std;
 	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
 	const double v_inj 	= 0.0565;	// Ek 	= 15 [keV] { 0.00565 } 
 	const double Bz0 	= 0.197;	// Bz0  = 0.2 [T]  { 0.197 }
-	const double r_larm	= 7;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_larm	= 0.6;		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
 	const int t_inj		= 25000;	// время нарастания сигнала
-	const double dr		= 1.00;
-	const double dr1	= 0.64;
+	const double dr		= 0.36;
+	const double dr1	= 0.20;
 
-	const int spline_width = 4;
-
-	const string dir_name = "../diagnostics/FRC/" + boundaries + "/" 
+	const string dir_name = "../diagnostics/FRC/tests/" + boundaries + "/" 
 	//+ to_string(SIZE_X) + "Xcell/"
 	//+ to_string(dx).substr(0,4) + "dx/"
 	//+ to_string(int(Np)) + "ppc_" 
@@ -65,8 +63,8 @@ using namespace std;
 	//+ "/" + to_string(SIZE_Y) + "Ycell";
 
 
-	const bool there_are_particles = true;
-	const bool particles_are_diagnosed = true;
+	const bool there_are_particles = false;
+	const bool particles_are_diagnosed = false;
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
 			{ "Electrons", 
@@ -75,7 +73,7 @@ using namespace std;
 						boundaries, to_string(n0), to_string(Np), XY_distrib,
 						to_string(0.5*SIZE_X*dx), to_string(0.5*SIZE_Y*dy),
 						to_string(0.5*SIZE_X*dx), to_string((r_larm + dr)*r_prop),
-						"vector2", "0 0"
+						"vector3", "0 0 0"
 			  		},
 				
 					{	"density"	},
@@ -93,12 +91,12 @@ using namespace std;
 		{ "whole_field", { "j", "x" } },
 		{ "whole_field", { "j", "y" } },
 		{ "whole_field", { "j", "z" } },
-		//{ "whole_field", { "E", "x" } },
-		//{ "whole_field", { "E", "y" } },
-		//{ "whole_field", { "E", "z" } },
-		//{ "whole_field", { "B", "x" } },
-		//{ "whole_field", { "B", "y" } },
-		//{ "whole_field", { "B", "z" } },
+		{ "whole_field", { "E", "x" } },
+		{ "whole_field", { "E", "y" } },
+		{ "whole_field", { "E", "z" } },
+		{ "whole_field", { "B", "x" } },
+		{ "whole_field", { "B", "y" } },
+		{ "whole_field", { "B", "z" } },
 
 		//{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },

@@ -18,16 +18,18 @@ using namespace std;
 using v3f = vector3_field;
 using diagnostic_up = unique_ptr<Diagnostic>;
 
+const int spline_width = 4;
+
 
 class Particles : public Species_description {
 public:
 	Particles() = default;
 
 	Particles(double q, double m)
-	: Species_description(q, m, second_order_spline, spline_width) {};
+	: Species_description(q, m, fourth_order_spline, spline_width) {};
 
 	Particles(double q, double m, double n)
-	: Species_description(q, m, n, second_order_spline, spline_width) {};
+	: Species_description(q, m, n, fourth_order_spline, spline_width) {};
 
 	void initialize(string name, vector<string> solvers, vector<string> configuration,
 	string dir_name, vector<string> diagnostics);

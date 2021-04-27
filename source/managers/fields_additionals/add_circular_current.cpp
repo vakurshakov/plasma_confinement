@@ -37,6 +37,19 @@ double get_current_shape(double r)
 	}	
 }
 
+double get_continuous_x_current(double x, double y)
+{
+	// TODO: нормальный список параметров!
+	double r = sqrt( x*x + y*y );
+	return +get_current_shape(r - r_larm) * y/r;
+}
+
+double get_continuous_y_current(double x, double y)
+{	
+	double r = sqrt( x*x + y*y );
+	return -get_current_shape(r - r_larm) * x/r;
+}
+
 void Fields::add_circular_current(int t)
 {
 	#pragma omp parallel for shared(j_), num_threads(THREAD_NUM)
@@ -44,12 +57,12 @@ void Fields::add_circular_current(int t)
 	for (int x = 0; x < (*j_).size_x(); ++x) {
 		
 		if ( t <= t_inj ) {
-			(*j_).z(y,x) += +sin(0.5*M_PI*t/double(t_inj))*get_current_shape((y - 0.5*SIZE_Y)*dy + r_larm);
-			(*j_).z(y,x) += -sin(0.5*M_PI*t/double(t_inj))*get_current_shape((y - 0.5*SIZE_Y)*dy - r_larm);
+			(*j_).x(y,x) += sin(0.5*M_PI*t/double(t_inj))*get_continuous_x_current((x+0.5 - 0.5*SIZE_X)*dx, (y+0.5 - 0.5*SIZE_Y)*dy);
+			(*j_).y(y,x) += sin(0.5*M_PI*t/double(t_inj))*get_continuous_y_current((x+0.5 - 0.5*SIZE_X)*dx, (y+0.5 - 0.5*SIZE_Y)*dy);
 		}
 		else {
-			(*j_).z(y,x) += +get_current_shape((y - 0.5*SIZE_Y)*dy + r_larm);
-			(*j_).z(y,x) += -get_current_shape((y - 0.5*SIZE_Y)*dy - r_larm);
+			(*j_).x(y,x) += get_continuous_x_current((x+0.5 - 0.5*SIZE_X)*dx, (y+0.5 - 0.5*SIZE_Y)*dy);
+			(*j_).y(y,x) += get_continuous_y_current((x+0.5 - 0.5*SIZE_X)*dx, (y+0.5 - 0.5*SIZE_Y)*dy);
 		}
 	}
 	}

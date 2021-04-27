@@ -6,6 +6,7 @@
 #include <functional>
 #include <cmath>
 #include <omp.h>
+#include <iostream>
 
 /*
 
@@ -40,7 +41,7 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 		
 		for (int x = -charge_cloud, y = -charge_cloud; y <= +charge_cloud; ++y) {
 			node_y = nearest_edge_to_ry + y;
-	
+
 			temp_j.x(y,x) = - q*n/Np*0.5*dx/dt*(shape_at(r.x - node_x*dx, dx) - shape_at(r0.x - node_x*dx, dx))*
 									 		   (shape_at(r.y - node_y*dy, dy) + shape_at(r0.y - node_y*dy, dy));
 	
@@ -105,7 +106,7 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 	
 				#pragma omp atomic
 				j.z(node_y, node_x) += + q*n/Np*vz/3.*((	 shape_at(r.x - node_x*dx, dx) + 0.5*shape_at(r0.x - node_x*dx, dx))*shape_at(r.y  -  node_y*dy, dy)+
-									    				(0.5*shape_at(r.x - node_x*dx, dx) +	 shape_at(r0.x - node_x*dx, dx))*shape_at(r0.y -  node_y*dy, dy));;
+									    				(0.5*shape_at(r.x - node_x*dx, dx) +	 shape_at(r0.x - node_x*dx, dx))*shape_at(r0.y -  node_y*dy, dy));
 			}
 		}
 	}

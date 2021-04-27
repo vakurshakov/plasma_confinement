@@ -69,7 +69,7 @@ def set_colorbar(mappable):
     ax = mappable.axes
     fig = ax.figure
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="3%", pad=0.05)
+    cax = divider.append_axes("right", size="30%", pad=0.05)
     cbar = fig.colorbar(mappable,
                        orientation="vertical",
                        cax=cax)
@@ -87,9 +87,13 @@ import numpy as np
 def set_whole_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_X, SIZE_Y,
                  current_shape_is_shown = False):
     
-    axes[ ddata_name[ddata_enum['axes_position']] ].set_title( ddata_name[ ddata_enum['axes_name'] ], fontsize=20)
-    
-    im_ = set_imshow(axes[ ddata_name[ddata_enum['axes_position']] ],
+    ax = axes[ ddata_name[ddata_enum['axes_position']] ]
+
+    ax.set_title( ddata_name[ ddata_enum['axes_name'] ], fontsize=20)
+    ax.set_xlabel( ddata_name[ ddata_enum['xlabel'] ], fontsize=15 )
+    ax.set_ylabel( ddata_name[ ddata_enum['ylabel'] ], fontsize=15 )
+
+    im_ = set_imshow(ax,
                      ddata_name[ddata_enum['frame_data']],
                      ddata_name[ddata_enum['colormap']],
                      ddata_name[ddata_enum['vmin_vmax']],
@@ -104,7 +108,7 @@ def set_whole_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_
 def clear_whole_figure(axes, cbars, nrows, ncols):
     for i in range(nrows):
         for j in range(ncols):
-            axes[i,j].cla()
+            axes[j].cla()
     
     for i in range(len(cbars)):
         cbars[i].remove()
@@ -119,10 +123,10 @@ TIME, dt, DTS, SIZE_X, SIZE_Y = return_parameters(parameters_file)
 
 ddata = {
     
-    #'name': ["file.txt", [frame_data], (axes_position), "axes_name", (vmin, vmax), "colormap"]
-    'jx': [ "jx.txt", [], (0), "$j_x$", (-5e-2, 5e-2), "plasma" ],
-    'jy': [ "jy.txt", [], (1), "$j_y$", (-5e-2, 5e-2), "plasma" ],
-    'jz': [ "jz.txt", [], (2), "$j_z$", (-5e-2, 5e-2),  "plasma" ],
+    #'name': ["file.txt", [frame_data], (axes_position), "axes_name", "xlabel", "ylabel" (vmin, vmax), "colormap"]
+    'jx': [ "jx.txt", [], (0), "ток $\hatj_x$", "$\hatx$", "$\haty$", (-5e-2, 5e-2), "plasma" ],
+    'jy': [ "jy.txt", [], (1), "ток $\hatj_y$", "$\hatx$", "$\haty$", (-5e-2, 5e-2), "plasma" ],
+    'jz': [ "jz.txt", [], (2), "ток $\hatj_z$", "$\hatx$", "$\haty$", (-5e-2, 5e-2), "plasma" ],
     
     #'Ex': [ "Ex.txt", [], (1,1), "$E_x$", (-5e-2, 5e-2), "plasma" ],
     #'Ey': [ "Ey.txt", [], (1,2), "$E_y$", (-5e-2, 5e-2), "plasma" ],
@@ -145,8 +149,10 @@ ddata_enum = {
     'frame_data': 1,
     'axes_position': 2,
     'axes_name': 3,
-    'vmin_vmax': 4,
-    'colormap': 5,
+    'xlabel': 4,
+    'ylabel': 5,
+    'vmin_vmax': 6,
+    'colormap': 7,
 
 }
 
@@ -185,7 +191,7 @@ for t in range(0, int(TIME/DTS)):
         else:
             axes[ ddata[name][ddata_enum['axes_position']] ].axis("off")
     
-    axes[0,2].text(-1.0, 1.2, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes[0,2].transAxes, fontsize=20)
+    axes[1].text(-1.5, 1.1, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes[1].transAxes, fontsize=20)
 
     
     name = str(t).zfill(len(str(int(TIME/DTS)-1)))
@@ -195,7 +201,7 @@ for t in range(0, int(TIME/DTS)):
 
 from os import system 
 
-os.system("cd ./animation/ && (ffmpeg -f image2 %02d.png -r 15 ../../2d_fields.mp4)")
+os.system("cd ./animation/ && (ffmpeg -f image2 %03d.png -r 15 ../../2d_fields.mp4)")
 
 
 # In[ ]:

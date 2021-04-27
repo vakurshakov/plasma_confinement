@@ -66,7 +66,7 @@ void load_p02d_particles(Species_description& sort, double Np,
 
 void load_p03d_particles(Species_description& sort, double Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector3& p0)
-{
+{	
 	sort.Np_ = Np;
 
 	srand(time(NULL));

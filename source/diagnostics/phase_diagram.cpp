@@ -29,7 +29,7 @@ void phase_diagram::diagnose(const Species_description& sort)
 			
 			vx_i = sort.element(i).px() / sqrt(sort.m()*sort.m() + sort.element(i).px()*sort.element(i).px());
 
-			if (( x*dx  <= sort.element(i).x()  && sort.element(i).x()  < (x  + 1)*dx ) && 
+			if (( x*dx  <= sort.element(i).x()  && sort.element(i).x()  < (x + 1)*dx ) && 
 				( vx <= vx_i && vx_i < vx + dv_ ))
 			{
 				#pragma atomic
