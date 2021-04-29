@@ -7,13 +7,14 @@ namespace fs = std::filesystem;
 
 namespace qubic_shape_constants
 {
+	const double B0 = 0.80*sqrt(Bz0 * 2*M_PI);
 	const double dr12 = dr1*dr1;
 	const double dr2 = dr*dr;
  
-	const double A = 2.*Bz0/(dr12*dr2); 
-	const double B = -6.*Bz0/(dr1*dr*(dr1 + dr));
-	const double C = 2.*Bz0/(dr1 + dr);
-	const double K = -2.*Bz0/(dr2*(dr2 - dr12));
+	const double A = +2.*B0/(dr12*dr2); 
+	const double B = -6.*B0/(dr1*dr*(dr1 + dr));
+	const double C = +2.*B0/(dr1 + dr);
+	const double K = -2.*B0/(dr2*(dr2 - dr12));
 } 
 
 namespace qsc = qubic_shape_constants;

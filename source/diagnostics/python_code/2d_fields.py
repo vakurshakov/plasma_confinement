@@ -108,7 +108,7 @@ def set_whole_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_
 def clear_whole_figure(axes, cbars, nrows, ncols):
     for i in range(nrows):
         for j in range(ncols):
-            axes[j].cla()
+            axes[i,j].cla()
     
     for i in range(len(cbars)):
         cbars[i].remove()
@@ -124,22 +124,22 @@ TIME, dt, DTS, SIZE_X, SIZE_Y = return_parameters(parameters_file)
 ddata = {
     
     #'name': ["file.txt", [frame_data], (axes_position), "axes_name", "xlabel", "ylabel" (vmin, vmax), "colormap"]
-    'jx': [ "jx.txt", [], (0), "ток $\hatj_x$", "$\hatx$", "$\haty$", (-5e-2, 5e-2), "plasma" ],
-    'jy': [ "jy.txt", [], (1), "ток $\hatj_y$", "$\hatx$", "$\haty$", (-5e-2, 5e-2), "plasma" ],
-    'jz': [ "jz.txt", [], (2), "ток $\hatj_z$", "$\hatx$", "$\haty$", (-5e-2, 5e-2), "plasma" ],
+    'jx': [ "jx.txt", [], (1,1), "$\hatj_x$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma" ],
+    'jy': [ "jy.txt", [], (1,2), "$\hatj_y$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma" ],
+    'jz': [ "jz.txt", [], (1,3), "$\hatj_z$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma" ],
     
-    #'Ex': [ "Ex.txt", [], (1,1), "$E_x$", (-5e-2, 5e-2), "plasma" ],
-    #'Ey': [ "Ey.txt", [], (1,2), "$E_y$", (-5e-2, 5e-2), "plasma" ],
-    #'Ez': [ "Ez.txt", [], (1,3), "$E_z$", (-5e-2, 5e-2), "plasma" ],
-    #
-    #'Bx': [ "Bx.txt", [], (2,1), "$B_x$", (0, 0.2), "plasma"],
-    #'By': [ "By.txt", [], (2,2), "$B_y$", (-5e-2, 5e-2), "plasma"],
-    #'Bz': [ "Bz.txt", [], (2,3), "$B_z$", (-5e-2, 5e-2),  "plasma"],
-    #
-    #'ne': [ "../../Electrons/density/density.txt", [], (0,0), "$n_e$", (0, 5), "Greys"], 
-    #
-    #'off1': [ "", [], (1,0), "", (), "" ],
-    #'off2': [ "", [], (2,0), "", (), "" ],
+    'Ex': [ "Ex.txt", [], (2,1), "$\hatE_x$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma" ],
+    'Ey': [ "Ey.txt", [], (2,2), "$\hatE_y$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma" ],
+    'Ez': [ "Ez.txt", [], (2,3), "$\hatE_z$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma" ],
+    
+    'Bx': [ "Bx.txt", [], (3,1), "$\hatB_x$", "$\hatx/h$", "$\haty/h$", (0, 0.2), "plasma"],
+    'By': [ "By.txt", [], (3,2), "$\hatB_y$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2), "plasma"],
+    'Bz': [ "Bz.txt", [], (3,3), "$\hatB_z$", "$\hatx/h$", "$\haty/h$", (-5e-2, 5e-2),  "plasma"],
+    
+    'ne': [ "../../Electrons/density/density.txt", [], (0,0), "$n_e$", (0, 5), "Greys"], 
+    
+    'off1': [ "", [], (0,1), "", (), "" ],
+    'off2': [ "", [], (0,2), "", (), "" ],
 
 }
 
@@ -156,8 +156,8 @@ ddata_enum = {
 
 }
 
-nrows = 1
-ncols = 3
+nrows = 3
+ncols = 4
 
 
 fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(18,12))
@@ -191,7 +191,7 @@ for t in range(0, int(TIME/DTS)):
         else:
             axes[ ddata[name][ddata_enum['axes_position']] ].axis("off")
     
-    axes[1].text(-1.5, 1.1, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes[1].transAxes, fontsize=20)
+    axes[0,2].text(0.2, 1.1, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes[0,2].transAxes, fontsize=20)
 
     
     name = str(t).zfill(len(str(int(TIME/DTS)-1)))

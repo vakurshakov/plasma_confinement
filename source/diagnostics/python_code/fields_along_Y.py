@@ -53,7 +53,7 @@ def set_whole_ax(axes, ddata_name : list, ddata_enum : dict, SIZE):
 def clear_whole_figure(axes, nrows, ncols):
     for i in range(nrows):
         for j in range(ncols):
-            axes[j].cla()
+            axes[i,j].cla()
 
 
 # In[8]:
@@ -66,15 +66,17 @@ TIME, dt, DTS, SIZE = return_parameters(parameters_file)
 ddata = {
     
     #'name': ["file.txt", [frame_data], (axes_position), "axes_name", "xlabel", "ylabel", (vmin, vmax)]
-    'jx': [ "jx.txt", [], (0), "ток$\ \hatj_x\ $в центре", "$(\hatx\ =\ Lx/2,\ \haty,\hatt)$", "$\hatj_x$", (-1, 1) ],
-    'jy': [ "jy.txt", [], (1), "ток$\ \hatj_y\ $в центре", "$(\hatx\ =\ Lx/2,\ \haty,\hatt)$", "$\hatj_y$", (-1, 1) ],
-    'jz': [ "jz.txt", [], (2), "ток$\ \hatj_z\ $в центре", "$(\hatx\ =\ Lx/2,\ \haty,\hatt)$", "$\hatj_z$", (-1, 1) ],
-    #'Ex': [ "Ex.txt", [], (1,0), "$E_x\ (\ \hatx\ =\ Lx/2,\ \haty\ )$", (-1e-2, 1e-2) ],
-    #'Ey': [ "Ey.txt", [], (1,1), "$E_y\ (\ \hatx\ =\ Lx/2,\ \haty\ )$", (-1e-2, 1e-2) ],
-    #'Ez': [ "Ez.txt", [], (1,2), "$E_z\ (\ \hatx\ =\ Lx/2,\ \haty\ )$", (-1e-2, 1e-2) ],
-    #'Bx': [ "Bx.txt", [], (2,0), "$B_x\ (\ \hatx\ =\ Lx/2,\ \haty\ )$", (0,     0.3)  ],
-    #'By': [ "By.txt", [], (2,1), "$B_y\ (\ \hatx\ =\ Lx/2,\ \haty\ )$", (-1e-3, 1e-3) ],
-    #'Bz': [ "Bz.txt", [], (2,2), "$B_z\ (\ \hatx\ =\ Lx/2,\ \haty\ )$", (-1e-3, 1e-3) ],
+    'jx': [ "jx.txt", [], (0,0), "$\hatj_x$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatj_x$", (-1, 1) ],
+    'jy': [ "jy.txt", [], (0,1), "$\hatj_y$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatj_y$", (-1, 1) ],
+    'jz': [ "jz.txt", [], (0,2), "$\hatj_z$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatj_z$", (-1, 1) ],
+    
+    'Ex': [ "Ex.txt", [], (1,0), "$\hatE_x$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatE_x$", (-1e-2, 1e-2) ],
+    'Ey': [ "Ey.txt", [], (1,1), "$\hatE_y$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatE_y$", (-1e-2, 1e-2) ],
+    'Ez': [ "Ez.txt", [], (1,2), "$\hatE_z$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatE_z$", (-1e-2, 1e-2) ],
+    
+    'Bx': [ "Bx.txt", [], (2,0), "$\hatB_x$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatB_x$", (0,     0.3)  ],
+    'By': [ "By.txt", [], (2,1), "$\hatB_y$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatB_y$", (-1e-3, 1e-3) ],
+    'Bz': [ "Bz.txt", [], (2,2), "$\hatB_z$", "$(\ \hatx\ =\ Lx/2,\ \haty,\ \hatt\ )$", "$\hatB_z$", (-1e-3, 1e-3) ],
     
 }
 
@@ -90,7 +92,7 @@ ddata_enum = {
     
 }
 
-nrows = 1
+nrows = 3
 ncols = 3
 
 
@@ -109,7 +111,7 @@ for t in range(0, int(TIME/DTS), 1):
         else:
             axes[ ddata[name][ddata_enum['axes_position']] ].axis("off")
         
-    axes[1].text(0.4, 1.05, "$\hatt\ =\ %.2f\ $" %(DTS*t*dt), transform=axes[1].transAxes, fontsize=15)
+    axes[0,1].text(0.4, 1.05, "$\hatt\ =\ %.2f\ $" %(DTS*t*dt), transform=axes[0,1].transAxes, fontsize=15)
 
     name = str(t).zfill(len(str(int(TIME/DTS)-1)))
     fig.savefig("./animation/" + name  + ".png")

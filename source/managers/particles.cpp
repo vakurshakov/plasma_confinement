@@ -100,6 +100,8 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 	 	}
 		diagnostics_.shrink_to_fit();
 	}
+
+	std::cout << "\t" << particles_.size() << "\tparticles have been loaded" << std::endl;
 }
 
 
