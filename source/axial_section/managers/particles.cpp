@@ -91,8 +91,9 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 			if ( diagnostic == "energy" ) {
 				diagnostics_.emplace_back(make_unique<particles_energy>(dir_name + '/' + p_name + '/' + diagnostic));
 			}
-			else if ( diagnostic == "phase_diagram" ) {
-				diagnostics_.emplace_back(make_unique<phase_diagram>(dir_name + '/' + p_name + '/' + diagnostic));
+			else if ( diagnostic == "diagram_vx_on_y" ) {
+				diagnostics_.emplace_back(make_unique<diagram_vx_on_y>(dir_name + '/' + p_name + '/' + diagnostic,
+					-1., 1., 0.05, 0, SIZE_Y)); //double vmin, double vmax, double dv, int nYmin, int nYmax
 			}
 			else if ( diagnostic == "density" ) {
 				diagnostics_.emplace_back(make_unique<density>(dir_name + '/' + p_name + '/' + diagnostic));

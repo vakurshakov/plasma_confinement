@@ -53,7 +53,7 @@ void Boris_pusher(const Species_description& sort,
 	}
 
 	//	добавляем внешнее, аналитически вычисленное, маг. поле
-	local_B += ( mirror1.return_field(r) + mirror2.return_field(r) );
+	//local_B += ( mirror1.return_field(r) + mirror2.return_field(r) );
 
 	vector3 p_minus, h, s;
 	double energy;

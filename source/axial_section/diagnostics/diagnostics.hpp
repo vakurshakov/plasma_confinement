@@ -137,22 +137,37 @@ private:
 	int py_;
 };
 
-class phase_diagram : public Diagnostic {
+class diagram_vx_on_y : public Diagnostic {
 public:
-	phase_diagram(string path) : Diagnostic(path, "phase_diagram") {
+	diagram_vx_on_y(string path, 
+		double vmin, double vmax, double dv, int nYmin, int nYmax)
+	: Diagnostic(path, "diagram_vx_on_y"),
+	vmin_(vmin), vmax_(vmax), dv_(dv),nYmax_(nYmax), nYmin_(nYmin) {
+
+		nVmin_ = int(roundf(vmin_/dv_));
+		nVmax_ = int(roundf(vmax_/dv_));
+		
 		initialize();
 	};
 
 	void initialize() override;
 	void diagnose(const Species_description& sort) override;
+
+	friend void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
+		const Species_description& sort);
+	friend void clear_diagram_vx_on_y(diagram_vx_on_y& diag);
+
+protected:
+	vector<double> data_;
+
+	double vmin_;
+	double vmax_;
+	double dv_;
 	
-private:
-	double vmin_ = 0;
-	double vmax_ = 1;
-	double dv_ = 1./20.;
-	
-	int xmin_ = 0;
-	int xmax_ = SIZE_X;		
+	int nYmin_;
+	int nYmax_;
+	int nVmin_;
+	int nVmax_;
 };
 
 class density : public Diagnostic {

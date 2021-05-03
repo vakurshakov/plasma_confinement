@@ -58,7 +58,7 @@ public:
 
 		for (int t = 0; t < TIME; ++t) {
 		
-			fields_.add_circular_current(t);
+			//fields_.add_circular_current(t);
 			
 			if ( there_are_particles ) {
 			for (auto& sort : particles_) {
