@@ -88,7 +88,7 @@ void load_p02d_particles(Species_description& sort,
 			double cx = (nx+0.5 - 0.5*SIZE_X)*dx;
 			double cy = (ny+0.5 - 0.5*SIZE_Y)*dy;
 			
-			if ( cx*cx + cy*cy <= (r_larm+dr)*r_prop ) {
+			if ( sqrt(cx*cx + cy*cy) <= (r_larm+dr)*r_prop ) {
 				
 				int err = 0;			
 				for (int i = 0; i < sort.Np_ + err; ++i) {

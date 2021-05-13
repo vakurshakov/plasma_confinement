@@ -33,7 +33,7 @@ using namespace std;
 	const double mi 	= 20.92;	//масса модельных частиц, чтобы выставить их на r_larm
 
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	TIME	= 50000;
+	const int 	TIME	= 5000;
 	const int 	TINJ	= 25000;		// время нарастания тока ионов
 	const int 	diagnose_time_step = 50; 
 
@@ -65,7 +65,7 @@ using namespace std;
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
-			/*
+			#if there_are_electrons
 			{ "Electrons", 
 				{	
 					{	boundaries, to_string(n0), to_string(1),
@@ -74,8 +74,9 @@ using namespace std;
 					{	"density"	},
 				} 
 			},
-			*/
+			#endif
 
+			#if there_are_ions
 			{ "Ions", 
 				{	
 					{	boundaries, to_string(0), to_string(2),
@@ -84,6 +85,7 @@ using namespace std;
 					{	"density"	},
 				} 
 			},
+			#endif
 		};
 //####################################################################################
 
@@ -93,26 +95,26 @@ using namespace std;
 
 	const multimap<string, vector<string>> field_diagnostics = {
 		{ "whole_field", { "j", "x" } },
-		{ "whole_field", { "j", "y" } },
+		//{ "whole_field", { "j", "y" } },
 		//{ "whole_field", { "j", "z" } },
-		{ "whole_field", { "E", "x" } },
-		{ "whole_field", { "E", "y" } },
+		//{ "whole_field", { "E", "x" } },
+		//{ "whole_field", { "E", "y" } },
 		// { "whole_field", { "E", "z" } },
 		// { "whole_field", { "B", "x" } },
 		// { "whole_field", { "B", "y" } },
-		{ "whole_field", { "B", "z" } },
+		//{ "whole_field", { "B", "z" } },
 
 		{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "j", "z", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "E", "z", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
-		{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
+		//{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
 
-		//{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "j", "z", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
@@ -122,7 +124,7 @@ using namespace std;
 		//{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "B", "z", to_string(SIZE_X/2) } },
 
-		//{ "field_at_point", { "B", "x", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
+		{ "field_at_point", { "B", "x", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
 		};
 //####################################################################################
 
@@ -137,7 +139,7 @@ using namespace std;
 
 
 //######## NAMING A DIRECTORY ########################################################
-	const string dir_name = "../diagnostics/FRC/tests/" + boundaries + "/IONS_WITH_n(t)" 
+	const string dir_name = "../diagnostics/FRC/tests/" + boundaries + "/IONS_WITH_n_OF_t" 
 	//+ to_string(SIZE_X) + "Xcell_"
 	//+ to_string(dx).substr(0,4) + "dx/"
 	//+ to_string(int(Np)) + "ppc_" 

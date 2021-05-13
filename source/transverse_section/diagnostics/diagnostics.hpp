@@ -29,10 +29,14 @@ public:
 		: path_(path), name_(name_) {
 		
 		create_directories(path_);
-		ofs_.open((path_ / fs::path{ name_ + ".txt" }).c_str());
+		ofs_.open((path_ / fs::path{ "parameters.txt" }).c_str());
 
+		ofs_ << "#sizeof(float)" << endl;
+		ofs_ << sizeof(float) << endl;
+		ofs_ << "#TIME dt DTS" << endl;
 		ofs_ << TIME << " " << dt << " " << diagnose_time_step << endl;
-		ofs_ << setprecision(10) << fixed;
+
+		OFS_.open((path_ / fs::path{ name_ + ".bin" }).c_str(), ios::binary | ios::out);
 	}
                       
 	virtual ~Diagnostic() = default;
@@ -44,6 +48,7 @@ protected:
 	fs::path path_;
 	fs::path name_;
 	ofstream ofs_;
+	ofstream OFS_;
 };
 
 

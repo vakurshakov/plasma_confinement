@@ -22,7 +22,7 @@ void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
 
 void clear_diagram_vx_on_y(diagram_vx_on_y& diag)
 {
-	#pragma omp parllel for num_threads(THREAD_NUM)
+	#pragma omp parallel for num_threads(THREAD_NUM)
 	for (int nVx = 0; nVx < (diag.nVmax_ - diag.nVmin_); ++nVx) {
 	for (int  nY = 0;  nY < (diag.nYmax_ - diag.nYmin_); ++ nY) {
 		diag.data_[ nVx*(diag.nYmax_ - diag.nYmin_) + nY ] = 0;
@@ -32,7 +32,9 @@ void clear_diagram_vx_on_y(diagram_vx_on_y& diag)
 
 void diagram_vx_on_y::initialize()
 {
+	ofs_ << "#nVmin_ nVmax_ dv_" << std::endl;
 	ofs_ << nVmin_ << " " << nVmax_ << " " << dv_ << std::endl;
+	ofs_ << "#nYmin_ nYmax_ dy"  << std::endl;
 	ofs_ << nYmin_ << " " << nYmax_ << " " << dy  << std::endl;
 	data_.reserve((nYmax_ - nYmin_)*(nVmax_ - nYmin_));
 	clear_diagram_vx_on_y(*this);
@@ -44,11 +46,11 @@ void diagram_vx_on_y::diagnose(const Species_description& sort)
 
 	for (int nVx = 0; nVx < (nVmax_ - nVmin_); ++nVx) {
 	for (int  nY = 0;  nY < (nYmax_ - nYmin_); ++ nY) {
-		ofs_ << data_[ nVx*(nYmax_ - nYmin_) + nY ] << " ";
+		OFS_ << data_[ nVx*(nYmax_ - nYmin_) + nY ] << " ";
 	}
-		ofs_ << "\t";
+		OFS_ << "\t";
 	}
-	ofs_ << std::endl;
+	OFS_ << std::endl;
 
 	clear_diagram_vx_on_y(*this);
 }
