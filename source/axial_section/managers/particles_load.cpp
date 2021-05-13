@@ -32,7 +32,7 @@ void coordinate_loader(string& XY_distrib, int i,
 }
 
 
-void load_p02d_particles(Species_description& sort, double Np,
+void load_p02d_particles(Species_description& sort, int Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector2& p0)
 {
 	sort.Np_ = Np;
@@ -61,7 +61,7 @@ void load_p02d_particles(Species_description& sort, double Np,
 	}
 }
 
-void load_p03d_particles(Species_description& sort, double Np,
+void load_p03d_particles(Species_description& sort, int Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector3& p0)
 {	
 	sort.Np_ = Np;
@@ -83,7 +83,6 @@ void load_p03d_particles(Species_description& sort, double Np,
 	
 	double flux = 0;
 	int ny_flux[(nx_m2-nx_m1)];
-	int nyi = 0;
 	R.x = x_m1;
 	
 	// вычисление формы магнитной поверхности (ny_flux) между пробками
@@ -128,7 +127,7 @@ void load_p03d_particles(Species_description& sort, double Np,
 	// ####################################################################################################
 }
 
-void load_chosen_distribution(Species_description& sort, double Np,
+void load_chosen_distribution(Species_description& sort, int Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, string P_distrib)
 {
 	sort.Np_ = Np;
@@ -143,17 +142,22 @@ void load_chosen_distribution(Species_description& sort, double Np,
 		double px, py;
 
 		if (P_distrib == string("X_Oscillations")) {
-			double px = 0.01*cos(2*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-			double py = 								 sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+			px = 0.01*cos(2*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+			py = 								 sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+			
+			if (isinf(px) | isinf(py)) { 
+				++err;
+				continue;
+			}
 		}
 		else if (P_distrib == string("XY_Oscillations")) {
-			double px = 0.01*cos(2*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-			double py = 0.01*cos(2*M_PI*y/(SIZE_Y*dy)) + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
-		}
-
-		if (isinf(px) | isinf(py)) { 
-			++err;
-			continue;
+			px = 0.01*cos(2*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+			py = 0.01*cos(2*M_PI*y/(SIZE_Y*dy)) + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+			
+			if (isinf(px) | isinf(py)) { 
+				++err;
+				continue;
+			}		
 		}
 		
 		vector2 r(x, y);

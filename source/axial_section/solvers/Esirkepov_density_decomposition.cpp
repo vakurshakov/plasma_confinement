@@ -21,7 +21,7 @@ void Esirkepov_density_decomposition(const Species_description& sort,
 {
 	double q  = sort.q();
 	double n  = sort.n();
-	double Np = sort.Np();
+	int Np = sort.Np();
 	int charge_cloud = sort.charge_cloud();
 	function<double(double, double)> shape_at = sort.form_factor();
 

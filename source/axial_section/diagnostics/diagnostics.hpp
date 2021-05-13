@@ -142,7 +142,7 @@ public:
 	diagram_vx_on_y(string path, 
 		double vmin, double vmax, double dv, int nYmin, int nYmax)
 	: Diagnostic(path, "diagram_vx_on_y"),
-	vmin_(vmin), vmax_(vmax), dv_(dv),nYmax_(nYmax), nYmin_(nYmin) {
+	vmin_(vmin), vmax_(vmax), dv_(dv), nYmin_(nYmin), nYmax_(nYmax) {
 
 		nVmin_ = int(roundf(vmin_/dv_));
 		nVmax_ = int(roundf(vmax_/dv_));

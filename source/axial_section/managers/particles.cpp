@@ -42,7 +42,7 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 	// TODO : частицы обёртки? Only Species_decription
 
 	double n 			= stod(configuration[CONF::ns_]);
-	double Np 			= stod(configuration[CONF::Np_]);
+	int Np 			= stod(configuration[CONF::Np_]);
 	string XY_distrib 	= 	   configuration[CONF::XY_];
 	double cX 			= stod(configuration[CONF::cX_]); 
 	double cY 			= stod(configuration[CONF::cY_]);

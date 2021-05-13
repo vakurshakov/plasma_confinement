@@ -1,82 +1,81 @@
-all: 2d_simulation
+PROG ?= 2d_simulation
 
 MAIN 		= main.o
 VECTORS 	= vector_classes.o vector3_field.o 
 SOLVERS 	= FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o
-ADDITIONALS	= add_circular_current.o add_Bz0.o
+ADDITIONALS	= add_Bz0.o add_ion_current.o
 PARTICLES 	= particles_form-factors.o boundaries_for_particle.o
 DIAGNOSTICS = energy.o whole_field.o field_along_the_line.o field_at_point.o phase_diagram.o density.o
 MANAGERS 	= fields.o particles.o particles_load.o
 
-KEYS  = -std=c++17 -fopenmp -c
+# setting all object files
+OBJs = $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN)
+
+CXX 	= g++ -Wall -pedantic -ggdb -O2
+CFLAGs  = -std=c++17 -fopenmp
 
 .PHONY: clean
 
-2d_simulation: $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN)
-	g++ -fopenmp $(VECTORS) $(PARTICLES) $(SOLVERS) $(MANAGERS) $(ADDITIONALS) $(DIAGNOSTICS) $(MAIN) -o ../2d_simulation
+$(PROG): $(OBJs)
+	$(CXX) $(CFLAGs) -o ../$(PROG) $(OBJs)
 	make clean
-	make run
-
 
 main.o:
-	g++ $(KEYS) ./main.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./main.cpp
 
 vector_classes.o:
-	g++ $(KEYS) ./vectors/vector_classes.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./vectors/vector_classes.cpp
 
 vector3_field.o:
-	g++ $(KEYS) ./vectors/vector3_field.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./vectors/vector3_field.cpp
 
 Boris_pusher.o:
-	g++ $(KEYS) ./solvers/Boris_pusher.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./solvers/Boris_pusher.cpp
 
 FDTD.o:
-	g++ $(KEYS) ./solvers/FDTD.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./solvers/FDTD.cpp
 
 Esirkepov_density_decomposition.o:
-	g++ $(KEYS) ./solvers/Esirkepov_density_decomposition.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./solvers/Esirkepov_density_decomposition.cpp
 
 boundaries_for_particle.o:
-	g++ $(KEYS) ./particles/boundaries_for_particle.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./particles/boundaries_for_particle.cpp
 
 particles_form-factors.o:
-	g++ $(KEYS) ./particles/particles_form-factors.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./particles/particles_form-factors.cpp
 
 fields.o:
-	g++ $(KEYS) ./managers/fields.cpp
-
-add_circular_current.o:
-	g++ $(KEYS) ./managers/fields_additionals/add_circular_current.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./managers/fields.cpp
 
 add_Bz0.o:
-	g++ $(KEYS) ./managers/fields_additionals/add_Bz0.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./managers/additionals/add_Bz0.cpp
+
+add_ion_current.o:
+	$(CXX) $(CFLAGs) -c -o $@ ./managers/additionals/add_ion_current.cpp
 
 particles.o:
-	g++ $(KEYS) ./managers/particles.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./managers/particles.cpp
 
 particles_load.o:
-	g++ $(KEYS) ./managers/particles_load.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./managers/particles_load.cpp
 
 energy.o:
-	g++ $(KEYS) ./diagnostics/energy.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./diagnostics/energy.cpp
 	
 whole_field.o:
-	g++ $(KEYS) ./diagnostics/whole_field.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./diagnostics/whole_field.cpp
 
 field_along_the_line.o:
-	g++ $(KEYS) ./diagnostics/field_along_the_line.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./diagnostics/field_along_the_line.cpp
 
 field_at_point.o:
-	g++ $(KEYS) ./diagnostics/field_at_point.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./diagnostics/field_at_point.cpp
 
 phase_diagram.o:
-	g++ $(KEYS) ./diagnostics/phase_diagram.cpp
+	$(CXX) $(CFLAGs) -c -o $@ ./diagnostics/phase_diagram.cpp
 
 density.o:
-	g++ $(KEYS) ./diagnostics/density.cpp
-
-run:
-	../2d_simulation.exe
+	$(CXX) $(CFLAGs) -c -o $@ ./diagnostics/density.cpp
 
 clean:
 	del *.o /Q

@@ -40,7 +40,8 @@ public:
 	void boundaries_processing(int i, double size_x, double size_y);
 	void diagnose();
 
-
+	void add_ion_current(int t);
+	
 protected:
 	// vector of diagnostics for sort
 	vector<diagnostic_up> diagnostics_; 
@@ -67,8 +68,18 @@ public:
 	Protons() : Particles(+e, mpr) {};
 
 	Protons(double n) : Particles(+e, mpr, n) {};
+
+	//void add_ion_current(int t);
 };
 
+class Ions : public Particles {
+public: 
+	Ions() : Particles(+e, mi) {};
+
+	Ions(double n) : Particles(+e, mi, n) {};
+
+	void add_ion_current(int t);
+};
 //#################################################################################################
 
 #endif

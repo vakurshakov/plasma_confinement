@@ -6,7 +6,6 @@
 #include "./fields.hpp"
 #include "./particles.hpp"
 #include "../constants.h"
-#include "./fields_additionals/magnetic_mirror.hpp"
 
 #include <iostream>
 #include <chrono>
@@ -37,7 +36,7 @@ public:
 		*/
 
 		
-		if ( there_are_particles ) {
+		#if there_are_particles
 		for (auto description : species) {
 			if ( description.first == "Electrons" ) {
 
@@ -48,19 +47,37 @@ public:
 
 				particles_.push_back(move(temp));
 			}
+
+			else if ( description.first == "Ions" ) {
+
+				Ions temp;
+				
+				temp.initialize("Ions", particles_solvers, description.second[0],
+					dir_name, description.second[1]);
+
+				particles_.push_back(move(temp));
+			}
+		
 		}
-		}
+		#endif
 	}
 
 	void Calculate() {
 
 		auto start = chrono::system_clock::now();
 
+		#if there_are_Bz0
+		fields_.add_Bz0(Bz0);
+		#endif
+			
+
 		for (int t = 0; t < TIME; ++t) {
 		
-			//fields_.add_circular_current(t);
+			#if there_are_current_add
+			particles_[0].add_ion_current(t);
+			#endif
 			
-			if ( there_are_particles ) {
+			#if there_are_particles
 			for (auto& sort : particles_) {
 				#pragma omp parallel for num_threads(THREAD_NUM)
 				for (int i = 0; i < sort.amount(); ++i) {
@@ -75,28 +92,35 @@ public:
 				}
 
 				// TODO: реализовать частицы и поля БЕЗ диагностик
-				if ( particles_are_diagnosed && (t % diagnose_time_step == 0) ) {
+				#if particles_are_diagnosed
+				if (t % diagnose_time_step == 0) {
 					sort.diagnose();
 				}
+				#endif
 				
 			}
-			}
+			#endif
 		
-			if ( fields_are_diagnosed && (t % diagnose_time_step == 0) ) {
+			#if fields_are_diagnosed
+			if ( t % diagnose_time_step == 0 ) {
 				fields_.diagnose();
 			}
+			#endif
 
 			fields_.propogate();			
 		
 			if ( t % (TIME/10) == 0 ) {
 				if ( t == 0 ) cout << endl;
 
+				auto time = chrono::system_clock::now();
+				chrono::duration<double> elapsed = time - start;
+				
 				cout << "\t[";
 				for (int n = 0; n <= TIME; n+= TIME/10) {
 					if ( n <= t ) { cout << "#"; }
 					else { cout << " "; }
 				}
-				cout << "]" << endl;
+				cout << "]\t" << elapsed.count() << "s" << endl;
 			}	
 		}
 			

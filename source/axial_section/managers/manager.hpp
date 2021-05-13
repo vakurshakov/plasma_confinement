@@ -97,12 +97,15 @@ public:
 			if ( t % (TIME/10) == 0 ) {
 				if ( t == 0 ) cout << endl;
 
+				auto time = chrono::system_clock::now();
+				chrono::duration<double> elapsed = time - start;
+				
 				cout << "\t[";
 				for (int n = 0; n <= TIME; n+= TIME/10) {
 					if ( n <= t ) { cout << "#"; }
 					else { cout << " "; }
 				}
-				cout << "]" << endl;
+				cout << "]\t" << elapsed.count() << endl;
 			}	
 		}
 			

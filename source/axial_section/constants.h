@@ -31,7 +31,7 @@ using namespace std;
 
 //######## CONFIGURATION IN GENERAL ##################################################
 	const int 	TIME	= 100;
-	const int 	t_inj	= 25000;	// время нарастания сигнала
+	const int 	TINJ	= 25000;	// время нарастания сигнала
 	const int 	diagnose_time_step = 2; 
 
 	const int 	SIZE_X 	= 200;
@@ -42,7 +42,7 @@ using namespace std;
 	
 	const string boundaries = "px_ry";
 	
-	const double Np = 1;
+	const int Np = 1;
 	const double Tx = 30e-3;
 	const double Ty = 30e-3;
 	const double Tz = 30e-3;
@@ -151,7 +151,7 @@ using namespace std;
 	+ "/Jz" + to_string(0.80*sqrt(Bz0 * 2*M_PI)/(dr1*dr1*dr1*dr1/4. + dr1*dr1*dr1/3. + dr1 - (dr1 - dr)*(dr1 - dr)*(dr1 - dr)*(dr1 - dr)/4.)).substr(0,5)
 	//+ "_dr" + to_string(dr).substr(0,4) + "_dr1" + to_string(dr1).substr(0,4)
 	+ "_R_LARM" + to_string(r_larm).substr(0,4)
-	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(t_inj)
+	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(TINJ)
 	+ "/" + to_string(SIZE_Y) + "Ycell";
 //####################################################################################
 

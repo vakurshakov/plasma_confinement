@@ -1,15 +1,14 @@
-#include "./fields_additionals/magnetic_mirror.hpp"
 #include "../particles/species_description.hpp"
 #include <iostream>
 
 double frand() { return ((double)rand()/RAND_MAX); }
 
-void coordinate_loader(string& XY_distrib, int i,
-	double cX, double cY, double Xm, double Ym, double& x, double& y)
+void load_coordinates(string& XY_distrib, int i, int Np,
+	double cx, double cy, double xm, double ym, double& x, double& y)
 {
 	if (XY_distrib == "random") {
-		x = cX + (2*Xm*frand() - Xm);  
-		y = cY + (2*Ym*frand() - Ym);  
+		x = cx + (2*xm*frand() - xm);  
+		y = cy + (2*ym*frand() - ym);  
 	}
 	else if (XY_distrib == "periodic") {
 		// i%Np -- номер от нуля до Np-1 частицы в одной ячейке
@@ -23,59 +22,110 @@ void coordinate_loader(string& XY_distrib, int i,
 		//		 сколько частиц будет уложено в одну ячейку вдоль оси Ox; 
 		
 		int divider = 2;
-		x = ((i/int(Np)) % SIZE_X)*dx + ((i%int(Np)) % divider)*dx/divider;
-		y = ((i/int(Np)) / SIZE_X)*dy + ((i%int(Np)) / divider)*dy/(int(Np)/divider); 
-	}
-	else if (XY_distrib == "circle_random") {
-		do
-		{
-			x = cX + (2*Xm*frand() - Xm);  
-			y = cY + (2*Ym*frand() - Ym);	
-		} 	while ((x - cX)*(x - cX) + (y - cY)*(y - cY) > Xm*Ym);
+		x = (cx - xm) + ((i%Np) % divider)*dx/divider;
+		y = (cy - ym) + ((i%Np) / divider)*dy/(Np/divider); 
 	}
 }
 
-
-void load_p02d_particles(Species_description& sort, double Np,
-		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector2& p0)
+void load_p02d_particles(Species_description& sort,
+		string XY_distrib, double p0)
 {
-	sort.Np_ = Np;
+	if ( XY_distrib.find("ring") == 0 ) {
 
-	srand(time(NULL));
-	int err = 0;
-	
-	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
+		int divider = XY_distrib.find('_');
+		int end = XY_distrib.size();
 
-		double x, y;
-		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
-		
-		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+		string distrib = XY_distrib.substr(divider+1,end);	
 
-		if (isinf(px) | isinf(py)) { 
-			++err;
-			continue;
-		}
-		
-		vector2 r(x, y);
-		vector3 p(px, py, 0);
-		
-		Particle temp_(r, p);
-		sort.particles_.push_back(temp_);
+		srand(time(NULL));
+
+		for (int nx = 0; nx < SIZE_X; ++nx) {
+		for (int ny = 0; ny < SIZE_Y; ++ny) {
+			
+			double cx = (nx+0.5 - 0.5*SIZE_X)*dx;
+			double cy = (ny+0.5 - 0.5*SIZE_Y)*dy;
+			
+			if ( (r_larm-dr <= sqrt(cx*cx + cy*cy)) and (sqrt(cx*cx + cy*cy) <= r_larm+dr) ) {
+			
+				int err = 0;			
+				for (int i = 0; i < sort.Np_ + err; ++i) {
+				
+					double x, y;
+					
+					load_coordinates(distrib, i, sort.Np_, cx+0.5*SIZE_X*dx, cy+0.5*SIZE_Y*dy, 0.5*dx, 0.5*dy, x, y);
+
+					double r = sqrt((x-0.5*SIZE_X*dx)*(x-0.5*SIZE_X*dx) + (y-0.5*SIZE_Y*dy)*(y-0.5*SIZE_Y*dy));
+
+					double px = p0*( +(y-0.5*SIZE_Y*dy)/r ) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+					double py = p0*( -(x-0.5*SIZE_X*dx)/r ) + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+						
+					if (isinf(px) | isinf(py)) { 
+						++err;
+						continue;
+					}
+								
+					vector2 _r(x, y);
+					vector3 _p(px, py, 0);
+								
+					Particle temp_(_r, _p);
+					sort.particles_.push_back(temp_);
+				}
+			}
+		}}
+
+	} else if ( XY_distrib.find("circle") == 0 ) {
+
+		int divider = XY_distrib.find('_');
+		int end = XY_distrib.size();
+
+		string distrib = XY_distrib.substr(divider+1,end);	
+
+		srand(time(NULL));
+
+		for (int nx = 0; nx < SIZE_X; ++nx) {
+		for (int ny = 0; ny < SIZE_Y; ++ny) {
+			
+			double cx = (nx+0.5 - 0.5*SIZE_X)*dx;
+			double cy = (ny+0.5 - 0.5*SIZE_Y)*dy;
+			
+			if ( cx*cx + cy*cy <= (r_larm+dr)*r_prop ) {
+				
+				int err = 0;			
+				for (int i = 0; i < sort.Np_ + err; ++i) {
+				
+					double x, y;
+					
+					load_coordinates(distrib, i, sort.Np_, cx+0.5*SIZE_X*dx, cy+0.5*SIZE_Y*dy, 0.5*dx, 0.5*dy, x, y);
+			
+					double px = sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
+					double py = sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
+						
+					if (isinf(px) | isinf(py)) { 
+						++err;
+						continue;
+					}
+								
+					vector2 _r(x, y);
+					vector3 _p(px, py, 0);
+								
+					Particle temp_(_r, _p);
+					sort.particles_.push_back(temp_);
+				}
+			}
+		}}
 	}
 }
 
-void load_p03d_particles(Species_description& sort, double Np,
-		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector3& p0)
-{	
-	sort.Np_ = Np;
-
+void load_p03d_particles(Species_description& sort,
+		string XY_distrib, double p0)
+{
+/*
 	srand(time(NULL));
 	int err = 0;
 	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
 
 		double x, y;
-		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
+		load_coordinates(XY_distrib, i, cX, cY, Xm, Ym, x, y);
 		
 		double px = p0.x + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
 		double py = p0.y + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
@@ -92,40 +142,5 @@ void load_p03d_particles(Species_description& sort, double Np,
 		Particle temp_(r, p);
 		sort.particles_.push_back(temp_);
 	}
-}
-
-void load_chosen_distribution(Species_description& sort, double Np,
-		string XY_distrib, double cX, double cY, double Xm, double Ym, string P_distrib)
-{
-	sort.Np_ = Np;
-	
-	srand(time(NULL));
-	int err = 0;
-	for (int i = 0; i < int(Np*(2*Xm/dx)*(2*Ym/dy)) + err; ++i) {
-
-		double x, y;
-		coordinate_loader(XY_distrib, i, cX, cY, Xm, Ym, x, y);
-		
-		double px, py;
-
-		if (P_distrib == string("X_Oscillations")) {
-			double px = 0.01*cos(2*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-			double py = 								 sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
-		}
-		else if (P_distrib == string("XY_Oscillations")) {
-			double px = 0.01*cos(2*M_PI*x/(SIZE_X*dx)) + sin(2.*M_PI*frand())*sqrt(-2.*(Tx*sort.m_/mec2)*log(frand())); 
-			double py = 0.01*cos(2*M_PI*y/(SIZE_Y*dy)) + sin(2.*M_PI*frand())*sqrt(-2.*(Ty*sort.m_/mec2)*log(frand()));
-		}
-
-		if (isinf(px) | isinf(py)) { 
-			++err;
-			continue;
-		}
-		
-		vector2 r(x, y);
-		vector3 p(px, py, 0);		
-		
-		Particle temp_(r, p);
-		sort.particles_.push_back(temp_);		
-	}
+*/
 }

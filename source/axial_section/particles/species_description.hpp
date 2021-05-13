@@ -35,7 +35,7 @@ public:
 	double q() const { return q_; };
 	double m() const { return m_; };
 	double n() const { return n_; };
-	double Np() const { return Np_; };
+	int Np() const { return Np_; };
 	auto form_factor() const { return form_factor_; };
 	int charge_cloud() const { return charge_cloud_; };
 	int amount() const { return particles_.size(); };
@@ -43,11 +43,11 @@ public:
 	Particle& element(int i) { return particles_[i]; };
 	Particle element(int i) const { return particles_[i]; };
 
-	friend void load_p02d_particles(Species_description& sort, double Np,
+	friend void load_p02d_particles(Species_description& sort, int Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector2& p0);
-	friend void load_p03d_particles(Species_description& sort, double Np,
+	friend void load_p03d_particles(Species_description& sort, int Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, const vector3& p0);
-	friend void load_chosen_distribution(Species_description& sort, double Np,
+	friend void load_chosen_distribution(Species_description& sort, int Np,
 		string XY_distrib, double cX, double cY, double Xm, double Ym, string P_distrib);
 
 protected:

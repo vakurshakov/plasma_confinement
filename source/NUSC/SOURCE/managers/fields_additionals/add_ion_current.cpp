@@ -1,9 +1,7 @@
 #include "../fields.hpp"
-#include <filesystem>
 #include <fstream>
 #include <cmath>
 
-namespace fs = std::filesystem;
 
 namespace qubic_shape_constants
 {
@@ -38,7 +36,7 @@ double get_current_shape(double r)
 	}	
 }
 
-void Fields::add_circular_current(int t)
+void Fields::add_ion_current(int t)
 {
 	#pragma omp parallel for shared(j_), num_threads(THREAD_NUM)
 	for (int y = 0; y < (*j_).size_y(); ++y) {

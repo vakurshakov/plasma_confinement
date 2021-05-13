@@ -4,7 +4,7 @@ void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
 	const Species_description& sort)
 {
 	double n  = sort.n();
-	double Np = sort.Np();
+	int Np = sort.Np();
 
 	for (int i = 0; i < sort.amount(); ++i) {
 		Particle i_th = sort.element(i); 

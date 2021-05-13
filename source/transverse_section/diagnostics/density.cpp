@@ -3,7 +3,7 @@
 void collect_density(vector<double>& dens, const Species_description& sort)
 {
 	double n  = sort.n();
-	double Np = sort.Np();
+	int Np = sort.Np();
 
 	for (int i = 0; i < sort.amount(); ++i) {
 		vector2 r = sort.element(i).r();

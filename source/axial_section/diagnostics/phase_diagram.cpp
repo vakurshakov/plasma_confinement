@@ -4,7 +4,7 @@ void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
 	const Species_description& sort)
 {
 	double n  = sort.n();
-	double Np = sort.Np();
+	int Np = sort.Np();
 
 	for (int i = 0; i < sort.amount(); ++i) {
 		Particle i_th = sort.element(i); 
@@ -22,7 +22,7 @@ void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
 
 void clear_diagram_vx_on_y(diagram_vx_on_y& diag)
 {
-	#pragma omp parllel for num_threads(THREAD_NUM)
+	#pragma omp parallel for shared(diag), num_threads(THREAD_NUM)
 	for (int nVx = 0; nVx < (diag.nVmax_ - diag.nVmin_); ++nVx) {
 	for (int  nY = 0;  nY < (diag.nYmax_ - diag.nYmin_); ++ nY) {
 		diag.data_[ nVx*(diag.nYmax_ - diag.nYmin_) + nY ] = 0;
