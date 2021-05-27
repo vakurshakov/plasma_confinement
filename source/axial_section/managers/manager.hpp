@@ -55,7 +55,8 @@ public:
 	void Calculate() {
 
 		auto start = chrono::system_clock::now();
-
+	
+		/*		
 		for (int t = 0; t < TIME; ++t) {
 		
 			#if there_are_ion_current
@@ -108,6 +109,27 @@ public:
 				cout << "]\t" << elapsed.count() << endl;
 			}	
 		}
+		*/
+		vector2 r; 
+	
+		for (int y = fields_.B().begin_y(X); y < fields_.B().end_y(X); ++y) {
+		for (int x = fields_.B().begin_x(X); x < fields_.B().end_x(X); ++x) {
+			r.x = x*dx;
+			r.y = y*dy;
+			fields_.B().x(y,x) = ( mirror1.return_field(r) + mirror2.return_field(r) ).x;
+		}
+		}
+
+		for (int y = fields_.B().begin_y(Y); y < fields_.B().end_y(Y); ++y) {
+		for (int x = fields_.B().begin_x(Y); x < fields_.B().end_x(Y); ++x) {
+			r.x = x*dx;
+			r.y = y*dy;
+			fields_.B().y(y,x) = ( mirror1.return_field(r) + mirror2.return_field(r) ).y;
+		}
+		}
+
+		fields_.diagnose();
+			
 			
 		auto end = chrono::system_clock::now();
 		chrono::duration<double> elapsed = end - start;

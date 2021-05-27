@@ -86,9 +86,9 @@ void Fields::propogate()
 	propogate_(*E_, *B_, *j_);
 }
 
-void Fields::diagnose()
+void Fields::diagnose(int t)
 {
 	for (auto& diagnostic : diagnostics_) {
-		(*diagnostic).diagnose(*E_, *B_, *j_);
+		(*diagnostic).diagnose(*E_, *B_, *j_, t);
 	}
 }

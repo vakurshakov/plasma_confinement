@@ -32,7 +32,7 @@ using namespace std;
 
 //######## CONFIGURATION IN GENERAL ##################################################
 	const int 	TIME	= 5000;
-	const int 	t_inj	= 50000;	// время нарастания сигнала
+	const int 	TINJ	= 50000;	// время нарастания сигнала
 	const int 	diagnose_time_step = 100; 
 
 	const int 	SIZE_X 	= 200;
@@ -67,9 +67,7 @@ using namespace std;
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
 	const double v_inj 	= 0.0565;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double r_larm
-	
-		= 1.36; 	//1.36		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_larm	= 1.36; 	//1.36		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
 	const double dr		= 0.36;
 	const double dr1	= 0.20;

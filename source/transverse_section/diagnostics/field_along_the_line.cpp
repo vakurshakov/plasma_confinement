@@ -4,15 +4,15 @@
 void field_along_X::initialize()
 {
 	create_directory( path_ / "animation" );
-	ofs_ << "#SIZE_X" << endl;
-	ofs_ << SIZE_X << endl;
+	ofs_ << "#SIZE_X DTS" << endl;
+	ofs_ << SIZE_X << diagnose_time_step << endl;
 }
 
 void field_along_Y::initialize()
 {
 	create_directory( path_ / "animation" );
-	ofs_ << "#SIZE_Y" << endl;
-	ofs_ << SIZE_Y << endl;
+	ofs_ << "#SIZE_Y DTS" << endl;
+	ofs_ << SIZE_Y << diagnose_time_step << endl;
 }
 
 void faX_diagnose(const v3f& F, string axis, int Y, ofstream& File)
@@ -53,16 +53,23 @@ void faY_diagnose(const v3f& F, string axis, int X, ofstream& File)
 	}
 }
 
-void field_along_X::diagnose(const v3f& E, const v3f& B, const v3f& j)
+void field_along_X::diagnose(const v3f& E, const v3f& B, const v3f& j, int t)
 {
-	if ( field_ == "E" ) { faX_diagnose( E, axis_, Y_, OFS_ ); }
-	else if ( field_ == "B" ) { faX_diagnose( B, axis_, Y_, OFS_ ); }
-	else if ( field_ == "j" ) { faX_diagnose( j, axis_, Y_, OFS_ ); }
+	if ((t % diagnose_time_step) == 0 ) {
+
+		if ( field_ == "E" ) { faX_diagnose( E, axis_, Y_, OFS_ ); }
+		else if ( field_ == "B" ) { faX_diagnose( B, axis_, Y_, OFS_ ); }
+		else if ( field_ == "j" ) { faX_diagnose( j, axis_, Y_, OFS_ ); }
+
+	} 
 }
 
-void field_along_Y::diagnose(const v3f& E, const v3f& B, const v3f& j)
+void field_along_Y::diagnose(const v3f& E, const v3f& B, const v3f& j, int t)
 {
-	if ( field_ == "E" ) { faY_diagnose( E, axis_, X_, OFS_ ); }
-	else if ( field_ == "B" ) { faY_diagnose( B, axis_, X_, OFS_ ); }
-	else if ( field_ == "j" ) { faY_diagnose( j, axis_, X_, OFS_ ); }
+	if ((t % diagnose_time_step) == 0 ) {
+
+		if ( field_ == "E" ) { faY_diagnose( E, axis_, X_, OFS_ ); }
+		else if ( field_ == "B" ) { faY_diagnose( B, axis_, X_, OFS_ ); }
+		else if ( field_ == "j" ) { faY_diagnose( j, axis_, X_, OFS_ ); }
+	} 
 }

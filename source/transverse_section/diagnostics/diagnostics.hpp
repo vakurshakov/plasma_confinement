@@ -33,16 +33,16 @@ public:
 
 		ofs_ << "#sizeof(float)" << endl;
 		ofs_ << sizeof(float) << endl;
-		ofs_ << "#TIME dt DTS" << endl;
-		ofs_ << TIME << " " << dt << " " << diagnose_time_step << endl;
+		ofs_ << "#TIME dt" << endl;
+		ofs_ << TIME << " " << dt << " " << endl;
 
 		OFS_.open((path_ / fs::path{ name_ + ".bin" }).c_str(), ios::binary | ios::out);
 	}
                       
 	virtual ~Diagnostic() = default;
 	virtual void initialize() = 0;
-	virtual void diagnose(const v3f& E, const v3f& B, const v3f& j) {};
-	virtual void diagnose(const Species_description& sort) {};
+	virtual void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) {};
+	virtual void diagnose(const Species_description& sort, int t) {};
 
 protected:
 	fs::path path_;
@@ -59,7 +59,7 @@ public:
 	}
 
 	void initialize() override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
 private:
 	double W = 0;
@@ -72,7 +72,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const Species_description& sort) override;
+	void diagnose(const Species_description& sort, int t) override;
 	
 private:
 	double W = 0;
@@ -86,7 +86,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
 private:
 	string field_;
@@ -101,7 +101,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
 private:
 	string field_;
@@ -117,7 +117,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
 private:
 	string field_;
@@ -133,7 +133,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j) override;
+	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
 private:
 	string field_;
@@ -156,7 +156,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const Species_description& sort) override;
+	void diagnose(const Species_description& sort, int t) override;
 
 	friend void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
 		const Species_description& sort);
@@ -182,7 +182,7 @@ public:
 	};
 
 	void initialize() override;
-	void diagnose(const Species_description& sort) override;
+	void diagnose(const Species_description& sort, int t) override;
 	
 private:
 	vector<double> dens_;

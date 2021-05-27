@@ -44,20 +44,21 @@ public:
 		return temp;
 	}
 
-private:
+protected:
 	// инициализируемые величины:
 	double B_m; // поле в пробке
 	double x_m; // положение пробки на оси X в c/wp
 	double B_l; // поле на НЕКОТОРОМ расстоянии от пробки
 	double x_l; // расстояние от пробки, где задано B_l (в c/wp)
 
+private:
 	// рассчитываемые величины:
 	double Ry; // 0.5(расстояния между витками с током) (радиус пробки)
 	double I;  // величина токов в безразмерных единицах
 };
 
-const Magnetic_mirror mirror1(Bz0, x_m1, Bzl, x_m2);
-const Magnetic_mirror mirror2(Bz0, x_m2, Bzl, x_m1);
+const Magnetic_mirror mirror1(Bz0-Bzl, x_m1, Bzl, x_m2);
+const Magnetic_mirror mirror2(Bz0-Bzl, x_m2, Bzl, x_m1);
 
 //#################################################################################################
 

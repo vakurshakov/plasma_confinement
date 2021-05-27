@@ -7,6 +7,7 @@ void particles_energy::initialize() {}
 
 void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j)
 {
+	float temp;
 	#pragma omp parallel for reduction(+: W)
 	for (int y = 0; y < SIZE_Y; ++y) {
 	for (int x = 0; x < SIZE_X; ++x) {
@@ -14,13 +15,16 @@ void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j)
 				   B.x(y,x)*B.x(y,x) + B.y(y,x)*B.y(y,x) + B.z(y,x)*B.z(y,x) )*dx*dy;		
 	}
 	}
-	ofs_ << W << endl;
+	
+	temp = W;
+	OFS_.write( (char*)&temp, sizeof(float) );
 	
 	W = 0;
 }
 
 void particles_energy::diagnose(const Species_description& sort)
 {
+	float temp;
 	#pragma omp parallel for reduction(+: W), num_threads(8)
 	for (int i = 0; i < sort.amount(); ++i) {
 		W += sqrt( sort.m()*sort.m() +
@@ -28,7 +32,8 @@ void particles_energy::diagnose(const Species_description& sort)
 						dx*dy*sort.n()/sort.Np();
 	}
 
-	ofs_ << W << " ";
-
+	temp = W;
+	OFS_.write( (char*)&temp, sizeof(float) );
+	
 	W = 0;
 }

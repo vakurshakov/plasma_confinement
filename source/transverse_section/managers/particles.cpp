@@ -49,6 +49,7 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 
 	n_ = n;
 	Np_ = Np;
+	name_ = p_name;
 
 	// TODO : сделать направленную скорость для КАЖДОЙ частицы, 
 	//	а не для всего сорта сразу. Т.о. load_%_particle должен
@@ -81,7 +82,7 @@ void Particles::initialize(string p_name, vector<string> solvers, vector<string>
 		diagnostics_.shrink_to_fit();
 	}
 
-	std::cout << "\t" << particles_.size() << "\tparticles have been loaded" << std::endl;
+	std::cout << "\t" << particles_.size() << "\t" << name_ << " have been loaded" << std::endl;
 }
 
 
@@ -104,9 +105,9 @@ void Particles::boundaries_processing(int i, double size_x, double size_y)
 }
 
 
-void Particles::diagnose()
+void Particles::diagnose(int t)
 {
 	for (auto& diagnostic : diagnostics_) {
-		(*diagnostic).diagnose(*this);
+		(*diagnostic).diagnose(*this, t);
 	} 
 }

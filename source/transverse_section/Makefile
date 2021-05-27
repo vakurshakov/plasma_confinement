@@ -3,7 +3,7 @@ PROG ?= 2d_simulation
 MAIN 		= main.o
 VECTORS 	= vector_classes.o vector3_field.o 
 SOLVERS 	= FDTD.o Boris_pusher.o Esirkepov_density_decomposition.o
-ADDITIONALS	= add_Bz0.o add_ion_current.o
+ADDITIONALS	= add_Bz0.o add_ion_density.o add_ion_current.o
 PARTICLES 	= particles_form-factors.o boundaries_for_particle.o
 DIAGNOSTICS = energy.o whole_field.o field_along_the_line.o field_at_point.o phase_diagram.o density.o
 MANAGERS 	= fields.o particles.o particles_load.o
@@ -52,6 +52,9 @@ add_Bz0.o:
 
 add_ion_current.o:
 	$(CXX) $(CFLAGs) -c -o $@ ./managers/additionals/add_ion_current.cpp
+
+add_ion_density.o:
+	$(CXX) $(CFLAGs) -c -o $@ ./managers/additionals/add_ion_density.cpp
 
 particles.o:
 	$(CXX) $(CFLAGs) -c -o $@ ./managers/particles.cpp

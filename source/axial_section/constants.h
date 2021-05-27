@@ -30,9 +30,9 @@ using namespace std;
 	const double mpr 	= 1836;
 
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	TIME	= 100;
-	const int 	TINJ	= 25000;	// время нарастания сигнала
-	const int 	diagnose_time_step = 2; 
+	const int 	TIME	= 2;
+	const int 	TINJ	= 0;	// время нарастания сигнала
+	const int 	diagnose_time_step = 1; 
 
 	const int 	SIZE_X 	= 200;
 	const int 	SIZE_Y 	= 400;
@@ -66,13 +66,13 @@ using namespace std;
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
 	const double v_inj 	= 0.0565;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double r_larm	= 1.36; 	//1.36		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_larm	= 1.72; 		//1.36		// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
-	const double dr		= 0.36;
+	const double dr		= 0.48;
 	const double dr1	= 0.20;
 
 	// Ширина плазменного столба в пробке 
-	const double plasma_width = 2;
+	const double plasma_width = 2.4;
 	
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	const multimap<string, vector<vector<string>>> species = {
@@ -98,23 +98,23 @@ using namespace std;
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
 	const multimap<string, vector<string>> field_diagnostics = {
-		{ "whole_field", { "j", "x" } },
-		{ "whole_field", { "j", "y" } },
-		{ "whole_field", { "j", "z" } },
-		// { "whole_field", { "E", "x" } },
-		// { "whole_field", { "E", "y" } },
-		// { "whole_field", { "E", "z" } },
-		// { "whole_field", { "B", "x" } },
-		// { "whole_field", { "B", "y" } },
-		// { "whole_field", { "B", "z" } },
+		//{ "whole_field", { "j", "x" } },
+		//{ "whole_field", { "j", "y" } },
+		//{ "whole_field", { "j", "z" } },
+		//{ "whole_field", { "E", "x" } },
+		//{ "whole_field", { "E", "y" } },
+		//{ "whole_field", { "E", "z" } },
+		{ "whole_field", { "B", "x" } },
+		{ "whole_field", { "B", "y" } },
+		//{ "whole_field", { "B", "z" } },
 
 		//{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "E", "z", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
 		//{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
 
 		//{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
@@ -123,11 +123,11 @@ using namespace std;
 		//{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "E", "y", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
 		//{ "field_along_Y", { "B", "z", to_string(SIZE_X/2) } },
 
-		//{ "field_at_point", { "B", "x", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
+		{ "field_at_point", { "B", "x", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
 		};
 //####################################################################################
 
@@ -142,17 +142,12 @@ using namespace std;
 
 
 //######## NAMING A DIRECTORY ########################################################
-	const string dir_name = "../diagnostics/FRC/tests/" + boundaries + "/" 
+	const string dir_name = "../diagnostics/FRC/" + boundaries + "/" 
 	+ to_string(SIZE_X) + "Xcell_"
 	+ to_string(dx).substr(0,4) + "dx/"
-	+ to_string(int(Np)) + "ppc_" 
-	+ XY_distrib
-	//+ "injection_system_and_field_reversing/"
-	+ "/Jz" + to_string(0.80*sqrt(Bz0 * 2*M_PI)/(dr1*dr1*dr1*dr1/4. + dr1*dr1*dr1/3. + dr1 - (dr1 - dr)*(dr1 - dr)*(dr1 - dr)*(dr1 - dr)/4.)).substr(0,5)
-	//+ "_dr" + to_string(dr).substr(0,4) + "_dr1" + to_string(dr1).substr(0,4)
+	+ "MAGNETIC_MIRRORS"
 	+ "_R_LARM" + to_string(r_larm).substr(0,4)
-	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(TINJ)
-	+ "/" + to_string(SIZE_Y) + "Ycell";
+	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(TINJ);
 //####################################################################################
 
 //#################################################################################################

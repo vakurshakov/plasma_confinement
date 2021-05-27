@@ -29,6 +29,7 @@ void clear_density(vector<double>& dens)
 
 void density::initialize()
 {
+	ofs_ << "#SIZE_X SIZE_Y" << endl;
 	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
 	dens_.reserve(SIZE_X*SIZE_Y);
 	clear_density(dens_);
@@ -39,13 +40,13 @@ void density::diagnose(const Species_description& sort)
 {
 	collect_density(dens_, sort);
 	
+	float temp;
 	for (int y = 0; y < SIZE_Y; ++y) {
 	for (int x = 0; x < SIZE_X; ++x) {
-		ofs_ << dens_[y*SIZE_X + x] << " ";
+		temp = dens_[y*SIZE_X + x];
+		OFS_.write( (char*)&temp, sizeof(float) ); 
 	}
-		ofs_ << "\t";
 	}
-	ofs_ << std::endl;	
 
 	clear_density(dens_);
 }

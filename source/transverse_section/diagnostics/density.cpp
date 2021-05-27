@@ -29,24 +29,27 @@ void clear_density(vector<double>& dens)
 
 void density::initialize()
 {
-	ofs_ << "#SIZE_X SIZE_Y" << endl;
-	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
+	ofs_ << "#SIZE_X SIZE_Y DTS" << endl;
+	ofs_ << SIZE_X << " " << SIZE_Y << " " << diagnose_time_step << endl;
 	dens_.reserve(SIZE_X*SIZE_Y);
 	clear_density(dens_);
 }
 
 
-void density::diagnose(const Species_description& sort)
+void density::diagnose(const Species_description& sort, int t)
 {
-	collect_density(dens_, sort);
+	if ((t % diagnose_time_step) == 0) {
+				
+		collect_density(dens_, sort);
+		
+		float temp;
+		for (int y = 0; y < SIZE_Y; ++y) {
+		for (int x = 0; x < SIZE_X; ++x) {
+			temp = dens_[y*SIZE_X + x];
+			OFS_.write( (char*)&temp, sizeof(float) ); 
+		}
+		}
 	
-	float temp;
-	for (int y = 0; y < SIZE_Y; ++y) {
-	for (int x = 0; x < SIZE_X; ++x) {
-		temp = dens_[y*SIZE_X + x];
-		OFS_.write( (char*)&temp, sizeof(float) ); 
+		clear_density(dens_);
 	}
-	}
-
-	clear_density(dens_);
 }

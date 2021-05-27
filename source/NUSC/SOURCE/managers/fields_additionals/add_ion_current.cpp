@@ -42,9 +42,9 @@ void Fields::add_ion_current(int t)
 	for (int y = 0; y < (*j_).size_y(); ++y) {
 	for (int x = 0; x < (*j_).size_x(); ++x) {
 		
-		if ( t <= t_inj ) {
-			(*j_).z(y,x) += -sin(0.5*M_PI*t/double(t_inj))*get_current_shape((x+0.5 - 0.5*SIZE_X)*dx)*get_current_shape((y+0.5 - 0.5*SIZE_Y)*dy - r_larm);
-			(*j_).z(y,x) += +sin(0.5*M_PI*t/double(t_inj))*get_current_shape((x+0.5 - 0.5*SIZE_X)*dx)*get_current_shape((y+0.5 - 0.5*SIZE_Y)*dy + r_larm);
+		if ( t <= TINJ ) {
+			(*j_).z(y,x) += -sin(0.5*M_PI*t/double(TINJ))*get_current_shape((x+0.5 - 0.5*SIZE_X)*dx)*get_current_shape((y+0.5 - 0.5*SIZE_Y)*dy - r_larm);
+			(*j_).z(y,x) += +sin(0.5*M_PI*t/double(TINJ))*get_current_shape((x+0.5 - 0.5*SIZE_X)*dx)*get_current_shape((y+0.5 - 0.5*SIZE_Y)*dy + r_larm);
 		}
 		else {
 			(*j_).z(y,x) += -get_current_shape((x+0.5 - 0.5*SIZE_X)*dx)*get_current_shape((y+0.5 - 0.5*SIZE_Y)*dy - r_larm);

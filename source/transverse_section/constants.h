@@ -18,27 +18,28 @@ using namespace std;
 
 //######## MODIFIERS #################################################################
 	#define there_are_particles 		true
-		#define there_are_electrons		false 
 		#define there_are_ions			true
+		#define there_are_electrons		true 
 	#define particles_are_diagnosed 	true
 	#define fields_are_diagnosed 		true
 	#define there_are_Bz0				true
-	#define there_are_current_add 		true
+	#define there_are_current_add 		false
+	#define there_are_density_add 		true
+
 
 //######## PARTICLES CONSTANTS #######################################################
 	const double mec2 	= 511;
 	const double e 		= 1;
 	const double me 	= 1;
 	const double mpr 	= 1836;
-	const double mi 	= 20.92;	//масса модельных частиц, чтобы выставить их на r_larm
-
+	
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	TIME	= 5000;
+	const int 	TIME	= 1000;
 	const int 	TINJ	= 25000;		// время нарастания тока ионов
-	const int 	diagnose_time_step = 50; 
+	const int 	diagnose_time_step = 100; 
 
-	const int 	SIZE_X 	= 200;
-	const int 	SIZE_Y 	= 200;
+	const int 	SIZE_X 	= 500;
+	const int 	SIZE_Y 	= 500;
 	const double dx 	= 0.04;
 	const double dy		= 0.04;
 	const double dt 	= 0.5*dx;
@@ -52,34 +53,43 @@ using namespace std;
 
 
 //######## MAGNETIC MIRROR PARAMETERS ################################################
-	const double Bz0  = 0.197;		// Bz0  = 0.2 [T]  { 0.197 }
+	const double Bz0  = 0.0197;		// Bz0  = 0.2 [T]  { 0.197 }
 
 //######## PARTICLES DESCRIPTION #####################################################
 	// тестовые параметры:			// ожидаемые параметры:
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
-	const double ni 	= 0.13;		// ni   = 1.291e11 [cm^(-3)]
-	const double v_inj 	= 0.00565;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double r_larm	= 0.6;	 	//1.36 // ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const int Npe 		= 1;
+	const double v_inj 	= 0.0565;	// Ek 	= 15 [keV] { 0.00565 } 
+	const double r_larm	= 1.48;	 	//1.36 // ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
-	const double dr		= 0.04;
+	const double dr		= 0.48;
+	const double dr1	= 0.24;
+
+
+	//зависимые параметры для обращения
+	const double ni 	= Bz0/( 2*dr*v_inj );	// ni   = 1.291e11 [cm^(-3)]
+	const int Npi 		= 1;
+	const double mi 	= r_larm*Bz0/v_inj;		//масса модельных частиц, чтобы выставить их на r_larm
+
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
+	#if there_are_particles
 	const multimap<string, vector<vector<string>>> species = {
 			#if there_are_electrons
 			{ "Electrons", 
 				{	
-					{	boundaries, to_string(n0), to_string(1),
+					{	boundaries, to_string(n0), to_string(Npe),
 						"circle_random", "vector2", "0"	},
 				
 					{	"density"	},
 				} 
 			},
 			#endif
-
+			
 			#if there_are_ions
 			{ "Ions", 
 				{	
-					{	boundaries, to_string(0), to_string(2),
+					{	boundaries, to_string(0), to_string(Npi),
 						"ring_random", "vector2", to_string(mi*v_inj/sqrt(1-v_inj*v_inj))	},
 				
 					{	"density"	},
@@ -87,6 +97,7 @@ using namespace std;
 			},
 			#endif
 		};
+	#endif
 //####################################################################################
 
 
@@ -95,36 +106,24 @@ using namespace std;
 
 	const multimap<string, vector<string>> field_diagnostics = {
 		{ "whole_field", { "j", "x" } },
-		//{ "whole_field", { "j", "y" } },
-		//{ "whole_field", { "j", "z" } },
-		//{ "whole_field", { "E", "x" } },
-		//{ "whole_field", { "E", "y" } },
-		// { "whole_field", { "E", "z" } },
-		// { "whole_field", { "B", "x" } },
-		// { "whole_field", { "B", "y" } },
-		//{ "whole_field", { "B", "z" } },
+		{ "whole_field", { "j", "y" } },
+		{ "whole_field", { "E", "x" } },
+		{ "whole_field", { "E", "y" } },
+		{ "whole_field", { "B", "z" } },
 
 		{ "field_along_X", { "j", "x", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "j", "z", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "E", "z", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "B", "x", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "B", "y", to_string(SIZE_Y/2) } },
-		//{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "j", "y", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "E", "x", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "E", "y", to_string(SIZE_Y/2) } },
+		{ "field_along_X", { "B", "z", to_string(SIZE_Y/2) } },
 
 		{ "field_along_Y", { "j", "x", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "j", "z", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "E", "y", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "E", "z", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "x", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "y", to_string(SIZE_X/2) } },
-		//{ "field_along_Y", { "B", "z", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "j", "y", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "E", "x", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "E", "y", to_string(SIZE_X/2) } },
+		{ "field_along_Y", { "B", "z", to_string(SIZE_X/2) } },
 
-		{ "field_at_point", { "B", "x", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
+		{ "field_at_point", { "B", "z", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
 		};
 //####################################################################################
 
@@ -139,17 +138,13 @@ using namespace std;
 
 
 //######## NAMING A DIRECTORY ########################################################
-	const string dir_name = "../diagnostics/FRC/tests/" + boundaries + "/IONS_WITH_n_OF_t" 
-	//+ to_string(SIZE_X) + "Xcell_"
-	//+ to_string(dx).substr(0,4) + "dx/"
-	//+ to_string(int(Np)) + "ppc_" 
-	//+ XY_distrib
-	//+ "injection_system_and_field_reversing/"
-	//+ "/Jz" + to_string(0.80*sqrt(Bz0 * 2*M_PI)/(dr1*dr1*dr1*dr1/4. + dr1*dr1*dr1/3. + dr1 - (dr1 - dr)*(dr1 - dr)*(dr1 - dr)*(dr1 - dr)/4.)).substr(0,5)
-	//+ "_dr" + to_string(dr).substr(0,4) + "_dr1" + to_string(dr1).substr(0,4)
-	//+ "_R_LARM" + to_string(r_larm).substr(0,4)
-	+ "/TIME" + to_string(TIME); // + "_TINJ" + to_string(TINJ)
-	//+ "/" + to_string(SIZE_Y) + "Ycell";
+	const string dir_name = "../diagnostics/FRC/" + boundaries + "/"
+	+ to_string(SIZE_X) + "Xcell_"
+	+ to_string(dx).substr(0,4) + "dx/"
+	+ "INJECTION_SYSTEM_"
+	+ to_string(Npi) + "ppc_" 
+	+ "_R_LARM" + to_string(r_larm).substr(0,4)
+	+ "/TIME" + to_string(TIME) + "_TINJ" + to_string(TINJ);
 //####################################################################################
 
 //#################################################################################################

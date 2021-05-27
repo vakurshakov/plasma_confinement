@@ -39,7 +39,7 @@ public:
 		#if there_are_particles
 		for (auto description : species) {
 			if ( description.first == "Electrons" ) {
-
+				
 				Electrons temp;
 				
 				temp.initialize("Electrons", particles_solvers, description.second[0],
@@ -47,8 +47,8 @@ public:
 
 				particles_.push_back(move(temp));
 			}
-
-			else if ( description.first == "Ions" ) {
+			
+			if ( description.first == "Ions" ) {
 
 				Ions temp;
 				
@@ -73,8 +73,18 @@ public:
 
 		for (int t = 0; t < TIME; ++t) {
 		
+			#if there_are_density_add
+			for (auto& sort : particles_) {
+				cout << "hello!" << endl;
+				if (sort.name_ == "Ions") {
+					cout << "hello, " << sort.name_ << "!" <<  endl;
+					sort.add_ion_density(t);
+				}
+			}
+			#endif
+
 			#if there_are_current_add
-			particles_[0].add_ion_current(t);
+			fields_.add_ion_current(t);
 			#endif
 			
 			#if there_are_particles
@@ -93,18 +103,14 @@ public:
 
 				// TODO: реализовать частицы и поля БЕЗ диагностик
 				#if particles_are_diagnosed
-				if (t % diagnose_time_step == 0) {
-					sort.diagnose();
-				}
+				sort.diagnose(t);
 				#endif
 				
 			}
 			#endif
 		
 			#if fields_are_diagnosed
-			if ( t % diagnose_time_step == 0 ) {
-				fields_.diagnose();
-			}
+			fields_.diagnose(t);
 			#endif
 
 			fields_.propogate();			

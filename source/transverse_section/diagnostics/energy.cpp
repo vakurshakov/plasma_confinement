@@ -5,7 +5,7 @@ void fields_energy::initialize() {}
 void particles_energy::initialize() {}
 
 
-void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j)
+void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j, int t)
 {
 	float temp;
 	#pragma omp parallel for reduction(+: W)
@@ -22,7 +22,7 @@ void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j)
 	W = 0;
 }
 
-void particles_energy::diagnose(const Species_description& sort)
+void particles_energy::diagnose(const Species_description& sort, int t)
 {
 	float temp;
 	#pragma omp parallel for reduction(+: W), num_threads(8)

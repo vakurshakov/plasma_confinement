@@ -38,9 +38,11 @@ public:
 	void particle_push(int i, const v3f& E, const v3f& B); 
 	void density_decomposition(int i, const vector2& r0, v3f& j);
 	void boundaries_processing(int i, double size_x, double size_y);
-	void diagnose();
+	void diagnose(int t);
 
-	void add_ion_current(int t);
+	void add_ion_density(int t);
+	
+	string name_;
 	
 protected:
 	// vector of diagnostics for sort
@@ -69,7 +71,7 @@ public:
 
 	Protons(double n) : Particles(+e, mpr, n) {};
 
-	//void add_ion_current(int t);
+	//void add_ion_density(int t);
 };
 
 class Ions : public Particles {
@@ -78,7 +80,7 @@ public:
 
 	Ions(double n) : Particles(+e, mi, n) {};
 
-	void add_ion_current(int t);
+	void add_ion_density(int t);
 };
 //#################################################################################################
 

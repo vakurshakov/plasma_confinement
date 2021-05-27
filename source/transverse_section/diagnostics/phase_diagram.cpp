@@ -31,7 +31,9 @@ void clear_diagram_vx_on_y(diagram_vx_on_y& diag)
 }
 
 void diagram_vx_on_y::initialize()
-{
+{	
+	ofs_ << "#DTS" << std::endl;
+	ofs_ << diagnose_time_step << std::endl;
 	ofs_ << "#nVmin_ nVmax_ dv_" << std::endl;
 	ofs_ << nVmin_ << " " << nVmax_ << " " << dv_ << std::endl;
 	ofs_ << "#nYmin_ nYmax_ dy"  << std::endl;
@@ -40,17 +42,20 @@ void diagram_vx_on_y::initialize()
 	clear_diagram_vx_on_y(*this);
 }
 
-void diagram_vx_on_y::diagnose(const Species_description& sort)
+void diagram_vx_on_y::diagnose(const Species_description& sort, int t)
 {
-	collect_diagram_vx_on_y(*this, sort);
-
-	for (int nVx = 0; nVx < (nVmax_ - nVmin_); ++nVx) {
-	for (int  nY = 0;  nY < (nYmax_ - nYmin_); ++ nY) {
-		OFS_ << data_[ nVx*(nYmax_ - nYmin_) + nY ] << " ";
+	if ((t % diagnose_time_step) == 0) {
+			
+		collect_diagram_vx_on_y(*this, sort);
+	
+		for (int nVx = 0; nVx < (nVmax_ - nVmin_); ++nVx) {
+		for (int  nY = 0;  nY < (nYmax_ - nYmin_); ++ nY) {
+			OFS_ << data_[ nVx*(nYmax_ - nYmin_) + nY ] << " ";
+		}
+			OFS_ << "\t";
+		}
+		OFS_ << std::endl;
+	
+		clear_diagram_vx_on_y(*this);
 	}
-		OFS_ << "\t";
-	}
-	OFS_ << std::endl;
-
-	clear_diagram_vx_on_y(*this);
 }

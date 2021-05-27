@@ -32,7 +32,7 @@ public:
 
 	// main Field's methods
 	void propogate();
-	void diagnose();
+	void diagnose(int t);
 
 	// additional
 	void add_ion_current(int t);

@@ -4,8 +4,8 @@
 void whole_field::initialize()
 {
 	create_directory(path_ / "animation");
-	ofs_ << "#SIZE_X SIZE_Y" << endl;
-	ofs_ << SIZE_X << " " << SIZE_Y << " " << endl;
+	ofs_ << "#SIZE_X SIZE_Y DTS" << endl;
+	ofs_ << SIZE_X << " " << SIZE_Y << " " << diagnose_time_step << endl;
 }
 
 void wf_diagnose(const v3f& F, string axis, ofstream& File)
@@ -29,9 +29,13 @@ void wf_diagnose(const v3f& F, string axis, ofstream& File)
 	}
 }
 
-void whole_field::diagnose(const v3f& E, const v3f& B, const v3f& j)
+void whole_field::diagnose(const v3f& E, const v3f& B, const v3f& j, int t)
 {
-	if ( field_ == "E" ) { wf_diagnose( E, axis_, OFS_ ); }
-	else if ( field_ == "B" ) { wf_diagnose( B, axis_, OFS_ ); }
-	else if ( field_ == "j" ) { wf_diagnose( j, axis_, OFS_ ); }
+	if ((t % diagnose_time_step) == 0) {
+			
+		if ( field_ == "E" ) { wf_diagnose( E, axis_, OFS_ ); }
+		else if ( field_ == "B" ) { wf_diagnose( B, axis_, OFS_ ); }
+		else if ( field_ == "j" ) { wf_diagnose( j, axis_, OFS_ ); }
+
+	}
 }
