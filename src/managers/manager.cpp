@@ -7,7 +7,8 @@
 #include "./fields_builder.hpp"
 #include "./particles_builder.hpp"
 #include "./time_manager.hpp"
-#include "../command/command_add_Bz0.hpp"
+#include "../command/command.hpp"
+#include "../command/cmd_add_Bz0.hpp"
 #include "../constants.h"
 
 
@@ -18,7 +19,7 @@ void Manager::initializes()
 		
 	#if there_are_fields
 		#if there_are_Bz0
-		set_up_commands.push_front(make_unique<Add_Bz0>(&fields_, Bz0));
+		fields_setting_commands_.push_front(std::make_unique<Add_Bz0>(&fields_, Bz0));
 		#endif
 	#endif
 	
@@ -33,13 +34,13 @@ void Manager::calculates()
 	Timer timer;
 	timer.set_up();
 
-	if (!set_up_commands.empty()) {
-		for (auto& command : set_up_commands_) {
+	if (!fields_setting_commands_.empty()) {
+		for (auto& command : fields_setting_commands_) {
 			command->execute();
 		}
 	}
 	
-	for (decltype(TIME) t = 0; t < TIME; ++t) {	
+	for (int t = 0; t < TIME; ++t) {	
 
 		#if there_are_particles
 		for (auto& particles : list_of_particles_) {

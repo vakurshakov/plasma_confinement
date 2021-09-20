@@ -24,12 +24,12 @@ void Esirkepov_density_decomposition(const Particle_parameters& sort,
 	const int charge_cloud = sort.charge_cloud();
 	const std::function<double(double, double)> shape_at = sort.form_factor();
 
-	const vector2 r = point.r();
+	const vector2& r = point.r();
 
 	px_py_vector3_field temp_J(2*charge_cloud+1, 2*charge_cloud+1); 
 
-	constexpr size_t nearest_edge_to_rx = size_t(roundf(r.x/dx));
-	constexpr size_t nearest_edge_to_ry = size_t(roundf(r.y/dy));
+	const size_t nearest_edge_to_rx = size_t(roundf(r.x/dx));
+	const size_t nearest_edge_to_ry = size_t(roundf(r.y/dy));
 
 	{	// collecting Jx(y,x) -------------------------------------------------------------------------
 		long int node_x, node_y;
@@ -92,8 +92,8 @@ void Esirkepov_density_decomposition(const Particle_parameters& sort,
 	}
 
 	{	// collecting Jz(y,x) -------------------------------------------------------------------------
-		constexpr double gamma = sqrt(1 + point.p().dot(point.p())/(sort.m()*sort.m()));
-		constexpr double vz = point.p().z/gamma;
+		const double gamma = sqrt(1 + point.p().dot(point.p())/(sort.m()*sort.m()));
+		const double vz = point.p().z/gamma;
 
 		long int node_x, node_y;
 		

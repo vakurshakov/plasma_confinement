@@ -1,13 +1,13 @@
 #include <memory>
 #include <forward_list>
 
-#include "./command/command.hpp"
-#include "./managers/fields.hpp"
-#include "./managers/particles.hpp"
+#include "./fields.hpp"
+#include "./particles.hpp"
+#include "../command/command.hpp"
 #include "../constants.h"
 
 
-using command_up = std::unique_ptr<Command>;
+using fcommand_up = std::unique_ptr<Fields_command>;
 
 
 class Manager {
@@ -17,12 +17,11 @@ public:
 	void initializes();
 	void calculates();
 
-
 private:
 	// Необходимые для работы cущности
 	Fields fields_;
 	std::forward_list<Particles> list_of_particles_;
 
 	// Комманды
-	std::forward_list<command_up> set_up_commands;
-}
+	std::forward_list<fcommand_up> fields_setting_commands_;
+};

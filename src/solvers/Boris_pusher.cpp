@@ -1,4 +1,4 @@
-#include "./solvers.hpp"
+#include "./Boris_pusher.hpp"
 
 #include <cmath>
 #include <functional>
@@ -15,25 +15,26 @@ enum SHAPE {
 };
 
 
-void Boris_pusher::interpolate(const v3f& E, const v3f& B, const vector2& r0)
+void Boris_pusher::interpolate(const v3f& E, const v3f& B,
+	const Particle_parameters& parameters, const vector2& r0)
 {
-	const std::function<double(double, double)> shape_at = parameters->form_factor();
-	const int charge_cloud = parameters->charge_cloud();
+	const std::function<double(double, double)> shape_at = parameters.form_factor();
+	const int charge_cloud = parameters.charge_cloud();
 
-	constexpr int nearest_edge_to_rx = int(roundf(r0.x/dx));
-	constexpr int nearest_edge_to_ry = int(roundf(r0.y/dy));
+	const int nearest_edge_to_rx = static_cast<int>(roundf(r0.x/dx));
+	const int nearest_edge_to_ry = static_cast<int>(roundf(r0.y/dy));
 
 	vector2 shape[2];
 	//	shape[noshift] -- shape((i, j) - r)
 	//	shape[shifted] -- shape((i + 1./2, j + 1./2) - r)
 		
 	for(int ny = nearest_edge_to_ry-charge_cloud; ny <= nearest_edge_to_ry+charge_cloud; ++ny) {
-		shape[noshift].y = shape_at( ny*dy - r.y, dy);
-		shape[shifted].y = shape_at((ny + 0.5)*dy - r.y, dy);
+		shape[noshift].y = shape_at( ny*dy - r0.y, dy);
+		shape[shifted].y = shape_at((ny + 0.5)*dy - r0.y, dy);
 		
 		for(int nx = nearest_edge_to_rx-charge_cloud; nx <= nearest_edge_to_rx+charge_cloud; ++nx) {
-			shape[noshift].x = shape_at( nx*dx - r.x, dx);
-			shape[shifted].x = shape_at((nx + 0.5)*dx - r.x, dx);
+			shape[noshift].x = shape_at( nx*dx - r0.x, dx);
+			shape[shifted].x = shape_at((nx + 0.5)*dx - r0.x, dx);
 			
 			local_E.x += E.x(ny,nx)*( shape[shifted].x * shape[noshift].y );
 			local_E.y += E.y(ny,nx)*( shape[noshift].x * shape[shifted].y );
@@ -51,19 +52,16 @@ void Boris_pusher::push(const Particle_parameters& parameters, Point* point)
 	// getting a usefull variabels from %parameters and %point
 	r_ = point->r();
 	p_ = point->p();
-	const double  q = parameters->q(); 
-	const double  m = parameters->m();
+	const double  q = parameters.q(); 
+	const double  m = parameters.m();
 
-	vector3 p_minus, h, s;
-	double energy;
-
-	p_minus = p_ + local_E*0.5*q*dt;
+	const vector3 p_minus = p_ + local_E*0.5*q*dt;
 	
-	energy = sqrt(m*m + p_minus.dot(p_minus));
+	double energy = sqrt(m*m + p_minus.dot(p_minus));
 	
-	h = local_B*0.5*q*dt/energy;
+	const vector3 h = local_B*0.5*q*dt/energy;
 	
-	s = h*2./(1. + h.dot(h));
+	const vector3 s = h*2./(1. + h.dot(h));
 	
 	p_ = local_E*0.5*q*dt + p_minus*(1. - h.dot(s)) + p_minus.cross(s) + h*(s.dot(p_minus));
 	

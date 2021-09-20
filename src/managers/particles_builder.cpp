@@ -18,6 +18,7 @@
 #include "../diagnostics/energy.hpp"
 #include "../diagnostics/phase_diagram.hpp"
 #include "../particle/point.hpp"
+#include "../solvers/solvers.hpp"
 #include "../constants.h"
 
 
@@ -181,7 +182,7 @@ auto Particles_builder::particle_push_commands(const std::vector<string> descrip
 
 	// Толкатель
 	if ( description[PCONF::pusher].find("+Interpolation") ) {
-		commands.push_front(make_unique<Interpolate_fields>(pusher, fields_->E(), fields_->B()));
+		commands.push_front(make_unique<Interpolate_fields>(pusher, fields_->E(), fields_->B(), parameters));
 	}
 
 	if ( description[PCONF::pusher].find("+Push_particle") ) {

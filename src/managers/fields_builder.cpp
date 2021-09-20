@@ -27,54 +27,60 @@ using diagnostic_up = std::unique_ptr<Diagnostic>;
 function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
 {
 	// Вовзращает выбранный солвер (пропогатор) [ работает с файлом ./constants.h ]
+	function<void(v3f& E, v3f& B, v3f& j)> propogator;
+	
 	if ( field_solver.empty() ) {
 		std::cout << "what():  Initialization error: No field_solver in file [./constants.h]" << std::endl; 
  	}
 	else if ( field_solver == "FDTD_2D" ) {
-		return FDTD_2D;			
+		propogator = FDTD_2D;			
 	}
 	else {
 		std::cout << "what():  Initialization error: No matching field_solver" << std::endl;
 	}
+	return propogator;
 }
 
 
 v3f_up Fields_builder::load_field(string type)
 {
 	// Возвращает сконфигурированные поля [ работает с файлом ./constants.h ]
+	v3f_up field = nullptr;
+
 	if ( boundaries.empty() ) {
 		std::cout << "load_field:  Initialization error: No boundaries in file [./constants.h]" << std::endl;
 	}
 	else if ( boundaries == "px_py" ) {
-		return make_unique<px_py_vector3_field>(SIZE_X, SIZE_Y);
+		field = make_unique<px_py_vector3_field>(SIZE_X, SIZE_Y);
 	}
 	else if ( boundaries == "rx_ry" ) {
 		if ( type == "Electric" ) {
-			return make_unique<rx_ry_Electric_field>(SIZE_X, SIZE_Y);
+			field = make_unique<rx_ry_Electric_field>(SIZE_X, SIZE_Y);
 		}
 		else if ( type == "Magnetic" ) {
-			return make_unique<rx_ry_Magnetic_field>(SIZE_X, SIZE_Y);
+			field = make_unique<rx_ry_Magnetic_field>(SIZE_X, SIZE_Y);
 		}
 	}
 	else if ( boundaries == "rx_py" ) {
 		if ( type == "Electric" ) {
-			return make_unique<rx_py_Electric_field>(SIZE_X, SIZE_Y);
+			field = make_unique<rx_py_Electric_field>(SIZE_X, SIZE_Y);
 		}
 		else if ( type == "Magnetic" ) {
-			return make_unique<rx_py_Magnetic_field>(SIZE_X, SIZE_Y);
+			field = make_unique<rx_py_Magnetic_field>(SIZE_X, SIZE_Y);
 		}
 	}
 	else if ( boundaries == "px_ry" ) {
 		if ( type == "Electric" ) {
-			return make_unique<px_ry_Electric_field>(SIZE_X, SIZE_Y);
+			field = make_unique<px_ry_Electric_field>(SIZE_X, SIZE_Y);
 		}
 		else if ( type == "Magnetic" ) {
-			return make_unique<px_ry_Magnetic_field>(SIZE_X, SIZE_Y);
+			field = make_unique<px_ry_Magnetic_field>(SIZE_X, SIZE_Y);
 		}
 	}
 	else {
 		std::cout << "load_field:  Initialization error: No matching boundaries" << std::endl;	
 	}
+	return field;
 }
 
 Fields Fields_builder::build()

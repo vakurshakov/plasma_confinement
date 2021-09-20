@@ -28,21 +28,21 @@ public:
 			}
 			
 			auto current_time = ch::steady_clock::now();
-			auto elapsed = ch::duration_cast<ch::seconds>(current_time - start_);
+			ch::duration<double> elapsed_time = current_time - start_;
 			
 			std::cout << "\t[";
 			for (int n = 0; n <= TIME; n+= TIME/10) {
 				if ( n <= t ) { std::cout << "#"; }
 				else { std::cout << " "; }
 			}
-			std::cout << "]\t" << elapsed.count() << "s" << std::endl;
+			std::cout << "]\t" << elapsed_time.count() << "s" << std::endl;
 		}
 		}
 	}
 
 	void elapsed() {
 		auto end = ch::steady_clock::now();
-		auto elapsed_time = ch::duration_cast<ch::seconds>(end - start_);
+		ch::duration<double> elapsed_time = end - start_;
 		std::cout << "\n\n\truntime:\t" << elapsed_time.count() << "s\n" << std::endl;
 	}
 
