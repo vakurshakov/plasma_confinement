@@ -4,10 +4,11 @@
 
 #include "../../constants.h"
 
-
-void Ions::add_ion_density(int t)
+/*
+void Particles::add_ion_density(int t)
 {
 	if ( t <= TINJ ) {
 		parameters_.n() = ni*sin(0.5*M_PI*double(t)/double(TINJ));
 	}
 }
+*/

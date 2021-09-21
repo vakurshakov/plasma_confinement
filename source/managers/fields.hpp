@@ -3,8 +3,8 @@
 
 //#################################################################################################
 
-#include "../command.hpp"
-#include "../Add_Bz0.hpp"
+//#include "../command.hpp"
+//#include "../Add_Bz0.hpp"
 
 #include "../diagnostics/diagnostics.hpp"
 #include "../vectors/vector3_field.hpp"
@@ -17,17 +17,17 @@
 
 using std::function, std::forward_list;
 using v3f = vector3_field;
-using v3f_up = unique_ptr<vector3_field>;
-using command_up = std::unique_ptr<Command>; 
+using v3f_up = std::unique_ptr<vector3_field>;
+//using command_up = std::unique_ptr<Command>; 
 using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 
 class Fields {
 public:
 	Fields() = default;
-	Fields( v3f_up E, v3f_up B, v3f_up J,
+	Fields( v3f_up&& E, v3f_up&& B, v3f_up&& J,
 			function<void(v3f& E, v3f& B, v3f& J)> propogator,
-			forward_list<diagnostic_up> diagnostics 			);
+			forward_list<diagnostic_up>&& diagnostics 		);
 	
 	// getters
 	v3f& E() { return *E_; }

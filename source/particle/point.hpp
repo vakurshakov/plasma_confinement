@@ -34,10 +34,10 @@ private:
 };
 
 
-void reflective_Xboundary(Point& particle, double SIZE_X);
-void reflective_Yboundary(Point& particle, double SIZE_Y);
-void periodic_Xboundary(Point& particle, double SIZE_X);
-void periodic_Yboundary(Point& particle, double SIZE_Y);
+void reflective_Xboundary(Point* particle, double size_x);
+void reflective_Yboundary(Point* particle, double size_y);
+void periodic_Xboundary(Point* particle, double size_x);
+void periodic_Yboundary(Point* particle, double size_y);
 
 //#################################################################################################
 

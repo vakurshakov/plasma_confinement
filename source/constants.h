@@ -13,13 +13,13 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const double M_PI = 3.14159265358979323846;
 
 //######## MODIFIERS #################################################################
-	#define there_are_particles 			true
+	#define there_are_particles 			false
 		#define there_are_ions				false
-		#define there_are_electrons			true
-		#define particles_are_diagnosed 	true
+		#define there_are_electrons			false
+		#define particles_are_diagnosed 	false
 
 	#define there_are_fields				true
-		#define there_are_Bz0				false
+		#define there_are_Bz0				true
 		#define there_are_current_add 		false
 		#define there_are_density_add 		false
 		#define fields_are_diagnosed 		true
@@ -76,7 +76,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 			#if there_are_electrons
 			{ "Electrons", 
 				{	
-					{	"Boris_pusher", "Esirkepov_density_decomposition",
+					{	"Boris_pusher:+Interpolation,+Push_particle", "Esirkepov_density_decomposition",
 						to_string(-e), to_string(me), to_string(n0), to_string(Npe),
 						"circle", "random",
 						to_string(30e-3), to_string(30e-3), to_string(0),
@@ -90,7 +90,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 			#if there_are_ions
 			{ "Ions", 
 				{	
-					{	"Boris_pusher", "Esirkepov_density_decomposition",
+					{	"Boris_pusher:+Push_particle", "Esirkepov_density_decomposition",
 						to_string(+e), to_string(mi), to_string(0), to_string(Npi),
 						"ring", "random",
 						to_string(30e-3), to_string(30e-3), to_string(0),
@@ -109,6 +109,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
 	const multimap<string, vector<string>> fields_diagnostics = {
+		{ "energy", {} },
+		
 		{ "whole_field", { "j", "x" } },
 		//{ "whole_field", { "j", "y" } },
 		//{ "whole_field", { "E", "x" } },

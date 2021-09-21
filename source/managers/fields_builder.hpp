@@ -1,5 +1,5 @@
-#ifndef ENTITIES_BUILDER_H
-#define ENTITIES_BUILDER_H
+#ifndef FIELDS_BUILDER_HPP
+#define FIELDS_BUILDER_HPP
 
 //#################################################################################################
 
@@ -15,19 +15,15 @@
 
 using std::map, std::multimap, std::string, std::vector;
 using v3f = vector3_field;
-using v3f_up = unique_ptr<vector3_field>;
-using diagnostic_up = unique_ptr<Diagnostic>;
+using v3f_up = std::unique_ptr<vector3_field>;
+using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 
-class Entities_builder {
+class Fields_builder {
 public:
-	Entities_builder() = default;
+	Fields_builder() = default;
+	Fields build();
 	
-	void save_config();
-
-	Fields build_fields();
-	map<string, Particles> build_particles();
-
 private:
 	// Методы для постороения полей
 	function<void(v3f& E, v3f& B, v3f& j)> propogator();
@@ -43,13 +39,11 @@ private:
 	auto x_boundary();
 	auto y_boundary();
 
-	// Возвращает список диагностик для полей
+	// Возвращает список диагностик
 	forward_list<diagnostic_up> diagnostics_list(multimap<string, vector<string>> description);
-	// Возвращает список диагностик для частиц
-	forward_list<diagnostic_up> diagnostics_list(string particle_name, vector<string> description);
 };
 
 
 //#################################################################################################
 
-#endif
+#endif //FIELDS_BUILDER_HPP
