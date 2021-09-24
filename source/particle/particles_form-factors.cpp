@@ -1,3 +1,5 @@
+#include "particle_parameters.hpp"
+
 #include <cmath>
 
 // description of the differences in form-factors.pdf

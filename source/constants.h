@@ -10,13 +10,13 @@
 
 using std::vector, std::map, std::multimap, std::string, std::to_string;
 
-	const double M_PI = 3.14159265358979323846;
+	//const double M_PI = 3.14159265358979323846;
 
 //######## MODIFIERS #################################################################
-	#define there_are_particles 			false
+	#define there_are_particles 			true
 		#define there_are_ions				false
-		#define there_are_electrons			false
-		#define particles_are_diagnosed 	false
+		#define there_are_electrons			true
+		#define particles_are_diagnosed 	true
 
 	#define there_are_fields				true
 		#define there_are_Bz0				true

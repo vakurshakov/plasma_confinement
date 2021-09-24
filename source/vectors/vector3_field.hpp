@@ -3,8 +3,7 @@
 
 //#################################################################################################
 
-#include "./vector_classes.hpp"
-
+#include "vector_classes.hpp"
 
 enum Axis { X, Y, Z };
 

@@ -206,16 +206,16 @@ forward_list<Particles> Particles_builder::build()
 		auto parameters = this->config_parameters(description.second[0]);
 		auto pusher = this->set_pusher(description.second[0]);
 		Particles particles( parameters,
-							 this->load_particles(description.second[0]),
-							 pusher,
-							 this->x_boundary(),
-							 this->y_boundary(),
-							 this->diagnostics_list(description.first,
-							 	description.second[1]) );
+							this->load_particles(description.second[0]),
+							pusher,
+							this->x_boundary(),
+							this->y_boundary(),
+							this->diagnostics_list(description.first,
+								description.second[1]) );
 
 		particles.set_push_commands(this->particle_push_commands(description.second[0],
 			pusher, parameters)); 
-		list_of_particles.push_front(std::move(particles));
+		//list_of_particles.push_front(std::move(particles));
 	}
 
 	#endif

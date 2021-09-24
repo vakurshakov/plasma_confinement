@@ -1,5 +1,5 @@
-#include "./managers/configuration_saver.hpp"
-#include "./managers/manager.hpp"
+#include "managers/configuration_saver.hpp"
+#include "managers/manager.hpp"
 
 
 int main(int argc, char const *argv[])

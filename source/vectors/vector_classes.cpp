@@ -1,4 +1,4 @@
-#include "./vector_classes.hpp"
+#include "vector_classes.hpp"
 
 vector2& vector2::operator+=(const vector2& other)
 {

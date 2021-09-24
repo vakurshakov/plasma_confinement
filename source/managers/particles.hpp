@@ -26,10 +26,10 @@ class Particles {
 public:
 	Particles() = default;
 	Particles(
-		Particle_parameters&&, std::vector<Point>&&,
+		Particle_parameters, std::vector<Point>&&,
 		Boris_pusher* pusher,
-		std::function<void(Point*, double)> x_boundary,
-		std::function<void(Point*, double)> y_boundary,
+		std::function<void(Point*, double)>&& x_boundary,
+		std::function<void(Point*, double)>&& y_boundary,
 		std::forward_list<diagnostic_up>&& diagnostics 	);
 	
 	~Particles() {

@@ -20,11 +20,11 @@ using pcommand_up = std::unique_ptr<Particle_command>;
 
 
 Particles::Particles(
-	Particle_parameters&& parameters,
+	Particle_parameters parameters,
 	std::vector<Point>&& points,
 	Boris_pusher* pusher,
-	std::function<void(Point*, double)> x_boundary,
-	std::function<void(Point*, double)> y_boundary,
+	std::function<void(Point*, double)>&& x_boundary,
+	std::function<void(Point*, double)>&& y_boundary,
 	std::forward_list<diagnostic_up>&& diagnostics )
 {
 	parameters_ = parameters;

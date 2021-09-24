@@ -1,4 +1,4 @@
-#include "./vector3_field.hpp"
+#include "vector3_field.hpp"
 
 // usefull functions:
 
