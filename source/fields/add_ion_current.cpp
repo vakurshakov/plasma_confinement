@@ -1,6 +1,6 @@
 #if there_are_current_add
 
-#include "../fields.hpp"
+#include "./fields.hpp"
 #include <cmath>
 
 double get_current_shape(double r)

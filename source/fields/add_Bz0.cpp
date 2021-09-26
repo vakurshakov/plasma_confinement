@@ -1,4 +1,4 @@
-#include "../fields.hpp"
+#include "./fields.hpp"
 #include <cmath>
 
 

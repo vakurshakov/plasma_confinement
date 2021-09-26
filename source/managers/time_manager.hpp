@@ -41,9 +41,14 @@ public:
 	}
 
 	void elapsed() {
-		auto end = ch::steady_clock::now();
-		ch::duration<double> elapsed_time = end - start_;
-		std::cout << "\n\n\truntime:\t" << elapsed_time.count() << "s\n" << std::endl;
+		if (!(state == "set up")) {
+			std::cout << "Timer::tick(int): Timer wasn't set up" << std::endl;
+		}
+		else {
+			auto end = ch::steady_clock::now();
+			ch::duration<double> elapsed_time = end - start_;
+			std::cout << "\n\n\truntime:\t" << elapsed_time.count() << "s\n" << std::endl;
+		}
 	}
 
 private:

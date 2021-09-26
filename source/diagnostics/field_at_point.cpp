@@ -1,4 +1,4 @@
-#include "./field_at_point.hpp" 
+#include "field_at_point.hpp" 
 
 #include <string>
 #include <vector>

@@ -1,8 +1,8 @@
-#include "../particles.hpp"
+#include "./particles.hpp"
 
 #include <cmath>
 
-#include "../../constants.h"
+#include "../constants.h"
 
 /*
 void Particles::add_ion_density(int t)

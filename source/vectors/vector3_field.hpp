@@ -3,6 +3,7 @@
 
 //#################################################################################################
 
+#include <vector>
 #include "vector_classes.hpp"
 
 enum Axis { X, Y, Z };
@@ -12,12 +13,10 @@ public:
 	vector3_field() = default;
 
 	vector3_field(int size_x, int size_y) : size_x_(size_x), size_y_(size_y) {
-		field_ = new vector3[size_x_*size_y_];
+		field_.reserve(size_x_*size_y_);
 	};
 
-	virtual ~vector3_field() {
-		delete[] field_;
-	}
+	virtual ~vector3_field() = default;
 
 	int size_x() const { return size_x_; }
 	int size_y() const { return size_y_; }
@@ -37,7 +36,7 @@ public:
 
 protected:
 	int size_x_, size_y_;
-	vector3* field_;
+	std::vector<vector3> field_;
 	
 	virtual vector3& field_at(int i, int j) = 0;
 	virtual vector3 field_at(int i, int j) const = 0;

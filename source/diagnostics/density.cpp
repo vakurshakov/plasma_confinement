@@ -1,10 +1,10 @@
-#include "./density.hpp"
+#include "density.hpp"
 
 #include <string>
 #include <vector>
 
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
 #include "../constants.h"
 
 

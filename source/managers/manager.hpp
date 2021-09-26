@@ -1,13 +1,14 @@
+#include <map>
+#include <string>
 #include <memory>
-#include <forward_list>
 
-#include "./fields.hpp"
-#include "./particles.hpp"
+#include "../fields/fields.hpp"
+#include "../particles/particles.hpp"
 #include "../command/command.hpp"
 #include "../constants.h"
 
 
-using fcommand_up = std::unique_ptr<Fields_command>;
+using command_up = std::unique_ptr<Command>;
 
 
 class Manager {
@@ -22,6 +23,7 @@ private:
 	Fields fields_;
 	std::forward_list<Particles> list_of_particles_;
 
-	// Комманды
-	std::forward_list<fcommand_up> fields_setting_commands_;
+	// Команды
+	std::forward_list<command_up> settings_before_main_cycle;
+	std::forward_list<command_up> each_step_presets;
 };

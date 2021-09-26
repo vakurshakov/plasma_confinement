@@ -1,4 +1,4 @@
-#include "./field_along_the_line.hpp"
+#include "field_along_the_line.hpp"
 
 #include <string>
 #include <fstream>

@@ -14,14 +14,14 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 
 //######## MODIFIERS #################################################################
 	#define there_are_particles 			true
-		#define there_are_ions				false
+		#define there_are_ions				true
 		#define there_are_electrons			true
 		#define particles_are_diagnosed 	true
 
 	#define there_are_fields				true
 		#define there_are_Bz0				true
-		#define there_are_current_add 		false
-		#define there_are_density_add 		false
+		#define there_are_current_add 		true
+		#define there_are_density_add 		true
 		#define fields_are_diagnosed 		true
 
 
@@ -39,8 +39,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const int 	TINJ	= 25000;		// время нарастания тока ионов
 	const int 	diagnose_time_step = 10; 
 
-	const int 	SIZE_X 	= 5;
-	const int 	SIZE_Y 	= 5;
+	const int 	SIZE_X 	= 50;
+	const int 	SIZE_Y 	= 50;
 	const double dx 	= 0.04;
 	const double dy		= 0.04;
 	const double dt 	= 0.5*dx;

@@ -1,4 +1,4 @@
-#include "./diagnostics.hpp"
+#include "diagnostics.hpp"
 
 #include <string>
 

@@ -9,8 +9,8 @@
 
 #include "../file_writers/file_interface.hpp"
 #include "../file_writers/bin_file.hpp"
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
 #include "../vectors/vector3_field.hpp"
 
 using v3f = vector3_field;

@@ -1,4 +1,4 @@
-#include "./solvers.hpp"
+#include "solvers.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -6,8 +6,8 @@
 
 #include <omp.h>
 
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../vectors/vector_classes.hpp"
 #include "../constants.h"
@@ -16,7 +16,7 @@
 void Esirkepov_density_decomposition(const Particle_parameters& sort,
 									 const Point& point,
 									 const vector2& r0,
-									 vector3_field* J)
+									 vector3_field* const J)
 {
 	const double q  = sort.q();
 	const double n  = sort.n();

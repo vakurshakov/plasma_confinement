@@ -3,13 +3,13 @@
 
 //#######################################################################################
 
-#include "./command.hpp"
+#include "command.hpp"
 
 #include <functional>
 
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
-#include "../solvers/solvers.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
+#include "../solvers/Boris_pusher.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../vectors/vector_classes.hpp"
 
@@ -18,32 +18,33 @@ using v3f = vector3_field;
 
 class Interpolate_fields : public Particle_command {
 public:
-	Interpolate_fields(Boris_pusher* pusher, const v3f& E, const v3f& B,
-		const Particle_parameters& parameters)
+	Interpolate_fields(Boris_pusher* const pusher,
+		const v3f* const E, const v3f* const B, const Particle_parameters& parameters)
 			: pusher_(pusher), E_(E), B_(B), parameters_(parameters) {};
 
-	void execute(Point* point, const vector2& r0) const override {
+	void execute(Point& point, const vector2& r0) const override {
 		this->pusher_->interpolate(E_, B_, parameters_, r0);
 	};
 
 private:
-	Boris_pusher* pusher_;
-	const v3f& E_;
-	const v3f& B_;
+	Boris_pusher* const pusher_;
+	const v3f* const E_;
+	const v3f* const B_;
 	const Particle_parameters& parameters_;
 };
 
 class Push_particle : public Particle_command {
 public:
-	Push_particle(Boris_pusher* pusher, const Particle_parameters& parameters)
-		: pusher_(pusher), parameters_(parameters) {};
+	Push_particle(Boris_pusher* const pusher,
+		const Particle_parameters& parameters)
+			: pusher_(pusher), parameters_(parameters) {};
 
-	void execute(Point* point, const vector2&) const override {
+	void execute(Point& point, const vector2&) const override {
 		this->pusher_->push(parameters_, point);
 	};
 
 private:
-	Boris_pusher* pusher_;
+	Boris_pusher* const pusher_;
 	const Particle_parameters& parameters_;
 };
 

@@ -7,7 +7,7 @@ CFLAGs   = -std=c++17 -g -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
 OBJDIR = ../obj
 DEPDIR = ../dep
 
-VPATH = vectors/ particle/ managers/ managers/additionals/ solvers/ file_writers/ diagnostics/
+VPATH = diagnostics/ fields/ file_writers/ managers/ particles/ particles/particle/ solvers/ vectors/ 
 
 MAIN 		= main.cpp
 VECTORS 	= vector_classes.cpp vector3_field.cpp
@@ -43,7 +43,7 @@ create_directories:
 
 .PHONY: clean
 clean:
-	@rm $(DEPs) $(OBJs) $(PROG)
+	@rm $(DEPs) $(OBJs) ../$(PROG)
 
 .PHONY: cleandeps
 cleandep:

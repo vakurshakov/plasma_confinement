@@ -3,16 +3,16 @@
 
 //#######################################################################################
 
-#include "./command.hpp"
+#include "command.hpp"
 
-#include "../managers/fields.hpp"
+#include "../fields/fields.hpp"
 
 using v3f = vector3_field;
 
 
-class Add_Bz0 : public Fields_command {
+class Add_Bz0 : public Command {
 public:
-	Add_Bz0(Fields* fields, double Bz0)
+	Add_Bz0(Fields* const fields, double Bz0)
 		: fields_(fields), Bz0_(Bz0) {};
 		
 	void execute() const override {
@@ -20,7 +20,7 @@ public:
 	};
 
 private:
-	Fields *fields_;	
+	Fields* const fields_;	
 	double Bz0_;
 };
 

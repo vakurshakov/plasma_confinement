@@ -1,21 +1,15 @@
-#include "./Boris_pusher.hpp"
+#include "Boris_pusher.hpp"
 
 #include <cmath>
 #include <functional>
 
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
 
-enum SHAPE {
-	noshift = 0,
-	shifted = 1
-};
-
-
-void Boris_pusher::interpolate(const v3f& E, const v3f& B,
+void Boris_pusher::interpolate(const v3f* const E, const v3f* const B,
 	const Particle_parameters& parameters, const vector2& r0)
 {
 	const std::function<double(double, double)> shape_at = parameters.form_factor();
@@ -25,9 +19,13 @@ void Boris_pusher::interpolate(const v3f& E, const v3f& B,
 	const int nearest_edge_to_ry = static_cast<int>(roundf(r0.y/dy));
 
 	vector2 shape[2];
-	//	shape[noshift] -- shape((i, j) - r)
-	//	shape[shifted] -- shape((i + 1./2, j + 1./2) - r)
+	enum SHAPE {
+		noshift = 0, //	shape[noshift] -- shape((i, j) - r)
+		shifted = 1  //	shape[shifted] -- shape((i + 1./2, j + 1./2) - r)
+	};
 		
+	local_E = {0, 0, 0};
+	local_B = {0, 0, 0};
 	for(int ny = nearest_edge_to_ry-charge_cloud; ny <= nearest_edge_to_ry+charge_cloud; ++ny) {
 		shape[noshift].y = shape_at( ny*dy - r0.y, dy);
 		shape[shifted].y = shape_at((ny + 0.5)*dy - r0.y, dy);
@@ -36,25 +34,27 @@ void Boris_pusher::interpolate(const v3f& E, const v3f& B,
 			shape[noshift].x = shape_at( nx*dx - r0.x, dx);
 			shape[shifted].x = shape_at((nx + 0.5)*dx - r0.x, dx);
 			
-			local_E.x += E.x(ny,nx)*( shape[shifted].x * shape[noshift].y );
-			local_E.y += E.y(ny,nx)*( shape[noshift].x * shape[shifted].y );
-			local_E.z += E.z(ny,nx)*( shape[shifted].x * shape[shifted].y );
+			local_E.x += E->x(ny,nx)*( shape[shifted].x * shape[noshift].y );
+			local_E.y += E->y(ny,nx)*( shape[noshift].x * shape[shifted].y );
+			local_E.z += E->z(ny,nx)*( shape[shifted].x * shape[shifted].y );
 			
-			local_B.x += B.x(ny,nx)*( shape[shifted].x * shape[noshift].y );
-			local_B.y += B.y(ny,nx)*( shape[noshift].x * shape[shifted].y );
-			local_B.z += B.z(ny,nx)*( shape[shifted].x * shape[shifted].y );
+			local_B.x += B->x(ny,nx)*( shape[shifted].x * shape[noshift].y );
+			local_B.y += B->y(ny,nx)*( shape[noshift].x * shape[shifted].y );
+			local_B.z += B->z(ny,nx)*( shape[shifted].x * shape[shifted].y );
 		}
 	}
 }
 
-void Boris_pusher::push(const Particle_parameters& parameters, Point* point)
+
+void Boris_pusher::push(const Particle_parameters& parameters, Point& point)
 {
 	// getting a usefull variabels from %parameters and %point
-	r_ = point->r();
-	p_ = point->p();
+	vector2 r_ = point.r();
+	vector3 p_ = point.p();
 	const double  q = parameters.q(); 
 	const double  m = parameters.m();
 
+	// Realization of a Boris pusher
 	const vector3 p_minus = p_ + local_E*0.5*q*dt;
 	
 	double energy = sqrt(m*m + p_minus.dot(p_minus));
@@ -69,6 +69,6 @@ void Boris_pusher::push(const Particle_parameters& parameters, Point* point)
 	
 	r_ += p_.squeeze(Axes::XY)/energy*dt;
 
-	point->r() = r_;
-	point->p() = p_;		
+	point.r() = r_;
+	point.p() = p_;		
 }

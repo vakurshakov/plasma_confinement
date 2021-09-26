@@ -1,4 +1,4 @@
-#include "./whole_field.hpp" 
+#include "whole_field.hpp" 
 
 #include <string>
 #include <fstream>

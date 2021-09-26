@@ -12,14 +12,16 @@ double third_order_spline(double x, double grid_mesh);
 double fourth_order_spline(double x, double grid_mesh);
 double fifth_order_spline(double x, double grid_mesh);
 
+
 class Particle_parameters {
 public:
 	Particle_parameters() = default;
 
 	Particle_parameters(
-		double q, double m, double n, int Np, int charge_cloud = 2,
+		double q, double m, double n, int Np, int charge_cloud = 3,
 		std::function<double(double, double)> form_factor = second_order_spline)
-		: 	q_(q), m_(m), n_(n), Np_(Np), charge_cloud_(charge_cloud), form_factor_(form_factor) {};
+		: 	q_(q), m_(m), n_(n), Np_(Np),
+			charge_cloud_(charge_cloud), form_factor_(form_factor) {};
 
 	// getters
 	double q()	const { return q_; };

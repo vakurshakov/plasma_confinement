@@ -3,7 +3,7 @@
 
 //#################################################################################################
 
-#include "./diagnostics.hpp"
+#include "diagnostics.hpp"
 
 #include <string>
 #include <vector>

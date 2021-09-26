@@ -1,11 +1,11 @@
-#include "./diagnostics.hpp"
+#include "diagnostics.hpp"
 
 #include <cmath>
 #include <string>
 #include <vector>
 
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
 
 
 class diagram_vx_on_y : public Diagnostic {

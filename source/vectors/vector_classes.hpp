@@ -3,8 +3,6 @@
 
 //#################################################################################################
 
-#include <initializer_list>
-
 enum Axes { XY, YZ, XZ };
 
 struct vector2 {	
@@ -21,7 +19,7 @@ struct vector2 {
 
 struct vector3 {
 	vector3() : x(0), y(0), z(0) {};
-	vector3(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {};
+	vector3(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}; 
 
 	double dot(const vector3 &other) const;
 	vector3 cross(const vector3 &other) const;

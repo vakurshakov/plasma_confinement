@@ -4,20 +4,20 @@
 //#######################################################################################
 
 
-#include "../particle/point.hpp"
+#include "../particles/particle/point.hpp"
 #include "../vectors/vector_classes.hpp"
 
 
-class Fields_command {
+class Command {
 public:
-	virtual ~Fields_command() = default;
+	virtual ~Command() = default;
 	virtual void execute() const = 0;
 };
 
 class Particle_command {
 public: 
 	virtual ~Particle_command() = default;
-	virtual void execute(Point*, const vector2& r0) const = 0;
+	virtual void execute(Point&, const vector2& r0) const = 0;
 };
 
 

@@ -3,7 +3,7 @@
 
 //#################################################################################################
 
-#include "../vectors/vector_classes.hpp"
+#include "../../vectors/vector_classes.hpp"
 
 class Point {
 public:
@@ -34,10 +34,10 @@ private:
 };
 
 
-void reflective_Xboundary(Point* particle, double size_x);
-void reflective_Yboundary(Point* particle, double size_y);
-void periodic_Xboundary(Point* particle, double size_x);
-void periodic_Yboundary(Point* particle, double size_y);
+void reflective_Xboundary(Point& particle, double size_x);
+void reflective_Yboundary(Point& particle, double size_y);
+void periodic_Xboundary(Point& particle, double size_x);
+void periodic_Yboundary(Point& particle, double size_y);
 
 //#################################################################################################
 

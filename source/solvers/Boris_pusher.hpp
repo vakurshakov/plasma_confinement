@@ -3,13 +3,14 @@
 
 //#######################################################################################
 
-#include "./solvers.hpp"
+#include "solvers.hpp"
 
 #include <cmath>
 #include <functional>
 
-#include "../particle/particle_parameters.hpp"
-#include "../particle/point.hpp"
+#include "../particles/particle/particle_parameters.hpp"
+#include "../particles/particle/point.hpp"
+#include "../vectors/vector_classes.hpp"
 #include "../vectors/vector3_field.hpp"
 
 
@@ -20,15 +21,14 @@ class Boris_pusher {
 public:
 	Boris_pusher() = default;
 
-	void interpolate(const v3f& E, const v3f& B,
+	void interpolate(const v3f* const E, const v3f* const B,
 		const Particle_parameters&, const vector2& r0);
-	void push(const Particle_parameters&, Point*);
+	
+	void push(const Particle_parameters&, Point&);
 
 private:
-	vector3 local_E, local_B;
-	
-	vector2 r_;
-	vector3 p_;		
+	vector3 local_E = {0, 0, 0};
+	vector3 local_B = {0, 0, 0};
 };
 
 //#######################################################################################
