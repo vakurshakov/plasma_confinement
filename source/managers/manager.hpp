@@ -21,7 +21,7 @@ public:
 private:
 	// Необходимые для работы cущности
 	Fields fields_;
-	std::forward_list<Particles> list_of_particles_;
+	std::map<std::string, Particles> list_of_particles_;
 
 	// Команды
 	std::forward_list<command_up> settings_before_main_cycle;

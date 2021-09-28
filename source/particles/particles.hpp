@@ -9,6 +9,7 @@
 #include <functional>
 #include <forward_list>
 
+// #include "./add_ionization.hpp"
 #include "./particle/particle_parameters.hpp"
 #include "./particle/point.hpp"
 #include "../command/command.hpp" 
@@ -27,28 +28,20 @@ class Particles {
 public:
 	Particles() = default;
 	Particles(
-		const std::string particles_name,
-		Particle_parameters&, Pusher_up& pusher,
-		std::vector<Point>&&,
+		Particle_parameters&, std::vector<Point>&&,
+		Pusher_up& pusher,
 		std::function<void(Point&, double)>&& x_boundary,
 		std::function<void(Point&, double)>&& y_boundary,
 		std::forward_list<diagnostic_up>&& diagnostics 	);	
 	void set_push_commands(std::forward_list<pcommand_up>&&);
-	std::string get_name() const { return particles_name_; }
 
 	// main Particles methods
 	void push();
 	void diagnose(int t);
 	
-	friend void create_particles(
-		Particles* ionized, Particles* lost,
-		std::function<bool(vector2&)>& if_particles_are_configurated,
-		std::function<double(double)>& density_shape,
-		std::function<double(vector2&)>& probability );
+	friend class Ionization;
 
-protected:
-	const std::string particles_name_;
-
+private:
 	// main Kinetic_particles fields
 	Particle_parameters parameters_;
 	std::vector<Point> points_;
@@ -59,7 +52,7 @@ protected:
 	
 	void boundaries_processing(Point&, double size_x, double size_y);
 	std::function<void(Point&, double)> x_boundary_ = nullptr;
-	std::function<void(Point&, double)> y_boundary_ = nullptr;
+	std::function<void(Point&, double)> y_boundary_ = nullptr;	
 
 	// list of diagnostics for Particles
 	std::forward_list<diagnostic_up> diagnostics_;

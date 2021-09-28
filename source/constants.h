@@ -32,15 +32,15 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const double mpr 	= 1836;
 	
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	THREAD_NUM = 8;
+	const int 	THREAD_NUM = 16;
 
 
-	const int 	TIME	= 100;
+	const int 	TIME	= 1000;
 	const int 	TINJ	= 25000;		// время нарастания тока ионов
 	const int 	diagnose_time_step = 10; 
 
-	const int 	SIZE_X 	= 50;
-	const int 	SIZE_Y 	= 50;
+	const int 	SIZE_X 	= 160;
+	const int 	SIZE_Y 	= 160;
 	const double dx 	= 0.04;
 	const double dy		= 0.04;
 	const double dt 	= 0.5*dx;
@@ -58,7 +58,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const int Npe 		= 1;
 	const double v_inj 	= 0.00591;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double r_larm	= 3;	 	//1.36 // ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_larm	= 1.36;	 	//3 (курсовая) // ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
 	//const double dr		= 0.48;
 	const double dr		= 0.24;
@@ -74,7 +74,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	#if there_are_particles
 	const multimap<string, vector<vector<string>>> species = {
 			#if there_are_electrons
-			{ "Electrons", 
+			{ "electrons", 
 				{	
 					{	"Boris_pusher:+Interpolation,+Push_particle", "Esirkepov_density_decomposition",
 						to_string(-e), to_string(me), to_string(n0), to_string(Npe),
@@ -88,13 +88,24 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 			#endif
 			
 			#if there_are_ions
-			{ "Ions", 
+			{ "ions", 
 				{	
 					{	"Boris_pusher:+Push_particle", "Esirkepov_density_decomposition",
-						to_string(+e), to_string(mi), to_string(0), to_string(Npi),
-						"ring", "random",
+						to_string(+e), to_string(mi), to_string(ni), to_string(Npi),
+						"", "",
 						to_string(30e-3), to_string(30e-3), to_string(0),
 						to_string(mi*v_inj/sqrt(1-v_inj*v_inj))	},
+				
+					{	"density"	},
+				} 
+			},
+			{ "buffer_electrons", 
+				{	
+					{	"Boris_pusher:+Interpolation,+Push_particle", "Esirkepov_density_decomposition",
+						to_string(-e), to_string(me), to_string(ni), to_string(Npi),
+						"", "",
+						to_string(30e-3), to_string(30e-3), to_string(0),
+						to_string(0)	},
 				
 					{	"density"	},
 				} 
@@ -109,8 +120,6 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
 	const multimap<string, vector<string>> fields_diagnostics = {
-		{ "energy", {} },
-		
 		{ "whole_field", { "j", "x" } },
 		//{ "whole_field", { "j", "y" } },
 		//{ "whole_field", { "E", "x" } },

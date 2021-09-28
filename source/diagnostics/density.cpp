@@ -60,8 +60,8 @@ void density::collect(const Particle_parameters& sort, const std::vector<Point>&
 	double n  = sort.n();
 	int Np = sort.Np();
 
-	for (decltype(points.size()) i = 0; i < points.size(); ++i) {
-		vector2 r = points[i].r();
+	for (auto& point : points) {
+		const vector2 r = point.r();
 
 		int nx = int(roundf(r.x/dx));
 		int ny = int(roundf(r.y/dy));

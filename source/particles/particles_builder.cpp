@@ -39,15 +39,20 @@ Particle_parameters Particles_builder::config_parameters(const std::vector<strin
 	Particle_parameters params(	stod(parameters[PCONF::sort_charge]),
 								stod(parameters[PCONF::sort_mass]),
 								stod(parameters[PCONF::sort_density]),
-								stoi(parameters[PCONF::number_of_particles_in_cell])	);
+								stoi(parameters[PCONF::number_of_particles_in_cell]),
+								stod(parameters[PCONF::temperature_x]), 
+								stod(parameters[PCONF::temperature_y]), 
+								stod(parameters[PCONF::temperature_z]),
+								stod(parameters[PCONF::initial_impulse])
+		);
 	return params;
 }
 
 
-vector<Point> Particles_builder::load_particles(const std::vector<string> distribution)
+vector<Point> Particles_builder::load_particles(
+	const std::vector<string> distribution, const Particle_parameters& parameters)
 {
 	string configuration =	distribution[PCONF::configuration];
-	
 	function<bool(int cell_number_nx, int cell_number_ny)> this_is_config_cell = nullptr;
 	function<void(double x, double y,
 		double mass, double Tx, double Ty, double Tz,
@@ -74,19 +79,16 @@ vector<Point> Particles_builder::load_particles(const std::vector<string> distri
 		fill_the_cell = fill_periodically;
 	}
 
-	double Tx = stod(distribution[PCONF::temperature_x]); 
-	double Ty = stod(distribution[PCONF::temperature_y]); 
-	double Tz = stod(distribution[PCONF::temperature_z]);  
-	double p0 =	stod(distribution[PCONF::initial_impulse]);
+	const int Np = parameters.Np();
+    const double mass = parameters.m();
+    const double Tx = parameters.Tx();
+    const double Ty = parameters.Ty();
+    const double Tz = parameters.Tz();
+    const double p0 = parameters.p0();
 
-	// Вот это, конечно, нужно по-другому сделать
-	double mass = stod(distribution[PCONF::sort_mass]);
-	int Np = stoi(distribution[PCONF::number_of_particles_in_cell]);
-
-	// Будем задавать рандом одинаковым числом для
-	// воспроизводимости экспериментов  
-	srand(42);
 	vector<Point> points;
+
+	if (!configuration.empty() && !cell_filling.empty()) {
 
 	for (int nx = 0; nx < SIZE_X; ++nx) {
 	for (int ny = 0; ny < SIZE_Y; ++ny) {
@@ -106,13 +108,13 @@ vector<Point> Particles_builder::load_particles(const std::vector<string> distri
 				}
 				else {
 					Point temp({x, y}, {px, py, pz});
-					points.push_back(temp);
+					points.push_back(std::move(temp));
 				}
 			}
 		}
 	}}	
-
-	points.shrink_to_fit();
+		points.shrink_to_fit();
+	}
 	return points;
 }
 
@@ -184,38 +186,42 @@ auto Particles_builder::particle_push_commands(const std::vector<string> descrip
 	forward_list<pcommand_up> commands;
 
 	// Толкатель (cейчас это пушер Бориса)
-	if ( description[PCONF::pusher].find("+Interpolation") ) {
-		commands.push_front(make_unique<Interpolate_fields>(pusher, fields_->E(), fields_->B(), parameters));
+	if ( description[PCONF::pusher].find("+Interpolation") != string::npos ) {
+		commands.push_front(make_unique<Interpolate_fields>(
+			pusher, fields_->E(), fields_->B(), parameters));
 	}
-	if ( description[PCONF::pusher].find("+Push_particle") ) {
+	if ( description[PCONF::pusher].find("+Push_particle") != string::npos ) {
 		commands.push_front(make_unique<Push_particle>(pusher, parameters));
 	}
 
 	// Декомпозиция токов
 	if ( description[PCONF::decomposition] == "Esirkepov_density_decomposition" ) {
-		commands.push_front(make_unique<Density_decomposition>(Esirkepov_density_decomposition, 
-			parameters, fields_->J()));
+		commands.push_front(make_unique<Density_decomposition>(
+			Esirkepov_density_decomposition, parameters, fields_->J()));
 	}
 
 	return commands;
 }
 
 
-forward_list<
-Particles> Particles_builder::build()
+map<string, Particles> Particles_builder::build()
 {
-	forward_list<Particles> list_of_particles;
+	map<string, Particles> list_of_particles;
 	
-	#if there_are_particles		
+	#if there_are_particles
+
+	// Будем задавать рандом одинаковым числом для
+	// воспроизводимости экспериментов  
+	srand(42);
 	for (auto& description : species) {
 
 		auto parameters = this->config_parameters(description.second[0]); 
 		auto pusher = this->set_pusher(description.second[0]);
 
 		Particles particles(
-			description.first,
-			parameters, pusher,
-			std::move(this->load_particles(description.second[0])),
+			parameters,
+			std::move(this->load_particles(description.second[0], parameters)),
+			pusher,
 			std::move(this->x_boundary()),
 			std::move(this->y_boundary()),
 			std::move(this->diagnostics_list(description.first,
@@ -229,7 +235,7 @@ Particles> Particles_builder::build()
 			)
 		);
 
-		list_of_particles.push_front(std::move(particles));
+		list_of_particles[description.first] = std::move(particles);
 	}
 
 	#endif

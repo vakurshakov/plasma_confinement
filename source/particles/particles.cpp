@@ -20,19 +20,18 @@ using Pusher_up = std::unique_ptr<Boris_pusher>;
 
 
 Particles::Particles(
-	const std::string particles_name,
-	Particle_parameters& parameters, Pusher_up& pusher,
+	Particle_parameters& parameters,
 	std::vector<Point>&& points,
+	Pusher_up& pusher,
 	std::function<void(Point&, double)>&& x_boundary,
 	std::function<void(Point&, double)>&& y_boundary,
 	std::forward_list<diagnostic_up>&& diagnostics )
-		: particles_name_(particles_name),
-		  parameters_(std::move(parameters)),
+		: parameters_(std::move(parameters)),
+		  points_(std::move(points)),
 		  pusher_(std::move(pusher)),
-		  points_(points),
-		  x_boundary_(x_boundary),
-		  y_boundary_(y_boundary),
-		  diagnostics_(diagnostics) {};
+		  x_boundary_(std::move(x_boundary)),
+		  y_boundary_(std::move(y_boundary)),
+		  diagnostics_(std::move(diagnostics)) {};
 
 
 void Particles::set_push_commands(std::forward_list<pcommand_up>&& commands) {

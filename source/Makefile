@@ -1,8 +1,8 @@
 PROG ?= test
 
 CC 	= g++
-CFLAGs   = -std=c++17 -g -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
-#CFLAGs = -std=c++17 -O2 -fopenmp # RELEASE VERSION
+#CFLAGs   = -std=c++17 -ggdb -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
+CFLAGs = -std=c++17 -O2 -fopenmp # RELEASE VERSION
 
 OBJDIR = ../obj
 DEPDIR = ../dep
@@ -15,7 +15,7 @@ PARTICLES 	= particles_form-factors.cpp point_bound_interact.cpp
 SOLVERS 	= FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp
 MANAGERS 	= fields.cpp fields_builder.cpp particles.cpp \
 				particles_builder.cpp particles_load.cpp manager.cpp
-ADDITIONALS	= add_Bz0.cpp add_ion_density.cpp add_ion_current.cpp
+ADDITIONALS	= add_Bz0.cpp add_ion_density.cpp add_ion_current.cpp add_ionization.cpp
 DIAGNOSTICS = energy.cpp whole_field.cpp field_along_the_line.cpp \
 				field_at_point.cpp phase_diagram.cpp density.cpp
 FILEWRITERS	= txt_file.cpp bin_file.cpp

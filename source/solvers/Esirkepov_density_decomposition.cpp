@@ -1,10 +1,10 @@
 #include "solvers.hpp"
 
+#include <omp.h>
+
 #include <cmath>
 #include <iostream>
 #include <functional>
-
-#include <omp.h>
 
 #include "../particles/particle/particle_parameters.hpp"
 #include "../particles/particle/point.hpp"

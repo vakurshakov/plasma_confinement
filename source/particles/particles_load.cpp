@@ -1,4 +1,4 @@
-#include "particles_load.hpp"
+#include "./particles_load.hpp"
 
 #include <cmath>
 
@@ -45,8 +45,8 @@ bool cell_on_a_ring(int cell_number_nx, int cell_number_ny)
 	double cx = (cell_number_nx+0.5 - 0.5*SIZE_X)*dx;
 	double cy = (cell_number_ny+0.5 - 0.5*SIZE_Y)*dy;
 	
-	return 	( r_larm-dr <= sqrt(cx*cx + cy*cy)) &&
-						  (sqrt(cx*cx + cy*cy) <= r_larm+dr );	
+	return 	( (r_larm-dr)*(r_larm-dr) <= (cx*cx + cy*cy)) &&
+			((cx*cx + cy*cy) <= (r_larm+dr)*(r_larm+dr) );	
 }
 
 bool cell_in_a_circle(int cell_number_nx, int cell_number_ny)

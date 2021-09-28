@@ -25,13 +25,14 @@ class Particles_builder {
 public:
 	Particles_builder(Fields* const fields) : fields_(fields) {};
 		
-	std::forward_list<Particles> build();
+	std::map<string, Particles> build();
 
 private:
 	Fields* const fields_;
 	
 	Particle_parameters config_parameters(const vector<string> parameters);
-	vector<Point> load_particles(const vector<string> distribution);
+	vector<Point> load_particles(const vector<string> distribution,
+		const Particle_parameters& parameters);
 	
 	auto set_pusher(const vector<string> description);
 	auto particle_push_commands(const vector<string> description,
