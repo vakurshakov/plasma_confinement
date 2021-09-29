@@ -19,13 +19,14 @@
 
 using std::string, std::vector;
 using diagnostic_up = std::unique_ptr<Diagnostic>;
+using Particles_up = std::unique_ptr<Particles>;
 
 
 class Particles_builder {
 public:
 	Particles_builder(Fields* const fields) : fields_(fields) {};
 		
-	std::map<string, Particles> build();
+	std::map<string, Particles_up> build();
 
 private:
 	Fields* const fields_;

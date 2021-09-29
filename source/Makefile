@@ -1,8 +1,8 @@
-PROG ?= test
+PROG ?= test.out
 
 CC 	= g++
-#CFLAGs   = -std=c++17 -ggdb -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
-CFLAGs = -std=c++17 -O2 -fopenmp # RELEASE VERSION
+CFLAGs   = -std=c++17 -ggdb -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
+#CFLAGs = -std=c++17 -O2 -fopenmp # RELEASE VERSION
 
 OBJDIR = ../obj
 DEPDIR = ../dep

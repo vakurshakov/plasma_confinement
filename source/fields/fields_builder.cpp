@@ -26,6 +26,7 @@ using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 function<void(v3f* const E, v3f* const B, v3f* const j)> Fields_builder::propogator()
 {
+	std::cout << "\t\tSetting propogator...";
 	// Вовзращает выбранный солвер (пропогатор) [ работает с файлом ./constants.h ]
 	function<void(v3f* const E, v3f* const B, v3f* const j)> propogator;
 	
@@ -33,17 +34,19 @@ function<void(v3f* const E, v3f* const B, v3f* const j)> Fields_builder::propoga
 		std::cout << "what():  Initialization error: No field_solver in file [./constants.h]" << std::endl; 
  	}
 	else if ( field_solver == "FDTD_2D" ) {
-		propogator = FDTD_2D;			
+		propogator = FDTD_2D;
 	}
 	else {
 		std::cout << "what():  Initialization error: No matching field_solver" << std::endl;
 	}
+	std::cout << "\tdone (" << field_solver << ")" << std::endl;
 	return propogator;
 }
 
 
 v3f_up Fields_builder::load_field(string type)
 {
+	std::cout << "\t\tMaking a(an) " << type << " v3f...";
 	// Возвращает сконфигурированные поля [ работает с файлом ./constants.h ]
 	v3f_up field = nullptr;
 
@@ -80,17 +83,21 @@ v3f_up Fields_builder::load_field(string type)
 	else {
 		std::cout << "load_field:  Initialization error: No matching boundaries" << std::endl;	
 	}
+	std::cout << "\tdone (" << field.get() << ")" << std::endl;
 	return field;
 }
 
 Fields Fields_builder::build()
 {
 	#if there_are_fields
+		std::cout << "\tBuilding fields:" << std::endl;
+
 		Fields fields(	std::move(this->load_field("Electric")),
 						std::move(this->load_field("Magnetic")),
 						std::move(this->load_field("Electric")),
 						std::move(this->propogator()),
 						std::move(this->diagnostics_list(fields_diagnostics))	);
+		std::cout << "\tBuilding of fields is complete\n" << std::endl;
 		return fields;
 	#else
 		Fields fields();
@@ -104,6 +111,7 @@ enum FD_DESC { FIELD, AXIS, PX, PY };
 forward_list<diagnostic_up> Fields_builder::diagnostics_list(
 	multimap<string, vector<string>> fields_diagnostics)
 {
+	std::cout << "\t\tSetting diagnostics...";
 	// Возвращает список необходимых диагностик для полей
 	forward_list<diagnostic_up> fl_diagnostics{};
 	
@@ -115,26 +123,31 @@ forward_list<diagnostic_up> Fields_builder::diagnostics_list(
 		else {	
 			for (auto& now : fields_diagnostics) {
 				if ( now.first == "energy" ) {
+					std::cout << "\n\t\t\t" << now.first;
 					fl_diagnostics.push_front(make_unique<fields_energy>(dir_name + "/" + now.first));
 				}
 				else if ( now.first == "whole_field" ) {
+					std::cout << "\n\t\t\t" << now.first;
 					fl_diagnostics.push_front(make_unique<whole_field>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS] ) );
 				}
 				else if ( now.first == "field_along_x_axis" ) {
+					std::cout << "\n\t\t\t" << now.first;
 					fl_diagnostics.push_front(make_unique<field_along_x_axis>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS],
 						stoi(now.second[FD_DESC::PX]) ) );
 				}
 				else if ( now.first == "field_along_y_axis" ) {
+					std::cout << "\n\t\t\t" << now.first;
 					fl_diagnostics.push_front(make_unique<field_along_y_axis>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS],
 						stoi(now.second[FD_DESC::PX]) ) );
 				} 
 				else if ( now.first == "field_at_point" ) {
+					std::cout << "\n\t\t\t" << now.first;
 					fl_diagnostics.push_front(make_unique<field_at_point>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS], 
@@ -146,5 +159,6 @@ forward_list<diagnostic_up> Fields_builder::diagnostics_list(
 			}
 		}
 	#endif
+	std::cout << "\n\t\tdone" << std::endl;
 	return fl_diagnostics; 
 }

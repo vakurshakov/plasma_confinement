@@ -30,24 +30,35 @@ void Manager::initializes()
 	
 	// Нужно забросить поля, чтобы задать пуш-команды
 	Particles_builder particles_builder(&fields_);
-	list_of_particles_ = std::move(particles_builder.build());
-
+	list_of_particles_ = particles_builder.build();
+	
 	#if there_are_ions
+		std::cout << "\tSetting each step presets..."
+			<< "\n\t\tIonization "; 
+
 		// Cейчас просто засовываем в класс ионизации нужные функции, потом разберёмся
 		Ionization_up ionization = std::make_unique<Ionization>(
 			cell_on_a_ring, fill_randomly, load_annular_impulse, uniform_density);
 		
-		Particles& ionized = list_of_particles_["ions"];
-		Particles& lost = list_of_particles_["buffer_electrons"];
-
+		Particles* ionized = list_of_particles_["ions"].get();
+		Particles* lost = list_of_particles_["buffer_electrons"].get();
+		
 		each_step_presets.push_front(std::make_unique<Create_particles>(
-			std::move(ionization), &ionized, &lost));
+			ionization, ionized, lost));
+		
+		std::cout << "\n\t\tcheck : (&ionization=" << ionization.get() << ", "
+					<< "&ionized=" << ionized << ", "
+					<< "&lost=" << lost << ")";
+			
+		std::cout << "\n\t\tdone\n"
+		<< "\tdone!" << std::endl;
 	#endif
 }
 
 
 void Manager::calculates()
 {
+	std::cout << "\n\tProcessing main cycle..." << std::endl;
 	Timer timer;
 	timer.set_up();
 
@@ -59,22 +70,26 @@ void Manager::calculates()
 	
 	for (int t = 0; t < TIME; ++t) {	
 
+	/*
 		if (!each_step_presets.empty()) {
 			for (auto& command : each_step_presets) {
 				command->execute();
 			}
 		}	
-	
+	*/
+
+	/*
 		#if there_are_particles
 		for (auto& particles : list_of_particles_) {
-			particles.second.diagnose(t);
-			particles.second.push();
+			particles.second->diagnose(t);
+			particles.second->push();
 		}
 		#endif
+	*/
 	
 		#if there_are_fields
-		fields_.diagnose(t);
-		fields_.propogate();
+	//	fields_.diagnose(t);
+	//	fields_.propogate();
 		#endif			
 		
 		timer.tick(t);

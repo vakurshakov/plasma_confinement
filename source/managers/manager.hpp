@@ -9,6 +9,7 @@
 
 
 using command_up = std::unique_ptr<Command>;
+using particles_up = std::unique_ptr<Particles>;
 
 
 class Manager {
@@ -21,7 +22,7 @@ public:
 private:
 	// Необходимые для работы cущности
 	Fields fields_;
-	std::map<std::string, Particles> list_of_particles_;
+	std::map<std::string, particles_up> list_of_particles_;
 
 	// Команды
 	std::forward_list<command_up> settings_before_main_cycle;

@@ -22,7 +22,7 @@ using Pusher_up = std::unique_ptr<Boris_pusher>;
 Particles::Particles(
 	Particle_parameters& parameters,
 	std::vector<Point>&& points,
-	Pusher_up& pusher,
+	Pusher_up&& pusher,
 	std::function<void(Point&, double)>&& x_boundary,
 	std::function<void(Point&, double)>&& y_boundary,
 	std::forward_list<diagnostic_up>&& diagnostics )
