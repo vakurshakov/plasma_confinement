@@ -24,11 +24,11 @@ using v3f_up = std::unique_ptr<vector3_field>;
 using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 
-function<void(v3f* const E, v3f* const B, v3f* const j)> Fields_builder::propogator()
+function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
 {
 	std::cout << "\t\tSetting propogator...";
 	// Вовзращает выбранный солвер (пропогатор) [ работает с файлом ./constants.h ]
-	function<void(v3f* const E, v3f* const B, v3f* const j)> propogator;
+	function<void(v3f& E, v3f& B, v3f& j)> propogator;
 	
 	if ( field_solver.empty() ) {
 		std::cout << "what():  Initialization error: No field_solver in file [./constants.h]" << std::endl; 
@@ -118,7 +118,7 @@ forward_list<diagnostic_up> Fields_builder::diagnostics_list(
 	#if fields_are_diagnosed
 		if ( fields_diagnostics.empty() ) {
 			std::cout << "what():  Initialization error: fields are diagnosed "
-					<< "but no fields_diagnostics in file [./constants.h]" << std::endl;
+					<< "but no fields_diagnostics in file [./constants.h]";
 		}
 		else {	
 			for (auto& now : fields_diagnostics) {

@@ -22,13 +22,11 @@ using Pusher_up = std::unique_ptr<Boris_pusher>;
 Particles::Particles(
 	Particle_parameters& parameters,
 	std::vector<Point>&& points,
-	Pusher_up&& pusher,
 	std::function<void(Point&, double)>&& x_boundary,
 	std::function<void(Point&, double)>&& y_boundary,
 	std::forward_list<diagnostic_up>&& diagnostics )
-		: parameters_(std::move(parameters)),
+		: parameters_(parameters),
 		  points_(std::move(points)),
-		  pusher_(std::move(pusher)),
 		  x_boundary_(std::move(x_boundary)),
 		  y_boundary_(std::move(y_boundary)),
 		  diagnostics_(std::move(diagnostics)) {};
@@ -43,8 +41,8 @@ void Particles::push()
 {
 	if (!push_commands_.empty()) {
 
-		#pragma omp parallel for num_threads(THREAD_NUM)
-		for (auto point : points_) {
+		// #pragma omp parallel for shared(push_commands_), num_threads(THREAD_NUM)
+		for (auto& point : points_) {
 
 			const vector2 r0 = point.r();
 			for (auto& command : push_commands_) {

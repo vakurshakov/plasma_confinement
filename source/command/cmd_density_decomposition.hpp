@@ -19,10 +19,10 @@ using v3f = vector3_field;
 class Density_decomposition : public Particle_command {
 public:
 	Density_decomposition(
-		const std::function<void(const Particle_parameters&,
-			const Point&, const vector2& r0, v3f* const J)>& decompose,
-		const Particle_parameters& parameters, v3f* const J )
-			: decompose_(decompose), parameters_(parameters), J_(J) {};
+		std::function<void(const Particle_parameters&,
+			const Point&, const vector2& r0, v3f& J)>&& decompose,
+		const Particle_parameters& parameters, v3f& J )
+			: decompose_(std::move(decompose)), parameters_(parameters), J_(J) {};
 
 	void execute(Point& point, const vector2& r0) const override {
 		this->decompose_(parameters_, point, r0, J_);
@@ -30,9 +30,9 @@ public:
 
 private:
 	const std::function<void(const Particle_parameters&,
-		const Point&, const vector2& r0, v3f* const J)>& decompose_;
+		const Point&, const vector2& r0, v3f& J)> decompose_;
 	const Particle_parameters& parameters_;
-	v3f* const J_;	
+	v3f& J_;	
 };
 
 

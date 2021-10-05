@@ -27,7 +27,7 @@ public:
 	
 private:
 	// Методы для постороения полей
-	function<void(v3f* const E, v3f* const B, v3f* const j)> propogator();
+	function<void(v3f& E, v3f& B, v3f& j)> propogator();
 	v3f_up load_field(string type);
 
 

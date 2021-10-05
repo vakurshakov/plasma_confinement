@@ -24,20 +24,19 @@ using Particles_up = std::unique_ptr<Particles>;
 
 class Particles_builder {
 public:
-	Particles_builder(Fields* const fields) : fields_(fields) {};
+	Particles_builder(Fields& fields) : fields_(fields) {};
 		
 	std::map<string, Particles_up> build();
 
 private:
-	Fields* const fields_;
+	Fields& fields_;
 	
 	Particle_parameters config_parameters(const vector<string> parameters);
 	vector<Point> load_particles(const vector<string> distribution,
 		const Particle_parameters& parameters);
 	
-	auto set_pusher(const vector<string> description);
 	auto particle_push_commands(const vector<string> description,
-		Boris_pusher* const, const Particle_parameters&);
+		const Particle_parameters&);
 	
 	auto x_boundary();
 	auto y_boundary();

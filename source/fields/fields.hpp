@@ -26,13 +26,13 @@ class Fields {
 public:
 	Fields() = default;
 	Fields( v3f_up&& E, v3f_up&& B, v3f_up&& J,
-			function<void(v3f* const E, v3f* const B, v3f* const J)>&& propogator,
+			function<void(v3f& E, v3f& B, v3f& J)>&& propogator,
 			forward_list<diagnostic_up>&& diagnostics 		);
 	
 	// getters
-	v3f* E() { return E_.get(); };
-	v3f* B() { return B_.get(); };
-	v3f* J() { return J_.get(); };
+	v3f& E() { return *E_; };
+	v3f& B() { return *B_; };
+	v3f& J() { return *J_; };
 
 	// main Field methods
 	void propogate();
@@ -45,7 +45,7 @@ public:
 private:
 	v3f_up E_, B_, J_;
 
-	function<void(v3f* const E, v3f* const B, v3f* const J)> propogate_ = nullptr;
+	function<void(v3f& E, v3f& B, v3f& J)> propogate_ = nullptr;
 	
 	forward_list<diagnostic_up> diagnostics_;
 };

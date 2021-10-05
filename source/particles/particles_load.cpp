@@ -7,7 +7,7 @@
 #include "../constants.h"
 
 
-double frand() { return static_cast<double>(rand())/RAND_MAX; }
+double frand() { return double(rand())/double(RAND_MAX); }
 
 // cell filling -------------------------------------------------------------------------
 
@@ -83,6 +83,6 @@ void load_uniform_impulse(double x, double y,
 	double p0, double* px, double* py, double* pz)
 {
 	*px = temperature_impulse(Tx, mass);
-	*pz = temperature_impulse(Ty, mass);
+	*py = temperature_impulse(Ty, mass); 
 	*pz = temperature_impulse(Tz, mass); 	
 }

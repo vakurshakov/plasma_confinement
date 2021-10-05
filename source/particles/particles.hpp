@@ -29,13 +29,11 @@ public:
 	Particles() = default;
 	Particles(
 		Particle_parameters&, std::vector<Point>&&,
-		Pusher_up&& pusher,
 		std::function<void(Point&, double)>&& x_boundary,
 		std::function<void(Point&, double)>&& y_boundary,
-		std::forward_list<diagnostic_up>&& diagnostics 	);
-	Boris_pusher* get_pusher() { return pusher_.get(); }
-	Particle_parameters& get_parameters() { return parameters_; } 
+		std::forward_list<diagnostic_up>&&	);
 	void set_push_commands(std::forward_list<pcommand_up>&&);
+	Particle_parameters& get_parameters() { return parameters_; }
 
 	// main Particles methods
 	void push();
@@ -49,7 +47,6 @@ private:
 	std::vector<Point> points_;
 
 	// solvers for particles
-	Pusher_up pusher_ = nullptr;
 	std::forward_list<pcommand_up> push_commands_;
 	
 	void boundaries_processing(Point&, double size_x, double size_y);

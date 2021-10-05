@@ -22,8 +22,11 @@ public:
 			:	ionization(std::move(_ionization)),
 				ionized(_ionized), lost(_lost) {};
 
-	void execute() const override {
-		ionization->process(ionized, lost);	
+	void execute(int t) const override {
+		// Лучше как-то вообще удалить указатель из списка
+		if ( t < TINJ) {
+			ionization->process(ionized, lost);
+		}
 	};
 
 private:

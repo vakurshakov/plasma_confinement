@@ -11,7 +11,7 @@ using v3f_up = std::unique_ptr<vector3_field>;
 
 
 Fields::Fields(	v3f_up&& E, v3f_up&& B, v3f_up&& J,
-				function<void(v3f* E, v3f* B, v3f* J)>&& propogate,
+				function<void(v3f& E, v3f& B, v3f& J)>&& propogate,
 				forward_list<diagnostic_up>&& diagnostics)
 {
 	E_.swap(E);
@@ -24,7 +24,7 @@ Fields::Fields(	v3f_up&& E, v3f_up&& B, v3f_up&& J,
 
 void Fields::propogate()
 {
-	propogate_(E_.get(), B_.get(), J_.get());
+	propogate_(*E_, *B_, *J_);
 }
 
 

@@ -12,31 +12,29 @@
 class Ionization {
 public:
     Ionization (
-	    std::function<bool(int nx, int ny)>&& this_is_config_cell,
-      std::function<void(int sequential_number, int Np,
-          int cell_number_nx, int cell_number_ny, double* x, double* y)>&& fill_the_cell,
-      std::function<void(double x, double y, double mass, double Tx, double Ty, double Tz,
-        double p0, double* px, double* py, double* pz)>&& load_impulse,
-      std::function<double(int nx, int ny)>&& density_shape )
-      // const std::function<double(double nx, double ny)>& probability
-          : this_is_config_cell_(this_is_config_cell),
-            fill_the_cell_(fill_the_cell),
-            load_impulse_(load_impulse),
-            density_shape_(density_shape) {};
+        int total_amount_of_particles_to_load, int time_of_injection,
+        std::function<void(double* x, double* y)>&& set_point_of_birth,
+        std::function<double(double x, double y)>&& get_probability,
+        std::function<void(double x, double y, double mass, double Tx, double Ty, double Tz,
+          double p0, double* px, double* py, double* pz)>&& load_impulse)
+            :   number_of_particles_to_load_(total_amount_of_particles_to_load/time_of_injection),
+                set_point_of_birth_(set_point_of_birth),
+                get_probability(get_probability),
+                load_impulse_(load_impulse) {};
 
     void process (Particles* const ionized, Particles* const lost);
-    double check_density(Particles* const ionized, int nx, int ny);
 
 private:
-    std::function<bool(int nx, int ny)> this_is_config_cell_;
-    std::function<void(int sequential_number, int Np,
-	    int cell_number_nx, int cell_number_ny, double* x, double* y)> fill_the_cell_;
+    int number_of_particles_to_load_;
+    std::function<void(double* x, double* y)> set_point_of_birth_;
+    std::function<double(double x, double y)> get_probability;
     std::function<void(double x, double y, double mass, double Tx, double Ty, double Tz,
-    	double p0, double* px, double* py, double* pz)> load_impulse_;
-    std::function<double(int nx, int ny)> density_shape_;
+        double p0, double* px, double* py, double* pz)> load_impulse_;
 };
 
-double uniform_density(int nx, int ny);
+
+double uniform_probability(double x, double y);
+void set_point_on_circle(double* x, double* y);
 
 
 //#################################################################################################

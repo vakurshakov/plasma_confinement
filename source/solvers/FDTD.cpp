@@ -6,84 +6,87 @@
 #include "../constants.h"
 
 
-void FDTD_2D(vector3_field* const E, vector3_field* const B, vector3_field* const J) 
-{	// in 2D-FDTD fields are independent of z, so every %/dz fractions will be zero
-	
+void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) 
+{	
+	// in 2D-FDTD fields are independent of z, so every %/dz fractions will be zero
 	#pragma omp parallel shared(E, B, J), num_threads(THREAD_NUM)
 	{
 		// Bx(y, x+1/2) at t+1/2 ----------------------------------------------------
 		#pragma omp for 
-		for (int y = B->begin_y(X); y < B->end_y(X); ++y) {
-			for (int x = B->begin_x(X); x < B->end_x(X); ++x) {
-					B->x(y,x) -= 0.5*(E->z(y,x) - E->z(y-1,x))*dt/dy;			
+		for (int ny = B.begin_y(X); ny < B.end_y(X); ++ny) {
+			for (int nx = B.begin_x(X); nx < B.end_x(X); ++nx) {
+					B.x(ny,nx) -= 0.5*(E.z(ny,nx) - E.z(ny-1,nx))*dt/dy;			
 			}
 		}	
 
 		// By(y+1/2, x) at t+1/2 ----------------------------------------------------
 		#pragma omp for
-		for (int y = B->begin_y(Y); y < B->end_y(Y); ++y) {
-			for (int x = B->begin_x(Y); x < B->end_x(Y); ++x) {
-					B->y(y,x) += 0.5*(E->z(y,x) - E->z(y,x-1))*dt/dx;
+		for (int ny = B.begin_y(Y); ny < B.end_y(Y); ++ny) {
+			for (int nx = B.begin_x(Y); nx < B.end_x(Y); ++nx) {
+					B.y(ny,nx) += 0.5*(E.z(ny,nx) - E.z(ny,nx-1))*dt/dx;
 			}
 		}
 	
 		// Bz(y, x) at t+1/2 --------------------------------------------------------
 		#pragma omp for
-		for (int y = B->begin_y(Z); y < B->end_y(Z); ++y) {
-			for (int x = B->begin_x(Z); x < B->end_x(Z); ++x) {
-					B->z(y,x) -= 0.5*((E->y(y,x+1) - E->y(y,x))/dx - (E->x(y+1,x) - E->x(y,x))/dy)*dt;
+		for (int ny = B.begin_y(Z); ny < B.end_y(Z); ++ny) {
+			for (int nx = B.begin_x(Z); nx < B.end_x(Z); ++nx) {
+					B.z(ny,nx) -= 0.5*((E.y(ny,nx+1) - E.y(ny,nx))/dx 
+									 - (E.x(ny+1,nx) - E.x(ny,nx))/dy)*dt;
 			}
 		}
 	
 
 		// Ex(y+1/2, x) at t+1 ------------------------------------------------------
 		#pragma omp for
-		for (int y = E->begin_y(X); y < E->end_y(X); ++y) {
-			for (int x = E->begin_x(X); x < E->end_x(X); ++x) {
-				E->x(y,x) += -J->x(y,x)*dt + (B->z(y,x) - B->z(y-1,x))*dt/dy;
-				J->x(y,x) = 0;
+		for (int ny = E.begin_y(X); ny < E.end_y(X); ++ny) {
+			for (int nx = E.begin_x(X); nx < E.end_x(X); ++nx) {
+				E.x(ny,nx) += -(J.x(ny,nx))*dt + (B.z(ny,nx) - B.z(ny-1,nx))*dt/dy;
+				J.x(ny,nx) = 0;
 			}	
 		}
 
 		// Ey(y, x+1/2) at t+1 ------------------------------------------------------
 		#pragma omp for
-		for (int y = E->begin_y(Y); y < E->end_y(Y); ++y) { 
-			for (int x = E->begin_x(Y); x < E->end_x(Y); ++x) {
-				E->y(y,x) += -J->y(y,x)*dt - (B->z(y,x) - B->z(y,x-1))*dt/dx;
-				J->y(y,x) = 0;
+		for (int ny = E.begin_y(Y); ny < E.end_y(Y); ++ny) { 
+			for (int nx = E.begin_x(Y); nx < E.end_x(Y); ++nx) {
+				E.y(ny,nx) += -(J.y(ny,nx))*dt - (B.z(ny,nx) - B.z(ny,nx-1))*dt/dx;
+				J.y(ny,nx) = 0;
 			}		
 		}
 
 		// Ez(y+1/2,x+1/2) at t+1 ---------------------------------------------------
 		#pragma omp for
-		for (int y = E->begin_y(Z); y < E->end_y(Z); ++y) {
-			for (int x = E->begin_x(Z); x < E->end_x(Z); ++x) {
-				E->z(y,x) += -J->z(y,x)*dt + ((B->y(y,x+1) - B->y(y,x))/dx - (B->x(y+1,x) - B->x(y,x))/dy)*dt;
-				J->z(y,x) = 0;
+		for (int ny = E.begin_y(Z); ny < E.end_y(Z); ++ny) {
+			for (int nx = E.begin_x(Z); nx < E.end_x(Z); ++nx) {
+				E.z(ny,nx) += -(J.z(ny,nx))*dt + ((B.y(ny,nx+1) - B.y(ny,nx))/dx
+												- (B.x(ny+1,nx) - B.x(ny,nx))/dy)*dt;
+				J.z(ny,nx) = 0;
 			}	
 		}
 
-		// Bx(y, x+1/2) at t+1/2 ----------------------------------------------------
-		#pragma omp for
-		for (int y = B->begin_y(X); y < B->end_y(X); ++y) {
-			for (int x = B->begin_x(X); x < B->end_x(X); ++x) {
-					B->x(y,x) -= 0.5*(E->z(y,x) - E->z(y-1,x))*dt/dy;			
+				// Bx(y, x+1/2) at t+1/2 ----------------------------------------------------
+		#pragma omp for 
+		for (int ny = B.begin_y(X); ny < B.end_y(X); ++ny) {
+			for (int nx = B.begin_x(X); nx < B.end_x(X); ++nx) {
+					B.x(ny,nx) -= 0.5*(E.z(ny,nx) - E.z(ny-1,nx))*dt/dy;			
 			}
 		}	
 
 		// By(y+1/2, x) at t+1/2 ----------------------------------------------------
 		#pragma omp for
-		for (int y = B->begin_y(Y); y < B->end_y(Y); ++y) {
-			for (int x = B->begin_x(Y); x < B->end_x(Y); ++x) {
-					B->y(y,x) += 0.5*(E->z(y,x) - E->z(y,x-1))*dt/dx;
+		for (int ny = B.begin_y(Y); ny < B.end_y(Y); ++ny) {
+			for (int nx = B.begin_x(Y); nx < B.end_x(Y); ++nx) {
+					B.y(ny,nx) += 0.5*(E.z(ny,nx) - E.z(ny,nx-1))*dt/dx;
 			}
 		}
-
+	
 		// Bz(y, x) at t+1/2 --------------------------------------------------------
 		#pragma omp for
-		for (int y = B->begin_y(Z); y < B->end_y(Z); ++y) {
-			for (int x = B->begin_x(Z); x < B->end_x(Z); ++x) {
-					B->z(y,x) -= 0.5*((E->y(y,x+1) - E->y(y,x))/dx - (E->x(y+1,x) - E->x(y,x))/dy)*dt;
+		for (int ny = B.begin_y(Z); ny < B.end_y(Z); ++ny) {
+			for (int nx = B.begin_x(Z); nx < B.end_x(Z); ++nx) {
+					B.z(ny,nx) -= 0.5*((E.y(ny,nx+1) - E.y(ny,nx))/dx 
+									 - (E.x(ny+1,nx) - E.x(ny,nx))/dy)*dt;
 			}
 		}
 	}

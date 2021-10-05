@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-// description of the differences in form-factors.pdf
-
 double second_order_spline(double x, double mesh_grid)
 {
 	double abs_x = fabs(x/mesh_grid);

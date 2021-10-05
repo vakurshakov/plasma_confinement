@@ -29,29 +29,43 @@ void Manager::initializes()
 	#endif
 	
 	// Нужно забросить поля, чтобы задать пуш-команды
-	Particles_builder particles_builder(&fields_);
+	Particles_builder particles_builder(fields_);
 	list_of_particles_ = particles_builder.build();
 	
 	#if there_are_ions
 		std::cout << "\tSetting each step presets..."
-			<< "\n\t\tIonization "; 
+			<< "\n\t\tIonization" << std::endl; 
+		
+		Particles* const ionized = list_of_particles_["ions"].get();
+		Particles* const lost = list_of_particles_["buffer_electrons"].get();
 
-		// Cейчас просто засовываем в класс ионизации нужные функции, потом разберёмся
-		Ionization_up ionization = std::make_unique<Ionization>(
-			cell_on_a_ring, fill_randomly, load_annular_impulse, uniform_density);
+		int Np = ionized->get_parameters().Np();
+		int total_number_of_particles_to_load = static_cast<int>(
+			Np*M_PI*((r_larm+dr)*(r_larm+dr) - (r_larm-dr)*(r_larm-dr))/(dx*dy));
+
+		if ( total_number_of_particles_to_load/TINJ == 0 ) {
+			std::cout << "Error of initialization" << std::endl;
+		}
+		else {
+			std::cout << "\n\t\tThere would be " << total_number_of_particles_to_load
+				<< " loaded particles (" << total_number_of_particles_to_load/TINJ << " each_step)";
+
+			// Cейчас просто засовываем в класс ионизации нужные функции, потом разберёмся
+			Ionization_up ionization = std::make_unique<Ionization>(
+				total_number_of_particles_to_load, TINJ,
+				set_point_on_circle, uniform_probability, load_annular_impulse);
 		
-		Particles* ionized = list_of_particles_["ions"].get();
-		Particles* lost = list_of_particles_["buffer_electrons"].get();
 		
-		each_step_presets.push_front(std::make_unique<Create_particles>(
-			ionization, ionized, lost));
+			each_step_presets.push_front(std::make_unique<Create_particles>(
+				ionization, ionized, lost));
 		
-		std::cout << "\n\t\tcheck : (&ionization=" << ionization.get() << ", "
+			std::cout << "\n\t\tcheck : (&ionization=" << ionization.get() << ", "
 					<< "&ionized=" << ionized << ", "
 					<< "&lost=" << lost << ")";
 			
-		std::cout << "\n\t\tdone\n"
-		<< "\tdone!" << std::endl;
+			std::cout << "\n\t\tdone\n"
+			<< "\tdone!" << std::endl;
+		}
 	#endif
 }
 
@@ -64,32 +78,28 @@ void Manager::calculates()
 
 	if (!settings_before_main_cycle.empty()) {
 		for (auto& command : settings_before_main_cycle) {
-			command->execute();
+			command->execute(0);
 		}
 	}
 	
 	for (int t = 0; t < TIME; ++t) {	
-
-	/*
+	
 		if (!each_step_presets.empty()) {
 			for (auto& command : each_step_presets) {
-				command->execute();
+				command->execute(t);
 			}
-		}	
-	*/
+		}
 
-	/*
 		#if there_are_particles
 		for (auto& particles : list_of_particles_) {
 			particles.second->diagnose(t);
 			particles.second->push();
 		}
 		#endif
-	*/
 	
 		#if there_are_fields
-	//	fields_.diagnose(t);
-	//	fields_.propogate();
+		fields_.diagnose(t);
+		fields_.propogate();
 		#endif			
 		
 		timer.tick(t);

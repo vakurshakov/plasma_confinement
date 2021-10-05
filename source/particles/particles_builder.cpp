@@ -23,11 +23,12 @@
 #include "../constants.h"
 
 
-using std::vector, std::string, std::forward_list, std::make_unique, std::stod, std::stoi;
+using std::vector, std::string, std::forward_list,
+	std::make_unique, std::make_shared, std::stod, std::stoi;
 using diagnostic_up = std::unique_ptr<Diagnostic>;
 using pcommand_up = std::unique_ptr<Particle_command>;
-using Pusher_up = std::unique_ptr<Boris_pusher>;
 using Particles_up = std::unique_ptr<Particles>;
+using Pusher_sp = std::shared_ptr<Boris_pusher>;
 
 
 enum PCONF { pusher, decomposition,
@@ -79,7 +80,21 @@ vector<Point> Particles_builder::load_particles(
 		this_is_config_cell = cell_in_a_circle;
 		load_impulse = load_uniform_impulse;
 	}
+	else if (configuration == "single_particle") {
+		// Решение для тестов, при этом лучше положить Np = 1.
+		this_is_config_cell = [](int x, int y) -> bool {
+			return x == SIZE_X/2 && y == SIZE_Y/2;
+		};
 
+		load_impulse = [](double x, double y,
+			double mass, double Tx, double Ty, double Tz,
+			double p0, double* px, double* py, double* pz) {
+				*px = 0;
+				*py = 1e-3;
+				*pz = 0;
+		};
+	}
+ 
 
 	string cell_filling = distribution[PCONF::cell_filling];
 	function<void(int sequential_number, int Np,
@@ -130,25 +145,9 @@ vector<Point> Particles_builder::load_particles(
 	}}	
 		points.shrink_to_fit();
 	}
-	std::cout << "\n\t\t\t\t" << points.size() << " points have been loaded";
+	std::cout << "\n\t\t\t\t" << points.size() << " point(s) have been loaded";
 	std::cout << "\n\t\t\tdone" << std::endl;
 	return points;
-}
-
-
-auto Particles_builder::set_pusher(const std::vector<string> description)
-{
-	std::cout << "\t\t\tSetting pusher...";	
-	Pusher_up pusher = nullptr;
-
-	if (description[PCONF::pusher].find("Boris_pusher:") == 0) {
-		pusher = make_unique<Boris_pusher>();
-	}
-	else {
-		std::cout << "what():  Initialization error: No matching Particle pusher" << std::endl;	
-	}
-	std::cout << "done (" << pusher.get() << ")" << std::endl;
-	return pusher;
 }
 
 
@@ -198,47 +197,56 @@ auto Particles_builder::y_boundary()
 
 
 auto Particles_builder::particle_push_commands(const std::vector<string> description,
-	Boris_pusher* const pusher,
 	const Particle_parameters& parameters)
 {
-	std::cout << "\t\t\tSetting particle push commands... (&pusher=" << pusher << ")";
 	// Возвращает список пуш-команд [ работает с файлом ./constants.h ]
+	std::cout << "\t\t\tSetting particle push commands...";
 	forward_list<pcommand_up> commands;
 
 	// Толкатель (cейчас это пушер Бориса)
-	if ( description[PCONF::pusher].find("+Interpolation") != string::npos ) {
-		commands.push_front(make_unique<Interpolate_fields>(
-			pusher, fields_->E(), fields_->B(), parameters));
-		std::cout << "\n\t\t\t\t Interpolation: " << commands.front().get()
-			<< " (&E=" << fields_->E() << ", &B=" << fields_->B() << ")";
+	std::cout << "\t\t\tSetting pusher...";	
+	Pusher_sp pusher = nullptr;
+
+	if (description[PCONF::pusher].find("Boris_pusher:") == 0) {
+		pusher = make_shared<Boris_pusher>();
+
+		if ( description[PCONF::pusher].find("+Interpolation") != string::npos ) {
+			commands.push_front(make_unique<Interpolate_fields>(
+				pusher, fields_.E(), fields_.B(), parameters));
+			std::cout << "\n\t\t\t\t Interpolation: (&pusher=" << pusher.get() << ")"
+				<< ", &E=" << &fields_.E() << ", &B=" << &fields_.B() << ")";
+		}
+		if ( description[PCONF::pusher].find("+Push_particle") != string::npos ) {
+			commands.push_front(make_unique<Push_particle>(pusher, parameters));
+			std::cout << "\n\t\t\t\t Push_particle: (&pusher=" << pusher.get() << ")";
+		}
 	}
-	if ( description[PCONF::pusher].find("+Push_particle") != string::npos ) {
-		commands.push_front(make_unique<Push_particle>(pusher, parameters));
-		std::cout << "\n\t\t\t\t Push_particle: " << commands.front().get();
+	else {
+		std::cout << "\t\t\twhat():  Initialization error: No matching Particle pusher" << std::endl;	
 	}
 
 	// Декомпозиция токов
 	if ( description[PCONF::decomposition] == "Esirkepov_density_decomposition" ) {
 		commands.push_front(make_unique<Density_decomposition>(
-			Esirkepov_density_decomposition, parameters, fields_->J()));
+			Esirkepov_density_decomposition, parameters, fields_.J()));
 		std::cout << "\n\t\t\t\t E.d.d.: " << commands.front().get()
-			<< " (&J=" << fields_->J() << ")";
+			<< " (&J=" << &fields_.J() << ")";
 	}
 
 	std::cout << "\n\t\t\tdone" << std::endl;
+	// Разворачиваем комманды, они в другом порядке
+	commands.reverse();
 	return commands;
 }
 
 
 map<string, Particles_up> Particles_builder::build()
 {
-	std::cout << "\tBulding particles:" << std::endl;
 	map<string, Particles_up> list_of_particles;
 	
 	#if there_are_particles
+	std::cout << "\tBulding particles:" << std::endl;
 
-	// Будем задавать рандом одинаковым числом для
-	// воспроизводимости экспериментов  
 	srand(42);
 	for (auto& description : species) {
 		std::cout << "\t\tBuilding \"" << description.first << "\"" << std::endl;
@@ -248,25 +256,23 @@ map<string, Particles_up> Particles_builder::build()
 		Particles_up particles = make_unique<Particles>(
 			parameters,
 			std::move(this->load_particles(description.second[0], parameters)),
-			std::move(this->set_pusher(description.second[0])),
 			std::move(this->x_boundary()),
 			std::move(this->y_boundary()),
 			std::move(this->diagnostics_list(description.first,
 				description.second[1])) );
 
 		particles->set_push_commands(
-			this->particle_push_commands (
+			std::move(this->particle_push_commands (
 				description.second[0],
-				particles->get_pusher(),
-				particles->get_parameters() ) );
+				particles->get_parameters() )));
 
 		std::cout << "\t\tdone (" << particles.get() << ")\n" << std::endl;		
 		list_of_particles[description.first] = std::move(particles);
 	}
 
-	#endif
-
 	std::cout << "\tdone!\n" << std::endl;
+	#endif
+	
 	return list_of_particles;
 }
 

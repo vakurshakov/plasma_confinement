@@ -3,6 +3,7 @@
 
 //#################################################################################################
 
+#include <iostream> // to debug cout
 #include <functional>
 
 double frand();
@@ -20,7 +21,7 @@ public:
 	Particle_parameters(
 		double q, double m, double n, int Np,
 		double Tx, double Ty, double Tz, double p0,
-		int charge_cloud = 3,
+		int charge_cloud = 2,
 		std::function<double(double, double)> form_factor = second_order_spline)
 		: q_ (q), m_ (m), n_ (n), Np_(Np),
 		  Tx_(Tx), Ty_(Ty), Tz_(Tz), p0_(p0),

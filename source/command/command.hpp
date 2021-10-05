@@ -11,7 +11,7 @@
 class Command {
 public:
 	virtual ~Command() = default;
-	virtual void execute() const = 0;
+	virtual void execute(int t) const = 0;
 };
 
 class Particle_command {

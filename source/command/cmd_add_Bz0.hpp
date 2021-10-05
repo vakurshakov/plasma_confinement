@@ -15,7 +15,7 @@ public:
 	Add_Bz0(Fields* const fields, double Bz0)
 		: fields_(fields), Bz0_(Bz0) {};
 		
-	void execute() const override {
+	void execute(int t) const override {
 		fields_->add_Bz0(Bz0);
 	};
 
@@ -26,4 +26,4 @@ private:
 
 //#######################################################################################
 
-#endif // CMD_ADD_BZ0_HPP
+#endif // CMD_ADD_BZ0_HPPa

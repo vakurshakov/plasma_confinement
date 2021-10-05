@@ -21,7 +21,7 @@ class Boris_pusher {
 public:
 	Boris_pusher() = default;
 
-	void interpolate(const v3f* const E, const v3f* const B,
+	void interpolate(const v3f& E, const v3f& B,
 		const Particle_parameters&, const vector2& r0);
 	
 	void push(const Particle_parameters&, Point&);
