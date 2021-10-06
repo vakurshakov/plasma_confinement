@@ -10,7 +10,6 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include <forward_list>
 
 #include "../command/command.hpp"
 #include "../fields/fields.hpp"
@@ -35,14 +34,18 @@ private:
 	vector<Point> load_particles(const vector<string> distribution,
 		const Particle_parameters& parameters);
 	
-	auto particle_push_commands(const vector<string> description,
+	auto choose_pusher(const vector<string> description,
 		const Particle_parameters&);
-	
+	auto choose_interpolation(const vector<string> description,
+		const Particle_parameters&);
+	auto choose_decomposition(const vector<string> description,
+		const Particle_parameters&);
+
 	auto x_boundary();
 	auto y_boundary();
 
 	// Возвращает список диагностик для частиц
-	std::forward_list<diagnostic_up> diagnostics_list(string particle_name,
+	vector<diagnostic_up> diagnostics_list(string particle_name,
 		vector<string> description);
 };
 

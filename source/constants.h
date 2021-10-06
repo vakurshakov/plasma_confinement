@@ -30,10 +30,10 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const double mpr 	= 1836;
 	
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	THREAD_NUM = 16;
+	const int 	THREAD_NUM = 1;
 
 
-	const int 	TIME	= 1000;
+	const int 	TIME	= 10000;
 	const int 	TINJ	= 500;		
 	const int 	diagnose_time_step = 10; 
 
@@ -72,7 +72,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 				{	
 					{	"Boris_pusher:+Interpolation,+Push_particle", "Esirkepov_density_decomposition",
 						to_string(-e), to_string(me), to_string(n0), to_string(Npe),
-						"circle", "random",
+						"two_particles", "random",
 						to_string(30e-3), to_string(30e-3), to_string(0),
 						"0"	},
 				
@@ -139,7 +139,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const string field_solver = "FDTD_2D"; 
 
 //######## NAMING A DIRECTORY ########################################################
-	const string dir_name = "./diagnostics/tests/circle_in_vacuum/pusher_on_shared_ptr";
+	const string dir_name = "./diagnostics/tests/two_particles/temp";
 
 //#################################################################################################
 

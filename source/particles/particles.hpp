@@ -7,21 +7,15 @@
 #include <vector>
 #include <string>
 #include <functional>
-#include <forward_list>
 
-// #include "./add_ionization.hpp"
 #include "./particle/particle_parameters.hpp"
 #include "./particle/point.hpp"
-#include "../command/command.hpp" 
 #include "../diagnostics/diagnostics.hpp"
-#include "../solvers/Boris_pusher.hpp"
+#include "../solvers/abstract_strategies.hpp" 
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
-
 using diagnostic_up = std::unique_ptr<Diagnostic>;
-using pcommand_up = std::unique_ptr<Particle_command>;
-using Pusher_up = std::unique_ptr<Boris_pusher>;
 
 
 class Particles {
@@ -29,11 +23,12 @@ public:
 	Particles() = default;
 	Particles(
 		Particle_parameters&, std::vector<Point>&&,
+		std::unique_ptr<Pusher>,
+		std::unique_ptr<Interpolation>,
+		std::unique_ptr<Decomposition>,
 		std::function<void(Point&, double)>&& x_boundary,
 		std::function<void(Point&, double)>&& y_boundary,
-		std::forward_list<diagnostic_up>&&	);
-	void set_push_commands(std::forward_list<pcommand_up>&&);
-	Particle_parameters& get_parameters() { return parameters_; }
+		std::vector<diagnostic_up>&&	);
 
 	// main Particles methods
 	void push();
@@ -47,14 +42,16 @@ private:
 	std::vector<Point> points_;
 
 	// solvers for particles
-	std::forward_list<pcommand_up> push_commands_;
+	std::unique_ptr<Pusher> push_;
+	std::unique_ptr<Interpolation> interpolation_;
+	std::unique_ptr<Decomposition> decomposition_;
 	
 	void boundaries_processing(Point&, double size_x, double size_y);
 	std::function<void(Point&, double)> x_boundary_ = nullptr;
 	std::function<void(Point&, double)> y_boundary_ = nullptr;	
 
 	// list of diagnostics for Particles
-	std::forward_list<diagnostic_up> diagnostics_;
+	std::vector<diagnostic_up> diagnostics_;
 };
 
 

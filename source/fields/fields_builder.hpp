@@ -6,6 +6,7 @@
 #include "fields.hpp"
 
 #include <map>
+#include <list>
 #include <string>
 #include <vector>
 #include <memory>
@@ -27,7 +28,7 @@ public:
 	
 private:
 	// Методы для постороения полей
-	function<void(v3f& E, v3f& B, v3f& j)> propogator();
+	std::function<void(v3f& E, v3f& B, v3f& j)> propogator();
 	v3f_up load_field(string type);
 
 
@@ -41,7 +42,7 @@ private:
 	auto y_boundary();
 
 	// Возвращает список диагностик
-	forward_list<diagnostic_up> diagnostics_list(multimap<string, vector<string>> description);
+	vector<diagnostic_up> diagnostics_list(multimap<string, vector<string>> description);
 };
 
 

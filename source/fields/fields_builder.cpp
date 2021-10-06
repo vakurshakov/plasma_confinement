@@ -1,6 +1,7 @@
 #include "./fields_builder.hpp"
 
 #include <map>
+#include <list>
 #include <string>
 #include <vector>
 #include <memory>
@@ -8,7 +9,7 @@
 #include <functional>
 
 #include "fields.hpp"
-#include "../solvers/solvers.hpp"
+#include "../solvers/FDTD.hpp"
 #include "../constants.h"
 
 // list of diagnostics
@@ -24,11 +25,11 @@ using v3f_up = std::unique_ptr<vector3_field>;
 using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 
-function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
+std::function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
 {
 	std::cout << "\t\tSetting propogator...";
 	// Вовзращает выбранный солвер (пропогатор) [ работает с файлом ./constants.h ]
-	function<void(v3f& E, v3f& B, v3f& j)> propogator;
+	std::function<void(v3f& E, v3f& B, v3f& j)> propogator;
 	
 	if ( field_solver.empty() ) {
 		std::cout << "what():  Initialization error: No field_solver in file [./constants.h]" << std::endl; 
@@ -108,12 +109,12 @@ Fields Fields_builder::build()
 enum FD_DESC { FIELD, AXIS, PX, PY };
 
 
-forward_list<diagnostic_up> Fields_builder::diagnostics_list(
+vector<diagnostic_up> Fields_builder::diagnostics_list(
 	multimap<string, vector<string>> fields_diagnostics)
 {
 	std::cout << "\t\tSetting diagnostics...";
 	// Возвращает список необходимых диагностик для полей
-	forward_list<diagnostic_up> fl_diagnostics{};
+	vector<diagnostic_up> vec_diagnostics{};
 	
 	#if fields_are_diagnosed
 		if ( fields_diagnostics.empty() ) {
@@ -124,31 +125,31 @@ forward_list<diagnostic_up> Fields_builder::diagnostics_list(
 			for (auto& now : fields_diagnostics) {
 				if ( now.first == "energy" ) {
 					std::cout << "\n\t\t\t" << now.first;
-					fl_diagnostics.push_front(make_unique<fields_energy>(dir_name + "/" + now.first));
+					vec_diagnostics.emplace_back(make_unique<fields_energy>(dir_name + "/" + now.first));
 				}
 				else if ( now.first == "whole_field" ) {
 					std::cout << "\n\t\t\t" << now.first;
-					fl_diagnostics.push_front(make_unique<whole_field>(dir_name + "/fields/" + now.first,
+					vec_diagnostics.emplace_back(make_unique<whole_field>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS] ) );
 				}
 				else if ( now.first == "field_along_x_axis" ) {
 					std::cout << "\n\t\t\t" << now.first;
-					fl_diagnostics.push_front(make_unique<field_along_x_axis>(dir_name + "/fields/" + now.first,
+					vec_diagnostics.emplace_back(make_unique<field_along_x_axis>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS],
 						stoi(now.second[FD_DESC::PX]) ) );
 				}
 				else if ( now.first == "field_along_y_axis" ) {
 					std::cout << "\n\t\t\t" << now.first;
-					fl_diagnostics.push_front(make_unique<field_along_y_axis>(dir_name + "/fields/" + now.first,
+					vec_diagnostics.emplace_back(make_unique<field_along_y_axis>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS],
 						stoi(now.second[FD_DESC::PX]) ) );
 				} 
 				else if ( now.first == "field_at_point" ) {
 					std::cout << "\n\t\t\t" << now.first;
-					fl_diagnostics.push_front(make_unique<field_at_point>(dir_name + "/fields/" + now.first,
+					vec_diagnostics.emplace_back(make_unique<field_at_point>(dir_name + "/fields/" + now.first,
 						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
 						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS], 
 						stoi(now.second[FD_DESC::PX]), stoi(now.second[FD_DESC::PY]) ) );
@@ -160,5 +161,7 @@ forward_list<diagnostic_up> Fields_builder::diagnostics_list(
 		}
 	#endif
 	std::cout << "\n\t\tdone" << std::endl;
-	return fl_diagnostics; 
+	
+	vec_diagnostics.shrink_to_fit();
+	return vec_diagnostics; 
 }
