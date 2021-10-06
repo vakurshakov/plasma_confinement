@@ -1,4 +1,4 @@
-#include "solvers.hpp"
+#include "FDTD.hpp"
 
 #include <omp.h>
 

@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <forward_list>
 
 #include "../fields/fields.hpp"
 #include "../particles/particles.hpp"

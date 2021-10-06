@@ -2,92 +2,79 @@
 
 // usefull functions:
 
-int rx_begin_E(const vector3_field& _F, Axis field_component)
+int rx_begin_E(const vector3_field& _F, Field_axis Fg)
 {
-	switch (field_component) {
-		case X: return 0;
-		case Y: return 1;
-		case Z: return 0;
+	switch (Fg) {
+		case Field_axis::Fx: return 0;
+		case Field_axis::Fy: return 1;
+		case Field_axis::Fz: return 0;
 	}
 	return 0;
 }
 
-int ry_begin_E(const vector3_field& _F, Axis field_component)
+int ry_begin_E(const vector3_field& _F, Field_axis Fg)
 {
-	switch (field_component) {
-		case X: return 1;
-		case Y: return 0;
-		case Z: return 0;
+	switch (Fg) {
+		case Field_axis::Fx: return 1;
+		case Field_axis::Fy: return 0;
+		case Field_axis::Fz: return 0;
 	}
 	return 0;
 }
 
-int rx_end_E(const vector3_field& _F, Axis field_component)
+int rx_end_E(const vector3_field& _F, Field_axis Fg)
 {
-	switch (field_component) {
-		case X: return _F.size_x();
-		case Y: return _F.size_x();
-		case Z: return _F.size_x()-1;
+	switch (Fg) {
+		case Field_axis::Fx: return _F.size_x();
+		case Field_axis::Fy: return _F.size_x();
+		case Field_axis::Fz: return _F.size_x()-1;
 	}
 	return 0;
 }
 
-int ry_end_E(const vector3_field& _F, Axis field_component)
+int ry_end_E(const vector3_field& _F, Field_axis Fg)
 {
-	switch (field_component) {
-		case X: return _F.size_y();
-		case Y: return _F.size_y();
-		case Z: return _F.size_y()-1;
-	}
-	return 0;
-}
-
-
-int rx_end_B(const vector3_field& _F, Axis field_component)
-{
-	switch (field_component) {
-		case X: return _F.size_x()-1;
-		case Y: return _F.size_x();
-		case Z: return _F.size_x();
-	}
-	return 0;
-}
-
-int ry_end_B(const vector3_field& _F, Axis field_component)
-{
-	switch (field_component) {
-		case X: return _F.size_y();
-		case Y: return _F.size_y()-1;
-		case Z: return _F.size_y();
+	switch (Fg) {
+		case Field_axis::Fx: return _F.size_y();
+		case Field_axis::Fy: return _F.size_y();
+		case Field_axis::Fz: return _F.size_y()-1;
 	}
 	return 0;
 }
 
 
-int px_end(const vector3_field& _F)
+int rx_end_B(const vector3_field& _F, Field_axis Fg)
 {
-	return _F.size_x();
+	switch (Fg) {
+		case Field_axis::Fx: return _F.size_x()-1;
+		case Field_axis::Fy: return _F.size_x();
+		case Field_axis::Fz: return _F.size_x();
+	}
+	return 0;
 }
 
-int py_end(const vector3_field& _F)
+int ry_end_B(const vector3_field& _F, Field_axis Fg)
 {
-	return _F.size_y();
+	switch (Fg) {
+		case Field_axis::Fx: return _F.size_y();
+		case Field_axis::Fy: return _F.size_y()-1;
+		case Field_axis::Fz: return _F.size_y();
+	}
+	return 0;
 }
 
-
+/* 
 //#################################################################################################
-
-
-	int px_py_vector3_field::begin_x(Axis field_component) const
+	int px_py_vector3_field::begin_x(Field_axis Fg) const
 	{ return 0; }
 	
-	int px_py_vector3_field::begin_y(Axis field_component) const
+	int px_py_vector3_field::begin_y(Field_axis Fg) const
 	{ return 0; }
 	
-	int px_py_vector3_field::end_x(Axis field_component) const
+	int px_py_vector3_field::end_x(Field_axis Fg) const
 	{ return px_end(*this); }
 	
-	int px_py_vector3_field::end_y(Axis field_component) const
+	int px_py_vector3_field::end_y(Field_axis Fg) const
 	{ return py_end(*this); }
 	
 	vector3& px_py_vector3_field::field_at(int i, int j)
@@ -114,7 +101,17 @@ int py_end(const vector3_field& _F)
 
 
 //#################################################################################################
-
+	double& vector3_field::component(Field_axis Fg, int ny, int nx)
+	{
+		if ((nx >= this->begin_x(axis_of_component) && nx < this->end_x(axis_of_component))
+		 && (ny >= this->begin_y(axis_of_component) && ny < this->end_y(axis_of_component))) {
+			return (field_[ny*size_x_ + nx]).x; 
+		}
+		else {
+			zero_ = {0, 0, 0};
+			return zero_;
+		}
+	}
 
 	vector3& rx_ry_vector3_field::field_at(int i, int j)
 	{
@@ -246,7 +243,7 @@ int py_end(const vector3_field& _F)
 	
 	vector3 rx_py_vector3_field::field_at(int i, int j) const
 	{
-			if (j >= 0 && j < size_x_){
+		if (j >= 0 && j < size_x_){
 			if ( i < 0 ) { 
 				return field_[(size_y_ + i%size_y_)*size_x_ + j];
 			} else {
@@ -287,3 +284,5 @@ int py_end(const vector3_field& _F)
 
 
 //#################################################################################################
+
+ */

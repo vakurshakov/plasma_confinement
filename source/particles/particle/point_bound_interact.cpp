@@ -1,23 +1,24 @@
 #include "point.hpp"
+#include "../../constants.h"
 
 void reflective_Xboundary(Point& point, double SIZE_X)
 {
-	if ( point.r().x < 0.04 ) {
-		point.r().x = 0.04;
-		point.p().x = - point.p().x; 
-	} else if ( point.r().x > SIZE_X - 0.04 ) {
-		point.r().x = SIZE_X - 0.04;
-		point.p().x = - point.p().x;
+	if ( point.r().x < dx ) {
+		point.r().x = dx;
+		point.p().x *= -1; 
+	} else if ( point.r().x > SIZE_X - dx ) {
+		point.r().x = SIZE_X - dx;
+		point.p().x *= -1;
 	}
 }
 
 void reflective_Yboundary(Point& point, double SIZE_Y)
 {
-	if ( point.r().y < 0.04 ) {
-		point.r().y = 0.04;
+	if ( point.r().y < dx ) {
+		point.r().y = dx;
 		point.p().y *= -1; 
-	} else if ( point.r().y > SIZE_Y - 0.04 ) {
-		point.r().y = SIZE_Y - 0.04;
+	} else if ( point.r().y > SIZE_Y - dx ) {
+		point.r().y = SIZE_Y - dx;
 		point.p().y *= -1; 
 	}
 }
