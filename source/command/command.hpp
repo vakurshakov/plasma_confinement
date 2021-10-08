@@ -3,7 +3,6 @@
 
 //#######################################################################################
 
-
 #include "../particles/particle/point.hpp"
 #include "../vectors/vector_classes.hpp"
 
@@ -14,13 +13,7 @@ public:
 	virtual void execute(int t) const = 0;
 };
 
-class Particle_command {
-public: 
-	virtual ~Particle_command() = default;
-	virtual void execute(Point&, const vector2& r0) const = 0;
-};
-
 
 //#######################################################################################
 
-#endif // COMMAND_COMMAND_HPP
+#endif // COMMAND_COMMAND_HPP 

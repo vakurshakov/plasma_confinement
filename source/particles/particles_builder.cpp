@@ -207,34 +207,35 @@ auto Particles_builder::y_boundary()
 auto Particles_builder::choose_pusher(const vector<string> description,
 	const Particle_parameters& parameters)
 {
-	std::cout << "\t\t\tSetting pusher..." << std::endl;	
+	std::cout << "\t\t\tSetting pusher... ";	
 	std::unique_ptr<Pusher> pusher_up;
 
 	if (description[PCONF::pusher].find("Boris_pusher:") == 0) {
 		if ( description[PCONF::pusher].find("+Push_particle") != string::npos ) {
 			pusher_up = make_unique<Boris_pusher>(parameters);
+			std::cout << "done" << std::endl;
 		}
 		else {
-			std::cout << "\t\t\t\twhat():  Known pusher not command" << std::endl;	
+			std::cout << "\n\t\t\t\twhat():  Known pusher not command" << std::endl;	
 		}
 	}
 	else {
-		std::cout << "\t\t\t\twhat():  Initialization error: No matching Particle pusher" << std::endl;	
+		std::cout << "\n\t\t\t\twhat():  Initialization error: No matching Particle pusher" << std::endl;	
 	}
 
-	std::cout << "\t\t\tdone" << std::endl;
 	return pusher_up;
 }
 
 auto Particles_builder::choose_interpolation(const vector<string> description,
 	const Particle_parameters& parameters)
 {
-	std::cout << "\t\t\tSetting interpolation..." << std::endl;	
+	std::cout << "\t\t\tSetting interpolation... ";	
 	std::unique_ptr<Interpolation> interpolation_up;
 
 	if (description[PCONF::pusher].find("Boris_pusher:") == 0) {
 		if ( description[PCONF::pusher].find("+Interpolation") != string::npos ) {
 			interpolation_up = make_unique<Boris_interpolation>(parameters, fields_.E(), fields_.B());
+			std::cout << "done" << std::endl;
 		}
 		else {
 			std::cout << "\t\t\t\twhat():  Known pusher not command" << std::endl;	
@@ -244,7 +245,6 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 		std::cout << "\t\t\t\twhat():  Initialization error: No matching particle pusher" << std::endl;	
 	}
 
-	std::cout << "\t\t\tdone" << std::endl;
 	return interpolation_up;
 }
 
@@ -252,19 +252,19 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 auto Particles_builder::choose_decomposition(const vector<string> description,
 	const Particle_parameters& parameters)
 {
-	std::cout << "\t\t\tSetting decomposition..." << std::endl;	
+	std::cout << "\t\t\tSetting decomposition... " << std::endl;	
 	std::unique_ptr<Decomposition> decomposition_up;
 
 	// Декомпозиция токов
 	if ( description[PCONF::decomposition] == "Esirkepov_density_decomposition" ) {
 		decomposition_up = make_unique<Esirkepov_density_decomposition>(
 			parameters, fields_.J());
+		std::cout << "done" << std::endl;
 	}
 	else {
 		std::cout << "\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
 	}
 
-	std::cout << "\t\t\tdone" << std::endl;
 	return decomposition_up;
 }
 

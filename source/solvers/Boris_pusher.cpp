@@ -11,8 +11,8 @@
 
 void Boris_interpolation::process(const vector2& r0, vector3& local_E, vector3& local_B) const
 {
-	const int nearest_edge_to_rx = int(roundf(r0.x/dx));
-	const int nearest_edge_to_ry = int(roundf(r0.y/dy));
+	const int nearest_edge_to_rx = int(roundf(r0.x()/dx));
+	const int nearest_edge_to_ry = int(roundf(r0.y()/dy));
 
 	vector2 shape[2];
 	enum SHAPE {
@@ -21,20 +21,20 @@ void Boris_interpolation::process(const vector2& r0, vector3& local_E, vector3& 
 	};
 
 	for(int ny = nearest_edge_to_ry-charge_cloud_; ny <= nearest_edge_to_ry+charge_cloud_; ++ny) {
-		shape[noshift].y = shape_at_( ny*dy - r0.y, dy);
-		shape[shifted].y = shape_at_((ny + 0.5)*dy - r0.y, dy);
+		shape[noshift].y() = shape_at_( ny*dy - r0.y(), dy);
+		shape[shifted].y() = shape_at_((ny + 0.5)*dy - r0.y(), dy);
 		
 		for(int nx = nearest_edge_to_rx-charge_cloud_; nx <= nearest_edge_to_rx+charge_cloud_; ++nx) {
-			shape[noshift].x = shape_at_( nx*dx - r0.x, dx);
-			shape[shifted].x = shape_at_((nx + 0.5)*dx - r0.x, dx);
+			shape[noshift].x() = shape_at_( nx*dx - r0.x(), dx);
+			shape[shifted].x() = shape_at_((nx + 0.5)*dx - r0.x(), dx);
 			
-			local_E.x += E_.x(ny,nx)*( shape[noshift].y * shape[shifted].x );
-			local_E.y += E_.y(ny,nx)*( shape[shifted].y * shape[noshift].x );
-			local_E.z += E_.z(ny,nx)*( shape[shifted].y * shape[shifted].x );
+			local_E.x() += E_.x(ny,nx)*( shape[noshift].y() * shape[shifted].x() );
+			local_E.y() += E_.y(ny,nx)*( shape[shifted].y() * shape[noshift].x() );
+			local_E.z() += E_.z(ny,nx)*( shape[shifted].y() * shape[shifted].x() );
 			
-			local_B.x += B_.x(ny,nx)*(  shape[noshift].y * shape[shifted].x );
-			local_B.y += B_.y(ny,nx)*(  shape[shifted].y * shape[noshift].x );
-			local_B.z += B_.z(ny,nx)*(  shape[shifted].y * shape[shifted].x );
+			local_B.x() += B_.x(ny,nx)*( shape[noshift].y() * shape[shifted].x() );
+			local_B.y() += B_.y(ny,nx)*( shape[shifted].y() * shape[noshift].x() );
+			local_B.z() += B_.z(ny,nx)*( shape[shifted].y() * shape[shifted].x() );
 		}
 	}
 }
@@ -63,5 +63,5 @@ void Boris_pusher::process(Point& point, const vector3& local_E, const vector3& 
 	r_minus += p_minus.squeeze(Axes::XY)*dt/energy;
 
 	point.r() = r_minus;
-	point.p() = p_minus;		
+	point.p() = p_minus;
 }

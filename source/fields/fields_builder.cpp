@@ -1,7 +1,6 @@
 #include "./fields_builder.hpp"
 
 #include <map>
-#include <list>
 #include <string>
 #include <vector>
 #include <memory>
@@ -58,28 +57,13 @@ v3f_up Fields_builder::load_field(string type)
 		field = make_unique<px_py_vector3_field>(SIZE_X, SIZE_Y);
 	}
 	else if ( boundaries == "rx_ry" ) {
-		if ( type == "Electric" ) {
-			field = make_unique<rx_ry_Electric_field>(SIZE_X, SIZE_Y);
-		}
-		else if ( type == "Magnetic" ) {
-			field = make_unique<rx_ry_Magnetic_field>(SIZE_X, SIZE_Y);
-		}
+		field = make_unique<rx_ry_vector3_field>(type, SIZE_X, SIZE_Y);
 	}
 	else if ( boundaries == "rx_py" ) {
-		if ( type == "Electric" ) {
-			field = make_unique<rx_py_Electric_field>(SIZE_X, SIZE_Y);
-		}
-		else if ( type == "Magnetic" ) {
-			field = make_unique<rx_py_Magnetic_field>(SIZE_X, SIZE_Y);
-		}
+		field = make_unique<rx_py_vector3_field>(type, SIZE_X, SIZE_Y);
 	}
 	else if ( boundaries == "px_ry" ) {
-		if ( type == "Electric" ) {
-			field = make_unique<px_ry_Electric_field>(SIZE_X, SIZE_Y);
-		}
-		else if ( type == "Magnetic" ) {
-			field = make_unique<px_ry_Magnetic_field>(SIZE_X, SIZE_Y);
-		}
+		field = make_unique<px_ry_vector3_field>(type, SIZE_X, SIZE_Y);
 	}
 	else {
 		std::cout << "load_field:  Initialization error: No matching boundaries" << std::endl;	

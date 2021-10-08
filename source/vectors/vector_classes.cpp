@@ -1,108 +1,68 @@
 #include "vector_classes.hpp"
 
+//_______ vector2 methods _________________________________________________________________________
+
 vector2& vector2::operator+=(const vector2& other)
 {
-	x += other.x;
-	y += other.y;
+	vec[X] += other.x();
+	vec[Y] += other.y();
 	return *this;
 }
 
-vector2 vector2::operator/(const double a) const
-{
-	vector2 temp;
-
-	temp.x = x/a;
-	temp.y = y/a;
-		
-	return temp;
+vector2 vector2::operator*(double a) const  {
+	return { vec[X]*a, vec[Y]*a };
 }
 
-vector2 vector2::operator*(const double a) const
-{
-	vector2 temp;
-
-	temp.x = x*a;
-	temp.y = y*a;
-
-	return temp;
+vector2 vector2::operator/(double a) const {
+	return this->operator*(1./a);
 }
 
+//_______ vector3 methods _________________________________________________________________________
 
-double vector3::dot(const vector3 &other) const
-{ 
-	return x*other.x + y*other.y + z*other.z;
+double vector3::dot(const vector3 &other) const { 
+	return vec[X]*other.x() + vec[Y]*other.y() + vec[Z]*other.z();
 }
 
-vector3 vector3::cross(const vector3 &other) const
-{
-		vector3 temp;
-
-		temp.x = + ( y*other.z - z*other.y );
-		temp.y = - ( x*other.z - z*other.x );
-		temp.z = + ( x*other.y - y*other.x );
-
-		return temp;		
+vector3 vector3::cross(const vector3 &other) const {
+	return {+ (vec[Y]*other.z() - vec[Z]*other.y()),
+			- (vec[X]*other.z() - vec[Z]*other.x()),
+			+ (vec[X]*other.y() - vec[Y]*other.x()) };		
 }
 
-vector3 vector3::operator+(const vector3& other) const
-{
-	vector3 temp;
-
-	temp.x = x + other.x;
-	temp.y = y + other.y;
-	temp.z = z + other.z;
-
-	return temp;
+vector3 vector3::operator+(const vector3& other) const {
+	return { vec[X] + other.x(), vec[Y] + other.y(), vec[Z] + other.z() };
 }
 	
-vector3& vector3::operator+=(const vector3& other) {
-	x += other.x;
-	y += other.y;
-	z += other.z;
+vector3& vector3::operator+=(const vector3& other)
+{
+	vec[X] += other.x();
+	vec[Y] += other.y();
+	vec[Z] += other.z();
+
 	return *this;
 }
 
-vector3 vector3::operator*(const double a) const
-{
-	vector3 temp;
-
-	temp.x = x*a;
-	temp.y = y*a;
-	temp.z = z*a;
-
-	return temp;
+vector3 vector3::operator*(double a) const {
+	return { vec[X]*a, vec[Y]*a, vec[Z]*a };
 }
 
-vector3 vector3::operator/(const double a) const
-{
-	vector3 temp;
-
-	temp.x = x/a;
-	temp.y = y/a;
-	temp.z = z/a;
-
-	return temp;
+vector3 vector3::operator/(double a) const {
+	return this->operator*(1./a);
 }
 
 vector2 vector3::squeeze(const Axes axes) const
 {
 	vector2 temp;
-	
+
 	switch (axes) {
 		case XY:
-			temp.x = x;
-			temp.y = y;	 
+			temp = {vec[X], vec[Y]};
 			break;
 		case YZ: 
-			temp.x = y;
-			temp.y = z;	 
+			temp = {vec[Y], vec[Z]};	 
 			break;		
 		case XZ:
-			temp.x = x;
-			temp.y = z;	 
-			break;
-		default:
-			throw("bad index");
+			temp = {vec[X], vec[Z]};	 
 			break;
 	}
 	

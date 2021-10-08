@@ -14,8 +14,6 @@
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
-using p_v3f = px_py_vector3_field;
-
 
 class Esirkepov_density_decomposition : public Decomposition {
 public:
@@ -28,6 +26,7 @@ public:
 	void process(const Point&, const vector2& r0) override;
 
 private:
+	using p_v3f = px_py_vector3_field;
 	void decompose_x(const vector2& r, const vector2& r0, int nx, int ny, p_v3f& temp_J);
 	void decompose_y(const vector2& r, const vector2& r0, int nx, int ny, p_v3f& temp_J);
 	void decompose_z(const Point&, const vector2& r0, int nx, int ny, p_v3f& temp_J);
