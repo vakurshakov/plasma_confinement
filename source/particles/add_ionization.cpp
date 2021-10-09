@@ -31,7 +31,6 @@ void Ionization::process(Particles* const ionized, Particles* const lost) {
     const double p0 = ionized->parameters_.p0();
 
 	int err = 0;
-	// #pragma omp parallel for num_thread(THREAD_NUM) 
 	for (int i = 0; i < number_of_particles_to_load_ + err; ++i) {
 		
 		double x, y;
@@ -50,14 +49,11 @@ void Ionization::process(Particles* const ionized, Particles* const lost) {
 				continue;
 			}
 			else {
-				Point ionized_particle({x, y}, {px, py, pz});
-            	Point lost_particle({x, y}, {-px, -py, -pz});
-			
-				// #pragma omp critical
-				ionized->points_.push_back(std::move(ionized_particle));
+				#pragma omp critical
+				ionized->points_.emplace_back(Point({x, y}, {px, py, pz}));
 				
-				// #pragma omp critical
-        	    lost->points_.push_back(std::move(lost_particle));
+				#pragma omp critical
+        	    lost->points_.emplace_back(Point({x, y}, {-px, -py, -pz}));
 			}
 		}
 	}

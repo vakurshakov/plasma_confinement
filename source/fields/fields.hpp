@@ -31,7 +31,7 @@ public:
 
 	// main Field methods
 	void propogate();
-	void diagnose(int t);
+	void diagnose(int t) const;
 
 	// additional
 	void add_Bz0(double Bz0);

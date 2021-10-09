@@ -30,7 +30,7 @@ void Fields::propogate()
 }
 
 
-void Fields::diagnose(int t)
+void Fields::diagnose(int t) const
 {
 	if  (!diagnostics_.empty()) {
 

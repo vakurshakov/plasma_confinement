@@ -16,12 +16,12 @@ void reflective_Xboundary(Point& point, double size_x)
 
 void reflective_Yboundary(Point& point, double size_y)
 {
-	if ( point.y() < 0.5*dx ) {
-		point.y() = 0.5*dx;
+	if ( point.y() < 0.5*dy ) {
+		point.y() = 0.5*dy;
 		point.py() *= -1; 
 	}
-	else if ( point.y() > size_y - 0.5*dx ) {
-		point.y() = size_y - 0.5*dx;
+	else if ( point.y() > size_y - 0.5*dy ) {
+		point.y() = size_y - 0.5*dy;
 		point.py() *= -1; 
 	}
 }

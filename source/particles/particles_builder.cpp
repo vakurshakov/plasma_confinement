@@ -17,13 +17,14 @@
 #include "../fields/fields.hpp"
 #include "../solvers/Boris_pusher.hpp"
 #include "../solvers/Esirkepov_density_decomposition.hpp"
+#include "../solvers/concrete_point_interpolation.hpp"
 #include "../constants.h"
 
 using std::vector, std::string, std::make_unique, std::stod, std::stoi;
 using diagnostic_up = std::unique_ptr<Diagnostic>;
 using Particles_up = std::unique_ptr<Particles>;
 
-enum PCONF { pusher, decomposition,
+enum PCONF { push, interpolation, decomposition,
 			sort_charge, sort_mass, sort_density, number_of_particles_in_cell,
 			configuration, cell_filling,
 			temperature_x, temperature_y, temperature_z,
@@ -210,8 +211,10 @@ auto Particles_builder::choose_pusher(const vector<string> description,
 	std::cout << "\t\t\tSetting pusher... ";	
 	std::unique_ptr<Pusher> pusher_up;
 
-	if (description[PCONF::pusher].find("Boris_pusher:") == 0) {
-		if ( description[PCONF::pusher].find("+Push_particle") != string::npos ) {
+	const auto& setting = description[PCONF::push];
+
+	if (setting.find("Boris_pusher:") != string::npos) {
+		if ( setting.find("+Push_particle") != string::npos ) {
 			pusher_up = make_unique<Boris_pusher>(parameters);
 			std::cout << "done" << std::endl;
 		}
@@ -229,20 +232,67 @@ auto Particles_builder::choose_pusher(const vector<string> description,
 auto Particles_builder::choose_interpolation(const vector<string> description,
 	const Particle_parameters& parameters)
 {
+	/*
+	*	тут может возникнуть сложность с одновременным использованием
+	*	двух интерполяций, нужно будет это поправить.
+	*/
+
 	std::cout << "\t\t\tSetting interpolation... ";	
 	std::unique_ptr<Interpolation> interpolation_up;
 
-	if (description[PCONF::pusher].find("Boris_pusher:") == 0) {
-		if ( description[PCONF::pusher].find("+Interpolation") != string::npos ) {
+	size_t pos = string::npos;
+	const auto& setting = description[PCONF::interpolation];
+
+	if ((pos = setting.find("Boris_pusher:")) != string::npos)
+	{
+		if ( setting.find("+Interpolation", pos) != string::npos ) {
 			interpolation_up = make_unique<Boris_interpolation>(parameters, fields_.E(), fields_.B());
 			std::cout << "done" << std::endl;
 		}
 		else {
-			std::cout << "\t\t\t\twhat():  Known pusher not command" << std::endl;	
+			std::cout << "\n\t\t\t\twhat():  Known pusher not command" << std::endl;	
+		}
+	}
+	else if ((pos = setting.find("Concrete_point_interpolation")) != string::npos )
+	{
+		if ((pos = setting.find("Homogenius_field", pos)) != string::npos) {
+			pos = setting.find("E0=", pos);
+			pos += 3;
+
+			int divider_1 = setting.find(',', pos);
+			int divider_2 = setting.find(',', divider_1+1);
+			int end 	  = setting.find(')', divider_2+1);
+
+			double E0x = stod(setting.substr(pos+1, divider_1-(pos+1)));
+			double E0y = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
+			double E0z = stod(setting.substr(divider_2+1, end-(divider_2+1)));
+			
+			vector3 E0 = {E0x, E0y, E0z};
+
+			pos = setting.find("B0=", pos);
+			pos += 3;
+
+			divider_1 = setting.find(',', pos);
+			divider_2 = setting.find(',', divider_1+1);
+			end 	  = setting.find(')', divider_2+1);
+
+			double B0x = stod(setting.substr(pos+1, divider_1-(pos+1)));
+			double B0y = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
+			double B0z = stod(setting.substr(divider_2+1, end-(divider_2+1)));
+			
+			vector3 B0 = {B0x, B0y, B0z};
+
+			std::unique_ptr<Local_field_adder> adder = make_unique<Homogenius_field_adder>(E0, B0);
+
+			interpolation_up = make_unique<Concrete_point_interpolation>(std::move(adder));
+			std::cout << "done" << std::endl;
+		}
+		else {
+			std::cout << "\n\t\t\t\twhat():  Known interpolation not adder" << std::endl;
 		}
 	}
 	else {
-		std::cout << "\t\t\t\twhat():  Initialization error: No matching particle pusher" << std::endl;	
+		std::cout << "\n\t\t\t\twhat():  Initialization error: No matching interpolation" << std::endl;	
 	}
 
 	return interpolation_up;
@@ -252,17 +302,18 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 auto Particles_builder::choose_decomposition(const vector<string> description,
 	const Particle_parameters& parameters)
 {
-	std::cout << "\t\t\tSetting decomposition... " << std::endl;	
+	std::cout << "\t\t\tSetting decomposition... ";	
 	std::unique_ptr<Decomposition> decomposition_up;
 
-	// Декомпозиция токов
-	if ( description[PCONF::decomposition] == "Esirkepov_density_decomposition" ) {
+	const auto& setting = description[PCONF::decomposition]; 
+
+	if ( setting.find("Esirkepov_density_decomposition") != string::npos ) {
 		decomposition_up = make_unique<Esirkepov_density_decomposition>(
 			parameters, fields_.J());
 		std::cout << "done" << std::endl;
 	}
 	else {
-		std::cout << "\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
+		std::cout << "\n\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
 	}
 
 	return decomposition_up;

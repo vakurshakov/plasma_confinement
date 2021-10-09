@@ -29,10 +29,11 @@ public:
 		std::function<void(Point&, double)>&& x_boundary,
 		std::function<void(Point&, double)>&& y_boundary,
 		std::vector<diagnostic_up>&&	);
+	const auto& get_parameters() const { return parameters_; };
 
 	// main Particles methods
 	void push();
-	void diagnose(int t);
+	void diagnose(int t) const;
 	
 	friend class Ionization;
 

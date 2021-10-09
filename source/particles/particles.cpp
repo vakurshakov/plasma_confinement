@@ -37,12 +37,12 @@ Particles::Particles(
 
 void Particles::push()
 {
-    auto push			= std::mem_fn(&Pusher::process);
-    auto interpolate 	= std::mem_fn(&Interpolation::process);
-	auto decompose		= std::mem_fn(&Decomposition::process);
+    auto push		  = std::mem_fn(&Pusher::process);
+    auto interpolate  = std::mem_fn(&Interpolation::process);
+	auto decompose	  = std::mem_fn(&Decomposition::process);
 	
-	// #pragma omp parallel for shared(points_), num_threads(THREAD_NUM),
-			// firstprivate(push, interpolate, decompose, x_boundary_, y_boundary_)
+	#pragma omp parallel for shared(points_), num_threads(THREAD_NUM),	\
+		firstprivate(push, interpolate, decompose, x_boundary_, y_boundary_)
 	for (auto& point : points_) {
 		
 		const vector2 r0 = point.r();
@@ -67,7 +67,7 @@ void Particles::boundaries_processing(Point& point, double size_x, double size_y
 }
 
 
-void Particles::diagnose(int t)
+void Particles::diagnose(int t) const
 {
 	if (!diagnostics_.empty()) {
 

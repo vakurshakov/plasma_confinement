@@ -34,17 +34,17 @@ void Manager::initializes()
 	
 	#if there_are_ions
 		std::cout << "\tSetting each step presets..."
-			<< "\n\t\tIonization" << std::endl; 
+			<< "\n\t\tIonization "; 
 		
 		Particles* const ionized = list_of_particles_["ions"].get();
 		Particles* const lost = list_of_particles_["buffer_electrons"].get();
 
 		int Np = ionized->get_parameters().Np();
-		int total_number_of_particles_to_load = static_cast<int>(
-			Np*M_PI*((r_larm+dr)*(r_larm+dr) - (r_larm-dr)*(r_larm-dr))/(dx*dy));
+		int total_number_of_particles_to_load = 1; // = static_cast<int>(
+		//	Np*M_PI*((r_larm+dr)*(r_larm+dr) - (r_larm-dr)*(r_larm-dr))/(dx*dy));
 
 		if ( total_number_of_particles_to_load/TINJ == 0 ) {
-			std::cout << "Error of initialization" << std::endl;
+			std::cout << "\n\t\twhat(): error in tot_num/tinj" << std::endl;
 		}
 		else {
 			std::cout << "\n\t\tThere would be " << total_number_of_particles_to_load
@@ -55,7 +55,9 @@ void Manager::initializes()
 				total_number_of_particles_to_load, TINJ,
 				set_point_on_circle, uniform_probability, load_annular_impulse);
 		
-		
+			// ionized->points_.reserve(total_number_of_particles_to_load);
+			// lost->points_.reserve(total_number_of_particles_to_load);
+
 			each_step_presets.push_front(std::make_unique<Create_particles>(
 				ionization, ionized, lost));
 		

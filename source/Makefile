@@ -12,7 +12,8 @@ VPATH = diagnostics/ fields/ file_writers/ managers/ particles/ particles/partic
 MAIN 		= main.cpp
 VECTORS 	= vector_classes.cpp vector3_field.cpp
 PARTICLES 	= particles_form-factors.cpp point_bound_interact.cpp
-SOLVERS 	= FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp
+SOLVERS 	= FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp \
+				concrete_point_interpolation.cpp
 MANAGERS 	= fields.cpp fields_builder.cpp particles.cpp \
 				particles_builder.cpp particles_load.cpp manager.cpp
 ADDITIONALS	= add_Bz0.cpp add_ion_density.cpp add_ion_current.cpp add_ionization.cpp

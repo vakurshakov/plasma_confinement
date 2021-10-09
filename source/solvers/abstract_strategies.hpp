@@ -9,25 +9,22 @@
 
 class Interpolation {
 public:
-    Interpolation() = default;
     virtual ~Interpolation() = default;
-    virtual void process(const vector2& r0, vector3& local_E, vector3& local_B) const {};
+    virtual void process(const vector2& r0, vector3& local_E, vector3& local_B) const = 0;
 };
 
 
 class Pusher {
 public:
-    Pusher() = default;
     virtual ~Pusher() = default;
-    virtual void process(Point&, const vector3& local_E, const vector3& local_B) const {};
+    virtual void process(Point&, const vector3& local_E, const vector3& local_B) const = 0;
 };
 
 
 class Decomposition {
 public:
-    Decomposition() = default;
     virtual ~Decomposition() = default;
-    virtual void process(const Point&, const vector2& r0) {};
+    virtual void process(const Point&, const vector2& r0) = 0;
 };
 
 //#################################################################################################
