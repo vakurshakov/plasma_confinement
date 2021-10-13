@@ -30,11 +30,10 @@ std::vector<int> set_time_distribution(int t_inj, size_t total_number_of_particl
 	std::minstd_rand gen(42);
 	std::uniform_int_distribution<int> distribution(0, (t_inj-1));
 
-	// for (size_t n = 0; n < total_number_of_particles; n++) {
-		// array_of_particles_to_load[ distribution(gen) ] += 1;
-	// }
+	for (size_t n = 0; n < total_number_of_particles; n++) {
+		array_of_particles_to_load[ distribution(gen) ] += 1;
+	}
 
-	array_of_particles_to_load[ 3 ] = 50;
 	return array_of_particles_to_load;
 }
 
