@@ -49,12 +49,25 @@ bool cell_on_a_ring(int cell_number_nx, int cell_number_ny)
 			((cx*cx + cy*cy) <= (r_larm+dr)*(r_larm+dr) );	
 }
 
+int  get_number_of_particles_on_ring(int Np)
+{
+	return static_cast<int>(
+		Np*M_PI*((r_larm + dr)*(r_larm + dr)
+			   - (r_larm - dr)*(r_larm - dr))/(dx*dy));
+}
+
 bool cell_in_a_circle(int cell_number_nx, int cell_number_ny)
 {
 	double cx = (cell_number_nx+0.5 - 0.5*SIZE_X)*dx;
 	double cy = (cell_number_ny+0.5 - 0.5*SIZE_Y)*dy;
 	
 	return ( sqrt(cx*cx + cy*cy) <= (r_larm+dr)*r_prop );
+}
+
+int  get_number_of_particles_in_circle(int Np)
+{
+	return static_cast<int>(
+		Np*M_PI*(r_larm*r_larm*r_prop*r_prop)/(dx*dy));
 }
 
 // impulse loading ----------------------------------------------------------------------
@@ -71,7 +84,7 @@ void load_annular_impulse(double x, double y,
 	double center_x = 0.5*SIZE_X*dx;
 	double center_y = 0.5*SIZE_Y*dy;
 	double r = sqrt((x - center_x)*(x - center_x) 
-				+ (y - center_y)*(y - center_y));
+				  + (y - center_y)*(y - center_y));
 	
 	*px = p0*( +(y - center_y)/r ) + temperature_impulse(Tx, mass); 
 	*py = p0*( -(x - center_x)/r ) + temperature_impulse(Ty, mass);

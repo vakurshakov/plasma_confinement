@@ -29,7 +29,8 @@ public:
 		std::function<void(Point&, double)>&& x_boundary,
 		std::function<void(Point&, double)>&& y_boundary,
 		std::vector<diagnostic_up>&&	);
-	const auto& get_parameters() const { return parameters_; };
+	const auto& get_parameters() const { return parameters_; }
+	const auto& get_points()	 const { return points_; } 
 
 	// main Particles methods
 	void push();

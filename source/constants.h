@@ -30,14 +30,14 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	const double mpr 	= 1836;
 	
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	THREAD_NUM = 2;
+	const int 	THREAD_NUM = 16;
 
-	const int 	TIME	= 10000;
-	const int 	TINJ	= 1;		
-	const int 	diagnose_time_step = 10; 
+	const int 	TIME	= 7000;
+	const int 	TINJ	= 5;		
+	const int 	diagnose_time_step = 5; 
 
-	const int 	SIZE_X 	= 50;
-	const int 	SIZE_Y 	= 50;
+	const int 	SIZE_X 	= 1024;
+	const int 	SIZE_Y 	= 1024;
 	const double dx 	= 0.04;
 	const double dy		= 0.04;
 	const double dt 	= 0.5*dx;
@@ -51,14 +51,14 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	// тестовые параметры:			// ожидаемые параметры:
 	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
 	const int 	 Npe	= 1;
-	const double v_inj 	= 0.00591;	// Ek 	= 15 [keV] { 0.00565 } 
-	const double r_larm	= 0.48;	 	// ож.: r_larm = 52,6 ( или 8,86 [cm] )
-	const double r_prop	= 1;		// r_plasma/r_larm = 1.13
+	const double v_inj 	= 0.0589;					// Ek 	= 15 [keV] { 0.00565 } 
+	const double r_larm	= 3;	 	// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
 	const double dr		= 0.24;
 
 	//зависимые параметры для обращения
-	const double ni		= Bz0/( 2*dr*v_inj );	// ni   = 1.291e11 [cm^(-3)]
 	const int	 Npi	= 1;
+	const double ni		= Bz0/( 2*dr*v_inj );	// ni   = 1.291e11 [cm^(-3)]
 	const double mi		= r_larm*Bz0/v_inj;		//масса модельных частиц, чтобы выставить их на r_larm
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
@@ -67,7 +67,9 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 			#if there_are_electrons
 			{ "electrons", 
 				{	
-					{	"Boris_pusher:+Interpolation,+Push_particle", "Esirkepov_density_decomposition",
+					{	"Boris_pusher:+Push_particle",
+						"Boris_pusher:+Interpolation;",
+						"Esirkepov_density_decomposition",
 						to_string(-e), to_string(me), to_string(n0), to_string(Npe),
 						"circle", "random",
 						to_string(30e-3), to_string(30e-3), to_string(0),
@@ -85,8 +87,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 						"Concrete_point_interpolation: Homogenius_field E0=(0,0,0), B0=(0,0,"+to_string(Bz0)+");",
 						"Esirkepov_density_decomposition",
 						to_string(+e), to_string(mi), to_string(ni), to_string(Npi),
-						"", "",
-						to_string(30e-3), to_string(30e-3), to_string(0),
+						"ring", "delayed",
+						to_string(0), to_string(0), to_string(0),
 						to_string(mi*v_inj/sqrt(1-v_inj*v_inj))	},
 				
 					{	"density"	},
@@ -94,12 +96,12 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 			},
 			{ "buffer_electrons", 
 				{	
-					{	"Boris_pusher:+Interpolation,+Push_particle;",
+					{	"Boris_pusher:+Push_particle;",
 						"Boris_pusher:+Interpolation;",
 						"Esirkepov_density_decomposition",
 						to_string(-e), to_string(me), to_string(ni), to_string(Npi),
-						"", "",
-						to_string(30e-3), to_string(30e-3), to_string(0),
+						"ring", "delayed",
+						to_string(0), to_string(0), to_string(0),
 						to_string(0)	},
 				
 					{	"density"	},

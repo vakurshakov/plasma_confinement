@@ -2,6 +2,7 @@
 
 #include <omp.h>
 #include <cmath>
+#include <random>
 
 #include "particles.hpp"
 #include "particles_load.hpp" // for frand()
@@ -23,15 +24,30 @@ void set_point_on_circle(double* x, double* y)
 }
 
 
-void Ionization::process(Particles* const ionized, Particles* const lost) {
+std::vector<int> set_time_distribution(int t_inj, size_t total_number_of_particles)
+{
+	std::vector<int> array_of_particles_to_load(t_inj);
+	std::minstd_rand gen(42);
+	std::uniform_int_distribution<int> distribution(0, (t_inj-1));
+
+	// for (size_t n = 0; n < total_number_of_particles; n++) {
+		// array_of_particles_to_load[ distribution(gen) ] += 1;
+	// }
+
+	array_of_particles_to_load[ 3 ] = 50;
+	return array_of_particles_to_load;
+}
+
+
+void Ionization::process(Particles* const ionized, Particles* const lost, int t) {
     const double mass = ionized->parameters_.m();
     const double Tx = ionized->parameters_.Tx();
     const double Ty = ionized->parameters_.Ty();
     const double Tz = ionized->parameters_.Tz();
     const double p0 = ionized->parameters_.p0();
-
+ 
 	int err = 0;
-	for (int i = 0; i < number_of_particles_to_load_ + err; ++i) {
+	for (int i = 0; i < array_of_particles_to_load_[t] + err; ++i) {
 		
 		double x, y;
 		set_point_of_birth_(&x, &y);

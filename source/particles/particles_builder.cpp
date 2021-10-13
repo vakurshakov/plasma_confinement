@@ -62,16 +62,20 @@ vector<Point> Particles_builder::load_particles(
 	std::cout << "\t\t\tLoading points...";
 	string configuration =	distribution[PCONF::configuration];
 	std::function<bool(int cell_number_nx, int cell_number_ny)> this_is_config_cell = nullptr;
+	std::function<int(int Np)> get_number_of_particles = nullptr;
 	std::function<void(double x, double y,
 		double mass, double Tx, double Ty, double Tz,
 		double p0, double* px, double* py, double* pz)> load_impulse = nullptr; 
 	
 	if (configuration == "ring") {
 		this_is_config_cell = cell_on_a_ring;
+		get_number_of_particles = get_number_of_particles_on_ring;
 		load_impulse = load_annular_impulse;
+
 	}
 	else if (configuration == "circle") {
 		this_is_config_cell = cell_in_a_circle;
+		get_number_of_particles = get_number_of_particles_in_circle;
 		load_impulse = load_uniform_impulse;
 	}
 	else if (configuration == "single_particle") {
@@ -82,7 +86,7 @@ vector<Point> Particles_builder::load_particles(
 
 		load_impulse = [](double x, double y,
 			double mass, double Tx, double Ty, double Tz,
-			double p0, double* px, double* py, double* pz) {
+			double p0, double* px, double* py, double* pz) -> void {
 				*px = 0;
 				*py = 1e-3;
 				*pz = 0;
@@ -124,10 +128,11 @@ vector<Point> Particles_builder::load_particles(
     const double p0 = parameters.p0();
 
 	vector<Point> points;
+	points.reserve( get_number_of_particles(Np) );
 
 	std::cout << "\n\t\t\t\tConfiguration: " << configuration
 		<< ", way of filling cell: " << cell_filling << ";";
-	if (!configuration.empty() && !cell_filling.empty()) {
+	if (cell_filling != "delayed") {
 
 	for (int nx = 0; nx < SIZE_X; ++nx) {
 	for (int ny = 0; ny < SIZE_Y; ++ny) {
@@ -229,6 +234,7 @@ auto Particles_builder::choose_pusher(const vector<string> description,
 	return pusher_up;
 }
 
+
 auto Particles_builder::choose_interpolation(const vector<string> description,
 	const Particle_parameters& parameters)
 {
@@ -318,6 +324,7 @@ auto Particles_builder::choose_decomposition(const vector<string> description,
 
 	return decomposition_up;
 }
+
 
 std::map<string, Particles_up> Particles_builder::build()
 {

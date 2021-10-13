@@ -28,10 +28,12 @@ void Manager::initializes()
 		#endif
 	#endif
 	
-	// Нужно забросить поля, чтобы задать пуш-команды
+	// fields_ is used to set push commands
 	Particles_builder particles_builder(fields_);
-	list_of_particles_ = particles_builder.build();
-	
+	list_of_particles_ = particles_builder.build();		
+
+	// TODO: fabric on each_step_presets
+	// TODO: variable set_time_distribution
 	#if there_are_ions
 		std::cout << "\tSetting each step presets..."
 			<< "\n\t\tIonization "; 
@@ -39,35 +41,20 @@ void Manager::initializes()
 		Particles* const ionized = list_of_particles_["ions"].get();
 		Particles* const lost = list_of_particles_["buffer_electrons"].get();
 
-		int Np = ionized->get_parameters().Np();
-		int total_number_of_particles_to_load = 1; // = static_cast<int>(
-		//	Np*M_PI*((r_larm+dr)*(r_larm+dr) - (r_larm-dr)*(r_larm-dr))/(dx*dy));
-
-		if ( total_number_of_particles_to_load/TINJ == 0 ) {
-			std::cout << "\n\t\twhat(): error in tot_num/tinj" << std::endl;
-		}
-		else {
-			std::cout << "\n\t\tThere would be " << total_number_of_particles_to_load
-				<< " loaded particles (" << total_number_of_particles_to_load/TINJ << " each_step)";
-
-			// Cейчас просто засовываем в класс ионизации нужные функции, потом разберёмся
-			Ionization_up ionization = std::make_unique<Ionization>(
-				total_number_of_particles_to_load, TINJ,
-				set_point_on_circle, uniform_probability, load_annular_impulse);
+		const auto total_number_of_particles = ionized->get_points().capacity();
+	
+		Ionization_up ionization = std::make_unique<Ionization>(
+			set_time_distribution(TINJ, total_number_of_particles),
+			set_point_on_circle, uniform_probability, load_annular_impulse);
+	
+		each_step_presets.push_front(std::make_unique<Create_particles>(
+			std::move(ionization), ionized, lost));
+	
+		std::cout << "\n\t\tcheck : (&ionized=" << ionized << ", "
+				  << "&lost=" << lost << ")";
 		
-			// ionized->points_.reserve(total_number_of_particles_to_load);
-			// lost->points_.reserve(total_number_of_particles_to_load);
-
-			each_step_presets.push_front(std::make_unique<Create_particles>(
-				ionization, ionized, lost));
-		
-			std::cout << "\n\t\tcheck : (&ionization=" << ionization.get() << ", "
-					<< "&ionized=" << ionized << ", "
-					<< "&lost=" << lost << ")";
-			
-			std::cout << "\n\t\tdone\n"
+		std::cout << "\n\t\tdone\n"
 			<< "\tdone!" << std::endl;
-		}
 	#endif
 }
 
@@ -93,9 +80,9 @@ void Manager::calculates()
 		}
 
 		#if there_are_particles
-		for (auto& particles : list_of_particles_) {
-			particles.second->diagnose(t);
-			particles.second->push();
+		for (auto& [_, particles] : list_of_particles_) {
+			particles->diagnose(t);
+			particles->push();
 		}
 		#endif
 	
