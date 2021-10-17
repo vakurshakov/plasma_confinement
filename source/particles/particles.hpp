@@ -22,7 +22,7 @@ public:
 
 	Particles() = default;
 	Particles(
-		Particle_parameters&, std::vector<Point>&,
+		Particle_parameters&, std::vector<Point>&&,
 		std::unique_ptr<Pusher>,
 		std::unique_ptr<Interpolation>,
 		std::unique_ptr<Decomposition>,

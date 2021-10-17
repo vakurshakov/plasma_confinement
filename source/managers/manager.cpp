@@ -41,7 +41,7 @@ void Manager::initializes()
 		Particles* const ionized = list_of_particles_["ions"].get();
 		Particles* const lost = list_of_particles_["buffer_electrons"].get();
 
-		const auto total_number_of_particles = ionized->get_points().capacity();
+		const int total_number_of_particles = ionized->get_points().capacity();
 	
 		Ionization_up ionization = std::make_unique<Ionization>(
 			set_time_distribution(TINJ, total_number_of_particles),

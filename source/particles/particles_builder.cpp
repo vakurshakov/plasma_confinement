@@ -129,6 +129,7 @@ vector<Point> Particles_builder::load_particles(
 
 	vector<Point> points;
 	points.reserve( get_number_of_particles(Np) );
+	std::cout << points.capacity();
 
 	std::cout << "\n\t\t\t\tConfiguration: " << configuration
 		<< ", way of filling cell: " << cell_filling << ";";
@@ -342,7 +343,7 @@ std::map<string, Particles_up> Particles_builder::build()
 
 		Particles_up particles = make_unique<Particles>(
 			parameters,
-			points,
+			std::move(points),
 			std::move(this->choose_pusher(description.second[0], parameters)),
 			std::move(this->choose_interpolation(description.second[0], parameters)),
 			std::move(this->choose_decomposition(description.second[0], parameters)),

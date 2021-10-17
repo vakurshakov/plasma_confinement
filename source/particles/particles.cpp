@@ -16,7 +16,7 @@
 
 Particles::Particles(
 	Particle_parameters& parameters,
-	std::vector<Point>& points,
+	std::vector<Point>&& points,
 	std::unique_ptr<Pusher> push,
 	std::unique_ptr<Interpolation> interpolation,
 	std::unique_ptr<Decomposition> decomposition,
@@ -24,7 +24,7 @@ Particles::Particles(
 	std::function<void(Point&, double)>&& y_boundary,
 	std::vector<diagnostic_up>&& diagnostics ) 
 		: 	parameters_(parameters),
-		  	points_(points),
+		  	points_(std::move(points)),
 		  	push_(std::move(push)),
 		  	interpolation_(std::move(interpolation)),
 		  	decomposition_(std::move(decomposition)),
