@@ -15,7 +15,7 @@ using std::string;
 using v3f = vector3_field;
 
 
-class field_at_point : public Diagnostic {
+class field_at_point : public Fields_diagnostic {
 public:
 	field_at_point(string directory_path, string file_name,
 	/*additional*/ string field_to_diagnose, string field_axis,

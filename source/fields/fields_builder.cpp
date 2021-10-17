@@ -21,7 +21,6 @@
 using std::vector, std::map, std::multimap, std::string, std::make_unique;
 using v3f = vector3_field;
 using v3f_up = std::unique_ptr<vector3_field>;
-using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 
 std::function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
@@ -93,11 +92,12 @@ Fields Fields_builder::build()
 enum FD_DESC { FIELD, AXIS, PX, PY };
 
 
-vector<diagnostic_up> Fields_builder::diagnostics_list(
+vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
 	multimap<string, vector<string>> fields_diagnostics)
 {
-	std::cout << "\t\tSetting diagnostics...";
 	// Возвращает список необходимых диагностик для полей
+	std::cout << "\t\tSetting diagnostics...";
+
 	vector<diagnostic_up> vec_diagnostics{};
 	
 	#if fields_are_diagnosed

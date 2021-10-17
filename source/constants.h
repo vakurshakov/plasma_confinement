@@ -12,8 +12,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 
 //######## MODIFIERS #################################################################
 	#define there_are_particles 			true
-		#define there_are_ions				true
-		#define there_are_electrons			false
+		#define there_are_ions				false
+		#define there_are_electrons			true
 		#define particles_are_diagnosed 	true
 
 	#define there_are_fields				true
@@ -24,46 +24,46 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 
 
 //######## PARTICLES CONSTANTS #######################################################
-	const double mec2 	= 511;
-	const double e 		= 1;
-	const double me 	= 1;
-	const double mpr 	= 1836;
+	inline const double mec2 = 511;
+	inline const double e 	= 1;
+	inline const double me 	= 1;
+	inline const double mpr = 1836;
 	
 //######## CONFIGURATION IN GENERAL ##################################################
-	const int 	THREAD_NUM = 16;
+	inline const int THREAD_NUM = 16;
 
-	const int 	TIME	= 7000;
-	const int 	TINJ	= 5;		
-	const int 	diagnose_time_step = 5; 
+	inline const int TIME	= 1000;
+	inline const int TINJ	= 5;		
+	inline const int diagnose_time_step = 5; 
 
-	const int 	SIZE_X 	= 1024;
-	const int 	SIZE_Y 	= 1024;
-	const double dx 	= 0.04;
-	const double dy		= 0.04;
-	const double dt 	= 0.5*dx;
+	inline const int SIZE_X = 100;
+	inline const int SIZE_Y = 100;
+	inline const double dx 	= 0.1;
+	inline const double dy	= 0.1;
+	inline const double dt 	= 0.5*dx;
 	
-	const string boundaries = "rx_ry";
+	inline const string boundaries = "rx_ry";
 
 //######## MAGNETIC MIRROR PARAMETERS ################################################
-	const double Bz0  = 0.0197;		// Bz0  = 0.2 [T]  { 0.197 }
+	inline const double Bz0  = 0.0197;		// Bz0  = 0.2 [T]  { 0.197 }
 
 //######## PARTICLES DESCRIPTION #####################################################
 	// тестовые параметры:			// ожидаемые параметры:
-	const double n0 	= 1;		// n0   = 10e13	 [cm^(-3)]
-	const int 	 Npe	= 1;
-	const double v_inj 	= 0.0589;					// Ek 	= 15 [keV] { 0.00565 } 
-	const double r_larm	= 3;	 	// ож.: r_larm = 52,6 ( или 8,86 [cm] )
-	const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
-	const double dr		= 0.24;
+	inline const double n0 		= 1;		// n0   = 10e13	 [cm^(-3)]
+	inline const int 	Npe		= 2;
+	inline const double v_inj 	= 0.0589;	// Ek 	= 15 [keV] { 0.00565 } 
+	inline const double r_larm	= 2;	 	// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	inline const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
+	inline const double dr		= 0.2;
 
 	//зависимые параметры для обращения
-	const int	 Npi	= 1;
-	const double ni		= Bz0/( 2*dr*v_inj );	// ni   = 1.291e11 [cm^(-3)]
-	const double mi		= r_larm*Bz0/v_inj;		//масса модельных частиц, чтобы выставить их на r_larm
+	inline const int	 Npi	= 1;
+	inline const double ni		= Bz0/( 2*dr*v_inj );	// ni   = 1.291e11 [cm^(-3)]
+	inline const double mi		= r_larm*Bz0/v_inj;		//масса модельных частиц, чтобы выставить их на r_larm
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!
 	#if there_are_particles
-	const multimap<string, vector<vector<string>>> species = {
+	inline const multimap<string, vector<vector<string>>> species = {
 			#if there_are_electrons
 			{ "electrons", 
 				{	
@@ -75,7 +75,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 						to_string(30e-3), to_string(30e-3), to_string(0),
 						"0"	},
 				
-					{	"density"	},
+					{	"density", "chosen_particles", "diagram_vx_on_y"	},
 				} 
 			},
 			#endif
@@ -112,9 +112,9 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	#endif
 
 //######## FIELDS DESCRIPTION ########################################################
-	const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
+	inline const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
 
-	const multimap<string, vector<string>> fields_diagnostics = {
+	inline const multimap<string, vector<string>> fields_diagnostics = {
 		#if fields_are_diagnosed
 		{ "whole_field", { "j", "x" } },
 		{ "whole_field", { "j", "y" } },
@@ -139,10 +139,10 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 		};
 
 //######## SOLVERS ###################################################################
-	const string field_solver = "FDTD_2D"; 
+	inline const string field_solver = "FDTD_2D"; 
 
 //######## NAMING A DIRECTORY ########################################################
-	const string dir_name = "./diagnostics/ionization/tests/birth_and_propogate";
+	inline const string dir_name = "./diagnostics/ionization/tests/testing_chosen_particles";
 
 //#################################################################################################
 

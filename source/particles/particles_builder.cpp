@@ -14,6 +14,7 @@
 #include "../diagnostics/density.hpp"
 #include "../diagnostics/energy.hpp"
 #include "../diagnostics/phase_diagram.hpp"
+#include "../diagnostics/chosen_particles.hpp"
 #include "../fields/fields.hpp"
 #include "../solvers/Boris_pusher.hpp"
 #include "../solvers/Esirkepov_density_decomposition.hpp"
@@ -21,7 +22,6 @@
 #include "../constants.h"
 
 using std::vector, std::string, std::make_unique, std::stod, std::stoi;
-using diagnostic_up = std::unique_ptr<Diagnostic>;
 using Particles_up = std::unique_ptr<Particles>;
 
 enum PCONF { push, interpolation, decomposition,
@@ -338,17 +338,18 @@ std::map<string, Particles_up> Particles_builder::build()
 		std::cout << "\t\tBuilding \"" << description.first << "\"" << std::endl;
 
 		Particle_parameters parameters = this->config_parameters(description.second[0]); 
+		std::vector<Point> points = this->load_particles(description.second[0], parameters); 
 
 		Particles_up particles = make_unique<Particles>(
 			parameters,
-			std::move(this->load_particles(description.second[0], parameters)),
+			points,
 			std::move(this->choose_pusher(description.second[0], parameters)),
 			std::move(this->choose_interpolation(description.second[0], parameters)),
 			std::move(this->choose_decomposition(description.second[0], parameters)),
 			std::move(this->x_boundary()),
 			std::move(this->y_boundary()),
 			std::move(this->diagnostics_list(description.first,
-				description.second[1])) );
+				description.second[1], points)) );
 
 		std::cout << "\t\tdone (" << particles.get() << ")\n" << std::endl;		
 		list_of_particles[description.first] = std::move(particles);
@@ -363,8 +364,8 @@ std::map<string, Particles_up> Particles_builder::build()
 
 // Определение требуемых диагностик ---------------------------------------------------------------
 
-std::vector<diagnostic_up> Particles_builder::diagnostics_list(
-	string name_of_sort, vector<string> particle_diagnostics)
+std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostics_list(
+	string name_of_sort, vector<string> particle_diagnostics, const std::vector<Point>& points)
 {
 	std::cout << "\t\t\tSetting diagnostics...";
 	// Возвращает список необходимых диагностик для частиц
@@ -376,19 +377,24 @@ std::vector<diagnostic_up> Particles_builder::diagnostics_list(
 					<< "but no particle diagnostics in file [./constants.h]" << std::endl;
 		}
 		else {
-			for (auto& now : particle_diagnostics) {
-				if ( now == "energy" ) {
-					std::cout << "\n\t\t\t\t" << now;
-					vec_diagnostics.emplace_back(make_unique<particles_energy>(dir_name + "/" + name_of_sort + "/" + now));
+			for (const auto& now : particle_diagnostics) {
+				std::cout << "\n\t\t\t\t" << now;
+
+				if ( now == "density" ) {
+					vec_diagnostics.emplace_back( 
+						make_unique<density>(dir_name + "/" + name_of_sort + "/" + now) );
+				}
+				else if ( now == "chosen_particles" ) {
+					vec_diagnostics.emplace_back( 
+						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, way_to_choose(points)));
 				}
 				else if ( now == "diagram_vx_on_y" ) {
-					std::cout << "\n\t\t\t\t" << now;
-					vec_diagnostics.emplace_back(make_unique<diagram_vx_on_y>(dir_name + "/" + name_of_sort + "/" + now,
-						-1., 1., 0.01, 0, SIZE_Y));
+					vec_diagnostics.emplace_back(
+						make_unique<diagram_vx_on_y>(dir_name + "/" + name_of_sort + "/" + now, 0.001));
 				}
-				else if ( now == "density" ) {
-					std::cout << "\n\t\t\t\t" << now;
-					vec_diagnostics.emplace_back( make_unique<density>(dir_name + "/" + name_of_sort + "/" + now) );
+				else if ( now == "energy" ) {
+					vec_diagnostics.emplace_back(
+						make_unique<particles_energy>(dir_name + "/" + name_of_sort + "/" + now));
 				}
 				else {
 					std::cout << "what():  Initialization error: No matching diagnostics for particles." << std::endl;

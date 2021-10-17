@@ -6,82 +6,84 @@
 
 #include "../particles/particle/particle_parameters.hpp"
 #include "../particles/particle/point.hpp"
-#include "../constants.h"
 
 
-void collect_diagram_vx_on_y(diagram_vx_on_y& diag,
-	const Particle_parameters& sort, const std::vector<Point>& points)
-{
-	/*
-	double n  = sort.n();
-	int Np = sort.Np();
+diagram_vx_on_y::diagram_vx_on_y(std::string directory_path, double dv)
+	: 	Particles_diagnostic(directory_path, "diagram_vx_on_y"), dv_(dv)
+	{
+		nv_min_ = v_min_/dv_;
+		nv_max_ = v_max_/dv_;
+		data_.reserve((ny_max_ - ny_min_)*(nv_max_ - nv_min_));
 
-	for (int i = 0; i < sort.amount(); ++i) {
-		Particle i_th = sort.element(i); 
-
-		double ry = i_th.y();
-		double vx = i_th.px() / 
-			sqrt(sort.m()*sort.m() + i_th.p().dot(i_th.p()));
-
-		int nY  = int(roundf(ry/dy ));
-		int nVx = int(roundf(vx/diag.dv_));
-
-		diag.data_[ (nVx - diag.nVmin_)*(diag.nYmax_ - diag.nYmin_) + (nY - diag.nYmin_) ] += n/Np;
-	}
-	*/
-}
-
-void clear_diagram_vx_on_y(diagram_vx_on_y& diag)
-{
-	/*
-	#pragma omp parallel for num_threads(THREAD_NUM)
-	for (int nVx = 0; nVx < (diag.nVmax_ - diag.nVmin_); ++nVx) {
-	for (int  nY = 0;  nY < (diag.nYmax_ - diag.nYmin_); ++ nY) {
-		diag.data_[ nVx*(diag.nYmax_ - diag.nYmin_) + nY ] = 0;
-	}
-	}
-	*/
-}
+		this->save_parameters(directory_path);
+	};
 
 
 void diagram_vx_on_y::save_parameters(std::string directory_path)
 {	
-	/*
-	std::ofstream diagnostic_parameters_((path_to_it + "/parameters.txt").c_str(), ios::out);
-	diagnostic_parameters_ << "#TIME dt" << std::endl;
-	diagnostic_parameters_ << TIME << " " << dt << " " << std::endl;
-	diagnostic_parameters_ << "#SIZE_X SIZE_Y DTS" << std::endl;
-	diagnostic_parameters_ << SIZE_X << " " << SIZE_Y << " " << diagnose_time_step << std::endl;
-	
+	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
+	diagnostic_parameters_ << "#TIME, dt, DTS" << std::endl;
+	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
+	diagnostic_parameters_ << "#nymin =  0, nymax = SIZE_Y, dy" << std::endl;
+	diagnostic_parameters_ << ny_min_ << " " << ny_max_ << " " << dy << " " << std::endl;
+	diagnostic_parameters_ << "#nv_min = -c/dv, nvmax = +c/dv, dv" << std::endl;
+	diagnostic_parameters_ << nv_min_ << " " << nv_max_ << " " << dv_ << " " << std::endl;
 
-	ofs_ << "#DTS" << std::endl;
-	ofs_ << diagnose_time_step << std::endl;
-	ofs_ << "#nVmin_ nVmax_ dv_" << std::endl;
-	ofs_ << nVmin_ << " " << nVmax_ << " " << dv_ << std::endl;
-	ofs_ << "#nYmin_ nYmax_ dy"  << std::endl;
-	ofs_ << nYmin_ << " " << nYmax_ << " " << dy  << std::endl;
-	data_.reserve((nYmax_ - nYmin_)*(nVmax_ - nYmin_));
-	clear_diagram_vx_on_y(*this);
-	*/
+	switch ( file_for_results_->get_type() ) {
+		case file_type::txt:
+			break;
+
+		case file_type::bin:
+			diagnostic_parameters_ << "#sizeof(float)" << std::endl;
+			diagnostic_parameters_ << sizeof(float) << std::endl;
+			break;
+
+		case file_type::hdf5:
+			break;
+	}
+}
+
+
+void diagram_vx_on_y::collect_diagram_vx_on_y(const Particle_parameters& sort, const std::vector<Point>& points)
+{
+	double n  = sort.n();
+	int Np = sort.Np();
+
+	for (const auto& point : points) {
+		double y  = point.y();
+		double vx = point.px() / sqrt(sort.m()*sort.m() + point.p().dot(point.p()));
+
+		int ny  = int(roundf(y/dy ));
+		int nvx = int(roundf(vx/dv_));
+
+		if ((ny_min_ < ny && ny  < ny_max_) && (nv_min_ < nvx && nvx < nv_max_)) {
+			data_[ (nvx - nv_min_)*(ny_max_ - ny_min_) + (ny - ny_min_) ] += n/Np;
+		}
+	}
+}
+
+
+void diagram_vx_on_y::clear_diagram_vx_on_y()
+{
+	#pragma omp parallel for num_threads(THREAD_NUM)
+	for (int nvx = 0; nvx < (nv_max_ - nv_min_); ++nvx) {
+	for (int ny = ny_min_;  ny < ny_max_;  ++ny) {
+		data_[ nvx*(ny_max_ - ny_min_) + (ny - ny_min_) ] = 0;
+	}}
 }
 
 
 void diagram_vx_on_y::diagnose(const Particle_parameters& sort, const std::vector<Point>& points, int t)
 {
-	/*
 	if ((t % diagnose_time_step) == 0) {
 			
-		collect_diagram_vx_on_y(*this, sort);
+	this->collect_diagram_vx_on_y(sort, points);
+
+	for (int nvx = 0; nvx < (nv_max_ - nv_min_); ++nvx) {
+	for (int ny = ny_min_;  ny < ny_max_; ++ ny) {
+		file_for_results_->write(data_[ nvx*(ny_max_ - ny_min_) + ny ]);
+	}}
 	
-		for (int nVx = 0; nVx < (nVmax_ - nVmin_); ++nVx) {
-		for (int  nY = 0;  nY < (nYmax_ - nYmin_); ++ nY) {
-			OFS_ << data_[ nVx*(nYmax_ - nYmin_) + nY ] << " ";
-		}
-			OFS_ << "\t";
-		}
-		OFS_ << std::endl;
-	
-		clear_diagram_vx_on_y(*this);
+	this->clear_diagram_vx_on_y();
 	}
-	*/
 }

@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 
 field_along_x_axis::field_along_x_axis(string directory_path, string name,
 /*additional*/ string field_to_diagnose, string axis_of_this_field, int fixed_y)
-	: Diagnostic(directory_path, name)
+	: Fields_diagnostic(directory_path, name)
 {
 	field_ = field_to_diagnose;
 	axis_ = axis_of_this_field;
@@ -75,7 +75,7 @@ void field_along_x_axis::diagnose(const v3f& E, const v3f& B, const v3f& j, int 
 
 field_along_y_axis::field_along_y_axis(string directory_path, string name,
 /*additional*/ string field_to_diagnose, string axis_of_this_field, int fixed_x)
-	: Diagnostic(directory_path, name)
+	: Fields_diagnostic(directory_path, name)
 {
 	field_ = field_to_diagnose;
 	axis_ = axis_of_this_field;

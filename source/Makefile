@@ -18,7 +18,7 @@ MANAGERS 	= fields.cpp fields_builder.cpp particles.cpp \
 				particles_builder.cpp particles_load.cpp manager.cpp
 ADDITIONALS	= add_Bz0.cpp add_ion_density.cpp add_ion_current.cpp add_ionization.cpp
 DIAGNOSTICS = energy.cpp whole_field.cpp field_along_the_line.cpp \
-				field_at_point.cpp phase_diagram.cpp density.cpp
+				field_at_point.cpp phase_diagram.cpp density.cpp chosen_particles.cpp
 FILEWRITERS	= txt_file.cpp bin_file.cpp
 
 SRCs = $(VECTORS) $(PARTICLES) $(MANAGERS) $(ADDITIONALS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)

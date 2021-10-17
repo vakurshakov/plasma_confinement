@@ -17,8 +17,6 @@
 using std::map, std::multimap, std::string, std::vector;
 using v3f = vector3_field;
 using v3f_up = std::unique_ptr<vector3_field>;
-using diagnostic_up = std::unique_ptr<Diagnostic>;
-
 
 class Fields_builder {
 public:
@@ -41,6 +39,7 @@ private:
 	auto y_boundary();
 
 	// Возвращает список диагностик
+	using diagnostic_up = std::unique_ptr<Fields_diagnostic>;
 	vector<diagnostic_up> diagnostics_list(multimap<string, vector<string>> description);
 };
 

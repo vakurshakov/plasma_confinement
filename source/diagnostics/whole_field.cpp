@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 
 whole_field::whole_field(string directory_path, string file_name,
 /*additional*/ string field_to_diagnose, string axis_of_this_field)
-	: Diagnostic(directory_path, file_name)
+	: Fields_diagnostic(directory_path, file_name)
 {
 	field_ = field_to_diagnose;
 	axis_ = axis_of_this_field;

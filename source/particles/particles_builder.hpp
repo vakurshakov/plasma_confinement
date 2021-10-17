@@ -17,7 +17,6 @@
 
 
 using std::string, std::vector;
-using diagnostic_up = std::unique_ptr<Diagnostic>;
 using Particles_up = std::unique_ptr<Particles>;
 
 
@@ -45,8 +44,9 @@ private:
 	auto y_boundary();
 
 	// Возвращает список диагностик для частиц
+	using diagnostic_up = std::unique_ptr<Particles_diagnostic>;
 	vector<diagnostic_up> diagnostics_list(string particle_name,
-		vector<string> description);
+		vector<string> description, const std::vector<Point>&);
 };
 
 

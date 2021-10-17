@@ -36,14 +36,28 @@ public:
 	virtual ~Diagnostic() = default;
 
 	virtual void save_parameters(std::string directory_path) = 0;
-	virtual void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) {};
-	virtual void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) {};
-
 protected:
 
 	std::unique_ptr<IFile> file_for_results_ = nullptr;
 };
 
+
+class Particles_diagnostic : public Diagnostic {
+public:
+	Particles_diagnostic(std::string directory_path, std::string file_name)
+		: Diagnostic(directory_path, file_name) {};
+
+	virtual void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) = 0;
+};
+
+
+class Fields_diagnostic : public Diagnostic {
+public:
+	Fields_diagnostic(std::string directory_path, std::string file_name)
+		: Diagnostic(directory_path, file_name) {};
+
+	virtual void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) = 0;
+};
 
 //#################################################################################################
 

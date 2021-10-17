@@ -15,14 +15,14 @@
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
-using diagnostic_up = std::unique_ptr<Diagnostic>;
-
 
 class Particles {
 public:
+	using diagnostic_up = std::unique_ptr<Particles_diagnostic>;
+
 	Particles() = default;
 	Particles(
-		Particle_parameters&, std::vector<Point>&&,
+		Particle_parameters&, std::vector<Point>&,
 		std::unique_ptr<Pusher>,
 		std::unique_ptr<Interpolation>,
 		std::unique_ptr<Decomposition>,

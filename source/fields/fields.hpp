@@ -11,14 +11,14 @@
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
-
 using v3f = vector3_field;
 using v3f_up = std::unique_ptr<v3f>;
-using diagnostic_up = std::unique_ptr<Diagnostic>;
 
 
 class Fields {
 public:
+	using diagnostic_up = std::unique_ptr<Fields_diagnostic>;
+	
 	Fields() = default;
 	Fields( v3f_up&& E, v3f_up&& B, v3f_up&& J,
 			std::function<void(v3f& E, v3f& B, v3f& J)>&& propogator,

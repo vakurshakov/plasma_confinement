@@ -12,7 +12,7 @@
 using std::string;
 
 
-class whole_field : public Diagnostic {
+class whole_field : public Fields_diagnostic {
 public:
 	whole_field(string directory_path, string file_name,
 	/*additional*/ string field_to_diagnose, string field_axis);

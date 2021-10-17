@@ -9,7 +9,7 @@
 
 
 density::density(std::string directory_path)
-	: Diagnostic(directory_path, "density")
+	: Particles_diagnostic(directory_path, "density")
 {
 	dens_.reserve(SIZE_X*SIZE_Y);
 	this->clear();

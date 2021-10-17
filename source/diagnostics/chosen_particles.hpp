@@ -1,5 +1,5 @@
-#ifndef DIAGNOSTICS_DENSITY_HPP
-#define DIAGNOSTICS_DENSITY_HPP
+#ifndef DIAGNOSTICS_CHOSEN_PARTICLES_HPP
+#define DIAGNOSTICS_CHOSEN_PARTICLES_HPP
 
 //#################################################################################################
 
@@ -12,20 +12,21 @@
 #include "../particles/particle/point.hpp"
 
 
-class density : public Particles_diagnostic {
+std::vector<int> way_to_choose(const std::vector<Point>&);
+
+
+class chosen_particles : public Particles_diagnostic {
 public:
-	density(std::string directory_path);
+	chosen_particles(std::string directory_path,
+        std::vector<int> indexes_of_chosen_particles);
 
 	void save_parameters(std::string directory_path) override;
 	void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) override;
 
 private:
-	std::vector<double> dens_;
-
-	void collect(const Particle_parameters& sort, const std::vector<Point>& points);
-	void clear();
+	std::vector<int> indexes_of_chosen_particles_;
 };
 
 //#################################################################################################
 
-#endif // DIAGNOSTICS_DENSITY_HPP
+#endif // DIAGNOSTICS_CHOSEN_PARTICLES_HPP
