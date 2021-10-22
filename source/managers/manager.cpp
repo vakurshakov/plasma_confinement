@@ -66,7 +66,7 @@ void Manager::calculates()
 	timer.set_up();
 
 	if (!settings_before_main_cycle.empty()) {
-		for (auto& command : settings_before_main_cycle) {
+		for (const auto& command : settings_before_main_cycle) {
 			command->execute(0);
 		}
 	}
@@ -74,7 +74,7 @@ void Manager::calculates()
 	for (int t = 0; t < TIME; ++t) {	
 	
 		if (!each_step_presets.empty()) {
-			for (auto& command : each_step_presets) {
+			for (const auto& command : each_step_presets) {
 				command->execute(t);
 			}
 		}

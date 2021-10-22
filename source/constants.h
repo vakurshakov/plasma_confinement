@@ -13,7 +13,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 //######## MODIFIERS #################################################################
 	#define there_are_particles 			true
 		#define there_are_ions				true
-		#define there_are_electrons			false
+		#define there_are_electrons			true
 		#define particles_are_diagnosed 	true
 
 	#define there_are_fields				true
@@ -36,8 +36,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const int TINJ	= 5;		
 	inline const int diagnose_time_step = 5; 
 
-	inline const int SIZE_X = 1000;
-	inline const int SIZE_Y = 1000;
+	inline const int SIZE_X = 500;
+	inline const int SIZE_Y = 500;
 	inline const double dx 	= 0.1;
 	inline const double dy	= 0.1;
 	inline const double dt 	= 0.5*dx;
@@ -57,8 +57,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const double dr		= 0.24;
 
 	//зависимые параметры для обращения
-	inline const int   Npi		= 5;
-	inline const double ni		= -Bz0/( 2*M_PI*v_inj*log(1 - 2*dr/(r_larm - dr)) );	// ni   = 1.291e11 [cm^(-3)]
+	inline const int   Npi		= 1;
+	inline const double ni		= Bz0/( 2*M_PI*v_inj*log(1 + 2*dr/(r_larm - dr)) );	// ni   = 1.291e11 [cm^(-3)]
 	inline const double mi		= r_larm*Bz0/v_inj;		//масса модельных частиц, чтобы выставить их на r_larm
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!

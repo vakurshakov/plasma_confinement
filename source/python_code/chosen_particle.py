@@ -2,6 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from cycler import cycler
 
 
 def return_parameters(parameters_file : str):
@@ -66,24 +67,34 @@ def set_chosen_particles(t : int, field, field_to_read : str, sizeof_float : int
 
 def set_imshow(subplot, Field: list, cmap_: str, v : tuple, SIZE_X : int, SIZE_Y : int):
     return subplot.imshow(
-        Field[:][:],
+        Field[250-150:250+150,250-150:250+150],
         cmap=plt.get_cmap(cmap_),
         interpolation="gaussian",
         animated=True,
         origin='lower',
-        extent=(0,SIZE_X,0,SIZE_Y),
+        extent=(250-150,250+150,250-150,250+150),
         vmin=v[0], vmax=v[1],
     )
 
 
 def set_scatter(subplot, Field: list, cmap_: str, v : tuple):
     return subplot.scatter(
-        x=Field[:,0],
-        y=Field[:,1],
-        c=Field[:,-1],
+        x=Field[::4, 0],
+        y=Field[::4, 1],
+        c=Field[::4,-1],
+        alpha=0.7,
         cmap=plt.get_cmap(cmap_),
         vmin=v[0], vmax=v[1],
     )    
+
+
+def set_trajectory_plot(subplot, Field: list):
+    return subplot.plot(
+        Field[:, 0],
+        Field[:, 1],
+        alpha=0.9,
+        linestyle='-',
+    )
 
 
 def set_colorbar(mappable, pos : str, pad):
@@ -99,7 +110,7 @@ def set_colorbar(mappable, pos : str, pad):
     return cbar
 
 
-def set_whole_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_X, SIZE_Y,
+def set_field_on_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict, SIZE_X, SIZE_Y,
                  current_shape_is_shown = False):
     
     ax = axes # [ ddata_name[ddata_enum['axes_position']] ]
@@ -129,6 +140,20 @@ def set_scatter_on_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict):
     cbars.append(set_colorbar(sc_, "bottom", 1.3))
 
 
+def set_trajectory_on_ax(axes, cbars : list, ddata_name : list, ddata_enum : dict):
+
+    
+    ax = axes # [ ddata_name[ddata_enum['axes_position']] ]
+    
+    trajectories = ddata_name[ddata_enum['frame_data']]
+
+    for i in range(number_of_particles_to_track):
+        set_trajectory_plot(ax,
+            trajectories[:, i, [0,1,-1]])
+
+    # cbars.append(set_colorbar(sc_, "bottom", 1.3))
+
+
 def clear_whole_figure(axes, cbars, nrows, ncols):
     for i in range(nrows):
         for j in range(ncols):
@@ -140,14 +165,17 @@ def clear_whole_figure(axes, cbars, nrows, ncols):
 
 parameters_file = "parameters.txt"
 sizeof_float, TIME, dt, DTS, SIZE_X, SIZE_Y = return_parameters(parameters_file)
-sizeof_float, TIME, dt, DTS, number_of_particles = return_chosen_particles_parameters("../chosen_particles/" + parameters_file)
+_, _, _, _, number_of_particles = return_chosen_particles_parameters("../chosen_particles/" + parameters_file)
+
+number_of_particles_to_track = 5
 
 
 ddata = {
     
     #'name': ["file.bin", [frame_data], (axes_position), "axes_name", "xlabel", "ylabel" (vmin, vmax), "colormap"]
-    'field_ne'  : [ "./density.bin", np.zeros((SIZE_Y, SIZE_X)), (0), "$\hat{n}_e$", "$\hat{x}/h$", "$\hat{y}/h$", (0, 2), "Greys"  ],
-    'scatter_ne': [ "../chosen_particles/chosen_particles.bin", np.zeros((number_of_particles, 6)), (0), "$\hat{n}_e$", "$\hat{x}/h$", "$\hat{y}/h$", (1e-2-5e-7, 1e-2+5e-7), "RdYlBu"  ],
+    'field_ne'     : [ "./density.bin", np.zeros((SIZE_Y, SIZE_X)), (0), "$\hat{n}_e$", "$\hat{x}/h$", "$\hat{y}/h$", (0, 2), "Greys"  ],
+    'scatter_ne'   : [ "../chosen_particles/chosen_particles.bin", np.zeros((number_of_particles, 6)), (0), "", "", "", (1e-2-5e-7, 1e-2+5e-7), "RdYlBu"  ],
+    'trajectory_ne': [ "", np.array([np.zeros((number_of_particles_to_track, 6))]), (0), "", "", "", (), "RdYlBu" ]
 }
 
 ddata_enum = {
@@ -168,6 +196,12 @@ nrows = 1
 ncols = 1
 
 fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7,10))
+
+custom_cycler = (cycler(color=['#FFFF73', '#AD66D5', '#FF0D00', '#F13C73', '#D6FA3F']))
+
+if ('trajectoty_ne' in ddata.keys()):
+    axes(ddata['trajectoty_ne'][ddata_enum['axes_position']]).set_prop_cycle(custom_cycler)
+
 
 '''
 from mpi4py import MPI
@@ -194,12 +228,22 @@ for t in range(0, int(TIME/DTS)):
                                     ddata[name][ddata_enum['file_to_read']],
                                     sizeof_float, number_of_particles)
 
+        elif ('trajectory' in name):
+            if (t == 0):
+                np.copyto(((ddata['trajectory_ne'])[ddata_enum['frame_data']])[0,:,:], ((ddata['scatter_ne'])[ddata_enum['frame_data']])[[0, -1, 5, 10, 20]])
+                ((ddata['trajectory_ne'])[ddata_enum['frame_data']]) = np.append(((ddata['trajectory_ne'])[ddata_enum['frame_data']]),
+                    [((ddata['scatter_ne'])[ddata_enum['frame_data']])[[0, -1, 5, 10, 20]]], axis=0)
+            else:
+                ((ddata['trajectory_ne'])[ddata_enum['frame_data']]) = np.append(((ddata['trajectory_ne'])[ddata_enum['frame_data']]),
+                    [((ddata['scatter_ne'])[ddata_enum['frame_data']])[[0, -1, 5, 10, 20]]], axis=0)
+
         elif ('off' in name):
             continue
     
 
-    set_whole_ax(axes, cbars, ddata['field_ne'], ddata_enum, SIZE_X, SIZE_Y)
+    set_field_on_ax(axes, cbars, ddata['field_ne'], ddata_enum, SIZE_X, SIZE_Y)
     set_scatter_on_ax(axes, cbars, ddata['scatter_ne'], ddata_enum)
+    set_trajectory_on_ax(axes, cbars, ddata['trajectory_ne'], ddata_enum)
         
     axes.text(0.4, 1.2, "%.2f $t\ {\cdot}\ w_p$" %(DTS*t*dt), transform=axes.transAxes, fontsize=20)
 
@@ -207,5 +251,8 @@ for t in range(0, int(TIME/DTS)):
     fig.savefig("animation/" + name + ".png", dpi=200)
     
     clear_whole_figure(axes, cbars, nrows, ncols)
+
+
+
 
 
