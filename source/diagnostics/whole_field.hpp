@@ -8,6 +8,7 @@
 #include <string>
 
 #include "../vectors/vector3_field.hpp"
+#include "../constants.h"
 
 using std::string;
 
@@ -15,15 +16,21 @@ using std::string;
 class whole_field : public Fields_diagnostic {
 public:
 	whole_field(string directory_path, string file_name,
-	/*additional*/ string field_to_diagnose, string field_axis);
+	/*additional*/ string field_to_diagnose, string field_axis,
+		int begin_x, int begin_y, int end_x, int end_y);
 
 	void save_parameters(string directory_path) override;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
-	void diagnose(const v3f& F);
-	
 private:
+	void diagnose(const v3f& F);
+
 	string field_, axis_;
+	
+	int begin_x_;
+	int begin_y_;
+	int end_x_;
+	int end_y_;	
 };
 
 

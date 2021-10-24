@@ -391,7 +391,7 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 				}
 				else if ( now == "diagram_vx_on_y" ) {
 					vec_diagnostics.emplace_back(
-						make_unique<diagram_vx_on_y>(dir_name + "/" + name_of_sort + "/" + now, 0.001));
+						make_unique<diagram_vx_on_y>(dir_name + "/" + name_of_sort + "/" + now));
 				}
 				else if ( now == "energy" ) {
 					vec_diagnostics.emplace_back(

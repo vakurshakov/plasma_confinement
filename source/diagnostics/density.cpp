@@ -9,9 +9,15 @@
 #include "../constants.h"
 
 
-density::density(std::string directory_path)
+density::density(std::string directory_path,
+	int begin_x=0, int begin_y=0, int end_x=SIZE_X, int end_y=SIZE_Y)
 	: Particles_diagnostic(directory_path)
 {
+	begin_x_ = begin_x;
+	begin_y_ = begin_y;
+	end_x_ 	 = end_x;
+	end_y_ 	 = end_y;
+
 	dens_.reserve(SIZE_X*SIZE_Y);
 	this->clear();
 	
@@ -23,8 +29,10 @@ void density::save_parameters(std::string directory_path)
 	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
-	diagnostic_parameters_ << "#SIZE_X SIZE_Y" << std::endl;
-	diagnostic_parameters_ << SIZE_X << " " << SIZE_Y << std::endl;
+	diagnostic_parameters_ << "#begin_x, end_x, dx" << std::endl;
+	diagnostic_parameters_ << begin_x_ << " " << end_x_ << " " << dx << std::endl;
+	diagnostic_parameters_ << "#begin_y, end_y, dy" << std::endl;
+	diagnostic_parameters_ << begin_y_ << " " << end_y_ << " " << dy << std::endl;
 	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
 	diagnostic_parameters_ << sizeof(float) << std::endl;
 }

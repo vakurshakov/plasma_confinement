@@ -24,9 +24,10 @@ public:
 	void save_parameters(string directory_path) override;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 
-	void diagnose(const v3f& F);
 	
 private:
+	void diagnose(const v3f& F);
+	
 	string field_, axis_;
 	int px_, py_;
 };

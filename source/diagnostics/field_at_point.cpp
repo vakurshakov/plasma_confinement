@@ -14,7 +14,8 @@ using v3f = vector3_field;
 
 
 field_at_point::field_at_point(string directory_path, string file_name,
-/*additional*/ string field_to_diagnose, string axis_of_this_field, int point_x, int point_y)
+/*additional*/ string field_to_diagnose, string axis_of_this_field,
+	int point_x=SIZE_X/2, int point_y=SIZE_Y/2)
 	: Fields_diagnostic(directory_path + "/" + file_name)
 {
 	field_ = field_to_diagnose;

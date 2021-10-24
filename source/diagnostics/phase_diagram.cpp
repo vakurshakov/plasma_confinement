@@ -8,15 +8,21 @@
 #include "../particles/particle/point.hpp"
 
 
-diagram_vx_on_y::diagram_vx_on_y(std::string directory_path, double dv)
-	: 	Particles_diagnostic(directory_path + "/" + "diagram_vx_on_y"), dv_(dv)
-	{
-		nv_min_ = v_min_/dv_;
-		nv_max_ = v_max_/dv_;
-		data_.reserve((ny_max_ - ny_min_)*(nv_max_ - nv_min_));
+diagram_vx_on_y::diagram_vx_on_y(std::string directory_path,
+/*additional*/ double v_min=-1, double v_max=+1, double dv=1e-2,
+	int ny_min=0, int ny_max=SIZE_Y)
+	: 	Particles_diagnostic(directory_path + "/" + "diagram_vx_on_y")
+{
+	dv_ = dv;
+	nv_min_ = v_min/dv_;
+	nv_max_ = v_max/dv_;
+	ny_min_ = ny_min;
+	ny_max_ = ny_max;
 
-		this->save_parameters(directory_path);
-	};
+	data_.reserve((ny_max_ - ny_min_)*(nv_max_ - nv_min_));
+
+	this->save_parameters(directory_path);
+};
 
 
 void diagram_vx_on_y::save_parameters(std::string directory_path)
@@ -24,9 +30,9 @@ void diagram_vx_on_y::save_parameters(std::string directory_path)
 	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME, dt, DTS" << std::endl;
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
-	diagnostic_parameters_ << "#nymin =  0, nymax = SIZE_Y, dy" << std::endl;
+	diagnostic_parameters_ << "#ny_min, ny_max, dy" << std::endl;
 	diagnostic_parameters_ << ny_min_ << " " << ny_max_ << " " << dy << " " << std::endl;
-	diagnostic_parameters_ << "#nv_min = -c/dv, nvmax = +c/dv, dv" << std::endl;
+	diagnostic_parameters_ << "#nv_min, nv_max, dv" << std::endl;
 	diagnostic_parameters_ << nv_min_ << " " << nv_max_ << " " << dv_ << " " << std::endl;
 	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
 	diagnostic_parameters_ << sizeof(float) << std::endl;
@@ -56,8 +62,8 @@ void diagram_vx_on_y::clear_diagram_vx_on_y()
 {
 	#pragma omp parallel for num_threads(THREAD_NUM)
 	for (int nvx = 0; nvx < (nv_max_ - nv_min_); ++nvx) {
-	for (int ny = ny_min_;  ny < ny_max_;  ++ny) {
-		data_[ nvx*(ny_max_ - ny_min_) + (ny - ny_min_) ] = 0;
+	for (int ny  = 0; ny  < (ny_max_ - ny_min_);  ++ny) {
+		data_[ nvx*(ny_max_ - ny_min_) + ny ] = 0;
 	}}
 }
 
@@ -71,7 +77,7 @@ void diagram_vx_on_y::diagnose(const Particle_parameters& sort, const std::vecto
 	this->collect_diagram_vx_on_y(sort, points);
 
 	for (int nvx = 0; nvx < (nv_max_ - nv_min_); ++nvx) {
-	for (int ny = ny_min_;  ny < ny_max_; ++ ny) {
+	for (int ny  = 0; ny  < (ny_max_ - ny_min_); ++ ny) {
 		file_for_results_->write(data_[ nvx*(ny_max_ - ny_min_) + ny ]);
 	}}
 	
