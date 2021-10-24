@@ -18,8 +18,7 @@ using v3f = vector3_field;
 
 class fields_energy : public Fields_diagnostic {
 public:
-	fields_energy(std::string directory_path)
-		: Fields_diagnostic(directory_path, "fields_energy") {};
+	fields_energy(std::string directory_path);
 
 	void save_parameters(std::string directory_path);
 	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
@@ -31,9 +30,8 @@ private:
 
 class particles_energy : public Particles_diagnostic {
 public:
-	particles_energy(std::string directory_path)
-		: Particles_diagnostic(directory_path, "particles_energy") {};
-
+	particles_energy(std::string directory_path);
+	
 	void save_parameters(std::string directory_path);
 	void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) override;
 	

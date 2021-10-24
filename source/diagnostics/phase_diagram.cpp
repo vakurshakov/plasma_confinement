@@ -9,7 +9,7 @@
 
 
 diagram_vx_on_y::diagram_vx_on_y(std::string directory_path, double dv)
-	: 	Particles_diagnostic(directory_path, "diagram_vx_on_y"), dv_(dv)
+	: 	Particles_diagnostic(directory_path + "/" + "diagram_vx_on_y"), dv_(dv)
 	{
 		nv_min_ = v_min_/dv_;
 		nv_max_ = v_max_/dv_;
@@ -28,19 +28,8 @@ void diagram_vx_on_y::save_parameters(std::string directory_path)
 	diagnostic_parameters_ << ny_min_ << " " << ny_max_ << " " << dy << " " << std::endl;
 	diagnostic_parameters_ << "#nv_min = -c/dv, nvmax = +c/dv, dv" << std::endl;
 	diagnostic_parameters_ << nv_min_ << " " << nv_max_ << " " << dv_ << " " << std::endl;
-
-	switch ( file_for_results_->get_type() ) {
-		case file_type::txt:
-			break;
-
-		case file_type::bin:
-			diagnostic_parameters_ << "#sizeof(float)" << std::endl;
-			diagnostic_parameters_ << sizeof(float) << std::endl;
-			break;
-
-		case file_type::hdf5:
-			break;
-	}
+	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
+	diagnostic_parameters_ << sizeof(float) << std::endl;
 }
 
 
@@ -76,7 +65,9 @@ void diagram_vx_on_y::clear_diagram_vx_on_y()
 void diagram_vx_on_y::diagnose(const Particle_parameters& sort, const std::vector<Point>& points, int t)
 {
 	if ((t % diagnose_time_step) == 0) {
-			
+	
+	file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
+
 	this->collect_diagram_vx_on_y(sort, points);
 
 	for (int nvx = 0; nvx < (nv_max_ - nv_min_); ++nvx) {
@@ -85,5 +76,6 @@ void diagram_vx_on_y::diagnose(const Particle_parameters& sort, const std::vecto
 	}}
 	
 	this->clear_diagram_vx_on_y();
-	}
-}
+
+	file_for_results_.release();
+}}

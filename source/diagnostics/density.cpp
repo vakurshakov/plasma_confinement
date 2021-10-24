@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "../particles/particle/particle_parameters.hpp"
 #include "../particles/particle/point.hpp"
@@ -9,7 +10,7 @@
 
 
 density::density(std::string directory_path)
-	: Particles_diagnostic(directory_path, "density")
+	: Particles_diagnostic(directory_path)
 {
 	dens_.reserve(SIZE_X*SIZE_Y);
 	this->clear();
@@ -24,35 +25,28 @@ void density::save_parameters(std::string directory_path)
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
 	diagnostic_parameters_ << "#SIZE_X SIZE_Y" << std::endl;
 	diagnostic_parameters_ << SIZE_X << " " << SIZE_Y << std::endl;
-
-	switch ( file_for_results_->get_type() ) {
-		case file_type::txt:
-			break;
-
-		case file_type::bin:
-			diagnostic_parameters_ << "#sizeof(float)" << std::endl;
-			diagnostic_parameters_ << sizeof(float) << std::endl;
-			break;
-
-		case file_type::hdf5:
-			break;
-	}
+	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
+	diagnostic_parameters_ << sizeof(float) << std::endl;
 }
 
 
 void density::diagnose(const Particle_parameters& sort, const std::vector<Point>& points, int t)
 {
 	if ((t % diagnose_time_step) == 0) {
-		
-		this->collect(sort, points);
-		for (int y = 0; y < SIZE_Y; ++y) {
-		for (int x = 0; x < SIZE_X; ++x) {
-			file_for_results_->write( dens_[y*SIZE_X + x] ); 
-		}
-		}
-		this->clear();
-	}
-}
+
+	file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
+
+	this->collect(sort, points);
+
+	for (int y = 0; y < SIZE_Y; ++y) {
+	for (int x = 0; x < SIZE_X; ++x) {
+		file_for_results_->write( dens_[y*SIZE_X + x] ); 
+	}}
+
+	this->clear();
+
+	file_for_results_.release();
+}}
 
 
 void density::collect(const Particle_parameters& sort, const std::vector<Point>& points)
@@ -77,6 +71,5 @@ void density::clear()
 	for (int ny = 0; ny < SIZE_Y; ++ny) {
 	for (int nx = 0; nx < SIZE_X; ++nx) {
 		dens_[ny*SIZE_X + nx] = 0;
-	}
-	}
+	}}
 }

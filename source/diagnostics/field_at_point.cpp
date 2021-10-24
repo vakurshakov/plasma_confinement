@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <fstream>
 
 #include "../vectors/vector3_field.hpp"
@@ -14,15 +15,15 @@ using v3f = vector3_field;
 
 field_at_point::field_at_point(string directory_path, string file_name,
 /*additional*/ string field_to_diagnose, string axis_of_this_field, int point_x, int point_y)
-	: Fields_diagnostic(directory_path, file_name)
+	: Fields_diagnostic(directory_path + "/" + file_name)
 {
 	field_ = field_to_diagnose;
-	axis_ = axis_of_this_field;
-	
-	px_ = point_x;
-	py_ = point_y;
+	axis_  = axis_of_this_field;
+	px_    = point_x;
+	py_    = point_y;
 
 	this->save_parameters(directory_path);
+	file_for_results_ = std::make_unique<BIN_File>(directory_path_, "total");
 }
 
 void field_at_point::save_parameters(string directory_path)
