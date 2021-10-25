@@ -1,37 +1,39 @@
-#ifndef DIAGNOSTICS_MARGINAL_DISTRIBUTION_HPP
-#define DIAGNOSTICS_MARGINAL_DISTRIBUTION_HPP
+#ifndef DIAGNOSTICS_RIBUTION_HPP_moment
+#define DIAGNOSTICS_RIBUTION_HPP_moment
 
 //#################################################################################################
 
 #include "diagnostics.hpp"
 
-#include <cmath>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "../particles/particle/particle_parameters.hpp"
 #include "../particles/particle/point.hpp"
+#include "../vectors/vector_classes.hpp"
 #include "../constants.h"
 
 
-//-------------------------------------------------------------------------------------------------
+//------- projector -------------------------------------------------------------------------------
 class Projector {
 public:
-	Projector(const std::string& distribution_projection);
+	Projector(const std::string distribution_projection);
 	virtual ~Projector() = default;
 
-	const std::string& get_coordinates() const { return coordinates_; }
+	const std::string& get_axes_names() const { return axes_name_; }
 	virtual const double project_to_x(const Particle_parameters&, const Point&) const = 0;
 	virtual const double project_to_y(const Particle_parameters&, const Point&) const = 0;
 
 private:
-	const std::string coordinates_;
+	const std::string axes_name_;
 };
 
 
 class XY_projector : public Projector {
 public:
-	XY_projector() : Projector("density") {};
+	XY_projector() : Projector("XY") {};
+
 	const double project_to_x(const Particle_parameters&, const Point&) const override;
 	const double project_to_y(const Particle_parameters&, const Point&) const override;
 };
@@ -39,19 +41,51 @@ public:
 
 class VxVy_projector : public Projector {
 public:
-	VxVy_projector() : Projector("vy_on_vx") {};
+	VxVy_projector() : Projector("VxVy") {};
+
 	const double project_to_x(const Particle_parameters&, const Point&) const override;
 	const double project_to_y(const Particle_parameters&, const Point&) const override;
 };
-//-------------------------------------------------------------------------------------------------
 
-
-class marginal_distribution : public Particles_diagnostic {
+//------- moment ----------------------------------------------------------------------------------
+class Moment {
 public:
-	marginal_distribution(std::string path,
+	Moment(const std::string distribution_projection);
+
+	const std::string get_moment_name() { return moment_name_; }
+	virtual const double get_quantity_to_be_averaged_(
+		const Particle_parameters&, const Point&) const = 0;
+
+private:
+	const std::string moment_name_;
+};
+
+
+class zeroth_moment : public Moment {
+public:
+	zeroth_moment() : Moment("Zeroth_moment") {};
+
+	const double get_quantity_to_be_averaged_(
+		const Particle_parameters&, const Point&) const override;
+};
+
+class first_Vx_moment : public Moment {
+public:
+	first_Vx_moment() : Moment("Vx") {};
+
+	const double get_quantity_to_be_averaged_(
+		const Particle_parameters&, const Point&) const override;
+};
+
+
+//------- distribution_moment ---------------------------------------------------------------------
+class distribution_moment : public Particles_diagnostic {
+public:
+	distribution_moment(std::string path,
 		double projection_x_min, double projection_x_max, double dpx,
 		double projection_y_min, double projection_y_max, double dpy,
-		std::unique_ptr<Projector> projector);
+		std::unique_ptr<Projector>,
+		std::unique_ptr<Moment>		);
 
 	void save_parameters(std::string directory_path) override;
 	void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) override;
@@ -69,9 +103,9 @@ private:
 	
 	std::vector<double> data_;
 	std::unique_ptr<Projector> projector_;
-	// std::unique_ptr<Value_to_> ;
+	std::unique_ptr<Moment> moment_;
 };
 
 //#################################################################################################
 
-#endif // DIAGNOSTICS_MARGINAL_DISTRIBUTION_HPP
+#endif // DIAGNOSTICS_RIBUTION_HPP_moment
