@@ -61,6 +61,13 @@ const double first_Vx_moment::get_quantity_to_be_averaged_(
 	}
 
 
+const double first_Vy_moment::get_quantity_to_be_averaged_(
+	const Particle_parameters& sort, const Point& point) const
+	{
+		return get_velocity(sort, point).y();
+	}
+
+
 distribution_moment::distribution_moment(std::string directory_path,
 	/*additional*/
 	double px_min, double px_max, double dpx,

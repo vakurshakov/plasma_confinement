@@ -386,16 +386,30 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
 							std::make_unique<XY_projector>(), std::make_unique<zeroth_moment>()));
 				}
-				else if ( now == "chosen_particles" ) {
-					vec_diagnostics.emplace_back( 
-						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, way_to_choose(points)));
-				}
 				else if ( now == "1_of_VxVy" ) {
 					vec_diagnostics.emplace_back(
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
 							-1.,	+1.,	0.01,
 							-1.,	+1.,	0.01,
 							std::make_unique<VxVy_projector>(), std::make_unique<zeroth_moment>()));
+				}
+				else if ( now == "first_Vx_moment" ) {
+					vec_diagnostics.emplace_back( 
+						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
+							(SIZE_X*dx/2 - 1.*r_prop*r_larm), (SIZE_X*dx/2 + 1.*r_prop*r_larm), dx,
+							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
+							std::make_unique<XY_projector>(), std::make_unique<first_Vx_moment>()));
+				}
+				else if ( now == "first_Vy_moment" ) {
+					vec_diagnostics.emplace_back( 
+						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
+							(SIZE_X*dx/2 - 1.*r_prop*r_larm), (SIZE_X*dx/2 + 1.*r_prop*r_larm), dx,
+							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
+							std::make_unique<XY_projector>(), std::make_unique<first_Vy_moment>()));
+				}
+				else if ( now == "chosen_particles" ) {
+					vec_diagnostics.emplace_back( 
+						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, way_to_choose(points)));
 				}
 				else if ( now == "energy" ) {
 					vec_diagnostics.emplace_back(

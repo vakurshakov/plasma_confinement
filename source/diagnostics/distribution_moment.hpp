@@ -81,6 +81,15 @@ public:
 };
 
 
+class first_Vy_moment : public Moment {
+public:
+	first_Vy_moment() : Moment("Vy") {};
+
+	const double get_quantity_to_be_averaged_(
+		const Particle_parameters&, const Point&) const override;
+};
+
+
 //------- distribution_moment ---------------------------------------------------------------------
 class distribution_moment : public Particles_diagnostic {
 public:
