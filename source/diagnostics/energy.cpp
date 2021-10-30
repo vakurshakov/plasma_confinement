@@ -3,6 +3,7 @@
 #include <omp.h>
 #include <string>
 #include <memory>
+#include <filesystem>
 
 #include "../particles/particle/particle_parameters.hpp"
 #include "../particles/particle/point.hpp"
@@ -10,6 +11,7 @@
 #include "../constants.h"
 
 using v3f = vector3_field;
+namespace fs = std::filesystem;
 
 
 //######## fields energy ##########################################################################
@@ -24,6 +26,7 @@ fields_energy::fields_energy(std::string directory_path)
 
 void fields_energy::save_parameters(std::string directory_path)
 {
+	fs::create_directories(fs::path(directory_path));
 	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;

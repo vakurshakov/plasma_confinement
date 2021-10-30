@@ -12,8 +12,8 @@
 
 void Esirkepov_density_decomposition::process(const Point& point, const vector2& r0){
 	const vector2& r = point.r(); 
-	const int nearest_edge_to_rx = int(roundf(r.x()/dx));
-	const int nearest_edge_to_ry = int(roundf(r.y()/dy));
+	const int nearest_edge_to_rx = int(round(r.x()/dx));
+	const int nearest_edge_to_ry = int(round(r.y()/dy));
 	p_v3f temp_J(2*charge_cloud_+1, 2*charge_cloud_+1);
 
 	decompose_x(r, r0, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);

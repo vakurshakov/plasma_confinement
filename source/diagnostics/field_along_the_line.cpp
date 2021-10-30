@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 
 field_along_x_axis::field_along_x_axis(string directory_path, string name,
 /*additional*/ string field_to_diagnose, string axis_of_this_field,
-	int fixed_y, int begin_x=0, int end_x=SIZE_X)
+	int fixed_y, int begin_x, int end_x)
 	: Fields_diagnostic(directory_path + "/" + name)
 {
 	field_ 	 = field_to_diagnose;
@@ -30,11 +30,12 @@ field_along_x_axis::field_along_x_axis(string directory_path, string name,
 
 void field_along_x_axis::save_parameters(string directory_path)
 {
+	fs::create_directories(fs::path(directory_path));
 	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME, dt, DTS" << std::endl;
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
 	diagnostic_parameters_ << "#PY, begin_x, end_x, dx"<< std::endl;
-	diagnostic_parameters_ << fixed_y_ << begin_x_ << " " << end_x_ << dx << std::endl;
+	diagnostic_parameters_ << fixed_y_ << begin_x_ << " " << end_x_ << dx << " " << std::endl;
 	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
 	diagnostic_parameters_ << sizeof(float) << std::endl;
 }
@@ -69,26 +70,27 @@ void field_along_x_axis::diagnose(const v3f& E, const v3f& B, const v3f& j, int 
 
 field_along_y_axis::field_along_y_axis(string directory_path, string name,
 /*additional*/ string field_to_diagnose, string axis_of_this_field,
-	int fixed_x, int begin_y=0, int end_y=SIZE_Y)
+	int fixed_x, int begin_y, int end_y)
 	: Fields_diagnostic(directory_path + "/" + name)
-{
-	field_ 	 = field_to_diagnose;
-	axis_ 	 = axis_of_this_field;
-	fixed_x_ = fixed_x;
-	begin_y_ = begin_y;
-	end_y_   = end_y;
+	{
+		field_ 	 = field_to_diagnose;
+		axis_ 	 = axis_of_this_field;
+		fixed_x_ = fixed_x;
+		begin_y_ = begin_y;
+		end_y_   = end_y;
 
-	this->save_parameters(directory_path);
-}
+		this->save_parameters(directory_path);
+	}
 
 
 void field_along_y_axis::save_parameters(string directory_path)
 {
+	fs::create_directories(fs::path(directory_path));
 	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
 	diagnostic_parameters_ << "#PX, begin_y, end_y, dy"<< std::endl;
-	diagnostic_parameters_ << fixed_x_ << begin_y_ << " " << end_y_ << dy << std::endl;
+	diagnostic_parameters_ << fixed_x_ << begin_y_ << " " << end_y_ << dy << " " << std::endl;
 	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
 	diagnostic_parameters_ << sizeof(float) << std::endl;
 }
@@ -113,6 +115,4 @@ void field_along_y_axis::diagnose(const v3f& E, const v3f& B, const v3f& j, int 
 	if ( field_ == "E" ) { this->diagnose(E); }
 	else if ( field_ == "B" ) { this->diagnose(B); }
 	else if ( field_ == "j" ) { this->diagnose(j); }
-
-	file_for_results_.release();
 }}

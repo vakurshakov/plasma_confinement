@@ -11,8 +11,8 @@
 
 void Boris_interpolation::process(const vector2& r0, vector3& local_E, vector3& local_B) const
 {
-	const int nearest_edge_to_rx = int(roundf(r0.x()/dx));
-	const int nearest_edge_to_ry = int(roundf(r0.y()/dy));
+	const int nearest_edge_to_rx = int(round(r0.x()/dx));
+	const int nearest_edge_to_ry = int(round(r0.y()/dy));
 
 	vector2 shape[2];
 	enum SHAPE {

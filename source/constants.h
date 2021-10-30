@@ -12,8 +12,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 
 //######## MODIFIERS #################################################################
 	#define there_are_particles 			true
-		#define there_are_ions				true
 		#define there_are_electrons			true
+		#define there_are_ions				false
 		#define particles_are_diagnosed 	true
 
 	#define there_are_fields				true
@@ -24,7 +24,6 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 
 
 //######## PARTICLES CONSTANTS #######################################################
-	inline const double mec2 = 511;
 	inline const double e 	= 1;
 	inline const double me 	= 1;
 	inline const double mpr = 1836;
@@ -32,12 +31,12 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 //######## CONFIGURATION IN GENERAL ##################################################
 	inline const int THREAD_NUM = 16;
 
-	inline const int TIME	= 1000;
 	inline const int TINJ	= 5;		
 	inline const int diagnose_time_step = 5; 
 
-	inline const int SIZE_X = 500;
-	inline const int SIZE_Y = 500;
+	inline const int TIME	= 1000;
+	inline const int SIZE_X = 100;
+	inline const int SIZE_Y = 100;
 	inline const double dx 	= 0.1;
 	inline const double dy	= 0.1;
 	inline const double dt 	= 0.5*dx;
@@ -52,7 +51,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const double n0 		= 1;		// n0   = 10e13	 [cm^(-3)]
 	inline const int 	Npe		= 2;
 	inline const double v_inj 	= 0.0589;	// Ek 	= 15 [keV] { 0.00565 } 
-	inline const double r_larm	= 6;	 	// ож.: r_larm = 52,6 ( или 8,86 [cm] )
+	inline const double r_larm	= 3;	 	// ож.: r_larm = 52,6 ( или 8,86 [cm] )
 	inline const double r_prop	= 1.13;		// r_plasma/r_larm = 1.13
 	inline const double dr		= 0.24;
 
@@ -66,7 +65,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const multimap<string, vector<vector<string>>> species = {
 			#if there_are_electrons
 			{ "electrons", 
-				{	
+				{
 					{	"Boris_pusher:+Push_particle",
 						"Boris_pusher:+Interpolation;",
 						"Esirkepov_density_decomposition",
@@ -75,7 +74,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 						to_string(30e-3), to_string(30e-3), to_string(0),
 						"0"	},
 				
-					{	"density", "chosen_particles"	},
+					{	"density"	},
 				} 
 			},
 			#endif

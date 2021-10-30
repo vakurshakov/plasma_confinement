@@ -17,7 +17,7 @@ class whole_field : public Fields_diagnostic {
 public:
 	whole_field(string directory_path, string file_name,
 	/*additional*/ string field_to_diagnose, string field_axis,
-		int begin_x, int begin_y, int end_x, int end_y);
+		int begin_x, int end_x, int begin_y, int end_y);
 
 	void save_parameters(string directory_path) override;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;

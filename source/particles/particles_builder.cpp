@@ -11,10 +11,9 @@
 #include "./particles.hpp"
 #include "./particles_load.hpp"
 #include "./particle/point.hpp"
-#include "../diagnostics/density.hpp"
 #include "../diagnostics/energy.hpp"
-#include "../diagnostics/phase_diagram.hpp"
 #include "../diagnostics/chosen_particles.hpp"
+#include "../diagnostics/distribution_moment.hpp"
 #include "../fields/fields.hpp"
 #include "../solvers/Boris_pusher.hpp"
 #include "../solvers/Esirkepov_density_decomposition.hpp"
@@ -129,7 +128,6 @@ vector<Point> Particles_builder::load_particles(
 
 	vector<Point> points;
 	points.reserve( get_number_of_particles(Np) );
-	std::cout << points.capacity();
 
 	std::cout << "\n\t\t\t\tConfiguration: " << configuration
 		<< ", way of filling cell: " << cell_filling << ";";
@@ -383,15 +381,21 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 
 				if ( now == "density" ) {
 					vec_diagnostics.emplace_back( 
-						make_unique<density>(dir_name + "/" + name_of_sort + "/" + now) );
+						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
+							(SIZE_X*dx/2 - 1.*r_prop*r_larm), (SIZE_X*dx/2 + 1.*r_prop*r_larm), dx,
+							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
+							std::make_unique<XY_projector>(), std::make_unique<zeroth_moment>()));
 				}
 				else if ( now == "chosen_particles" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, way_to_choose(points)));
 				}
-				else if ( now == "diagram_vx_on_y" ) {
+				else if ( now == "1_of_VxVy" ) {
 					vec_diagnostics.emplace_back(
-						make_unique<diagram_vx_on_y>(dir_name + "/" + name_of_sort + "/" + now));
+						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
+							-1.,	+1.,	0.01,
+							-1.,	+1.,	0.01,
+							std::make_unique<VxVy_projector>(), std::make_unique<zeroth_moment>()));
 				}
 				else if ( now == "energy" ) {
 					vec_diagnostics.emplace_back(

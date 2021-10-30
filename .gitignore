@@ -1,7 +1,9 @@
- .ipynb_checkpoints/
-./diagnostics/*
-./dep/*
-./obj/*
-**/__pycache__
-*.zip
-.vscode/*
+diagnostics
+dep
+obj
+python_code
+.vscode
+.gitignore
+log
+*.txt
+*.out

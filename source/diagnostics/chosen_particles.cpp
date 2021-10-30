@@ -4,11 +4,14 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <filesystem>
 
 #include "../file_writers/bin_file.hpp"
 #include "../particles/particle/particle_parameters.hpp"
 #include "../particles/particle/point.hpp"
 #include "../constants.h"
+
+namespace fs = std::filesystem;
 
 
 std::vector<int> way_to_choose(const std::vector<Point>& points)
@@ -19,9 +22,8 @@ std::vector<int> way_to_choose(const std::vector<Point>& points)
         int nx = int(roundf(points[i].x()/dx));
         int ny = int(roundf(points[i].y()/dy));
 
-        if (nx == ny) {
-            indexes_of_chosen_particles.emplace_back( i );
-        }
+        if (nx == ny)
+            indexes_of_chosen_particles.emplace_back(i);
     }
 
     return indexes_of_chosen_particles;
@@ -31,19 +33,20 @@ std::vector<int> way_to_choose(const std::vector<Point>& points)
 chosen_particles::chosen_particles(std::string directory_path, std::vector<int> indexes_of_chosen_particles)
     :   Particles_diagnostic(directory_path),
         indexes_of_chosen_particles_(std::move(indexes_of_chosen_particles))
-{
-    this->save_parameters(directory_path);
-}
+    {
+        this->save_parameters(directory_path);
+    }
 
 void chosen_particles::save_parameters(std::string directory_path)
 {
+    fs::create_directories(fs::path(directory_path));
     std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
 	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
     diagnostic_parameters_ << "#there are N particles" << std::endl;
     diagnostic_parameters_ << indexes_of_chosen_particles_.size() << std::endl;
     diagnostic_parameters_ << "#sizeof(float)" << std::endl;
-	diagnostic_parameters_ << sizeof(float) << std::endl;		
+	diagnostic_parameters_ << sizeof(float) << std::endl;
 }
 
 void chosen_particles::diagnose(const Particle_parameters& parameters, const std::vector<Point>& points, int t)
@@ -64,10 +67,5 @@ void chosen_particles::diagnose(const Particle_parameters& parameters, const std
         file_for_results_->write(points[i].px());
         file_for_results_->write(points[i].py());
         file_for_results_->write(points[i].pz());
-
-        double particle_energy = sqrt( m*m + points[i].p().dot(points[i].p()) )*dx*dy*n/Np;
-        file_for_results_->write(particle_energy);
     }
-
-    file_for_results_.release();
 }}

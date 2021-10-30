@@ -67,13 +67,14 @@ bool cell_in_a_circle(int cell_number_nx, int cell_number_ny)
 int  get_number_of_particles_in_circle(int Np)
 {
 	return static_cast<int>(
-		Np*M_PI*(r_larm*r_larm*r_prop*r_prop)/(dx*dy));
+		Np*M_PI*((r_larm+dr)*r_prop*(r_larm+dr)*r_prop)/(dx*dy));
 }
 
 // impulse loading ----------------------------------------------------------------------
 
 double temperature_impulse(double temperature, double mass)
 {
+	static const double mec2 = 511.;
 	return sin(2.*M_PI*frand())*sqrt(-2.*(temperature*mass/mec2)*log(frand())); 
 }
 

@@ -17,7 +17,6 @@
 #include "../diagnostics/field_at_point.hpp"
 #include "../diagnostics/whole_field.hpp"
 
-
 using std::vector, std::map, std::multimap, std::string, std::make_unique;
 using v3f = vector3_field;
 using v3f_up = std::unique_ptr<vector3_field>;
@@ -106,37 +105,41 @@ vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
 					<< "but no fields_diagnostics in file [./constants.h]";
 		}
 		else {	
-			for (auto& now : fields_diagnostics) {
-				if ( now.first == "energy" ) {
-					std::cout << "\n\t\t\t" << now.first;
-					vec_diagnostics.emplace_back(make_unique<fields_energy>(dir_name + "/" + now.first));
+			for (const auto& [name, description] : fields_diagnostics) {
+				if ( name == "energy" ) {
+					std::cout << "\n\t\t\t" << name;
+					vec_diagnostics.emplace_back(make_unique<fields_energy>(dir_name + "/" + name));
 				}
-				else if ( now.first == "whole_field" ) {
-					std::cout << "\n\t\t\t" << now.first;
-					vec_diagnostics.emplace_back(make_unique<whole_field>(dir_name + "/fields/" + now.first,
-						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
-						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS] ) );
+				else if ( name == "whole_field" ) {
+					std::cout << "\n\t\t\t" << name;
+					vec_diagnostics.emplace_back(make_unique<whole_field>(dir_name + "/fields/" + name,
+						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
+						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
+						0, SIZE_X,		// int(SIZE_X/2 - 1.3*r_prop*r_larm/dx), int(SIZE_X/2 + 1.3*r_prop*r_larm/dx),
+						0, SIZE_Y));	// int(SIZE_Y/2 - 1.3*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.3*r_prop*r_larm/dy)));
 				}
-				else if ( now.first == "field_along_x_axis" ) {
-					std::cout << "\n\t\t\t" << now.first;
-					vec_diagnostics.emplace_back(make_unique<field_along_x_axis>(dir_name + "/fields/" + now.first,
-						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
-						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS],
-						stoi(now.second[FD_DESC::PX]) ) );
+				else if ( name == "field_along_x_axis" ) {
+					std::cout << "\n\t\t\t" << name;
+					vec_diagnostics.emplace_back(make_unique<field_along_x_axis>(dir_name + "/fields/" + name,
+						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
+						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
+						stoi(description[FD_DESC::PX]),
+						int(SIZE_X/2 - 1.5*r_prop*r_larm/dx), int(SIZE_X/2 + 1.5*r_prop*r_larm/dx)));
 				}
-				else if ( now.first == "field_along_y_axis" ) {
-					std::cout << "\n\t\t\t" << now.first;
-					vec_diagnostics.emplace_back(make_unique<field_along_y_axis>(dir_name + "/fields/" + now.first,
-						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
-						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS],
-						stoi(now.second[FD_DESC::PX]) ) );
+				else if ( name == "field_along_y_axis" ) {
+					std::cout << "\n\t\t\t" << name;
+					vec_diagnostics.emplace_back(make_unique<field_along_y_axis>(dir_name + "/fields/" + name,
+						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
+						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
+						stoi(description[FD_DESC::PX]),
+						int(SIZE_Y/2 - 1.5*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.5*r_prop*r_larm/dy) ));
 				} 
-				else if ( now.first == "field_at_point" ) {
-					std::cout << "\n\t\t\t" << now.first;
-					vec_diagnostics.emplace_back(make_unique<field_at_point>(dir_name + "/fields/" + now.first,
-						now.second[FD_DESC::FIELD] + now.second[FD_DESC::AXIS],
-						now.second[FD_DESC::FIELD], now.second[FD_DESC::AXIS], 
-						stoi(now.second[FD_DESC::PX]), stoi(now.second[FD_DESC::PY]) ) );
+				else if ( name == "field_at_point" ) {
+					std::cout << "\n\t\t\t" << name;
+					vec_diagnostics.emplace_back(make_unique<field_at_point>(dir_name + "/fields/" + name,
+						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
+						description[FD_DESC::FIELD], description[FD_DESC::AXIS], 
+						stoi(description[FD_DESC::PX]), stoi(description[FD_DESC::PY])));
 				}
 				else {
 					std::cout << "what():  Initialization error: No matching diagnostics for fields." << std::endl;
