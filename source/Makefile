@@ -1,13 +1,13 @@
 PROG ?= test.out
 
 CC 	= g++
-CFLAGs   = -std=c++17 -ggdb -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
-#CFLAGs = -std=c++17 -O2 -fopenmp # RELEASE VERSION
+CFLAGs   = -std=c++20 -ggdb -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
+#CFLAGs = -std=c++20 -O2 -fopenmp # RELEASE VERSION
 
 OBJDIR = ../obj
 DEPDIR = ../dep
 
-VPATH = diagnostics/ fields/ file_writers/ managers/ particles/ particles/particle/ solvers/ vectors/ 
+VPATH = diagnostics/ fields/ file_writers/ managers/ particles/ particles/particle/ solvers/ vectors/ command/ 
 
 MAIN 		= main.cpp
 VECTORS 	= vector_classes.cpp vector3_field.cpp
@@ -19,9 +19,10 @@ MANAGERS 	= fields.cpp fields_builder.cpp particles.cpp \
 ADDITIONALS	= add_Bz0.cpp add_ion_density.cpp add_ion_current.cpp add_ionization.cpp
 DIAGNOSTICS = energy.cpp whole_field.cpp field_along_the_line.cpp \
 				field_at_point.cpp distribution_moment.cpp chosen_particles.cpp
+COMMANDS 	= cmd_set_particles.cpp cmd_copy_coordinates.cpp
 FILEWRITERS	= txt_file.cpp bin_file.cpp
 
-SRCs = $(VECTORS) $(PARTICLES) $(MANAGERS) $(ADDITIONALS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)
+SRCs = $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(ADDITIONALS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)
 OBJs = $(SRCs:%.cpp=$(OBJDIR)/%.o)
 DEPs = $(OBJs:$(OBJDIR)/%.o=$(DEPDIR)/%.d)
 

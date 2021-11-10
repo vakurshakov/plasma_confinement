@@ -6,7 +6,7 @@
 #include "time_manager.hpp"
 #include "../command/command.hpp"
 #include "../command/cmd_add_Bz0.hpp"
-#include "../command/cmd_create_particles.hpp"
+#include "../command/cmd_ionize_particles.hpp"
 #include "../fields/fields_builder.hpp"
 #include "../particles/particles_builder.hpp"
 #include "../particles/add_ionization.hpp"
@@ -24,13 +24,13 @@ void Manager::initializes()
 		
 	#if there_are_fields
 		#if there_are_Bz0
-		settings_before_main_cycle.push_front(std::make_unique<Add_Bz0>(&fields_, Bz0));
+		settings_before_main_cycle.push_back(std::make_unique<Add_Bz0>(&fields_, Bz0));
 		#endif
 	#endif
 	
 	// fields_ is used to set push commands
-	Particles_builder particles_builder(fields_);
-	list_of_particles_ = particles_builder.build();		
+	Particles_builder particles_builder;
+	list_of_particles_ = particles_builder.build(fields_, settings_before_main_cycle);		
 
 	// TODO: fabric on each_step_presets
 	// TODO: variable set_time_distribution
@@ -47,7 +47,7 @@ void Manager::initializes()
 			set_time_distribution(TINJ, total_number_of_particles),
 			set_point_on_circle, uniform_probability, load_annular_impulse);
 	
-		each_step_presets.push_front(std::make_unique<Create_particles>(
+		each_step_presets.push_front(std::make_unique<Ionize_particles>(
 			std::move(ionization), ionized, lost));
 	
 		std::cout << "\n\t\tcheck : (&ionized=" << ionized << ", "
@@ -66,9 +66,9 @@ void Manager::calculates()
 	timer.set_up();
 
 	if (!settings_before_main_cycle.empty()) {
-		for (const auto& command : settings_before_main_cycle) {
+		for (const auto& command : settings_before_main_cycle)
 			command->execute(0);
-		}
+		settings_before_main_cycle.clear();
 	}
 	
 	for (int t = 0; t < TIME; ++t) {	
@@ -76,6 +76,9 @@ void Manager::calculates()
 		if (!each_step_presets.empty()) {
 			for (const auto& command : each_step_presets) {
 				command->execute(t);
+				
+				if (command->this_is_time_to_remove(t))
+					each_step_presets.remove(command);
 			}
 		}
 

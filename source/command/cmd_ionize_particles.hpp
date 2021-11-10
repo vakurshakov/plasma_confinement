@@ -1,12 +1,11 @@
-#ifndef COMMAND_CMD_CREATE_PARTICLES_HPP
-#define COMMAND_CMD_CREATE_PARTICLES_HPP
+#ifndef COMMAND_CMD_IONIZE_PARTICLES_HPP
+#define COMMAND_CMD_IONIZE_PARTICLES_HPP
 
 //#######################################################################################
 
 #include "command.hpp"
 
 #include <memory>
-#include <functional>
 
 #include "../particles/particles.hpp"
 #include "../particles/add_ionization.hpp"
@@ -14,20 +13,22 @@
 using Ionization_up = std::unique_ptr<Ionization>;
 
 
-class Create_particles : public Command {
+class Ionize_particles : public Command {
 public:
-	Create_particles(
+	Ionize_particles(
 		Ionization_up _ionization,
 		Particles* const _ionized, Particles* const _lost) 
 			:	ionization(std::move(_ionization)),
 				ionized(_ionized), lost(_lost) {};
 
 	void execute(int t) const override {
-		// Лучше как-то вообще удалить указатель из списка
-		if ( t < TINJ) {
-			ionization->process(ionized, lost, t);
-		}
+		ionization->process(ionized, lost, t);
 	};
+
+	bool this_is_time_to_remove(int t) {
+		if ( t >= TINJ)
+			return true;
+	}
 
 private:
 	const Ionization_up ionization;
@@ -37,4 +38,4 @@ private:
 
 //#######################################################################################
 
-#endif // COMMAND_CMD_CREATE_PARTICLES_HPP
+#endif // COMMAND_CMD_IONIZE_PARTICLES_HPP

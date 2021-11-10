@@ -1,6 +1,7 @@
 #include "particles_builder.hpp"
 
-#include <cmath>
+#include <list>
+#include <tuple>
 #include <string>
 #include <vector>
 #include <memory>
@@ -11,6 +12,8 @@
 #include "./particles.hpp"
 #include "./particles_load.hpp"
 #include "./particle/point.hpp"
+#include "../command/cmd_set_particles.hpp"
+#include "../command/cmd_copy_coordinates.hpp"
 #include "../diagnostics/energy.hpp"
 #include "../diagnostics/chosen_particles.hpp"
 #include "../diagnostics/distribution_moment.hpp"
@@ -20,12 +23,11 @@
 #include "../solvers/concrete_point_interpolation.hpp"
 #include "../constants.h"
 
-using std::vector, std::string, std::make_unique, std::stod, std::stoi;
-using Particles_up = std::unique_ptr<Particles>;
+using std::vector, std::string, std::function, std::make_unique, std::stod, std::stoi;
 
 enum PCONF { push, interpolation, decomposition,
 			sort_charge, sort_mass, sort_density, number_of_particles_in_cell,
-			configuration, cell_filling,
+			command_type, configuration, cell_filling,
 			temperature_x, temperature_y, temperature_z,
 			initial_impulse };
 
@@ -55,117 +57,140 @@ Particle_parameters Particles_builder::config_parameters(const vector<string> pa
 }
 
 
-vector<Point> Particles_builder::load_particles(
-	const vector<string> distribution, const Particle_parameters& parameters)
-{
-	std::cout << "\t\t\tLoading points...";
-	string configuration =	distribution[PCONF::configuration];
-	std::function<bool(int cell_number_nx, int cell_number_ny)> this_is_config_cell = nullptr;
-	std::function<int(int Np)> get_number_of_particles = nullptr;
-	std::function<void(double x, double y,
+std::tuple<
+	function<bool(int cell_number_nx, int cell_number_ny)>,
+    function<int(int Np)>,
+    function<void(double x, double y,
 		double mass, double Tx, double Ty, double Tz,
-		double p0, double* px, double* py, double* pz)> load_impulse = nullptr; 
-	
-	if (configuration == "ring") {
-		this_is_config_cell = cell_on_a_ring;
-		get_number_of_particles = get_number_of_particles_on_ring;
-		load_impulse = load_annular_impulse;
-
-	}
-	else if (configuration == "circle") {
-		this_is_config_cell = cell_in_a_circle;
-		get_number_of_particles = get_number_of_particles_in_circle;
-		load_impulse = load_uniform_impulse;
-	}
-	else if (configuration == "single_particle") {
-		// Решение для тестов, при этом лучше положить Np = 1.
-		this_is_config_cell = [](int x, int y) -> bool {
-			return x == SIZE_X/2 && y == SIZE_Y/2;
-		};
-
-		load_impulse = [](double x, double y,
+		double p0, double* px, double* py, double* pz)>>
+get_configuration_functions(string configuration)
+{
+	std::tuple<
+		function<bool(int cell_number_nx, int cell_number_ny)>,
+    	function<int(int Np)>,
+    	function<void(double x, double y,
 			double mass, double Tx, double Ty, double Tz,
-			double p0, double* px, double* py, double* pz) -> void {
+			double p0, double* px, double* py, double* pz)>> temp;
+
+	if (configuration == "ring")
+	{
+		temp = std::make_tuple(
+				cell_on_a_ring,
+				get_number_of_particles_on_ring,
+				load_annular_impulse);
+	}
+	else if (configuration == "circle")
+	{
+		temp = std::make_tuple(
+				cell_in_a_circle,
+				get_number_of_particles_in_circle,
+				load_uniform_impulse);
+	}
+	else if (configuration == "single_particle")
+	{
+		// Решение для тестов, при этом лучше положить Np = 1.
+		temp = std::make_tuple(
+			[](int x, int y) -> bool {
+				return x == SIZE_X/2 && y == SIZE_Y/2;
+			},
+
+			[](int) -> int { return 1; },
+
+			[](double x, double y,
+			   double mass, double Tx, double Ty, double Tz,
+			   double p0, double* px, double* py, double* pz) -> void
+			{
 				*px = 0;
 				*py = 1e-3;
 				*pz = 0;
-		};
+			});
 	}
-	else if (configuration == "two_particles") {
+	else if (configuration == "two_particles")
+	{
 		// Так можно проверить race-condition декомпозиции. 
-		this_is_config_cell = [](int x, int y) -> bool {
-			return 	(x == (SIZE_X/2 - 1) && y == SIZE_Y/2) ||
-					(x == (SIZE_X/2 + 1) && y == SIZE_Y/2);
-		};
+		temp = std::make_tuple(
+			[](int x, int y) -> bool {
+				return 	(x == (SIZE_X/2 - 1) && y == SIZE_Y/2) ||
+						(x == (SIZE_X/2 + 1) && y == SIZE_Y/2); 
+			},
+			
+			[](int) -> int { return 2; },
 
-		load_impulse = [](double x, double y,
-			double mass, double Tx, double Ty, double Tz,
-			double p0, double* px, double* py, double* pz) {
+			[](double x, double y,
+			   double mass, double Tx, double Ty, double Tz,
+			   double p0, double* px, double* py, double* pz)
+			{
 				*px = 0;
 				*py = 1e-1;
 				*pz = 0;
-		};	
+			});	
 	}
-  
+	
+	return temp;
+}
 
-	string cell_filling = distribution[PCONF::cell_filling];
-	std::function<void(int sequential_number, int Np,
-		int cell_number_nx, int cell_number_ny,
-		double* x, double* y)> fill_the_cell = nullptr;
-	if (cell_filling == "random") {
-		fill_the_cell = fill_randomly;
-	}
-	else if (cell_filling == "periodic") {
-		fill_the_cell = fill_periodically;
-	}
+void Particles_builder::load_particles(
+	Particles* const particles,
+	const vector<string> distribution,
+	const Particle_parameters& parameters,
+	std::list<Command_up>& settings_before_main_cycle)
+{
+	std::cout << "\t\t\tLoading points...";
 
-	const int Np = parameters.Np();
-    const double mass = parameters.m();
-    const double Tx = parameters.Tx();
-    const double Ty = parameters.Ty();
-    const double Tz = parameters.Tz();
-    const double p0 = parameters.p0();
-
-	vector<Point> points;
-	points.reserve( get_number_of_particles(Np) );
-
-	std::cout << "\n\t\t\t\tConfiguration: " << configuration
-		<< ", way of filling cell: " << cell_filling << ";";
-	if (cell_filling != "delayed") {
-
-	for (int nx = 0; nx < SIZE_X; ++nx) {
-	for (int ny = 0; ny < SIZE_Y; ++ny) {
+	string command_type 	= distribution[PCONF::command_type];
+	string configuration 	= distribution[PCONF::configuration];
+	string cell_filling 	= distribution[PCONF::cell_filling];
 		
-		if ( this_is_config_cell(nx, ny) ) {
-			int err = 0;
-			for (int i = 0; i < Np + err; ++i) {
-				double x, y;
-				fill_the_cell(i, Np, nx, ny, &x, &y);
+	std::cout << "\n\t\t\t\t" << command_type
+		<< ", configuration: " << configuration
+		<< ", way of filling cell: " << cell_filling << ";";
 
-				double px, py, pz;
-				load_impulse(x, y, mass, Tx, Ty, Tz, p0, &px, &py, &pz);
+	if (command_type == "set")
+	{
+		auto [this_is_config_cell, get_number_of_particles, load_impulse]
+				= get_configuration_functions(configuration);
 
-				if (std::isinf(px) || std::isinf(py) || std::isinf(pz)) { 
-					++err;
-					continue;
-				}
-				else {
-					points.emplace_back(Point({x, y}, {px, py, pz}));
-				}
-			}
+		function<void(int sequential_number, int Np,
+			int cell_number_nx, int cell_number_ny,
+			double* x, double* y)> fill_the_cell = nullptr;
+	
+		if (cell_filling == "random") {
+			fill_the_cell = fill_randomly;
 		}
-	}}	
-		points.shrink_to_fit();
+		else if (cell_filling == "periodic") {
+			fill_the_cell = fill_periodically;
+		}
+
+		const int Np = parameters.Np();
+		
+		settings_before_main_cycle.push_back(make_unique<Set_particles>(
+			particles,
+			get_number_of_particles(Np),
+			this_is_config_cell,
+			load_impulse,
+			fill_the_cell));
 	}
-	std::cout << "\n\t\t\t\t" << points.size() << " point(s) have been loaded";
-	std::cout << "\n\t\t\tdone" << std::endl;
-	return points;
+	else if (command_type.starts_with("copy_coordinates"))
+	{
+		// 	This particles will wait until the end of
+		//	the cycle and copy coordinates %from_... 
+		throw string(command_type + "," + configuration);
+	}
+	else if (command_type == "Ionize_particles")
+	{
+		// 	This particles will wait until the end of
+		//	the cycle and make a pair into Ionize_particles command
+		// throw string(command_type + "," + configuration);
+	}
+	else{
+		std::cout << "There is no know command type." << std::endl;
+	}
 }
 
 
 auto Particles_builder::x_boundary()
 {	
-	std::function<void(Point&, double)> x_boundary = nullptr;
+	function<void(Point&, double)> x_boundary = nullptr;
 	
 	const size_t right_boundary = 2;
 	
@@ -188,7 +213,7 @@ auto Particles_builder::x_boundary()
 
 auto Particles_builder::y_boundary()
 {
-	std::function<void(Point&, double)> y_boundary = nullptr;
+	function<void(Point&, double)> y_boundary = nullptr;
 	
 	const size_t left_boundary = 3;
 	
@@ -210,15 +235,17 @@ auto Particles_builder::y_boundary()
 
 
 auto Particles_builder::choose_pusher(const vector<string> description,
-	const Particle_parameters& parameters)
+	const Particle_parameters& parameters, Fields& fields)
 {
 	std::cout << "\t\t\tSetting pusher... ";	
 	std::unique_ptr<Pusher> pusher_up;
 
-	const auto& setting = description[PCONF::push];
+	const auto& setting = description[PCONF::push];		
 
-	if (setting.find("Boris_pusher:") != string::npos) {
-		if ( setting.find("+Push_particle") != string::npos ) {
+	if (setting.find("Boris_pusher:") != string::npos)
+	{
+		if ( setting.find("+Push_particle") != string::npos )
+		{
 			pusher_up = make_unique<Boris_pusher>(parameters);
 			std::cout << "done" << std::endl;
 		}
@@ -235,7 +262,7 @@ auto Particles_builder::choose_pusher(const vector<string> description,
 
 
 auto Particles_builder::choose_interpolation(const vector<string> description,
-	const Particle_parameters& parameters)
+	const Particle_parameters& parameters, Fields& fields)
 {
 	/*
 	*	тут может возникнуть сложность с одновременным использованием
@@ -250,8 +277,9 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 
 	if ((pos = setting.find("Boris_pusher:")) != string::npos)
 	{
-		if ( setting.find("+Interpolation", pos) != string::npos ) {
-			interpolation_up = make_unique<Boris_interpolation>(parameters, fields_.E(), fields_.B());
+		if ( setting.find("+Interpolation", pos) != string::npos )
+		{
+			interpolation_up = make_unique<Boris_interpolation>(parameters, fields.E(), fields.B());
 			std::cout << "done" << std::endl;
 		}
 		else {
@@ -260,7 +288,8 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 	}
 	else if ((pos = setting.find("Concrete_point_interpolation")) != string::npos )
 	{
-		if ((pos = setting.find("Homogenius_field", pos)) != string::npos) {
+		if ((pos = setting.find("Homogenius_field", pos)) != string::npos)
+		{
 			pos = setting.find("E0=", pos);
 			pos += 3;
 
@@ -305,7 +334,7 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 
 
 auto Particles_builder::choose_decomposition(const vector<string> description,
-	const Particle_parameters& parameters)
+	const Particle_parameters& parameters, Fields& fields)
 {
 	std::cout << "\t\t\tSetting decomposition... ";	
 	std::unique_ptr<Decomposition> decomposition_up;
@@ -314,7 +343,7 @@ auto Particles_builder::choose_decomposition(const vector<string> description,
 
 	if ( setting.find("Esirkepov_density_decomposition") != string::npos ) {
 		decomposition_up = make_unique<Esirkepov_density_decomposition>(
-			parameters, fields_.J());
+			parameters, fields.J());
 		std::cout << "done" << std::endl;
 	}
 	else {
@@ -325,7 +354,9 @@ auto Particles_builder::choose_decomposition(const vector<string> description,
 }
 
 
-std::map<string, Particles_up> Particles_builder::build()
+std::map<string, std::unique_ptr<Particles>> Particles_builder::build(
+	Fields& fields,
+	std::list<Command_up>& settings_before_main_cycle)
 {
 	std::map<string, Particles_up> list_of_particles;
 	
@@ -333,25 +364,66 @@ std::map<string, Particles_up> Particles_builder::build()
 	std::cout << "\tBulding particles:" << std::endl;
 
 	srand(42);
-	for (auto& description : species) {
-		std::cout << "\t\tBuilding \"" << description.first << "\"" << std::endl;
+	std::map<string, string> loaded_after;
+	for (const auto& [name, descrtiption] : species)
+	{
+		std::cout << "\t\tBuilding \"" << name << "\"" << std::endl;
 
-		Particle_parameters parameters = this->config_parameters(description.second[0]); 
-		std::vector<Point> points = this->load_particles(description.second[0], parameters); 
-
+		Particle_parameters parameters = this->config_parameters(descrtiption[0]); 
+		
 		Particles_up particles = make_unique<Particles>(
 			parameters,
-			std::move(points),
-			std::move(this->choose_pusher(description.second[0], parameters)),
-			std::move(this->choose_interpolation(description.second[0], parameters)),
-			std::move(this->choose_decomposition(description.second[0], parameters)),
+			std::move(this->choose_pusher(descrtiption[0], parameters, fields)),
+			std::move(this->choose_interpolation(descrtiption[0], parameters, fields)),
+			std::move(this->choose_decomposition(descrtiption[0], parameters, fields)),
 			std::move(this->x_boundary()),
 			std::move(this->y_boundary()),
-			std::move(this->diagnostics_list(description.first,
-				description.second[1], points)) );
+			std::move(this->diagnostics_list(name, descrtiption[1])));
+
+		try
+		{
+			load_particles(particles.get(), descrtiption[0], parameters, settings_before_main_cycle);
+			std::cout << "\n\t\t\tdone" << std::endl;
+		}
+		catch (const string& loading_setting)
+		{
+			loaded_after[name] = loading_setting;
+			std::cout << "\n\t\t\tdone" << std::endl;
+		}
+		catch (...) {
+			std::cout << "\n\t\t\tCatched an unexpected exception"
+				<< "while trying to load particles!" << std::endl;
+		}
 
 		std::cout << "\t\tdone (" << particles.get() << ")\n" << std::endl;		
-		list_of_particles[description.first] = std::move(particles);
+		list_of_particles[name] = std::move(particles);
+	}
+
+	for (const auto& [name, loading_setting] : loaded_after)
+	{
+		Particles *const named = list_of_particles[name].get();
+
+		if (loading_setting.starts_with("copy_coordinates"))
+		{
+			size_t pos = string("copy_coordinates_from_").size();
+			
+			size_t divider = loading_setting.find(',', pos+1);
+			
+			string copy_from = loading_setting.substr(pos, divider-pos);
+			
+			string configuration  = loading_setting.substr(divider+1);
+
+			auto [_1, _2, load_impulse] = get_configuration_functions(configuration);
+
+			settings_before_main_cycle.push_back(make_unique<Copy_coordinates>(
+				named, list_of_particles[copy_from].get(), load_impulse));
+		}
+		else if (loading_setting.starts_with("ionize_particles"))
+		{}
+		else
+		{
+			std::cout << "\t\tThere is no known loading setting" << std::endl;
+		}
 	}
 
 	std::cout << "\tdone!\n" << std::endl;
@@ -364,7 +436,7 @@ std::map<string, Particles_up> Particles_builder::build()
 // Определение требуемых диагностик ---------------------------------------------------------------
 
 std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostics_list(
-	string name_of_sort, vector<string> particle_diagnostics, const std::vector<Point>& points)
+	string name_of_sort, vector<string> particle_diagnostics)
 {
 	std::cout << "\t\t\tSetting diagnostics...";
 	// Возвращает список необходимых диагностик для частиц
@@ -382,34 +454,34 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 				if ( now == "density" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							(SIZE_X*dx/2 - 1.*r_prop*r_larm), (SIZE_X*dx/2 + 1.*r_prop*r_larm), dx,
-							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
-							std::make_unique<XY_projector>(), std::make_unique<zeroth_moment>()));
+							(SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							(SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							make_unique<XY_projector>(), make_unique<zeroth_moment>()));
 				}
 				else if ( now == "1_of_VxVy" ) {
 					vec_diagnostics.emplace_back(
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
 							-1.,	+1.,	0.01,
 							-1.,	+1.,	0.01,
-							std::make_unique<VxVy_projector>(), std::make_unique<zeroth_moment>()));
+							make_unique<VxVy_projector>(), make_unique<zeroth_moment>()));
 				}
 				else if ( now == "first_Vx_moment" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							(SIZE_X*dx/2 - 1.*r_prop*r_larm), (SIZE_X*dx/2 + 1.*r_prop*r_larm), dx,
-							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
-							std::make_unique<XY_projector>(), std::make_unique<first_Vx_moment>()));
+							(SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							(SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							make_unique<XY_projector>(), make_unique<first_Vx_moment>()));
 				}
 				else if ( now == "first_Vy_moment" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							(SIZE_X*dx/2 - 1.*r_prop*r_larm), (SIZE_X*dx/2 + 1.*r_prop*r_larm), dx,
-							(SIZE_Y*dy/2 - 1.*r_prop*r_larm), (SIZE_Y*dy/2 + 1.*r_prop*r_larm), dy,
-							std::make_unique<XY_projector>(), std::make_unique<first_Vy_moment>()));
+							(SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							(SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							make_unique<XY_projector>(), make_unique<first_Vy_moment>()));
 				}
 				else if ( now == "chosen_particles" ) {
 					vec_diagnostics.emplace_back( 
-						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, way_to_choose(points)));
+						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, choose_indexes()));
 				}
 				else if ( now == "energy" ) {
 					vec_diagnostics.emplace_back(

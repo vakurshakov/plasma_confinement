@@ -12,7 +12,7 @@
 #include "../particles/particle/point.hpp"
 
 
-std::vector<int> way_to_choose(const std::vector<Point>&);
+std::vector<int> choose_indexes();
 
 
 class chosen_particles : public Particles_diagnostic {

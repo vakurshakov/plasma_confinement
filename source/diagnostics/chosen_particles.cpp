@@ -1,6 +1,5 @@
 #include "chosen_particles.hpp"
 
-#include <set> 
 #include <string>
 #include <vector>
 #include <memory>
@@ -14,17 +13,18 @@
 namespace fs = std::filesystem;
 
 
-std::vector<int> way_to_choose(const std::vector<Point>& points)
+std::vector<int> choose_indexes()
 {
     std::vector<int> indexes_of_chosen_particles;
 
-    for (decltype(points.size()) i = 0; i < points.size(); i += Npe) {
-        int nx = int(roundf(points[i].x()/dx));
-        int ny = int(roundf(points[i].y()/dy));
+    /*     for (decltype(points.size()) i = 0; i < points.size(); i += Npe) {
+            int nx = int(roundf(points[i].x()/dx));
+            int ny = int(roundf(points[i].y()/dy));
 
-        if (nx == ny)
-            indexes_of_chosen_particles.emplace_back(i);
-    }
+            if (nx == ny)
+                indexes_of_chosen_particles.emplace_back(i);
+        }
+    */
 
     return indexes_of_chosen_particles;
 }
@@ -54,10 +54,6 @@ void chosen_particles::diagnose(const Particle_parameters& parameters, const std
     if ((t % diagnose_time_step) == 0) {
 
     file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
-
-    double m  = parameters.m();
-    double n  = parameters.n();
-    int    Np = parameters.Np();
 
     for(const auto& i : indexes_of_chosen_particles_) {
 

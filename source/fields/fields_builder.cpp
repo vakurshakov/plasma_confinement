@@ -115,8 +115,8 @@ vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
 					vec_diagnostics.emplace_back(make_unique<whole_field>(dir_name + "/fields/" + name,
 						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
 						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
-						0, SIZE_X,		// int(SIZE_X/2 - 1.3*r_prop*r_larm/dx), int(SIZE_X/2 + 1.3*r_prop*r_larm/dx),
-						0, SIZE_Y));	// int(SIZE_Y/2 - 1.3*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.3*r_prop*r_larm/dy)));
+						int(SIZE_X/2 - 1.3*r_prop*r_larm/dx), int(SIZE_X/2 + 1.3*r_prop*r_larm/dx),
+						int(SIZE_Y/2 - 1.3*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.3*r_prop*r_larm/dy)));
 				}
 				else if ( name == "field_along_x_axis" ) {
 					std::cout << "\n\t\t\t" << name;
@@ -124,7 +124,7 @@ vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
 						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
 						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
 						stoi(description[FD_DESC::PX]),
-						int(SIZE_X/2 - 1.5*r_prop*r_larm/dx), int(SIZE_X/2 + 1.5*r_prop*r_larm/dx)));
+						int(SIZE_X/2 - 1.3*r_prop*r_larm/dx), int(SIZE_X/2 + 1.3*r_prop*r_larm/dx)));
 				}
 				else if ( name == "field_along_y_axis" ) {
 					std::cout << "\n\t\t\t" << name;
@@ -132,7 +132,7 @@ vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
 						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
 						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
 						stoi(description[FD_DESC::PX]),
-						int(SIZE_Y/2 - 1.5*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.5*r_prop*r_larm/dy) ));
+						int(SIZE_Y/2 - 1.3*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.3*r_prop*r_larm/dy) ));
 				} 
 				else if ( name == "field_at_point" ) {
 					std::cout << "\n\t\t\t" << name;

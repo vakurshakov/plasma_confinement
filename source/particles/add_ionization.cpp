@@ -39,12 +39,18 @@ std::vector<int> set_time_distribution(int t_inj, size_t total_number_of_particl
 
 
 void Ionization::process(Particles* const ionized, Particles* const lost, int t) {
-    const double mass = ionized->parameters_.m();
-    const double Tx = ionized->parameters_.Tx();
-    const double Ty = ionized->parameters_.Ty();
-    const double Tz = ionized->parameters_.Tz();
-    const double p0 = ionized->parameters_.p0();
+    const double mi = ionized->parameters_.m();
+    const double Ti_x = ionized->parameters_.Tx();
+    const double Ti_y = ionized->parameters_.Ty();
+    const double Ti_z = ionized->parameters_.Tz();
+    const double pi_0 = ionized->parameters_.p0();
  
+	const double ml = lost->parameters_.m();
+    const double Tl_x = lost->parameters_.Tx();
+    const double Tl_y = lost->parameters_.Ty();
+    const double Tl_z = lost->parameters_.Tz();
+    const double pl_0 = lost->parameters_.p0();
+
 	int err = 0;
 	for (int i = 0; i < array_of_particles_to_load_[t] + err; ++i) {
 		
@@ -56,19 +62,23 @@ void Ionization::process(Particles* const ionized, Particles* const lost, int t)
 			continue;
 		}
 		else {
-			double px, py, pz;
-			load_impulse_(x, y, mass, Tx, Ty, Tz, p0, &px, &py, &pz);
+			double pi_x, pi_y, pi_z;
+			load_impulse_(x, y, mi, Ti_x, Ti_y, Ti_z, pi_0, &pi_x, &pi_y, &pi_z);
 
-			if ( std::isinf(px) || std::isinf(py) || std::isinf(pz)) { 
+			double pl_x, pl_y, pl_z;
+			load_impulse_(x, y, ml, Tl_x, Tl_y, Tl_z, pl_0, &pl_x, &pl_y, &pl_z);
+
+			if ( std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
+				 std::isinf(pl_x) || std::isinf(pl_y) || std::isinf(pl_z) ) { 
 				++err;
 				continue;
 			}
 			else {
 				#pragma omp critical
-				ionized->points_.emplace_back(Point({x, y}, {px, py, pz}));
+				ionized->points_.emplace_back(Point({x, y}, {pi_x, pi_y, pi_z}));
 				
 				#pragma omp critical
-        	    lost->points_.emplace_back(Point({x, y}, {-px, -py, -pz}));
+        	    lost->points_.emplace_back(Point({x, y}, {-pl_x, -pl_y, -pl_z}));
 			}
 		}
 	}

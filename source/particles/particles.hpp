@@ -22,7 +22,7 @@ public:
 
 	Particles() = default;
 	Particles(
-		Particle_parameters&, std::vector<Point>&&,
+		Particle_parameters&,
 		std::unique_ptr<Pusher>,
 		std::unique_ptr<Interpolation>,
 		std::unique_ptr<Decomposition>,
@@ -37,6 +37,8 @@ public:
 	void diagnose(int t) const;
 	
 	friend class Ionization;
+	friend class Set_particles;
+	friend class Copy_coordinates;
 
 private:
 	// main Kinetic_particles fields
