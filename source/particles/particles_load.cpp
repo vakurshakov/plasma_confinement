@@ -1,9 +1,11 @@
 #include "./particles_load.hpp"
 
 #include <cmath>
+#include <random>
 
 #include "./particle/point.hpp"
 #include "../vectors/vector_classes.hpp"
+#include "../managers/random_number_generator.hpp"
 #include "../constants.h"
 
 
@@ -15,19 +17,22 @@ void fill_randomly(int sequential_number, int Np,
 	int cell_number_nx, int cell_number_ny,
 	double* x, double* y)
 {
-		*x = (cell_number_nx + frand())*dx;  
-		*y = (cell_number_ny + frand())*dy;  
+	static auto distribution = std::uniform_real_distribution(0., 1.);
+	
+	*x = (cell_number_nx + distribution(Random_generator::get()))*dx;  
+	*y = (cell_number_ny + distribution(Random_generator::get()))*dy;  
 }
 
 void fill_periodically(int sequential_number, int Np,
 	int cell_number_nx, int cell_number_ny,
 	double* x, double* y)
 {
-	/* i%Np -- номер от нуля до Np-1 частицы в одной ячейке
+	/** 
+	 * i%Np -- номер от нуля до Np-1 частицы в одной ячейке
 	 * i/Np -- список индексов, эквивалентный перебору ячеек
 	 * индекс ячейки по Ox: (i/Np % divider), Oy: (i/Np / divider).
 	 *
-	 * 	Cколько по длинне в ячейку влазит? Это надо искать делители Np
+	 * Cколько по длинне в ячейку влазит? Это надо искать делители Np
 	 * при том лучше, конечно, от половины Np начинать в обе стороны искать
 	 * Пока эта проблема решена так: divider -- число, показывающее 
 	 * сколько частиц будет уложено в одну ячейку вдоль оси Ox; 
@@ -74,8 +79,11 @@ int  get_number_of_particles_in_circle(int Np)
 
 double temperature_impulse(double temperature, double mass)
 {
+	static auto distribution = std::uniform_real_distribution(0., 1.);
+
 	static const double mec2 = 511.;
-	return sin(2.*M_PI*frand())*sqrt(-2.*(temperature*mass/mec2)*log(frand())); 
+	return sin(2.*M_PI*distribution(Random_generator::get()))*
+		sqrt(-2.*(temperature*mass/mec2)*log(distribution(Random_generator::get()))); 
 }
 
 void load_annular_impulse(double x, double y,

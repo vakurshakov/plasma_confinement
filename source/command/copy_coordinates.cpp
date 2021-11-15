@@ -1,6 +1,6 @@
-#include "cmd_copy_coordinates.hpp"
+#include "copy_coordinates.hpp"
 
-#include <cmath>
+#include <cmath> // for isinf(double)
 
 
 void Copy_coordinates::execute(int _) const

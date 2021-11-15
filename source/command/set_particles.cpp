@@ -1,6 +1,6 @@
-#include "cmd_set_particles.hpp"
+#include "set_particles.hpp"
 
-#include <cmath>
+#include <cmath> // for isinf(double)
 #include <functional>
 
 #include "../particles/particle/point.hpp"

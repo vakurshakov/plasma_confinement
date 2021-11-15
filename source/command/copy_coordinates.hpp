@@ -1,5 +1,5 @@
-#ifndef COMMAND_CMD_COPY_COORDINATES_HPP
-#define COMMAND_CMD_COPY_COORDINATES_HPP
+#ifndef COMMAND_COPY_COORDINATES_HPP
+#define COMMAND_COPY_COORDINATES_HPP
 
 //#######################################################################################
 
@@ -15,9 +15,7 @@
  */
 class Copy_coordinates : public Command {
 public:
-    //settings_before_main_cycle.push_back(std::make_unique<Copy_coordinates>(
-	//	particles, load_impulse));
-		
+	
     /**
      * @brief Constructor of the command.
      * 
@@ -55,4 +53,4 @@ private:
 
 //#######################################################################################
 
-#endif // COMMAND_CMD_COPY_COORDINATES_HPP
+#endif // COMMAND_COPY_COORDINATES_HPP

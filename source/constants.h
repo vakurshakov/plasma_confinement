@@ -14,14 +14,14 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	#define there_are_particles 			true
 		#define there_are_electrons			true
 		#define there_are_plasma_ions		true
-		#define there_are_ions				false
+		#define there_are_ions				true
 		#define particles_are_diagnosed 	true
 
 	#define there_are_fields				true
 		#define there_are_Bz0				true	
-		#define there_are_current_add 		false
-		#define there_are_density_add 		false
 		#define fields_are_diagnosed 		true
+		//#define there_are_current_add 		false
+		//#define there_are_density_add 		false
 
 
 //######## PARTICLES CONSTANTS #######################################################

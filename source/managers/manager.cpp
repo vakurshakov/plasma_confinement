@@ -6,15 +6,11 @@
 #include "time_manager.hpp"
 #include "../command/command.hpp"
 #include "../command/cmd_add_Bz0.hpp"
-#include "../command/cmd_ionize_particles.hpp"
+#include "../command/ionize_particles.hpp"
 #include "../fields/fields_builder.hpp"
 #include "../particles/particles_builder.hpp"
-#include "../particles/add_ionization.hpp"
 #include "../particles/particles_load.hpp"
 #include "../constants.h"
-
-
-using Ionization_up = std::unique_ptr<Ionization>;
 
 
 void Manager::initializes()
@@ -37,22 +33,24 @@ void Manager::initializes()
 	#if there_are_ions
 		std::cout << "\tSetting each step presets..."
 			<< "\n\t\tIonization "; 
-		
+
 		Particles* const ionized = list_of_particles_["ions"].get();
 		Particles* const lost = list_of_particles_["buffer_electrons"].get();
 
-		const int total_number_of_particles = ionized->get_points().capacity();
-	
-		Ionization_up ionization = std::make_unique<Ionization>(
-			set_time_distribution(TINJ, total_number_of_particles),
-			set_point_on_circle, uniform_probability, load_annular_impulse);
+		const int Np_il = ionized->get_parameters().Np();
+		const int total_number_of_particles = get_number_of_particles_on_ring(Np_il);
 	
 		each_step_presets.push_front(std::make_unique<Ionize_particles>(
-			std::move(ionization), ionized, lost));
+			ionized, lost,
+			set_time_distribution(TINJ, total_number_of_particles),
+			set_point_on_annulus,
+			uniform_probability,
+			load_annular_impulse
+		));
 	
 		std::cout << "\n\t\tcheck : (&ionized=" << ionized << ", "
 				  << "&lost=" << lost << ")";
-		
+
 		std::cout << "\n\t\tdone\n"
 			<< "\tdone!" << std::endl;
 	#endif
@@ -74,12 +72,16 @@ void Manager::calculates()
 	for (int t = 0; t < TIME; ++t) {	
 	
 		if (!each_step_presets.empty()) {
-			for (const auto& command : each_step_presets) {
+			
+			// Сlearing the list of unnecessary elements.
+			each_step_presets.remove_if(
+				[t](const Command_up& command){
+				return command->needs_to_be_removed(t);
+			});
+
+			// Executing the rest of the commands.
+			for (const auto& command : each_step_presets)
 				command->execute(t);
-				
-				if (command->this_is_time_to_remove(t))
-					each_step_presets.remove(command);
-			}
 		}
 
 		#if there_are_particles
@@ -92,10 +94,10 @@ void Manager::calculates()
 		#if there_are_fields
 		fields_.diagnose(t);
 		fields_.propogate();
-		#endif			
-		
+		#endif
+
 		timer.tick(t);
-	}
+ 	}
 
 	timer.elapsed();
 }

@@ -1,5 +1,5 @@
-#ifndef COMMAND_CMD_SET_PARTICLES_HPP
-#define COMMAND_CMD_SET_PARTICLES_HPP
+#ifndef COMMAND_SET_PARTICLES_HPP
+#define COMMAND_SET_PARTICLES_HPP
 
 //#######################################################################################
 
@@ -11,7 +11,7 @@
 #include "../particles/particles.hpp"
 
 /**
- * @brief Command to set particles before the main calculation cycle.
+ * @brief Command that sets particles before the main calculation cycle.
  */
 class Set_particles : public Command {
 public:
@@ -35,16 +35,16 @@ public:
         std::size_t number_of_particles_to_load,
         std::function<bool(int cell_number_nx, int cell_number_ny)> this_is_config_cell,
         std::function<void(double x, double y,
-		    double mass, double Tx, double Ty, double Tz,
-		    double p0, double* px, double* py, double* pz)> load_impulse,
+		  double mass, double Tx, double Ty, double Tz,
+		  double p0, double* px, double* py, double* pz)> load_impulse,
         std::function<void(int sequential_number, int Np,
-		    int cell_number_nx, int cell_number_ny,
-		    double* x, double* y)> fill_the_cell )
-		:	particles(particles),
-            number_of_particles_to_load(number_of_particles_to_load),
-            this_is_config_cell(this_is_config_cell),
-            load_impulse(load_impulse),
-            fill_the_cell(fill_the_cell) {};
+		  int cell_number_nx, int cell_number_ny,
+		  double* x, double* y)> fill_the_cell )
+		    :	particles(particles),
+                number_of_particles_to_load(number_of_particles_to_load),
+                this_is_config_cell(this_is_config_cell),
+                load_impulse(load_impulse),
+                fill_the_cell(fill_the_cell) {};
 
     /**
      * @brief Passes through each cell in the domain and if the
@@ -62,14 +62,14 @@ private:
     std::function<bool(int cell_number_nx, int cell_number_ny)> this_is_config_cell;
 
     std::function<void(double x, double y,
-	    double mass, double Tx, double Ty, double Tz,
-	    double p0, double* px, double* py, double* pz)> load_impulse;
+	  double mass, double Tx, double Ty, double Tz,
+	  double p0, double* px, double* py, double* pz)> load_impulse;
     
     std::function<void(int sequential_number, int Np,
-	    int cell_number_nx, int cell_number_ny,
-	    double* x, double* y)> fill_the_cell;    
+	  int cell_number_nx, int cell_number_ny,
+	  double* x, double* y)> fill_the_cell;    
 };
 
 //#######################################################################################
 
-#endif // COMMAND_CMD_SET_PARTICLES_HPP
+#endif // COMMAND_SET_PARTICLES_HPP

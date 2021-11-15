@@ -36,9 +36,9 @@ public:
 	void push();
 	void diagnose(int t) const;
 	
-	friend class Ionization;
 	friend class Set_particles;
 	friend class Copy_coordinates;
+	friend class Ionize_particles;
 
 private:
 	// main Kinetic_particles fields
@@ -54,7 +54,7 @@ private:
 	std::function<void(Point&, double)> x_boundary_ = nullptr;
 	std::function<void(Point&, double)> y_boundary_ = nullptr;	
 
-	// list of diagnostics for Particles
+	// vector of diagnostics for Particles
 	std::vector<diagnostic_up> diagnostics_;
 };
 
