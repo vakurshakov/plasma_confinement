@@ -24,7 +24,6 @@ void Manager::initializes()
 		#endif
 	#endif
 	
-	// fields_ is used to set push commands
 	Particles_builder particles_builder;
 	list_of_particles_ = particles_builder.build(fields_, settings_before_main_cycle);		
 
@@ -84,16 +83,17 @@ void Manager::calculates()
 				command->execute(t);
 		}
 
+	
 		#if there_are_particles
 		for (auto& [_, particles] : list_of_particles_) {
 			particles->diagnose(t);
-			particles->push();
+			//particles->push();
 		}
 		#endif
 	
 		#if there_are_fields
 		fields_.diagnose(t);
-		fields_.propogate();
+		//fields_.propogate();
 		#endif
 
 		timer.tick(t);

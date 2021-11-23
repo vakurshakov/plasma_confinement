@@ -18,8 +18,6 @@
 #include "../diagnostics/whole_field.hpp"
 
 using std::vector, std::map, std::multimap, std::string, std::make_unique;
-using v3f = vector3_field;
-using v3f_up = std::unique_ptr<vector3_field>;
 
 
 std::function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
@@ -42,7 +40,7 @@ std::function<void(v3f& E, v3f& B, v3f& j)> Fields_builder::propogator()
 }
 
 
-v3f_up Fields_builder::load_field(string type)
+std::unique_ptr<vector3_field> Fields_builder::load_field(string type)
 {
 	std::cout << "\t\tMaking a(an) " << type << " v3f...";
 	// Возвращает сконфигурированные поля [ работает с файлом ./constants.h ]
@@ -88,11 +86,9 @@ Fields Fields_builder::build()
 	#endif
 }
 
-enum FD_DESC { FIELD, AXIS, PX, PY };
 
-
-vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
-	multimap<string, vector<string>> fields_diagnostics)
+vector<std::unique_ptr<Fields_diagnostic>>
+Fields_builder::diagnostics_list(multimap<string, vector<string>> fields_diagnostics)
 {
 	// Возвращает список необходимых диагностик для полей
 	std::cout << "\t\tSetting diagnostics...";
@@ -105,6 +101,8 @@ vector<std::unique_ptr<Fields_diagnostic>> Fields_builder::diagnostics_list(
 					<< "but no fields_diagnostics in file [./constants.h]";
 		}
 		else {	
+			enum FD_DESC { FIELD, AXIS, PX, PY };
+
 			for (const auto& [name, description] : fields_diagnostics) {
 				if ( name == "energy" ) {
 					std::cout << "\n\t\t\t" << name;

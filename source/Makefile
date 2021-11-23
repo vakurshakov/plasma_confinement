@@ -7,7 +7,8 @@ CFLAGs   = -std=c++20 -ggdb -O0 -fopenmp -Wall -pedantic # DEBUG VERSION
 OBJDIR = ../obj
 DEPDIR = ../dep
 
-VPATH = diagnostics/ fields/ file_writers/ managers/ particles/ particles/particle/ solvers/ vectors/ command/ 
+VPATH = diagnostics/ fields/ file_writers/ managers/ solvers/ vectors/ command/ 
+VPATH += particles/ particles/particle/ particles/particle/concrete/ particles/particle/parameters/ 
 
 MAIN 		= main.cpp
 VECTORS 	= vector_classes.cpp vector3_field.cpp

@@ -13,10 +13,8 @@
 
 #include "../particles/particles.hpp"
 
-
 using std::map, std::multimap, std::string, std::vector;
-using v3f = vector3_field;
-using v3f_up = std::unique_ptr<vector3_field>;
+	
 
 class Fields_builder {
 public:
@@ -25,18 +23,10 @@ public:
 	
 private:
 	// Методы для постороения полей
+	using v3f = vector3_field;
+	using v3f_up = std::unique_ptr<vector3_field>;
 	std::function<void(v3f& E, v3f& B, v3f& j)> propogator();
 	v3f_up load_field(string type);
-
-
-	// Методы для построения частиц
-	Particle_parameters config_parameters(vector<string> parameters);
-	vector<Point> load_particles(vector<string> distribution);
-	
-	auto particle_push(vector<string> description);
-	auto density_decomposition(vector<string> description);
-	auto x_boundary();
-	auto y_boundary();
 
 	// Возвращает список диагностик
 	using diagnostic_up = std::unique_ptr<Fields_diagnostic>;

@@ -1,8 +1,8 @@
 /diagnostics
+/diagnostics_python
 /todo
 dep
 obj
-python_code
 .vscode
 .gitignore
 log

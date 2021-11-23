@@ -27,9 +27,9 @@ public:
 		Particles* const particles_that_copies,
         const Particles* const particles_to_copy,
         std::function<void(double x, double y,
-		    double mass, double Tx, double Ty, double Tz,
-		    double p0, double* px, double* py, double* pz)> load_impulse)
-		:	particles_that_copies(particles_that_copies),
+		  double mass, double Tx, double Ty, double Tz,
+		  double p0, double* px, double* py, double* pz)> load_impulse)
+		  : particles_that_copies(particles_that_copies),
             particles_to_copy(particles_to_copy),
             load_impulse(load_impulse) {};
 
@@ -44,6 +44,7 @@ public:
 
 private:
 	Particles* const particles_that_copies;
+
     const Particles* const particles_to_copy;
     
     std::function<void(double x, double y,

@@ -3,8 +3,6 @@
 
 //#################################################################################################
 
-#include "../particles/particle/particle_parameters.hpp"
-#include "../particles/particle/point.hpp"
 #include "../vectors/vector_classes.hpp"
 #include "../vectors/vector3_field.hpp"
 
