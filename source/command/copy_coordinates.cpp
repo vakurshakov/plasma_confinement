@@ -2,6 +2,8 @@
 
 #include <cmath> // for isinf(double)
 
+#include "../particles/particle/concrete/particle_with_global_density_and_charge.hpp"
+
 
 void Copy_coordinates::execute(int _) const
 {
@@ -11,12 +13,12 @@ void Copy_coordinates::execute(int _) const
     const double Tz   = particles_that_copies->get_parameters().Tz();
     const double p0   = particles_that_copies->get_parameters().p0();
 	
-	particles_that_copies->points_.reserve(particles_to_copy->points_.size());
+	particles_that_copies->particles_.reserve(particles_to_copy->particles_.size());
 
-	for (const auto& point : particles_to_copy->points_)
+	for (const auto& particle : particles_to_copy->particles_)
     {
-        double x = point.x();
-        double y = point.y();
+        double x = particle->get_point().x();
+        double y = particle->get_point().y();
     
         double px, py, pz;
         do
@@ -25,6 +27,11 @@ void Copy_coordinates::execute(int _) const
         }
         while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
         
-        particles_that_copies->points_.emplace_back(Point({x, y}, {px, py, pz}));    
+        particles_that_copies->particles_.emplace_back(
+            std::make_unique<gDensity_gCharge_Particle>(
+                Point({x, y}, {px, py, pz}),
+                particles_that_copies->get_parameters()
+            )
+        );    
 	}
 }

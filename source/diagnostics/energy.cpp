@@ -5,13 +5,10 @@
 #include <memory>
 #include <filesystem>
 
-#include "../particles/particle/particle_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/concrete/particle_interface.hpp"
+#include "../particles/particle/parameters/global_parameters.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
-
-using v3f = vector3_field;
-namespace fs = std::filesystem;
 
 
 //######## fields energy ##########################################################################
@@ -26,6 +23,8 @@ fields_energy::fields_energy(std::string directory_path)
 
 void fields_energy::save_parameters(std::string directory_path)
 {
+	namespace fs = std::filesystem;
+	
 	fs::create_directories(fs::path(directory_path));
 	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
 	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
@@ -70,13 +69,20 @@ void particles_energy::save_parameters(std::string directory_path)
 }
 
 
-void particles_energy::diagnose(const Particle_parameters& sort, const std::vector<Point>& points, int t)
-{
-	#pragma omp parallel for reduction(+: W)
-	for (decltype(points.size()) i = 0; i < points.size(); ++i) {
-		W += sqrt( sort.m()*sort.m() + points[i].p().dot(points[i].p()) )*
-				dx*dy*sort.n()/sort.Np();
+void particles_energy::diagnose(
+	const gParameters& parameters, const std::vector<particle_up>& particles, int t)
+	{
+		const int Np = parameters.Np();
+
+		#pragma omp parallel for reduction(+: W)
+		for (const auto& particle : particles)
+		{
+			const double& m = particle->m();
+			const double& n = particle->n();
+			const vector3& p = particle->get_point().p();
+
+			W += sqrt( m * m + p.dot(p) ) * dx * dy * n/Np;
+		}
+		file_for_results_->write(W);
+		W = 0;
 	}
-	file_for_results_->write(W);
-	W = 0;
-}

@@ -1,5 +1,3 @@
-#include "particle_parameters.hpp"
-
 #include <cmath>
 
 double second_order_spline(double x, double mesh_grid)

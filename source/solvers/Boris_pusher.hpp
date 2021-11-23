@@ -5,18 +5,18 @@
 
 #include "abstract_strategies.hpp"
 
-#include "../particles/particle/particle_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/concrete/particle_interface.hpp"
+#include "../particles/particle/parameters/global_parameters.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../vectors/vector_classes.hpp"
 #include "../constants.h"
 
-using v3f = vector3_field;
-
 
 class Boris_interpolation : public Interpolation {
 public:
-	Boris_interpolation(const Particle_parameters& parameters, const v3f& E, const v3f& B)
+	using v3f = vector3_field;
+	
+	Boris_interpolation(const gParameters& parameters, const v3f& E, const v3f& B)
 		:   E_(E), B_(B),
             shape_at_(parameters.form_factor()),
             charge_cloud_(parameters.charge_cloud()) {};
@@ -32,14 +32,8 @@ private:
 
 class Boris_pusher : public Pusher {
 public:
-	Boris_pusher(const Particle_parameters& parameters)
-        :  q0_(0.5*dt*parameters.q()), m_(parameters.m()) {};
-
-	void process(Point&, const vector3& local_E, const vector3& local_B) const override;
-
-private:
-    const double q0_;
-    const double  m_;
+	Boris_pusher() = default;
+	void process(IParticle&, const vector3& local_E, const vector3& local_B) const override;
 };
 
 //#################################################################################################

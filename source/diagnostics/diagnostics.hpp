@@ -9,11 +9,9 @@
 
 #include "../file_writers/file_interface.hpp"
 #include "../file_writers/bin_file.hpp"
-#include "../particles/particle/particle_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/concrete/particle_interface.hpp"
+#include "../particles/particle/parameters/global_parameters.hpp"
 #include "../vectors/vector3_field.hpp"
-
-using v3f = vector3_field;
 
 
 /*
@@ -48,7 +46,8 @@ public:
 	Particles_diagnostic(std::string directory_path)
 		: Diagnostic(directory_path) {};
 
-	virtual void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) = 0;
+	using particle_up = std::unique_ptr<IParticle>;
+	virtual void diagnose(const gParameters&, const std::vector<particle_up>&, int t) = 0;
 };
 
 
@@ -57,6 +56,7 @@ public:
 	Fields_diagnostic(std::string directory_path)
 		: Diagnostic(directory_path) {};
 
+	using v3f = vector3_field;
 	virtual void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) = 0;
 };
 

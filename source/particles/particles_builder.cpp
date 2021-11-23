@@ -9,9 +9,14 @@
 #include <iostream>
 #include <functional>
 
-#include "./particles.hpp"
-#include "./particles_load.hpp"
-#include "./particle/point.hpp"
+#include "particles.hpp"
+#include "particles_load.hpp"
+#include "particle/concrete/particle_interface.hpp"
+#include "particle/parameters/global_parameters.hpp"
+#include "particle/parameters/global_densty.hpp"
+#include "particle/parameters/global_charge.hpp"
+#include "particle/parameters/global_density_and_charge.hpp"
+
 #include "../command/set_particles.hpp"
 #include "../command/copy_coordinates.hpp"
 #include "../diagnostics/energy.hpp"
@@ -25,52 +30,84 @@
 
 using std::vector, std::string, std::function, std::make_unique, std::stod, std::stoi;
 
-enum PCONF { push, interpolation, decomposition,
-			sort_charge, sort_mass, sort_density, number_of_particles_in_cell,
+enum PCONF { push = 0, interpolation, decomposition,
+			sort_density, sort_charge, sort_mass, number_of_particles_in_cell,
 			command_type, configuration, cell_filling,
 			temperature_x, temperature_y, temperature_z,
 			initial_impulse };
 
 
-Particle_parameters Particles_builder::config_parameters(const vector<string> parameters)
+auto Particles_builder::config_parameters(const vector<string> parameters)
 {
 	std::cout << "\t\t\tSetting parameters...";
-	Particle_parameters params(	stod(parameters[PCONF::sort_charge]),
-								stod(parameters[PCONF::sort_mass]),
-								stod(parameters[PCONF::sort_density]),
-								stoi(parameters[PCONF::number_of_particles_in_cell]),
-								stod(parameters[PCONF::temperature_x]), 
-								stod(parameters[PCONF::temperature_y]), 
-								stod(parameters[PCONF::temperature_z]),
-								stod(parameters[PCONF::initial_impulse])
-	);
-	std::cout << "\n\t\t\t\t" << "e=" << parameters[PCONF::sort_charge] << ", "
-							  << "m=" << parameters[PCONF::sort_mass] << ", "
-							  << "n=" << parameters[PCONF::sort_density] << ", "
-							  << "Np=" << parameters[PCONF::number_of_particles_in_cell] << ",\n\t\t\t\t"
-							  << "Tx=" << parameters[PCONF::temperature_x] << ", "
-							  << "Ty=" << parameters[PCONF::temperature_y] << ", "
-							  << "Tz=" << parameters[PCONF::temperature_z] << ", "
-							  << "p0=" << parameters[PCONF::initial_impulse] << ";";
-	std::cout << "\n\t\t\tdone (" << &params << ")" << std::endl;
-	return params;
+
+	gParameters tparam = gParameters( 
+		stod(parameters[PCONF::sort_mass]),
+		stoi(parameters[PCONF::number_of_particles_in_cell]),
+		stod(parameters[PCONF::temperature_x]), 
+		stod(parameters[PCONF::temperature_y]), 
+		stod(parameters[PCONF::temperature_z]),
+		stod(parameters[PCONF::initial_impulse]));
+
+	std::unique_ptr<gParameters> param = make_unique<gParameters>(tparam);
+	
+	if (parameters[PCONF::sort_density] == "local" &&
+		parameters[PCONF::sort_charge]  == "local" )
+	{}
+	else if (parameters[PCONF::sort_density] == "local")
+	{
+		std::unique_ptr<gParameters> temp = make_unique<gCharge>(
+			stod(parameters[PCONF::sort_charge]),
+			tparam
+		);
+
+		param.swap(temp);
+	}
+	else if (parameters[PCONF::sort_charge] == "local")
+	{
+		std::unique_ptr<gParameters> temp = make_unique<gDensity>(
+			stod(parameters[PCONF::sort_density]),
+			tparam
+		);
+		
+		param.swap(temp);
+	}
+	else
+	{
+		std::unique_ptr<gParameters> temp = make_unique<gDensity_gCharge>(
+			stod(parameters[PCONF::sort_density]),
+			stod(parameters[PCONF::sort_charge]),
+			tparam
+		);
+		
+		param.swap(temp);
+	}
+
+	std::cout
+	<< "\n\t\t\t\t"
+		<< "e=" << parameters[PCONF::sort_charge] << ", "
+		<< "m=" << parameters[PCONF::sort_mass] << ", "
+		<< "n=" << parameters[PCONF::sort_density] << ", "
+		<< "Np=" << parameters[PCONF::number_of_particles_in_cell]
+	<< ",\n\t\t\t\t"
+		<< "Tx=" << parameters[PCONF::temperature_x] << ", "
+		<< "Ty=" << parameters[PCONF::temperature_y] << ", "
+		<< "Tz=" << parameters[PCONF::temperature_z] << ", "
+		<< "p0=" << parameters[PCONF::initial_impulse] << ";";
+	std::cout << "\n\t\t\tdone (" << param.get() << ")" << std::endl;
+
+	return param;
 }
 
 
-std::tuple<
-	function<bool(int cell_number_nx, int cell_number_ny)>,
-    function<int(int Np)>,
-    function<void(double x, double y,
-		double mass, double Tx, double Ty, double Tz,
-		double p0, double* px, double* py, double* pz)>>
-get_configuration_functions(string configuration)
+auto get_configuration_functions(string configuration)
 {
 	std::tuple<
-		function<bool(int cell_number_nx, int cell_number_ny)>,
-    	function<int(int Np)>,
-    	function<void(double x, double y,
-			double mass, double Tx, double Ty, double Tz,
-			double p0, double* px, double* py, double* pz)>> temp;
+	  function<bool(int cell_number_nx, int cell_number_ny)>,
+      function<int(int Np)>,
+      function<void(double x, double y,
+	  	double mass, double Tx, double Ty, double Tz,
+	  	double p0, double* px, double* py, double* pz)>> temp;
 
 	if (configuration == "ring")
 	{
@@ -132,7 +169,7 @@ get_configuration_functions(string configuration)
 void Particles_builder::load_particles(
 	Particles* const particles,
 	const vector<string> distribution,
-	const Particle_parameters& parameters,
+	const gParameters& parameters,
 	std::list<Command_up>& settings_before_main_cycle)
 {
 	std::cout << "\t\t\tLoading points...";
@@ -176,11 +213,11 @@ void Particles_builder::load_particles(
 		//	the cycle and copy coordinates %from_... 
 		throw string(command_type + "," + configuration);
 	}
-	else if (command_type == "Ionize_particles")
+	else if (command_type == "ionize_particles")
 	{
 		// 	This particles will wait until the end of
 		//	the cycle and make a pair into Ionize_particles command
-		// throw string(command_type + "," + configuration);
+		throw string(command_type + "," + configuration);
 	}
 	else{
 		std::cout << "There is no know command type." << std::endl;
@@ -235,7 +272,7 @@ auto Particles_builder::y_boundary()
 
 
 auto Particles_builder::choose_pusher(const vector<string> description,
-	const Particle_parameters& parameters, Fields& fields)
+	const gParameters& parameters, Fields& fields)
 {
 	std::cout << "\t\t\tSetting pusher... ";	
 	std::unique_ptr<Pusher> pusher_up;
@@ -246,7 +283,7 @@ auto Particles_builder::choose_pusher(const vector<string> description,
 	{
 		if ( setting.find("+Push_particle") != string::npos )
 		{
-			pusher_up = make_unique<Boris_pusher>(parameters);
+			pusher_up = make_unique<Boris_pusher>();
 			std::cout << "done" << std::endl;
 		}
 		else {
@@ -262,7 +299,7 @@ auto Particles_builder::choose_pusher(const vector<string> description,
 
 
 auto Particles_builder::choose_interpolation(const vector<string> description,
-	const Particle_parameters& parameters, Fields& fields)
+	const gParameters& parameters, Fields& fields)
 {
 	/*
 	*	тут может возникнуть сложность с одновременным использованием
@@ -334,7 +371,7 @@ auto Particles_builder::choose_interpolation(const vector<string> description,
 
 
 auto Particles_builder::choose_decomposition(const vector<string> description,
-	const Particle_parameters& parameters, Fields& fields)
+	const gParameters& parameters, Fields& fields)
 {
 	std::cout << "\t\t\tSetting decomposition... ";	
 	std::unique_ptr<Decomposition> decomposition_up;
@@ -363,26 +400,25 @@ std::map<string, std::unique_ptr<Particles>> Particles_builder::build(
 	#if there_are_particles
 	std::cout << "\tBulding particles:" << std::endl;
 
-	srand(42);
 	std::map<string, string> loaded_after;
 	for (const auto& [name, descrtiption] : species)
 	{
 		std::cout << "\t\tBuilding \"" << name << "\"" << std::endl;
 
-		Particle_parameters parameters = this->config_parameters(descrtiption[0]); 
-		
+		auto parameters = this->config_parameters(descrtiption[0]); 
+
 		Particles_up particles = make_unique<Particles>(
-			parameters,
-			std::move(this->choose_pusher(descrtiption[0], parameters, fields)),
-			std::move(this->choose_interpolation(descrtiption[0], parameters, fields)),
-			std::move(this->choose_decomposition(descrtiption[0], parameters, fields)),
+			std::move(parameters),
+			std::move(this->choose_pusher(descrtiption[0], *parameters, fields)),
+			std::move(this->choose_interpolation(descrtiption[0], *parameters, fields)),
+			std::move(this->choose_decomposition(descrtiption[0], *parameters, fields)),
 			std::move(this->x_boundary()),
 			std::move(this->y_boundary()),
 			std::move(this->diagnostics_list(name, descrtiption[1])));
 
 		try
 		{
-			load_particles(particles.get(), descrtiption[0], parameters, settings_before_main_cycle);
+			load_particles(particles.get(), descrtiption[0], particles->get_parameters(), settings_before_main_cycle);
 			std::cout << "\n\t\t\tdone" << std::endl;
 		}
 		catch (const string& loading_setting)
@@ -454,8 +490,8 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 				if ( now == "density" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							(SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
-							(SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							0, SIZE_X*dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm)
+							0, SIZE_X*dx, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm)
 							make_unique<XY_projector>(), make_unique<zeroth_moment>()));
 				}
 				else if ( now == "1_of_VxVy" ) {

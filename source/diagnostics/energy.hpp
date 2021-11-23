@@ -8,12 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "../particles/particle/particle_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/concrete/particle_interface.hpp"
+#include "../particles/particle/parameters/global_parameters.hpp"
 #include "../vectors/vector3_field.hpp"
-
-
-using v3f = vector3_field;
 
 
 class fields_energy : public Fields_diagnostic {
@@ -21,6 +18,9 @@ public:
 	fields_energy(std::string directory_path);
 
 	void save_parameters(std::string directory_path);
+
+
+	using v3f = vector3_field;
 	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
 	
 private:
@@ -33,7 +33,9 @@ public:
 	particles_energy(std::string directory_path);
 	
 	void save_parameters(std::string directory_path);
-	void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) override;
+
+	using particle_up = std::unique_ptr<IParticle>;
+	void diagnose(const gParameters&, const std::vector<particle_up>&, int t) override;
 	
 private:
 	double W = 0;

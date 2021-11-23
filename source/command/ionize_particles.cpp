@@ -3,7 +3,10 @@
 #include <cmath> // for nextafter(...) isinf(double)
 
 #include "../particles/particles.hpp"
+#include "../particles/particle/concrete/particle_with_global_charge.hpp"
+#include "../particles/particle/concrete/particle_with_global_density_and_charge.hpp"
 #include "../managers/random_number_generator.hpp"
+#include "../constants.h"
 
 
 void set_point_on_annulus(double* x, double* y)
@@ -11,14 +14,15 @@ void set_point_on_annulus(double* x, double* y)
 	// To close the interval of the real distribution we use std::nextafter(double from, double to)
 	static auto distribution = std::uniform_real_distribution(0., std::nextafter(1., 2.));
 	
-	double ra = r_larm - dr; 
-	double rb = r_larm + dr;
-	double r = sqrt(ra*ra + (rb*rb - ra*ra)*distribution(Random_generator::get()));
+	double ra = r_larm - 3. * dr; 
+	double rb = r_larm + 3. * dr;
+	double r = sqrt(ra * ra + (rb * rb - ra * ra) *
+		distribution(Random_generator::get()));
 
-	double phi = 2*M_PI*distribution(Random_generator::get());
+	double phi = 2 * M_PI * distribution(Random_generator::get());
 
-	*x = SIZE_X/2*dx + r*cos(phi);
-	*y = SIZE_Y/2*dy + r*sin(phi);
+	*x = 0.5 * SIZE_X * dx + r * cos(phi);
+	*y = 0.5 * SIZE_Y * dy + r * sin(phi);
 }
 
 
@@ -26,6 +30,25 @@ double uniform_probability(double _1, double _2)
 {
 	return 1.;
 }
+
+
+#if density_beam_profile_is_set
+double density_beam_profile(double x, double y)
+{
+	x -= 0.5 * SIZE_X * dx;
+	y -= 0.5 * SIZE_Y * dy;
+
+	const double r = fabs( sqrt(x * x + y * y) - r_larm );
+	static const double sigma = dr; 
+
+	double ans = 0;
+
+	if (r < 3. * sigma)
+		ans = exp(- 0.5 * r * r / (sigma * sigma)) / sqrt(2. * M_PI * sigma * sigma);
+
+	return ans;
+}
+#endif
 
 
 std::vector<size_t> set_time_distribution(int t_inj, size_t total_number_of_particles)
@@ -42,17 +65,17 @@ std::vector<size_t> set_time_distribution(int t_inj, size_t total_number_of_part
 
 
 void Ionize_particles::execute(int t) const {
-    const double mi = ionized->parameters_.m();
-    const double Ti_x = ionized->parameters_.Tx();
-    const double Ti_y = ionized->parameters_.Ty();
-    const double Ti_z = ionized->parameters_.Tz();
-    const double pi_0 = ionized->parameters_.p0();
+    const double mi = ionized->get_parameters().m();
+    const double Ti_x = ionized->get_parameters().Tx();
+    const double Ti_y = ionized->get_parameters().Ty();
+    const double Ti_z = ionized->get_parameters().Tz();
+    const double pi_0 = ionized->get_parameters().p0();
  
-	const double ml = lost->parameters_.m();
-    const double Tl_x = lost->parameters_.Tx();
-    const double Tl_y = lost->parameters_.Ty();
-    const double Tl_z = lost->parameters_.Tz();
-    const double pl_0 = lost->parameters_.p0();
+	const double ml = lost->get_parameters().m();
+    const double Tl_x = lost->get_parameters().Tx();
+    const double Tl_y = lost->get_parameters().Ty();
+    const double Tl_z = lost->get_parameters().Tz();
+    const double pl_0 = lost->get_parameters().p0();
 
 	// To close the interval of the real distribution we use std::nextafter(double from, double to)
 	auto distribution = std::uniform_real_distribution(0., std::nextafter(1., 2.));
@@ -80,11 +103,43 @@ void Ionize_particles::execute(int t) const {
 				continue;
 			}
 			else {
+
+				#if density_beam_profile_is_set
 				#pragma omp critical
-				ionized->points_.emplace_back(Point({x, y}, {pi_x, pi_y, pi_z}));
-				
+				ionized->particles_.emplace_back(
+					std::make_unique<gCharge_Particle>(
+						Point({x, y}, {pi_x, pi_y, pi_z}),
+						density_beam_profile(x, y),
+						ionized->get_parameters()
+					)
+				);
+
 				#pragma omp critical
-        	    lost->points_.emplace_back(Point({x, y}, {pl_x, pl_y, pl_z}));
+        	    lost->particles_.emplace_back(
+					std::make_unique<gCharge_Particle>(
+						Point({x, y}, {pl_x, pl_y, pl_z}),
+						density_beam_profile(x, y),
+						lost->get_parameters()
+					)
+				);
+
+				#else	
+				#pragma omp critical
+				ionized->particles_.emplace_back(
+					std::make_unique<gCharge_Particle>(
+						Point({x, y}, {pi_x, pi_y, pi_z}),
+						ionized->get_parameters()
+					)
+				);
+
+				#pragma omp critical
+        	    lost->particles_.emplace_back(
+					std::make_unique<gCharge_Particle>(
+						Point({x, y}, {pl_x, pl_y, pl_z}),
+						lost->get_parameters()
+					)
+				);
+				#endif
 			}
 		}
 	}

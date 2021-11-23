@@ -1,10 +1,10 @@
+/*
 #include "./particles.hpp"
 
 #include <cmath>
 
 #include "../constants.h"
 
-/*
 void Particles::add_ion_density(int t)
 {
 	if ( t <= TINJ ) {

@@ -12,40 +12,63 @@
 #include <memory>
 #include <functional>
 
+#include "particle/parameters/global_parameters.hpp"
 #include "../command/command.hpp"
 #include "../fields/fields.hpp"
 
 using std::string, std::vector;
 
 
+/**
+ * Builder for particles.
+ * 
+ * @brief This class builds all types of particles
+ * 		prediscribed in `constants.h`
+ * 
+ * @todo Builder for a single Particles object (?)
+ */
 class Particles_builder {
 public:
-	Particles_builder() {};
+	// Default constructor.
+	Particles_builder() = default;
 	
 	using Particles_up = std::unique_ptr<Particles>;
 	using Command_up = std::unique_ptr<Command>;
 
+	/**
+	 * @brief Constructs a list of particles used in a
+	 * 		computational experiment.
+	 * 
+	 * @param fields Reference to an outer Fields object,
+	 * 		to set particle-field and field-particle interaction.
+	 * @param settings_before_main_cycle Reference to a list of
+	 * 		commands to insert particle initialization there. 
+	 * 
+	 * @return List of particles with names, according to its
+	 * 		desctription in `constants.h`.
+	 */
 	std::map<string, Particles_up> build(Fields& fields,
 		std::list<Command_up>& settings_before_main_cycle);
 
 private:
 	
-	Particle_parameters config_parameters(const vector<string> parameters);
+	auto config_parameters(const vector<string> parameters);
+	
 	void load_particles(
 		Particles* const particles,
 		const vector<string> distribution,
-		const Particle_parameters& parameters,
+		const gParameters& parameters,
 		std::list<Command_up>& settings_before_main_cycle);
 	
 	auto choose_pusher(
 		const vector<string> description,
-		const Particle_parameters&, Fields& fields);
+		const gParameters&, Fields& fields);
 	auto choose_interpolation(
 		const vector<string> description,
-		const Particle_parameters&, Fields& fields);
+		const gParameters&, Fields& fields);
 	auto choose_decomposition(
 		const vector<string> description,
-		const Particle_parameters&, Fields& fields);
+		const gParameters&, Fields& fields);
 
 	auto x_boundary();
 	auto y_boundary();

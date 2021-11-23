@@ -3,7 +3,8 @@
 #include <cmath> // for isinf(double)
 #include <functional>
 
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/concrete/particle_with_global_charge.hpp"
+#include "../particles/particle/concrete/particle_with_global_density_and_charge.hpp"
 #include "../particles/particles_load.hpp"
 
 
@@ -16,7 +17,7 @@ void Set_particles::execute(int _) const
     const double p0   = particles->get_parameters().p0();
 	const int    Np   = particles->get_parameters().Np();
 
-	particles->points_.reserve( number_of_particles_to_load );
+	particles->particles_.reserve( number_of_particles_to_load );
 
 	for (int nx = 0; nx < SIZE_X; ++nx) {
 	for (int ny = 0; ny < SIZE_Y; ++ny) {
@@ -35,7 +36,12 @@ void Set_particles::execute(int _) const
                 }
                 while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
 
-				particles->points_.emplace_back(Point({x, y}, {px, py, pz}));
+				particles->particles_.emplace_back(
+					std::make_unique<gDensity_gCharge_Particle>(
+						Point({x, y}, {px, py, pz}),
+						particles->get_parameters()
+					)
+				);
 			}
 		}
 	}}

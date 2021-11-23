@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "../particles/particle/particle_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/concrete/particle_interface.hpp"
+#include "../particles/particle/parameters/global_parameters.hpp"
 
 
 std::vector<int> choose_indexes();
@@ -21,7 +21,9 @@ public:
         std::vector<int> indexes_of_chosen_particles);
 
 	void save_parameters(std::string directory_path) override;
-	void diagnose(const Particle_parameters&, const std::vector<Point>&, int t) override;
+
+	using particle_up = std::unique_ptr<IParticle>;
+	void diagnose(const gParameters&, const std::vector<particle_up>&, int t) override;
 
 private:
 	std::vector<int> indexes_of_chosen_particles_;

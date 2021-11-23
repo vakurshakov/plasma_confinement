@@ -1,5 +1,3 @@
-double frand();
-
 void fill_randomly(int sequential_number, int Np,
 	int cell_number_cell_number_nx, int cell_number_ny,
 	double* x, double* y);
