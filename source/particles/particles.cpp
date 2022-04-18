@@ -3,10 +3,10 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <cstdarg>
 #include <functional>
 
-#include "particle/concrete/particle_interface.hpp"
-#include "./particle/point.hpp"
+#include "./particle/particle.hpp"
 #include "../diagnostics/diagnostics.hpp"
 #include "../solvers/abstract_strategies.hpp"
 #include "../solvers/Boris_pusher.hpp"
@@ -15,14 +15,14 @@
 
 
 Particles::Particles(
-	std::unique_ptr<gParameters> parameters,
+	Parameters&& parameters,
 	std::unique_ptr<Pusher> push,
 	std::unique_ptr<Interpolation> interpolation,
 	std::unique_ptr<Decomposition> decomposition,
 	std::function<void(Point&, double)>&& x_boundary,
 	std::function<void(Point&, double)>&& y_boundary,
 	std::vector<diagnostic_up>&& diagnostics ) 
-	: 	parameters_(std::move(parameters)),
+	: 	parameters_(parameters),
 	  	push_(std::move(push)),
 	  	interpolation_(std::move(interpolation)),
 	  	decomposition_(std::move(decomposition)),
@@ -39,20 +39,20 @@ void Particles::push()
 	
 	#pragma omp parallel for shared(particles_), num_threads(THREAD_NUM),	\
 		firstprivate(push, interpolate, decompose, x_boundary_, y_boundary_)
-	for (auto& p_particle : particles_) {
+	for (auto& particle : particles_) {
 		
-		const vector2 r0 = p_particle->get_point().r();
+		const vector2 r0 = particle.get_point().r();
 		
 		{
 			vector3 local_E = { 0., 0., 0. };
 			vector3 local_B = { 0., 0., 0. };
 
 			interpolate(interpolation_, r0, local_E, local_B);
-			push(push_, *p_particle, local_E, local_B);
+			push(push_, particle, local_E, local_B);
 		}
 
-		decompose(decomposition_, *p_particle, r0);		
-		boundaries_processing(p_particle->get_point(), SIZE_X*dx, SIZE_Y*dy);
+		decompose(decomposition_, particle, r0);		
+		boundaries_processing(particle.get_point(), SIZE_X*dx, SIZE_Y*dy);
 	}
 }
 
@@ -69,7 +69,29 @@ void Particles::diagnose(int t) const
 
 		#pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
 		for (auto& diagnostic : diagnostics_) {
-			diagnostic->diagnose(*parameters_, particles_, t);
+			diagnostic->diagnose(parameters_, particles_, t);
 		} 
 	}
-} 
+}
+
+/**
+ * @brief Adds a particle to the end of the array.
+ * 
+ * @param point Coordinates and impulse of the particle.
+ * @param ... Local parameters.
+ */
+void Particles::add_particle(const Point& point, ...)
+{
+	va_list list;
+	va_start(list, point);
+	
+	if (auto* n = dynamic_cast<Local_parameter*>(parameters_.raw_n()); n != nullptr)
+		n->values_.emplace_back(static_cast<double>(va_arg(list, double)));
+
+	if (auto* q = dynamic_cast<Local_parameter*>(parameters_.raw_q()); q != nullptr)
+		q->values_.emplace_back(static_cast<double>(va_arg(list, double)));
+
+	va_end(list);
+
+	particles_.emplace_back(Particle{number_in_sort++, point, parameters_});
+}

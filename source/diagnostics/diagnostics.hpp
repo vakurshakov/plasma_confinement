@@ -9,14 +9,13 @@
 
 #include "../file_writers/file_interface.hpp"
 #include "../file_writers/bin_file.hpp"
-#include "../particles/particle/concrete/particle_interface.hpp"
-#include "../particles/particle/parameters/global_parameters.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 
 
 /*
-	NOTE: Скорее всего нужно будет ещё пересмотреть систему диагностирования, чтобы 
-		она не брала на вход слишком много. Так, не стоит передавать в диагностику сразу
+	TODO: Нужно будет ещё пересмотреть систему диагностирования, чтобы она не 
+		брала на вход слишком много. Так, не стоит передавать в диагностику сразу
 		все поля; это убирает возможность создать объект диагностики для конкретного
 		(одного) поля, а также добавляет неясность в том, для какого поля эта диагностика
 		на самом деле.
@@ -46,8 +45,7 @@ public:
 	Particles_diagnostic(std::string directory_path)
 		: Diagnostic(directory_path) {};
 
-	using particle_up = std::unique_ptr<IParticle>;
-	virtual void diagnose(const gParameters&, const std::vector<particle_up>&, int t) = 0;
+	virtual void diagnose(const Parameters&, const std::vector<Particle>&, int t) = 0;
 };
 
 

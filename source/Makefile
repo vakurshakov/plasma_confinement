@@ -8,7 +8,7 @@ OBJDIR = ../obj
 DEPDIR = ../dep
 
 VPATH = diagnostics/ fields/ file_writers/ managers/ solvers/ vectors/ command/ 
-VPATH += particles/ particles/particle/ particles/particle/concrete/ particles/particle/parameters/ 
+VPATH += particles/ particles/particle/
 
 MAIN 		= main.cpp
 VECTORS 	= vector_classes.cpp vector3_field.cpp

@@ -42,7 +42,7 @@ const vector3& px_py_vector3_field::get_vector(int ny, int nx) const {
 
 vector3& px_py_vector3_field::get_vector(Axis axis, int ny, int nx) {
 	if (nx < ix_first(axis) && ny < iy_first(axis)) {
-		return field_[(size_y_ + ny%size_y_)*size_x_ + (size_x_ + nx%size_x_)]; 
+		return field_[(size_y_ + ny%size_y_)*size_x_ + (size_x_ + nx%size_x_)];
 	}
 	else if (nx < ix_first(axis)) {
 		return field_[(ny%size_y_)*size_x_ + (size_x_ + nx%size_x_)]; 
@@ -72,10 +72,9 @@ rx_ry_vector3_field::rx_ry_vector3_field(std::string type, int size_x, int size_
 		bound[upper + X] = size_y_;	   bound[upper + Y] = size_y_-1;  bound[upper + Z] = size_y_;
 	}
 } 
-
 int rx_ry_vector3_field::ix_first (Axis axis) const { return bound[left  + axis]; }
-int rx_ry_vector3_field::iy_first (Axis axis) const { return bound[lower + axis]; }
 int rx_ry_vector3_field::ix_last  (Axis axis) const { return bound[right + axis]; }
+int rx_ry_vector3_field::iy_first (Axis axis) const { return bound[lower + axis]; }
 int rx_ry_vector3_field::iy_last  (Axis axis) const { return bound[upper + axis]; }
 
 const vector3& rx_ry_vector3_field::get_vector(int ny, int nx) const

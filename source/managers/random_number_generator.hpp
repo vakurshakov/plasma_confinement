@@ -1,5 +1,4 @@
 #include <random>
-#include <functional>
 
 /**
  * @brief This is a singleton around the linear congruential
@@ -28,7 +27,7 @@ public:
     }
     
 private:
-    std::minstd_rand gen;
+    std::mt19937_64 gen;
     
     Random_generator() = default;
     

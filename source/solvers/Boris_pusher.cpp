@@ -3,8 +3,7 @@
 #include <cmath>
 #include <functional>
 
-#include "../particles/particle/concrete/particle_interface.hpp"
-#include "../particles/particle/parameters/global_parameters.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
@@ -40,27 +39,27 @@ void Boris_interpolation::process(const vector2& r0, vector3& local_E, vector3& 
 }
 
 
-void Boris_pusher::process(IParticle& particle, const vector3& local_E, const vector3& local_B) const
+void Boris_pusher::process(Particle& particle, const vector3& local_E, const vector3& local_B) const
 {
 	// getting a usefull variabels from %parameters and %point
-	const double q0 = 0.5*dt*particle.q();
+	const double q0 = 0.5 * dt * particle.q();
 	const double m  = particle.m(); 
-	vector2& r_minus = particle.get_point().r();
-	vector3& p_minus = particle.get_point().p();
+	vector2& r = particle.get_point().r();
+	vector3& p = particle.get_point().p();
 
 	// Realization of a Boris pusher
 
-	const vector3 w = p_minus + local_E*q0;
+	const vector3 w = p + local_E * q0;
 	
-	double energy = sqrt(m*m + w.dot(w));
+	double energy = sqrt(m * m + w.dot(w));
 	
-	const vector3 h = local_B*q0/energy;
+	const vector3 h = local_B * q0 / energy;
 	
-	const vector3 s = h*2./(1. + h.dot(h));
+	const vector3 s = h * 2. / (1. + h.dot(h));
 	
-	p_minus = local_E*q0 + w*(1. - h.dot(s)) + w.cross(s) + h*(s.dot(w));
+	p = local_E * q0 + w * (1. - h.dot(s)) + w.cross(s) + h * (s.dot(w));
 	
-	energy = sqrt(m*m + p_minus.dot(p_minus));
+	energy = sqrt(m * m + p.dot(p));
 	
-	r_minus += p_minus.squeeze(Axes::XY)*dt/energy;
+	r += p.squeeze(Axes::XY) * dt / energy;
 }

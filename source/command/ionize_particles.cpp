@@ -2,9 +2,7 @@
 
 #include <cmath> // for nextafter(...) isinf(double)
 
-#include "../particles/particles.hpp"
-#include "../particles/particle/concrete/particle_with_global_charge.hpp"
-#include "../particles/particle/concrete/particle_with_global_density_and_charge.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../managers/random_number_generator.hpp"
 #include "../constants.h"
 
@@ -14,8 +12,8 @@ void set_point_on_annulus(double* x, double* y)
 	// To close the interval of the real distribution we use std::nextafter(double from, double to)
 	static auto distribution = std::uniform_real_distribution(0., std::nextafter(1., 2.));
 	
-	double ra = r_larm - 3. * dr; 
-	double rb = r_larm + 3. * dr;
+	double ra = r_larm - dr; 
+	double rb = r_larm + dr;
 	double r = sqrt(ra * ra + (rb * rb - ra * ra) *
 		distribution(Random_generator::get()));
 
@@ -38,13 +36,13 @@ double density_beam_profile(double x, double y)
 	x -= 0.5 * SIZE_X * dx;
 	y -= 0.5 * SIZE_Y * dy;
 
-	const double r = fabs( sqrt(x * x + y * y) - r_larm );
-	static const double sigma = dr; 
+	const double r = sqrt(x * x + y * y) - r_larm;
+	static const double sigma2 = dr * dr / 9.; 
 
-	double ans = 0;
+	double ans = 0.;
 
-	if (r < 3. * sigma)
-		ans = exp(- 0.5 * r * r / (sigma * sigma)) / sqrt(2. * M_PI * sigma * sigma);
+	if (r * r < 9. * sigma2)
+		ans = ni * exp(- 0.5 * r * r / sigma2) / sqrt(2. * M_PI * sigma2);
 
 	return ans;
 }
@@ -91,56 +89,31 @@ void Ionize_particles::execute(int t) const {
 			continue;
 		}
 		else {
+
 			double pi_x, pi_y, pi_z;
-			load_impulse(x, y, mi, Ti_x, Ti_y, Ti_z, pi_0, &pi_x, &pi_y, &pi_z);
-
 			double pl_x, pl_y, pl_z;
-			load_impulse(x, y, ml, Tl_x, Tl_y, Tl_z, pl_0, &pl_x, &pl_y, &pl_z);
+			do 
+			{
+				load_impulse(x, y, mi, Ti_x, Ti_y, Ti_z, pi_0, &pi_x, &pi_y, &pi_z);
+				load_impulse(x, y, ml, Tl_x, Tl_y, Tl_z, pl_0, &pl_x, &pl_y, &pl_z);
+			} while (
+				std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
+				std::isinf(pl_x) || std::isinf(pl_y) || std::isinf(pl_z));
 
-			if ( std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
-				 std::isinf(pl_x) || std::isinf(pl_y) || std::isinf(pl_z) ) { 
-				++err;
-				continue;
-			}
-			else {
 
-				#if density_beam_profile_is_set
-				#pragma omp critical
-				ionized->particles_.emplace_back(
-					std::make_unique<gCharge_Particle>(
-						Point({x, y}, {pi_x, pi_y, pi_z}),
-						density_beam_profile(x, y),
-						ionized->get_parameters()
-					)
-				);
+			#pragma omp critical
+			ionized->add_particle(Point({x, y}, {pi_x, pi_y, pi_z})
+			#if density_beam_profile_is_set
+				, density_beam_profile(x, y)
+			#endif
+			);
 
-				#pragma omp critical
-        	    lost->particles_.emplace_back(
-					std::make_unique<gCharge_Particle>(
-						Point({x, y}, {pl_x, pl_y, pl_z}),
-						density_beam_profile(x, y),
-						lost->get_parameters()
-					)
-				);
-
-				#else	
-				#pragma omp critical
-				ionized->particles_.emplace_back(
-					std::make_unique<gCharge_Particle>(
-						Point({x, y}, {pi_x, pi_y, pi_z}),
-						ionized->get_parameters()
-					)
-				);
-
-				#pragma omp critical
-        	    lost->particles_.emplace_back(
-					std::make_unique<gCharge_Particle>(
-						Point({x, y}, {pl_x, pl_y, pl_z}),
-						lost->get_parameters()
-					)
-				);
-				#endif
-			}
+			#pragma omp critical
+        	lost->add_particle(Point({x, y}, {pl_x, pl_y, pl_z})
+			#if density_beam_profile_is_set
+				, density_beam_profile(x, y)
+			#endif
+			);
 		}
 	}
 }

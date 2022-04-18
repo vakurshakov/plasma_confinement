@@ -12,7 +12,7 @@
 #include <memory>
 #include <functional>
 
-#include "particle/parameters/global_parameters.hpp"
+#include "./particle/parameters.hpp"
 #include "../command/command.hpp"
 #include "../fields/fields.hpp"
 
@@ -57,18 +57,18 @@ private:
 	void load_particles(
 		Particles* const particles,
 		const vector<string> distribution,
-		const gParameters& parameters,
+		const Parameters& parameters,
 		std::list<Command_up>& settings_before_main_cycle);
 	
 	auto choose_pusher(
 		const vector<string> description,
-		const gParameters&, Fields& fields);
+		const Parameters&, Fields& fields);
 	auto choose_interpolation(
 		const vector<string> description,
-		const gParameters&, Fields& fields);
+		const Parameters&, Fields& fields);
 	auto choose_decomposition(
 		const vector<string> description,
-		const gParameters&, Fields& fields);
+		const Parameters&, Fields& fields);
 
 	auto x_boundary();
 	auto y_boundary();

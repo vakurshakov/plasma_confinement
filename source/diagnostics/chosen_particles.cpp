@@ -6,9 +6,7 @@
 #include <filesystem>
 
 #include "../file_writers/bin_file.hpp"
-#include "../particles/particle/concrete/particle_interface.hpp"
-#include "../particles/particle/parameters/global_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../constants.h"
 
 
@@ -41,16 +39,14 @@ void chosen_particles::save_parameters(std::string directory_path)
 	diagnostic_parameters_ << sizeof(float) << std::endl;
 }
 
-void chosen_particles::diagnose(
-    const gParameters& parameters, const std::vector<particle_up>& particles, int t)
+void chosen_particles::diagnose(const Parameters&, const std::vector<Particle>& particles, int t)
+{
+    if ((t % diagnose_time_step) == 0)
     {
-        if ((t % diagnose_time_step) == 0) {
-
         file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
-
-        for(const auto& i : indexes_of_chosen_particles_) {
-
-            const Point& ith_point = particles[i]->get_point(); 
+        for(const auto& i : indexes_of_chosen_particles_)
+        {
+            const Point& ith_point = particles[i].get_point(); 
 
             file_for_results_->write(ith_point.x() / dx);
             file_for_results_->write(ith_point.y() / dy);
@@ -59,4 +55,5 @@ void chosen_particles::diagnose(
             file_for_results_->write(ith_point.py());
             file_for_results_->write(ith_point.pz());
         }
-    }}
+    }
+}

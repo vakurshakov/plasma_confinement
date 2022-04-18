@@ -8,9 +8,7 @@
 #include <string>
 #include <functional>
 
-#include "particle/point.hpp"
-#include "particle/concrete/particle_interface.hpp"
-#include "particle/parameters/global_parameters.hpp"
+#include "./particle/particle.hpp"
 #include "../diagnostics/diagnostics.hpp"
 #include "../solvers/abstract_strategies.hpp" 
 #include "../vectors/vector3_field.hpp"
@@ -24,7 +22,7 @@ public:
 	Particles() = default;
 	
 	Particles(
-		std::unique_ptr<gParameters>,
+		Parameters&&,
 		std::unique_ptr<Pusher>,
 		std::unique_ptr<Interpolation>,
 		std::unique_ptr<Decomposition>,
@@ -32,8 +30,10 @@ public:
 		std::function<void(Point&, double)>&& y_boundary,
 		std::vector<diagnostic_up>&&	);
 	
-	const gParameters& get_parameters() const { return *parameters_; }
-	
+	const Parameters& get_parameters() const { return parameters_; }
+	void add_particle(const Point& point, ...);
+
+
 	// main Particles methods
 	void push();
 	void diagnose(int t) const;
@@ -44,10 +44,9 @@ public:
 
 private:
 	// main Kinetic_particles fields
-	std::unique_ptr<gParameters> parameters_;
-	
-	using particle_up = std::unique_ptr<IParticle>;
-	std::vector<particle_up> particles_;
+	size_t number_in_sort = 0;
+	Parameters parameters_;
+	std::vector<Particle> particles_;
 
 	// solvers for particles
 	std::unique_ptr<Pusher> push_;
@@ -61,7 +60,6 @@ private:
 	// vector of diagnostics for Particles
 	std::vector<diagnostic_up> diagnostics_;
 };
-
 
 //#################################################################################################
 

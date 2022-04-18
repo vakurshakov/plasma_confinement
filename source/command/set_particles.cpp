@@ -3,9 +3,7 @@
 #include <cmath> // for isinf(double)
 #include <functional>
 
-#include "../particles/particle/concrete/particle_with_global_charge.hpp"
-#include "../particles/particle/concrete/particle_with_global_density_and_charge.hpp"
-#include "../particles/particles_load.hpp"
+#include "../particles/particle/particle.hpp"
 
 
 void Set_particles::execute(int _) const
@@ -36,12 +34,7 @@ void Set_particles::execute(int _) const
                 }
                 while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
 
-				particles->particles_.emplace_back(
-					std::make_unique<gDensity_gCharge_Particle>(
-						Point({x, y}, {px, py, pz}),
-						particles->get_parameters()
-					)
-				);
+				particles->add_particle(Point({x, y}, {px, py, pz}));
 			}
 		}
 	}}

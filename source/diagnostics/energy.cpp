@@ -5,8 +5,7 @@
 #include <memory>
 #include <filesystem>
 
-#include "../particles/particle/concrete/particle_interface.hpp"
-#include "../particles/particle/parameters/global_parameters.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
@@ -70,18 +69,18 @@ void particles_energy::save_parameters(std::string directory_path)
 
 
 void particles_energy::diagnose(
-	const gParameters& parameters, const std::vector<particle_up>& particles, int t)
+	const Parameters& parameters, const std::vector<Particle>& particles, int t)
 	{
 		const int Np = parameters.Np();
 
 		#pragma omp parallel for reduction(+: W)
 		for (const auto& particle : particles)
 		{
-			const double& m = particle->m();
-			const double& n = particle->n();
-			const vector3& p = particle->get_point().p();
+			const double& m = particle.m();
+			const double& n = particle.n();
+			const vector3& p = particle.get_point().p();
 
-			W += sqrt( m * m + p.dot(p) ) * dx * dy * n/Np;
+			W += sqrt( m * m + p.dot(p) ) * dx * dy * n / Np;
 		}
 		file_for_results_->write(W);
 		W = 0;

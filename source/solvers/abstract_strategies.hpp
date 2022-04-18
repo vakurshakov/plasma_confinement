@@ -4,7 +4,7 @@
 //#################################################################################################
 
 #include "../vectors/vector_classes.hpp"
-#include "../particles/particle/concrete/particle_interface.hpp"
+#include "../particles/particle/particle.hpp"
 
 
 class Interpolation {
@@ -17,14 +17,14 @@ public:
 class Pusher {
 public:
     virtual ~Pusher() = default;
-    virtual void process(IParticle&, const vector3& local_E, const vector3& local_B) const = 0;
+    virtual void process(Particle&, const vector3& local_E, const vector3& local_B) const = 0;
 };
 
 
 class Decomposition {
 public:
     virtual ~Decomposition() = default;
-    virtual void process(const IParticle&, const vector2& r0) = 0;
+    virtual void process(const Particle&, const vector2& r0) = 0;
 };
 
 //#################################################################################################

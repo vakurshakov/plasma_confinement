@@ -4,14 +4,12 @@
 #include <cmath>
 #include <functional>
 
-#include "../particles/particle/concrete/particle_interface.hpp"
-#include "../particles/particle/parameters/global_parameters.hpp"
-#include "../particles/particle/point.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
 
-void Esirkepov_density_decomposition::process(const IParticle& particle, const vector2& r0)
+void Esirkepov_density_decomposition::process(const Particle& particle, const vector2& r0)
 {	
 	const int nearest_edge_to_rx = int(round(particle.get_point().x() / dx));
 	const int nearest_edge_to_ry = int(round(particle.get_point().y() / dy));
@@ -24,7 +22,7 @@ void Esirkepov_density_decomposition::process(const IParticle& particle, const v
 }
 
 
-void Esirkepov_density_decomposition::decompose_x( const IParticle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
+void Esirkepov_density_decomposition::decompose_x(const Particle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
 {
 	const double n = particle.n();
 	const double q = particle.q();
@@ -64,7 +62,7 @@ void Esirkepov_density_decomposition::decompose_x( const IParticle& particle, co
 }
 
 
-void Esirkepov_density_decomposition::decompose_y( const IParticle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
+void Esirkepov_density_decomposition::decompose_y(const Particle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
 {
 	const double n = particle.n();
 	const double q = particle.q();
@@ -103,7 +101,7 @@ void Esirkepov_density_decomposition::decompose_y( const IParticle& particle, co
 }
 	
 
-void Esirkepov_density_decomposition::decompose_z(const IParticle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
+void Esirkepov_density_decomposition::decompose_z(const Particle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
 {
 	const double m = particle.m();
 	const double n = particle.n();

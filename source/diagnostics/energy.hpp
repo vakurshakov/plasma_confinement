@@ -8,8 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "../particles/particle/concrete/particle_interface.hpp"
-#include "../particles/particle/parameters/global_parameters.hpp"
+#include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 
 
@@ -34,8 +33,7 @@ public:
 	
 	void save_parameters(std::string directory_path);
 
-	using particle_up = std::unique_ptr<IParticle>;
-	void diagnose(const gParameters&, const std::vector<particle_up>&, int t) override;
+	void diagnose(const Parameters&, const std::vector<Particle>&, int t) override;
 	
 private:
 	double W = 0;
