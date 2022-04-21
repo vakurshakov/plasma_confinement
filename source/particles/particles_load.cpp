@@ -55,8 +55,8 @@ bool cell_on_a_ring(int cell_number_nx, int cell_number_ny)
 int  get_number_of_particles_on_ring(int Np)
 {
 	return static_cast<int>(
-		Np*M_PI*((r_larm + 3. * dr)*(r_larm + 3. * dr)
-			   - (r_larm - 3. * dr)*(r_larm - 3. * dr))/(dx*dy));
+		Np*M_PI*((r_larm + dr)*(r_larm + dr)
+			   - (r_larm - dr)*(r_larm - dr))/(dx*dy));
 }
 
 bool cell_in_a_circle(int cell_number_nx, int cell_number_ny)
