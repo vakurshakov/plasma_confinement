@@ -15,7 +15,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 		#define there_are_electrons					false
 		#define there_are_plasma_ions				false
 		#define there_are_ions						true
-		#define density_beam_profile_is_set 		true
+		#define density_beam_profile_is_set 		false
 		#define particles_are_diagnosed 			true
 
 	#define there_are_fields				true
@@ -36,9 +36,9 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const int TINJ	= 1;		
 	inline const int diagnose_time_step = 1; 
 
-	inline const int TIME	= 1000;
-	inline const int SIZE_X = 500;
-	inline const int SIZE_Y = 500;
+	inline const int TIME	= 10;
+	inline const int SIZE_X = 1000;
+	inline const int SIZE_Y = 1000;
 	inline const double dx 	= 0.1;
 	inline const double dy	= 0.1;
 	inline const double dt 	= 0.5*dx;
@@ -58,8 +58,8 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const double dr		= 3.;
 
 	//зависимые параметры для обращения
-	inline const int   Npi		= 10;
-	inline const double ni		= 1800. * 1.2887e11 / 1e13;	// ni   = 1.291e11 [cm^(-3)]
+	inline const int   Npi		= 100;
+	inline const double ni		= 1.;	// ni   = 1.291e11 [cm^(-3)]
 	inline const double mi		= Mp;
 
 	// TODO: частицы без диагностик вызывают ошибку файловой системы!

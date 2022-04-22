@@ -37,11 +37,11 @@ double density_beam_profile(double x, double y)
 	y -= 0.5 * SIZE_Y * dy;
 
 	const double r = sqrt(x * x + y * y) - r_larm;
-	static const double sigma2 = dr * dr / 9.; 
+	static const double sigma2 = dr * dr / 6.25; 
 
 	double ans = 0.;
 
-	if (r * r < 9. * sigma2)
+	if (r * r <  dr * dr)
 		ans = ni * exp(- 0.5 * r * r / sigma2) / sqrt(2. * M_PI * sigma2);
 
 	return ans;
