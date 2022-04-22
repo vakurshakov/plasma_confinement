@@ -40,7 +40,7 @@ auto Particles_builder::config_parameters(const vector<string> parameters)
 	size_t pos = string::npos;
 	string setting = parameters[PCONF::sort_density];
 
-	std::unique_ptr<Parameter> n;
+	std::unique_ptr<Variadic_parameter> n;
 	if (pos = setting.find("local"); pos != string::npos)
 	{
 		n = make_unique<Local_parameter>();
@@ -57,7 +57,7 @@ auto Particles_builder::config_parameters(const vector<string> parameters)
 	pos = string::npos;
 	setting = parameters[PCONF::sort_charge];
 
-	std::unique_ptr<Parameter> q;
+	std::unique_ptr<Variadic_parameter> q;
 	if (pos = setting.find("local"); pos != string::npos)
 	{
 		q = make_unique<Local_parameter>();

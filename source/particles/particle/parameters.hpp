@@ -13,22 +13,54 @@ double fourth_order_spline(double x, double grid_mesh);
 double fifth_order_spline(double x, double grid_mesh);
 
 
-struct Parameter {
-	virtual ~Parameter() = default;
+class Variadic_parameter {
+public:
+	Variadic_parameter() = delete;
+
+	Variadic_parameter(const std::string& type) : parameter_type(type) {};
+
+	virtual ~Variadic_parameter() = default;
 	
-protected:
-	Parameter() = default;
+	virtual double
+	get_value(size_t id) const = 0;
+	
+	virtual void
+	set_value(double value) = 0;
+
+	const std::string&
+	get_type() { return parameter_type; }
+
+private:
+	std::string parameter_type;
 };
 
 
-struct Global_parameter : public Parameter {
-	Global_parameter(double value) : value_(value) {};
+class Global_parameter : public Variadic_parameter {
+public:
+	Global_parameter(double value) : Variadic_parameter("global"), value_(value) {};
+
+	double
+	get_value(size_t id) const override { return value_; }
+
+	void
+	set_value(double value) override { value_ = value; }
+
+private:
 	double value_;
 };
 
 
-struct Local_parameter : public Parameter {
-	Local_parameter() = default;
+class Local_parameter : public Variadic_parameter {
+public:
+	Local_parameter() : Variadic_parameter("local") {};
+
+	double
+	get_value(size_t id) const override { return values_[id]; }
+
+	void
+	set_value(double value) override { values_.emplace_back(value); }
+
+private:	
 	std::vector<double> values_;
 };
 
@@ -51,7 +83,7 @@ public:
 	 * @param form_factor Shape of the macroparticle.
 	 */
 	Parameters(
-		int Np, double m, std::unique_ptr<Parameter> n, std::unique_ptr<Parameter> q,
+		int Np, double m, std::unique_ptr<Variadic_parameter> n, std::unique_ptr<Variadic_parameter> q,
 		double p0, double Tx, double Ty, double Tz, int charge_cloud = 2,
 		std::function<double(double, double)> form_factor = second_order_spline)
 		: Np_(Np), m_(m), n_(std::move(n)), q_(std::move(q)), p0_(p0),
@@ -87,33 +119,21 @@ public:
 	const auto& form_factor() const { return form_factor_; }
 	
 	
-	Parameter* raw_n() const { return n_.get(); }
-	double n(size_t id) const
-	{
-		if (auto* n = dynamic_cast<Global_parameter*>(raw_n()); n != nullptr)
-			return n->value_;
+	double n(size_t id) const { return n_->get_value(id); }
+	double q(size_t id) const { return q_->get_value(id); }
 
-		else if (auto* n = dynamic_cast<Local_parameter*>(raw_n()); n != nullptr)
-			return n->values_[id];
-	}
+	void set_n(double value) { n_->set_value(value); }
+	void set_q(double value) { q_->set_value(value); }
 
-	Parameter* raw_q() const { return q_.get(); }
-	double q(size_t id) const
-	{
-		if (auto* q = dynamic_cast<Global_parameter*>(raw_q()); q != nullptr)
-			return q->value_;
-
-		else if (auto* q = dynamic_cast<Local_parameter*>(raw_q()); q != nullptr)
-			return q->values_[id];
-	}
-
+	const std::string& n_type() { return n_->get_type(); }
+	const std::string& q_type() { return q_->get_type(); }
 
 private:
 	int Np_;
 	double m_;
 	
-	std::unique_ptr<Parameter> n_;
-	std::unique_ptr<Parameter> q_;
+	std::unique_ptr<Variadic_parameter> n_;
+	std::unique_ptr<Variadic_parameter> q_;
 
 	double p0_;
 	double T_[3];

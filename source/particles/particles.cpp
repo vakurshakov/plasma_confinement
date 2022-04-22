@@ -85,11 +85,11 @@ void Particles::add_particle(const Point& point, ...)
 	va_list list;
 	va_start(list, point);
 	
-	if (auto* n = dynamic_cast<Local_parameter*>(parameters_.raw_n()); n != nullptr)
-		n->values_.emplace_back(static_cast<double>(va_arg(list, double)));
+	if (parameters_.n_type() == "local")
+		parameters_.set_n(static_cast<double>(va_arg(list, double)));
 
-	if (auto* q = dynamic_cast<Local_parameter*>(parameters_.raw_q()); q != nullptr)
-		q->values_.emplace_back(static_cast<double>(va_arg(list, double)));
+	if (parameters_.q_type() == "local")
+		parameters_.set_q(static_cast<double>(va_arg(list, double)));
 
 	va_end(list);
 
