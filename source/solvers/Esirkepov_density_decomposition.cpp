@@ -11,22 +11,22 @@
 
 void Esirkepov_density_decomposition::process(const Particle& particle, const vector2& r0)
 {	
+	const double n = particle.n();
+	const double q = particle.q();
+
 	const int nearest_edge_to_rx = int(round(particle.get_point().x() / dx));
 	const int nearest_edge_to_ry = int(round(particle.get_point().y() / dy));
 
 	p_v3f temp_J(2 * charge_cloud_ + 1, 2 * charge_cloud_ + 1);
 
-	decompose_x(particle, r0, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
-	decompose_y(particle, r0, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
-	// decompose_z(point, r0, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+	decompose_x(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+	decompose_y(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+	// decompose_z(point, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
 }
 
 
-void Esirkepov_density_decomposition::decompose_x(const Particle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
+void Esirkepov_density_decomposition::decompose_x(const Particle& particle, const vector2& r0, double n, double q, int ne_x, int ne_y, p_v3f& temp_J)
 {
-	const double n = particle.n();
-	const double q = particle.q();
-
 	const vector2& r = particle.get_point().r();
 
 	long int node_x, node_y;
@@ -62,11 +62,8 @@ void Esirkepov_density_decomposition::decompose_x(const Particle& particle, cons
 }
 
 
-void Esirkepov_density_decomposition::decompose_y(const Particle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
+void Esirkepov_density_decomposition::decompose_y(const Particle& particle, const vector2& r0, double n, double q, int ne_x, int ne_y, p_v3f& temp_J)
 {
-	const double n = particle.n();
-	const double q = particle.q();
-
 	const vector2& r = particle.get_point().r();
 
 	long int node_x, node_y;
@@ -101,11 +98,9 @@ void Esirkepov_density_decomposition::decompose_y(const Particle& particle, cons
 }
 	
 
-void Esirkepov_density_decomposition::decompose_z(const Particle& particle, const vector2& r0, int ne_x, int ne_y, p_v3f& temp_J)
+void Esirkepov_density_decomposition::decompose_z(const Particle& particle, const vector2& r0, double n, double q, int ne_x, int ne_y, p_v3f& temp_J)
 {
 	const double m = particle.m();
-	const double n = particle.n();
-	const double q = particle.q();
 
 	const vector2& r = particle.get_point().r();
 	const vector3& p = particle.get_point().p();

@@ -32,11 +32,8 @@ void Fields::propogate()
 
 void Fields::diagnose(int t) const
 {
-	if  (!diagnostics_.empty()) {
-
-		#pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
-		for (auto& diagnostic : diagnostics_) {
-			diagnostic->diagnose(*E_, *B_, *J_, t);
-		}
+	#pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
+	for (auto& diagnostic : diagnostics_) {
+		diagnostic->diagnose(*E_, *B_, *J_, t);
 	}
 }

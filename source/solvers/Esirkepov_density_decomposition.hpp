@@ -26,9 +26,9 @@ public:
 
 private:
 	using p_v3f = px_py_vector3_field;
-	void decompose_x(const Particle&, const vector2& r0, int nx, int ny, p_v3f& temp_J);
-	void decompose_y(const Particle&, const vector2& r0, int nx, int ny, p_v3f& temp_J);
-	void decompose_z(const Particle&, const vector2& r0, int nx, int ny, p_v3f& temp_J);
+	void decompose_x(const Particle&, const vector2& r0, double n, double q, int nx, int ny, p_v3f& temp_J);
+	void decompose_y(const Particle&, const vector2& r0, double n, double q, int nx, int ny, p_v3f& temp_J);
+	void decompose_z(const Particle&, const vector2& r0, double n, double q, int nx, int ny, p_v3f& temp_J);
 
 	const int Np_;
 	const int charge_cloud_;

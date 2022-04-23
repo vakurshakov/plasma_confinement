@@ -65,13 +65,10 @@ void Particles::boundaries_processing(Point& point, double size_x, double size_y
 
 void Particles::diagnose(int t) const
 {
-	if (!diagnostics_.empty()) {
-
-		#pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
-		for (auto& diagnostic : diagnostics_) {
-			diagnostic->diagnose(parameters_, particles_, t);
-		} 
-	}
+	#pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
+	for (auto& diagnostic : diagnostics_) {
+		diagnostic->diagnose(parameters_, particles_, t);
+	} 
 }
 
 /**

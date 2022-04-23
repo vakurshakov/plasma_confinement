@@ -76,8 +76,8 @@ void particles_energy::diagnose(
 		#pragma omp parallel for reduction(+: W)
 		for (const auto& particle : particles)
 		{
-			const double& m = particle.m();
-			const double& n = particle.n();
+			const double m = particle.m();
+			const double n = particle.n();
 			const vector3& p = particle.get_point().p();
 
 			W += sqrt( m * m + p.dot(p) ) * dx * dy * n / Np;

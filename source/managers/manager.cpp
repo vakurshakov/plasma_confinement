@@ -87,13 +87,13 @@ void Manager::calculates()
 		#if there_are_particles
 		for (auto& [_, particles] : list_of_particles_) {
 			particles->diagnose(t);
-			//particles->push();
+			particles->push();
 		}
 		#endif
 	
 		#if there_are_fields
 		fields_.diagnose(t);
-		//fields_.propogate();
+		fields_.propogate();
 		#endif
 
 		timer.tick(t);
