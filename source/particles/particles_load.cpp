@@ -93,8 +93,8 @@ void load_annular_impulse(double x, double y,
 	double r = sqrt((x - center_x)*(x - center_x) 
 				  + (y - center_y)*(y - center_y));
 	
-	*px = p0*( +(y - center_y)/r ) + temperature_impulse(Tx, mass); 
-	*py = p0*( -(x - center_x)/r ) + temperature_impulse(Ty, mass);
+	*px = p0 * (r / r_larm) * ( +(y - center_y)/r ) + temperature_impulse(Tx, mass); 
+	*py = p0 * (r / r_larm) * ( -(x - center_x)/r ) + temperature_impulse(Ty, mass);
 	*pz = temperature_impulse(Tz, mass); 
 }
 
