@@ -20,7 +20,8 @@ MANAGERS 	= fields.cpp fields_builder.cpp particles.cpp \
 ADDITIONALS	= add_Bz0.cpp add_ion_density.cpp add_ion_current.cpp
 DIAGNOSTICS = energy.cpp whole_field.cpp field_along_the_line.cpp \
 				field_at_point.cpp distribution_moment.cpp chosen_particles.cpp
-COMMANDS 	= set_particles.cpp copy_coordinates.cpp ionize_particles.cpp
+COMMANDS 	= set_particles.cpp copy_coordinates.cpp ionize_particles.cpp \
+				magnetic_field_half_step.cpp
 FILEWRITERS	= txt_file.cpp bin_file.cpp
 
 SRCs = $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(ADDITIONALS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)

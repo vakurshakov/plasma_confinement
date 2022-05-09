@@ -7,6 +7,7 @@
 #include "../command/command.hpp"
 #include "../command/cmd_add_Bz0.hpp"
 #include "../command/ionize_particles.hpp"
+#include "../command/magnetic_field_half_step.hpp"
 #include "../fields/fields_builder.hpp"
 #include "../particles/particles_builder.hpp"
 #include "../particles/particles_load.hpp"
@@ -17,7 +18,9 @@ void Manager::initializes()
 {
 	Fields_builder fields_builder;
 	fields_ = std::move(fields_builder.build());
-		
+	
+	each_step_presets.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
+
 	#if there_are_fields
 		#if there_are_Bz0
 		settings_before_main_cycle.push_back(std::make_unique<Add_Bz0>(&fields_, Bz0));

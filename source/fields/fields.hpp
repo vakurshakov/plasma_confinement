@@ -34,6 +34,7 @@ public:
 	void diagnose(int t) const;
 
 	// additional
+	friend class Magnetic_field_half_step;
 	void add_Bz0(double Bz0);
 	void add_ion_current(int t);
 
