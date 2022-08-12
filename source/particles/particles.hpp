@@ -14,7 +14,6 @@
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
-
 class Particles {
 public:
 	using diagnostic_up = std::unique_ptr<Particles_diagnostic>;
@@ -30,9 +29,11 @@ public:
 		std::function<void(Point&, double)>&& y_boundary,
 		std::vector<diagnostic_up>&&	);
 	
+	const std::vector<Particle>& get_particles() const { return particles_; }
 	const Parameters& get_parameters() const { return parameters_; }
-	void add_particle(const Point& point, ...);
 
+	void add_particle(const Point& point, ...);
+	void add_diagnostic(diagnostic_up&& diagnostic);
 
 	// main Particles methods
 	void push();
@@ -42,6 +43,9 @@ public:
 	friend class Copy_coordinates;
 	friend class Ionize_particles;
 
+	// плоха
+	rx_ry_vector3_field J;
+	
 private:
 	// main Kinetic_particles fields
 	size_t number_in_sort = 0;

@@ -35,14 +35,14 @@ public:
 	 */
 	Ionize_particles(
 		Particles* const ionized, Particles* const lost,
-		std::vector<size_t>&& amount_of_particles_to_load_per_step,
+		const std::vector<size_t>& amount_of_particles_to_load_per_step,
         std::function<void(double* x, double* y)>&& set_point_of_birth,
         std::function<double(double x, double y)>&& get_probability,
         std::function<void(double x, double y,
 		  double mass, double Tx, double Ty, double Tz,
           double p0, double* px, double* py, double* pz)>&& load_impulse )
 			:	ionized(ionized), lost(lost),
-				amount_of_particles_to_load_per_step(std::move(amount_of_particles_to_load_per_step)),
+				amount_of_particles_to_load_per_step(amount_of_particles_to_load_per_step),
                 set_point_of_birth(std::move(set_point_of_birth)),
                 get_probability(std::move(get_probability)),
                 load_impulse(std::move(load_impulse)) {};
@@ -92,11 +92,15 @@ private:
  * 
  * @warning Setter uses global r_larm, dr. So that smaller radius
  * 		is r_larm - dr, and the larger is r_larm + dr.
- * 
- * @param x Pointer to the coordinate of a point to be set.
- * @param y Pointer to the coordinate of a point to be set.
  */
 void set_point_on_annulus(double* x, double* y);
+
+/**
+ * @brief Sets (x,y) randomly on the intersection of x < dr and r < r_plasma - dr. 
+ * 
+ * @warning Setter uses global r_larm, r_prop, dr.
+ */
+void set_point_on_circle_segment(double* x, double* y);
 
 /**
  * @brief Probability function that gives the probablity
@@ -108,6 +112,8 @@ void set_point_on_annulus(double* x, double* y);
  * @return 1.0
  */
 double uniform_probability(double x, double y);
+
+double get_cosine_probability(double x, double y);
 
 /**
  * @brief Specifies a time distribution of birth particles.

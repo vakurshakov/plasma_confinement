@@ -25,9 +25,9 @@ public:
         static Random_generator single_instance;
         return single_instance.gen;
     }
-    
+
 private:
-    std::mt19937_64 gen;
+    std::minstd_rand gen;
     
     Random_generator() = default;
     

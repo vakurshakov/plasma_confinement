@@ -14,15 +14,12 @@ enum class file_type {
 class IFile {
 public:
 	virtual void write(double data) = 0;
+
+	virtual void flush() = 0;
+
 	virtual file_type get_type() = 0;
+	
 	virtual ~IFile() = default;
-};
-
-
-class HDF5_File : public IFile {
-public:
-	void write(double data) override;
-	file_type get_type() override;
 };
 
 //#################################################################################################

@@ -5,9 +5,7 @@
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 
-//плохо плохо плохо!
-// сначала подкручиваем магнитное поле (см. magnetic_field_half_step),
-// затем продвигаем электрическое поле.
+
 void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) 
 {	
 	// in 2D-FDTD fields are independent of z, so every %/dz fractions will be zero

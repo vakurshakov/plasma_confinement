@@ -14,6 +14,9 @@ public:
 	TXT_File(std::string directory_path, std::string file_name);
 	
 	void write(double data) override;
+
+	virtual void flush() override;
+
 	file_type get_type() override;
 
 private:

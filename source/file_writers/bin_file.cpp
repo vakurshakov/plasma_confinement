@@ -20,4 +20,9 @@ void BIN_File::write(double data)
 	bin_file_.write( (char*)&fdata, sizeof(float) );
 }
 
+void BIN_File::flush()
+{
+	bin_file_.flush();
+}
+
 file_type BIN_File::get_type() { return file_type::bin; }

@@ -73,6 +73,14 @@ int  get_number_of_particles_in_circle(int Np)
 		Np*M_PI*((r_larm+dr)*r_prop*(r_larm+dr)*r_prop)/(dx*dy));
 }
 
+int get_number_of_particles_on_circle_segment(int Np)
+{
+	static const double angle = acos(1. - dr / ((r_larm + dr) * r_prop));
+
+	return static_cast<int>(
+		Np * 0.5 * pow((r_larm + dr) * r_prop, 2) * (angle - sin(angle))) / ( dx * dy );
+}
+
 // impulse loading ----------------------------------------------------------------------
 
 double temperature_impulse(double temperature, double mass)

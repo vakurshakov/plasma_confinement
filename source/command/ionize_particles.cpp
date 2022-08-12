@@ -23,12 +23,48 @@ void set_point_on_annulus(double* x, double* y)
 	*y = 0.5 * SIZE_Y * dy + r * sin(phi);
 }
 
+void set_point_on_circle_segment(double* x, double* y)
+{
+	static const double r_plasma = (r_larm + dr) * r_prop;
+	static const double center_x = 0.5 * SIZE_X * dx;
+	static const double center_y = 0.5 * SIZE_Y * dy;
+	static const double plasmas_left_x = center_x - r_plasma;
+	static const double plasmas_height = sqrt(r_plasma * r_plasma - (r_plasma - dr) * (r_plasma - dr));
+
+	// To close the interval of the real distribution we use std::nextafter(double from, double to)
+	static auto x_distribution = std::uniform_real_distribution(plasmas_left_x, plasmas_left_x + dr);
+	static auto y_distribution = std::uniform_real_distribution(center_y - plasmas_height, center_y + plasmas_height);
+
+	double r;
+
+	do
+	{
+		*x = x_distribution(Random_generator::get());
+		*y = y_distribution(Random_generator::get());
+
+		double centered_x = *x - center_x;
+		double centered_y = *y - center_y;
+		
+		r  = sqrt(centered_x * centered_x + centered_y * centered_y);
+	}
+	while(r > r_plasma);
+}
+
 
 double uniform_probability(double _1, double _2)
 {
 	return 1.;
 }
 
+double get_cosine_probability(double x, double y)
+{  
+	static const double r_plasma = (r_larm + dr) * r_prop;
+	static const double center_y = 0.5 * SIZE_Y * dy;
+
+	static const double height = sqrt(r_plasma * r_plasma - (r_plasma - dr) * (r_plasma - dr));
+
+	return 0.5 * (1. + cos(M_PI * (y - center_y) / height)) / (height + 1.);
+}
 
 #if density_beam_profile_is_set
 double density_beam_profile(double x, double y)

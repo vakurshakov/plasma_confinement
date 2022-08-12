@@ -113,8 +113,8 @@ Fields_builder::diagnostics_list(multimap<string, vector<string>> fields_diagnos
 					vec_diagnostics.emplace_back(make_unique<whole_field>(dir_name + "/fields/" + name,
 						description[FD_DESC::FIELD] + description[FD_DESC::AXIS],
 						description[FD_DESC::FIELD], description[FD_DESC::AXIS],
-						int(SIZE_X/2 - 1.3*r_prop*r_larm/dx), int(SIZE_X/2 + 1.3*r_prop*r_larm/dx),
-						int(SIZE_Y/2 - 1.3*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.3*r_prop*r_larm/dy)));
+						1000, 2000, // int(SIZE_X/2 - 1.3*r_prop*r_larm/dx), int(SIZE_X/2 + 1.3*r_prop*r_larm/dx),
+						1000, 2000)); // int(SIZE_Y/2 - 1.3*r_prop*r_larm/dy), int(SIZE_Y/2 + 1.3*r_prop*r_larm/dy)));
 				}
 				else if ( name == "field_along_x_axis" ) {
 					std::cout << "\n\t\t\t" << name;

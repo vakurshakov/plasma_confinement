@@ -12,10 +12,10 @@
 namespace fs = std::filesystem;
 
 
-//------- additive --------------------------------------------------------------------------------
+//------- additional ------------------------------------------------------------------------------
 const vector3 get_velocity(const Particle& particle)
 {
-	const double m = particle.m();
+	double m = particle.m();
 	const vector3& p = particle.get_point().p();
 
 	return p / sqrt(m * m + p.dot(p));
@@ -23,45 +23,72 @@ const vector3 get_velocity(const Particle& particle)
 
 
 //------- projectors ------------------------------------------------------------------------------
-const double XY_projector::project_to_x(const Particle& particle) const
+double XY_projector::project_to_x(const Particle& particle) const
 {
 	return particle.get_point().x();
 }
 
-const double XY_projector::project_to_y(const Particle& particle) const
+double XY_projector::project_to_y(const Particle& particle) const
 {
 	return particle.get_point().y();
 }
 
 
-const double VxVy_projector::project_to_x(const Particle& particle) const
+double VxVy_projector::project_to_x(const Particle& particle) const
 {
 	return get_velocity(particle).x();
 }
 
-const double VxVy_projector::project_to_y(const Particle& particle) const
+double VxVy_projector::project_to_y(const Particle& particle) const
 {
 	return get_velocity(particle).y();
 }
 
 
 //------- moment ----------------------------------------------------------------------------------
-const double zeroth_moment::get_quantity_to_be_averaged_(const Particle&) const
+double zeroth_moment::get_quantity_to_be_averaged_(const Particle& particle) const
 {
-	return 1.;
+	return particle.n();
 }
 
 
-const double first_Vx_moment::get_quantity_to_be_averaged_(const Particle& particle) const
+double first_Vx_moment::get_quantity_to_be_averaged_(const Particle& particle) const
 {
 	return get_velocity(particle).x();
 }
 
 
-const double first_Vy_moment::get_quantity_to_be_averaged_(const Particle& particle) const
+double first_Vy_moment::get_quantity_to_be_averaged_(const Particle& particle) const
 {
 	return get_velocity(particle).y();
 }
+
+
+double first_Vr_moment::get_quantity_to_be_averaged_(const Particle& particle) const
+{
+	double x = particle.get_point().x() - 0.5 * SIZE_X * dx;
+	double y = particle.get_point().y() - 0.5 * SIZE_Y * dy;
+	double r = sqrt(x * x + y * y);
+
+	// Частицы, близкие к центру не учитываются
+	if (!std::isfinite(1. / r)) return 0.;
+
+	return get_velocity(particle).x() * (+x / r) + get_velocity(particle).y() * (y / r);
+}
+
+
+double first_Vphi_moment::get_quantity_to_be_averaged_(const Particle& particle) const
+{
+	double x = particle.get_point().x() - 0.5 * SIZE_X * dx;
+	double y = particle.get_point().y() - 0.5 * SIZE_Y * dy;
+	double r = sqrt(x * x + y * y);
+
+	// Частицы, близкие к центру не учитываются 
+	if (!std::isfinite(1. / r)) return 0.;
+
+	return get_velocity(particle).x() * (-y / r) + get_velocity(particle).y() * (x / r);
+}
+
 
 
 distribution_moment::distribution_moment(std::string directory_path,
@@ -108,28 +135,25 @@ void distribution_moment::save_parameters(std::string directory_path)
 
 //! @todo interpolated particle density.
 void distribution_moment::collect(const Parameters& parameters, const std::vector<Particle>& particles)
-	{
-		const int Np = parameters.Np();
+{
+	int Np = parameters.Np();
 
-		for (const auto& particle : particles) {
-			const double pr_x = projector_->project_to_x(particle);
-			const double pr_y = projector_->project_to_y(particle);
+	for (const auto& particle : particles) {
+		double pr_x = projector_->project_to_x(particle);
+		double pr_y = projector_->project_to_y(particle);
 
-			const int npx = int(round(pr_x / dpx_));   
-			const int npy = int(round(pr_y / dpy_));
+		int npx = int(round(pr_x / dpx_));   
+		int npy = int(round(pr_y / dpy_));
 
-			if ((npx_min_ < npx && npx < npx_max_) &&
-				(npy_min_ < npy && npy < npy_max_))
-			{
-				const double n = particle.n();
-
-				data_[(npy - npy_min_) * (npx_max_ - npx_min_) +  (npx - npx_min_)]
-					+= moment_->get_quantity_to_be_averaged_(particle) * n / Np;
-			}
-			else
-				continue;
+		if ((npx_min_ < npx && npx < npx_max_) &&
+			(npy_min_ < npy && npy < npy_max_))
+		{
+			data_[(npy - npy_min_) * (npx_max_ - npx_min_) +  (npx - npx_min_)]
+				+= moment_->get_quantity_to_be_averaged_(particle) / Np;
 		}
+		else continue;
 	}
+}
 
 
 void distribution_moment::clear()

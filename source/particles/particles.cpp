@@ -12,7 +12,7 @@
 #include "../solvers/Boris_pusher.hpp"
 #include "../vectors/vector_classes.hpp"
 #include "../constants.h"
-
+#include "../solvers/Esirkepov_density_decomposition.hpp"
 
 Particles::Particles(
 	Parameters&& parameters,
@@ -25,10 +25,13 @@ Particles::Particles(
 	: 	parameters_(parameters),
 	  	push_(std::move(push)),
 	  	interpolation_(std::move(interpolation)),
-	  	decomposition_(std::move(decomposition)),
 		x_boundary_(std::move(x_boundary)),
 		y_boundary_(std::move(y_boundary)),
-		diagnostics_(std::move(diagnostics)) {};
+		diagnostics_(std::move(diagnostics)),
+		J("Electric", SIZE_X, SIZE_Y) // плоха!!!
+	{
+		decomposition_ = std::make_unique<Esirkepov_density_decomposition>(parameters_, this->J);
+	}
 
 
 void Particles::push()
@@ -91,4 +94,9 @@ void Particles::add_particle(const Point& point, ...)
 	va_end(list);
 
 	particles_.emplace_back(Particle{number_in_sort++, point, parameters_});
+}
+
+void Particles::add_diagnostic(diagnostic_up&& diagnostic)
+{
+	diagnostics_.emplace_back(std::move(diagnostic));
 }

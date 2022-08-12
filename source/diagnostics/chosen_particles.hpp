@@ -10,7 +10,7 @@
 
 #include "../particles/particle/particle.hpp"
 
-std::vector<int> choose_indexes();
+std::vector<int> choose_indexes(const std::vector<Particle>& particles);
 
 
 class chosen_particles : public Particles_diagnostic {
@@ -24,6 +24,7 @@ public:
 
 private:
 	std::vector<int> indexes_of_chosen_particles_;
+	std::vector<std::unique_ptr<BIN_File>> files_for_results_;
 };
 
 //#################################################################################################

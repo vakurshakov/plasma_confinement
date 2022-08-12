@@ -376,14 +376,14 @@ auto Particles_builder::choose_decomposition(const vector<string> description,
 
 	const auto& setting = description[PCONF::decomposition]; 
 
-	if ( setting.find("Esirkepov_density_decomposition") != string::npos ) {
-		decomposition_up = make_unique<Esirkepov_density_decomposition>(
-			parameters, fields.J());
-		std::cout << "done" << std::endl;
-	}
-	else {
-		std::cout << "\n\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
-	}
+	// if ( setting.find("Esirkepov_density_decomposition") != string::npos ) {
+	// 	decomposition_up = make_unique<Esirkepov_density_decomposition>(
+	// 		parameters, fields.J());
+	// 	std::cout << "done" << std::endl;
+	// }
+	// else {
+	// 	std::cout << "\n\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
+	// }
 
 	return decomposition_up;
 }
@@ -488,8 +488,8 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 				if ( now == "density" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							0, SIZE_X*dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm)
-							0, SIZE_X*dx, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm)
+							1000 * dx, 2000 * dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm)
+							1000 * dy, 2000 * dy, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm)
 							make_unique<XY_projector>(), make_unique<zeroth_moment>()));
 				}
 				else if ( now == "1_of_VxVy" ) {
@@ -502,21 +502,35 @@ std::vector<std::unique_ptr<Particles_diagnostic>> Particles_builder::diagnostic
 				else if ( now == "first_Vx_moment" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							(SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
-							(SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							1000 * dx, 2000 * dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							1000 * dy, 2000 * dy, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
 							make_unique<XY_projector>(), make_unique<first_Vx_moment>()));
 				}
 				else if ( now == "first_Vy_moment" ) {
 					vec_diagnostics.emplace_back( 
 						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
-							(SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
-							(SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							1000 * dx, 2000 * dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							1000 * dy, 2000 * dy, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
 							make_unique<XY_projector>(), make_unique<first_Vy_moment>()));
 				}
-				else if ( now == "chosen_particles" ) {
+				else if ( now == "first_Vr_moment" ) {
 					vec_diagnostics.emplace_back( 
-						make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, choose_indexes()));
+						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
+							1000 * dx, 2000 * dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							1000 * dy, 2000 * dy, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							make_unique<XY_projector>(), make_unique<first_Vr_moment>()));
 				}
+				else if ( now == "first_Vphi_moment" ) {
+					vec_diagnostics.emplace_back( 
+						make_unique<distribution_moment>(dir_name + "/" + name_of_sort,
+							1000 * dx, 2000 * dx, dx, // (SIZE_X*dx/2 - 1.3*r_prop*r_larm), (SIZE_X*dx/2 + 1.3*r_prop*r_larm), dx,
+							1000 * dy, 2000 * dy, dy, // (SIZE_Y*dy/2 - 1.3*r_prop*r_larm), (SIZE_Y*dy/2 + 1.3*r_prop*r_larm), dy,
+							make_unique<XY_projector>(), make_unique<first_Vphi_moment>()));
+				}
+				// else if ( now == "chosen_particles" ) {
+				// 	vec_diagnostics.emplace_back( 
+				// 		make_unique<chosen_particles>(dir_name + "/" + name_of_sort + "/" + now, choose_indexes()));
+				// }
 				else if ( now == "energy" ) {
 					vec_diagnostics.emplace_back(
 						make_unique<particles_energy>(dir_name + "/" + name_of_sort + "/" + now));

@@ -19,4 +19,9 @@ void TXT_File::write(double data)
 	// txt_file_for_results_ <<  	
 }
 
+void TXT_File::flush()
+{
+	txt_file_.flush();
+}
+
 file_type TXT_File::get_type() { return file_type::txt; }
