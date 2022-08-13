@@ -1,9 +1,5 @@
 #include "Esirkepov_density_decomposition.hpp"
 
-#include <omp.h>
-#include <cmath>
-#include <functional>
-
 #include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"

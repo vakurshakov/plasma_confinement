@@ -3,12 +3,7 @@
 
 //#################################################################################################
 
-#include <iostream>
-#include <filesystem>
-
-#include "../constants.h"
-
-
+#include "src/pch.h"
 namespace fs = std::filesystem;
 
 
@@ -18,18 +13,18 @@ public:
 	void save() {
 		// Сохранение параметров (/*from*/ constants.h, /*to*/ dir_name)
 		try{
-			fs::copy("./source/constants.h", dir_name + "/constants.h");
+			fs::copy("./src/constants.h", dir_name + "/constants.h");
 		}
 		catch(fs::filesystem_error const& ex) {
 			switch(ex.code().value()) 
 			{
 				case 2: // "No such file or directory"
 					fs::create_directories(dir_name);
-					fs::copy("./source/constants.h", dir_name + "/constants.h");
+					fs::copy("./src/constants.h", dir_name + "/constants.h");
 					break;
 				case 17: // "File exists"
 					fs::remove(dir_name + "/constants.h");
-					fs::copy("./source/constants.h", dir_name + "/constants.h");
+					fs::copy("./src/constants.h", dir_name + "/constants.h");
 					break;
 				default:
 					std::cout

@@ -5,9 +5,7 @@
 
 #include "./file_interface.hpp"
 
-#include <fstream>
-#include <string>
-
+#include "src/pch.h"
 
 class TXT_File : public IFile {
 public:

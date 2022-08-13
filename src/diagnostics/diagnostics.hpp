@@ -3,10 +3,7 @@
 
 //#################################################################################################
 
-#include <string>
-#include <vector>
-#include <memory>
-
+#include "src/pch.h"
 #include "../file_writers/file_interface.hpp"
 #include "../file_writers/bin_file.hpp"
 #include "../particles/particle/particle.hpp"

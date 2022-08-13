@@ -5,13 +5,7 @@
 
 #include "particles.hpp"
 
-#include <map>
-#include <list>
-#include <string>
-#include <vector>
-#include <memory>
-#include <functional>
-
+#include "src/pch.h"
 #include "./particle/parameters.hpp"
 #include "../command/command.hpp"
 #include "../fields/fields.hpp"

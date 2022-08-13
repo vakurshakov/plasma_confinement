@@ -5,11 +5,8 @@
 
 #include "command.hpp"
 
-#include <vector>
-#include <functional>
-
+#include "src/pch.h"
 #include "../particles/particles.hpp"
-
 
 /**
  * @brief Command that sets fixed number of particles (in pairs)

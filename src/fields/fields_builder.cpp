@@ -1,12 +1,5 @@
 #include "./fields_builder.hpp"
 
-#include <map>
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
-#include <functional>
-
 #include "fields.hpp"
 #include "../solvers/FDTD.hpp"
 #include "../constants.h"

@@ -1,11 +1,5 @@
 #include "field_at_point.hpp" 
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <fstream>
-#include <filesystem>
-
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 

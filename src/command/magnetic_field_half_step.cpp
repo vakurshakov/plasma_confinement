@@ -1,6 +1,6 @@
 #include "magnetic_field_half_step.hpp"
 #include <omp.h>
-
+  
 void Magnetic_field_half_step::execute(int _) const
 {
     vector3_field& E = fields_->E();

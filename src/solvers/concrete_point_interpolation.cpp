@@ -1,7 +1,6 @@
 #include "concrete_point_interpolation.hpp"
 
-#include <memory>
-
+#include "src/pch.h"
 #include "../vectors/vector_classes.hpp"
 
 

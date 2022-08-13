@@ -1,12 +1,5 @@
 #include "distribution_moment.hpp" 
 
-#include <cmath>
-#include <memory>
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <filesystem>
-
 #include "../particles/particle/particle.hpp"
 
 namespace fs = std::filesystem;

@@ -3,9 +3,7 @@
 
 //#################################################################################################
 
-#include <functional>
-#include <memory>
-
+#include "src/pch.h"
 
 double second_order_spline(double x, double grid_mesh);
 double third_order_spline(double x, double grid_mesh);

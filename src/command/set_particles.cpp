@@ -1,11 +1,8 @@
 #include "set_particles.hpp"
 
-#include <cmath> // for isinf(double)
-#include <functional>
-
 #include "../particles/particle/particle.hpp"
 
-
+ 
 void Set_particles::execute(int _) const
 {
     const double mass = particles->get_parameters().m();

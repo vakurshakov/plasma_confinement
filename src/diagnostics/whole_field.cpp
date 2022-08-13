@@ -1,9 +1,5 @@
 #include "whole_field.hpp" 
 
-#include <string>
-#include <fstream>
-#include <filesystem> 
-
 #include "../file_writers/file_interface.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"

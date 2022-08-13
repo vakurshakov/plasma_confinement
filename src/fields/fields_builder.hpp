@@ -5,12 +5,7 @@
 
 #include "fields.hpp"
 
-#include <map>
-#include <string>
-#include <vector>
-#include <memory>
-#include <functional>
-
+#include "src/pch.h"
 #include "../particles/particles.hpp"
 
 using std::map, std::multimap, std::string, std::vector;

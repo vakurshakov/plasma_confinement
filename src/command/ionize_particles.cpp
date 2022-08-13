@@ -1,7 +1,5 @@
 #include "ionize_particles.hpp"
 
-#include <cmath> // for nextafter(...) isinf(double)
-
 #include "../particles/particle/particle.hpp"
 #include "../managers/random_number_generator.hpp"
 #include "../constants.h"

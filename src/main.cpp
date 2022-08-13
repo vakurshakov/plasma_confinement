@@ -11,6 +11,6 @@ int main(int argc, char const *argv[])
 	Manager Nerpa;
  	Nerpa.initializes();
 	Nerpa.calculates();
-
+  
 	return 0;
 }

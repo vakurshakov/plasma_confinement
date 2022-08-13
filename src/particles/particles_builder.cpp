@@ -1,14 +1,5 @@
 #include "particles_builder.hpp"
 
-#include <list>
-#include <tuple>
-#include <string>
-#include <vector>
-#include <memory>
-#include <utility>
-#include <iostream>
-#include <functional>
-
 #include "particles.hpp"
 #include "particles_load.hpp"
 #include "particle/particle.hpp"
