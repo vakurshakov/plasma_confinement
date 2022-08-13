@@ -1,35 +1,31 @@
-#ifndef DIAGNOSTICS_FIELD_AT_POINT_HPP
-#define DIAGNOSTICS_FIELD_AT_POINT_HPP
+#ifndef SRC_DIAGNOSTICS_FIELD_AT_POINT_HPP
+#define SRC_DIAGNOSTICS_FIELD_AT_POINT_HPP
 
-//#################################################################################################
-
-#include "diagnostics.hpp"
+#include "src/diagnostics/diagnostic.hpp"
 
 #include "src/pch.h"
-#include "../vectors/vector3_field.hpp"
-
+#include "src/vectors/basic_field.hpp"
+#include "src/vectors/grid_indexes.hpp"
 
 using std::string;
-using v3f = vector3_field;
 
+template<std::int8_t tensor_dim>
+class field_at_point : public Diagnostic {
+ public:
+  field_at_point(
+    string result_directory, string file_name,
+    const basic_field<tensor_dim>& field, int comp,
+    grid_indexes::index point);
 
-class field_at_point : public Fields_diagnostic {
-public:
-	field_at_point(string directory_path, string file_name,
-	/*additional*/ string field_to_diagnose, string field_axis,
-		int point_x, int point_y);
+  void diagnose(int t) const override;
+  void save_parameters() const override;
 
-	void save_parameters(string directory_path) override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
-
-	
-private:
-	void diagnose(const v3f& F);
-	
-	string field_, axis_;
-	int px_, py_;
+ private:  
+  const basic_field<tensor_dim>& field;
+  int comp_;
+  grid_indexes::index point_;
 };
 
-//#################################################################################################
+#include "field_at_point.inc"
 
-#endif // DIAGNOSTICS_FIELD_AT_POINT_HPP
+#endif  // SRC_DIAGNOSTICS_FIELD_AT_POINT_HPP
