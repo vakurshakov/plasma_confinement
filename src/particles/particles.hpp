@@ -3,11 +3,7 @@
 
 //#################################################################################################
 
-#include <memory>
-#include <vector>
-#include <string>
-#include <functional>
-
+#include "src/pch.h"
 #include "./particle/particle.hpp"
 #include "../diagnostics/diagnostics.hpp"
 #include "../solvers/abstract_strategies.hpp" 

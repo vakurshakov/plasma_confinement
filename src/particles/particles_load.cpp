@@ -1,12 +1,9 @@
 #include "./particles_load.hpp"
 
-#include <cmath>
-#include <random>
-
+#include "src/pch.h"
 #include "./particle/point.hpp"
 #include "../vectors/vector_classes.hpp"
 #include "../managers/random_number_generator.hpp"
-#include "../constants.h"
 
 
 // cell filling -------------------------------------------------------------------------

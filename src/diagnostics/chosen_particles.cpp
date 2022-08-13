@@ -1,10 +1,5 @@
 #include "chosen_particles.hpp"
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <filesystem>
-
 #include "../file_writers/bin_file.hpp"
 #include "../particles/particle/particle.hpp"
 #include "../constants.h"

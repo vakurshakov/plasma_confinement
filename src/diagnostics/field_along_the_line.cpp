@@ -1,10 +1,5 @@
 #include "field_along_the_line.hpp"
 
-#include <string>
-#include <memory>
-#include <fstream>
-#include <filesystem> 
-
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
 

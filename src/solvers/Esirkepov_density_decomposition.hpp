@@ -5,10 +5,7 @@
 
 #include "abstract_strategies.hpp"
 
-#include <omp.h>
-#include <cmath>
-#include <functional>
-
+#include "src/pch.h"
 #include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"

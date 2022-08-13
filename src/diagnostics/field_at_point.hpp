@@ -5,9 +5,7 @@
 
 #include "diagnostics.hpp"
 
-#include <string>
-#include <vector>
-
+#include "src/pch.h"
 #include "../vectors/vector3_field.hpp"
 
 

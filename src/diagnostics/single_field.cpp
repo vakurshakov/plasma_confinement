@@ -1,8 +1,5 @@
 #include "single_field.hpp" 
 
-#include <fstream>
-#include <filesystem> 
-
 #include "../file_writers/bin_file.hpp"
 
 using std::string;

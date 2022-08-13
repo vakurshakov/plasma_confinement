@@ -5,11 +5,7 @@
 
 #include "diagnostics.hpp"
 
-#include <memory>
-#include <string>
-#include <vector>
-#include <functional>
-
+#include "src/pch.h"
 #include "../particles/particle/particle.hpp"
 #include "../vectors/vector_classes.hpp"
 #include "../constants.h"

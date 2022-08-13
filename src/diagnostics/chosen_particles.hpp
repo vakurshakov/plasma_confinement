@@ -5,9 +5,7 @@
 
 #include "diagnostics.hpp"
 
-#include <string>
-#include <vector>
-
+#include "src/pch.h"
 #include "../particles/particle/particle.hpp"
 
 std::vector<int> choose_indexes(const std::vector<Particle>& particles);

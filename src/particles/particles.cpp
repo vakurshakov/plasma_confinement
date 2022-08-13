@@ -1,10 +1,6 @@
 #include "particles.hpp"
 
-#include <memory>
-#include <vector>
-#include <string>
 #include <cstdarg>
-#include <functional>
 
 #include "./particle/particle.hpp"
 #include "../diagnostics/diagnostics.hpp"

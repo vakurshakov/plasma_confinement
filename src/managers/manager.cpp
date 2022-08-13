@@ -1,8 +1,5 @@
 #include "manager.hpp"
 
-#include <omp.h>
-#include <memory>
-
 #include "time_manager.hpp"
 #include "../command/command.hpp"
 #include "../command/cmd_add_Bz0.hpp"
@@ -12,7 +9,6 @@
 #include "../fields/fields_builder.hpp"
 #include "../particles/particles_builder.hpp"
 #include "../particles/particles_load.hpp"
-#include "../constants.h"
 
 
 void Manager::initializes()

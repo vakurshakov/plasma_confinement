@@ -3,10 +3,7 @@
 
 //#################################################################################################
 
-#include <memory>
-#include <vector>
-#include <functional>
-
+#include "src/pch.h"
 #include "../diagnostics/diagnostics.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"

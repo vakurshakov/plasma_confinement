@@ -1,10 +1,5 @@
 #include "energy.hpp" 
 
-#include <omp.h>
-#include <string>
-#include <memory>
-#include <filesystem>
-
 #include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"

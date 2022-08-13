@@ -1,8 +1,4 @@
-#include <map>
-#include <list>
-#include <string>
-#include <memory>
-
+#include "src/pch.h"
 #include "../fields/fields.hpp"
 #include "../particles/particles.hpp"
 #include "../command/command.hpp"

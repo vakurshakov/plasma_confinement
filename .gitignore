@@ -1,12 +1,19 @@
-/results
-/tmp
-/diagnostics
-/diagnostics_python
-/todo
-dep
-obj
+# Prerequisites & Compiled object files
+*.d
+*.o
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Executables
+*.out
+
 .vscode
 .gitignore
+/results
+/diagnostics
+/diagnostics_python
+/tmp
+/todo
 log
-*.txt
-*.out

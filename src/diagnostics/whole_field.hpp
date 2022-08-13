@@ -5,10 +5,8 @@
 
 #include "diagnostics.hpp"
 
-#include <string>
-
+#include "src/pch.h"
 #include "../vectors/vector3_field.hpp"
-#include "../constants.h"
 
 using std::string;
 

@@ -1,9 +1,5 @@
 #include "./fields.hpp"
 
-#include <memory>
-#include <vector>
-#include <functional>
-
 #include "../diagnostics/diagnostics.hpp"
 #include "../vectors/vector3_field.hpp"
 
