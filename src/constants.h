@@ -35,13 +35,14 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 
 	inline const double dx 	= 0.05;
 	inline const double dy	= 0.05;
-	inline const double dt 	= 0.5 * dx;
-
-	inline const int TIME	= 1000000;
 	inline const int SIZE_X = 3000;
 	inline const int SIZE_Y = 3000;
-	inline const int TINJ	= 1000 / dt;
-	inline const int diagnose_time_step = 200;
+
+	using time_step = uint32_t; 
+	inline const double dt 	= 0.5 * dx;
+	inline const time_step TIME	= 1000000;
+	inline const time_step TINJ	= 1000 / dt;
+	inline const time_step diagnose_time_step = 200;
 	
 	inline const string boundaries = "rx_ry";
 
