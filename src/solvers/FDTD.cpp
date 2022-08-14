@@ -1,68 +1,50 @@
-#include "FDTD.hpp"
+#include "src/solvers/FDTD.hpp"
 
-#include <omp.h>
+// Yee lattice assumed. In 2D fields are independent of z, so every
+// %/dz fractions is zero. Currents will be reset to zero afterwards.
+void FDTD_2D(electric_field& E, magnetic_field& B, electric_field& J) {
+#pragma omp parallel shared(E, B, J), num_threads(THREAD_NUM)
+{
+  /// @warning Magnetic field half step preset must be used with this.
+  #pragma omp parallel for
+  for (auto& g : B.indexes(0)) {
+    B(0, g.x, g.y) -= (E(2, g.x, g.y + 1) - E(2, g.x, g.y)) * 0.5 * dt / dy;
+  }
 
-#include "../vectors/vector3_field.hpp"
-#include "../constants.h"
+  #pragma omp parallel for
+  for (auto& g : B.indexes(1)) {
+    B(1, g.x, g.y) += (E(2, g.x + 1, g.y) - E(2, g.x, g.y)) * 0.5 * dt / dx;
+  }
 
+  #pragma omp parallel for
+  for (auto& g : B.indexes(2)) {
+    B(2, g.x, g.y) -= (
+      (E(1, g.x + 1, g.y) - E(1, g.x, g.y)) / dx -
+      (E(0, g.x, g.y + 1) - E(0, g.x, g.y)) / dy) * 0.5 * dt;
+  }
 
-void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) 
-{	
-	// in 2D-FDTD fields are independent of z, so every %/dz fractions will be zero
-	#pragma omp parallel shared(E, B, J), num_threads(THREAD_NUM)
-	{
-		// Bx(y, x+1/2) at t+1/2 ----------------------------------------------------
-		#pragma omp for 
-		for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
-			for (int nx = B.ix_first(X); nx < B.ix_last(X); ++nx) {
-				B.x(ny,nx) -= 0.5*(E.z(ny,nx) - E.z(ny-1,nx))*dt/dy;			
-			}
-		}	
+  #pragma omp parallel for
+  for (auto& g : E.indexes(0)) {
+    E(0, g.x, g.y) += -J(0, g.x, g.y) * dt + (
+      B(2, g.x, g.y) - B(2, g.x, g.y - 1)) * dt / dy;
 
-		// By(y+1/2, x) at t+1/2 ----------------------------------------------------
-		#pragma omp for
-		for (int ny = B.iy_first(Y); ny < B.iy_last(Y); ++ny) {
-			for (int nx = B.ix_first(Y); nx < B.ix_last(Y); ++nx) {
-				B.y(ny,nx) += 0.5*(E.z(ny,nx) - E.z(ny,nx-1))*dt/dx;
-			}
-		}
-	
-		// Bz(y, x) at t+1/2 --------------------------------------------------------
-		#pragma omp for
-		for (int ny = B.iy_first(Z); ny < B.iy_last(Z); ++ny) {
-			for (int nx = B.ix_first(Z); nx < B.ix_last(Z); ++nx) {
-				B.z(ny,nx) -= 0.5*((E.y(ny,nx+1) - E.y(ny,nx))/dx 
-								 - (E.x(ny+1,nx) - E.x(ny,nx))/dy)*dt;
-			}
-		}
+    J(0, g.x, g.y) = 0;
+  }
 
+  #pragma omp parallel for
+  for (auto& g : E.indexes(1)) {
+    E(1, g.x, g.y) += -J(1, g.x, g.y) * dt + (
+      B(2, g.x, g.y) - B(2, g.x - 1, g.y)) * dt / dx;
 
-		// Ex(y+1/2, x) at t+1 ------------------------------------------------------
-		#pragma omp for
-		for (int ny = E.iy_first(X); ny < E.iy_last(X); ++ny) {
-			for (int nx = E.ix_first(X); nx < E.ix_last(X); ++nx) {
-				E.x(ny,nx) += -(J.x(ny,nx))*dt + (B.z(ny,nx) - B.z(ny-1,nx))*dt/dy;
-				J.x(ny,nx) = 0;
-			}	
-		}
+    J(1, g.x, g.y) = 0;
+  }
 
-		// Ey(y, x+1/2) at t+1 ------------------------------------------------------
-		#pragma omp for
-		for (int ny = E.iy_first(Y); ny < E.iy_last(Y); ++ny) { 
-			for (int nx = E.ix_first(Y); nx < E.ix_last(Y); ++nx) {
-				E.y(ny,nx) += -(J.y(ny,nx))*dt - (B.z(ny,nx) - B.z(ny,nx-1))*dt/dx;
-				J.y(ny,nx) = 0;
-			}		
-		}
+  #pragma omp parallel for
+  for (auto& g : E.indexes(2)) {
+    E(2, g.x, g.y) += -J(2, g.x, g.y) * dt + (
+      (B(1, g.x, g.y) - B(1, g.x - 1, g.y)) / dx -
+      (B(0, g.x, g.y) - B(0, g.x, g.y - 1)) / dy) * dt;
 
-		// Ez(y+1/2,x+1/2) at t+1 ---------------------------------------------------
-		#pragma omp for
-		for (int ny = E.iy_first(Z); ny < E.iy_last(Z); ++ny) {
-			for (int nx = E.ix_first(Z); nx < E.ix_last(Z); ++nx) {
-				E.z(ny,nx) += -(J.z(ny,nx))*dt + ((B.y(ny,nx+1) - B.y(ny,nx))/dx
-												- (B.x(ny+1,nx) - B.x(ny,nx))/dy)*dt;
-				J.z(ny,nx) = 0;
-			}	
-		}
-	}
-}
+    J(2, g.x, g.y) = 0;
+  }
+}}

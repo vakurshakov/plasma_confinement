@@ -100,7 +100,7 @@ class basic_field {
     return grid_indexes{{0, 0}, {size_[kX], size_[kY]}};
   }
 
- private:
+ protected:
   inline constexpr int indexing_impl(
     int f_comp, int f_dim, int x, int size_x, int y, int size_y) {
     return (x * size_y + y) * f_dim + f_comp;

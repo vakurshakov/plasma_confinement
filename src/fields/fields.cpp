@@ -1,35 +1,49 @@
-#include "./fields.hpp"
+#include "fields.hpp"
+#include "src/solvers/FDTD.hpp"
 
-#include "../diagnostics/diagnostics.hpp"
-#include "../vectors/vector3_field.hpp"
+namespace regular {
 
-
-using v3f = vector3_field;
-using v3f_up = std::unique_ptr<v3f>;
-
-
-Fields::Fields(	v3f_up&& E, v3f_up&& B, v3f_up&& J,
-				std::function<void(v3f& E, v3f& B, v3f& J)>&& propogate,
-				std::vector<diagnostic_up>&& diagnostics)
-{
-	E_.swap(E);
-	B_.swap(B);
-	J_.swap(J);
-	propogate_ = propogate;
-	diagnostics_.swap(diagnostics);
+Electromagnetic_field::Electromagnetic_field(int size_x, int size_y)
+  : E(size_x, size_y), B(size_x, size_y), J(size_x, size_y) {
 }
 
-
-void Fields::propogate()
-{
-	propogate_(*E_, *B_, *J_);
+void Electromagnetic_field::propagate() {
+  FDTD_2D(E, B, J);
 }
 
+void Electromagnetic_field::set_uniform_E(vector3 uni_E) {
+  for (const auto& g : E.indexes(0)) {
+    E(0, g) = uni_E.x();
+  }
 
-void Fields::diagnose(int t) const
-{
-	#pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
-	for (auto& diagnostic : diagnostics_) {
-		diagnostic->diagnose(*E_, *B_, *J_, t);
-	}
+  for (const auto& g : E.indexes(1)) {
+    E(1, g) = uni_E.y();
+  }
+
+  for (const auto& g : E.indexes(2)) {
+    E(2, g) = uni_E.z();
+  }
 }
+
+void Electromagnetic_field::set_uniform_B(vector3 uni_B) {
+  for (const auto& g : B.indexes(0)) {
+    B(0, g) = uni_B.x();
+  }
+
+  for (const auto& g : B.indexes(1)) {
+    B(1, g) = uni_B.y();
+  }
+
+  for (const auto& g : B.indexes(2)) {
+    B(2, g) = uni_B.z();
+  }
+}
+
+void Electromagnetic_field::diagnose(int t) const {
+  #pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
+  for (auto& diagnostic : diagnostics_) {
+    diagnostic->diagnose(t);
+  }
+}
+
+}  // namespace regular
