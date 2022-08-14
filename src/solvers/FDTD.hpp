@@ -1,13 +1,9 @@
 #ifndef FDTD_HPP
 #define FDTD_HPP
 
-//#################################################################################################
+#include "src/pch.h"
+#include "src/fields/em_fields.hpp"
 
-#include "../vectors/vector_classes.hpp"
-#include "../vectors/vector3_field.hpp"
+void FDTD_2D(electric_field& E, magnetic_field& B, electric_field& J);
 
-void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J);
-
-//#################################################################################################
-
-#endif // FDTD_HPP
+#endif  // FDTD_HPP

@@ -4,6 +4,7 @@
 #include <omp.h>
 
 #include <cmath>
+#include <cstdint>
 
 #include <map>
 #include <list>
