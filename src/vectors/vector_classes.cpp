@@ -1,72 +1,117 @@
-#include "vector_classes.hpp"
+#include "src/vectors/vector_classes.hpp"
 
-//_______ vector2 methods _________________________________________________________________________
-
-vector2& vector2::operator+=(const vector2& other)
-{
-	vec[X] += other.x();
-	vec[Y] += other.y();
-	return *this;
+double& vector2::operator[](int i) {
+  double *v = reinterpret_cast<double*>(this);
+  return v[i];
 }
 
-vector2 vector2::operator*(double a) const  {
-	return { vec[X]*a, vec[Y]*a };
+double vector2::operator[](int i) const {
+  const double *v = reinterpret_cast<const double*>(this);
+  return v[i];
+}
+
+vector2& vector2::operator+=(const vector2& other) {
+  this->x += other.x;
+  this->y += other.y;
+  return *this;
 }
 
 vector2 vector2::operator/(double a) const {
-	return this->operator*(1./a);
+  return {this->x / a, this->y / a};
 }
 
-//_______ vector3 methods _________________________________________________________________________
-
-double vector3::dot(const vector3 &other) const { 
-	return vec[X]*other.x() + vec[Y]*other.y() + vec[Z]*other.z();
+vector2 operator*(const vector2& v, double a) {
+  return {v.x * a, v.y * a};
 }
 
-vector3 vector3::cross(const vector3 &other) const {
-	return {+ (vec[Y]*other.z() - vec[Z]*other.y()),
-			- (vec[X]*other.z() - vec[Z]*other.x()),
-			+ (vec[X]*other.y() - vec[Y]*other.x()) };		
+vector2 operator*(double a, const vector2& v) {
+  return v * a;
+}
+
+double& vector3::operator[](int i) {
+  double *v = reinterpret_cast<double*>(this);
+  return v[i];
+}
+
+double vector3::operator[](int i) const {
+  const double *v = reinterpret_cast<const double*>(this);
+  return v[i];
+}
+
+double vector3::dot(const vector3& other) const {
+  return
+    this->x * other.x +
+    this->y * other.y +
+    this->y * other.y;
+}
+
+vector3 vector3::cross(const vector3& other) const {
+  return {
+    + (this->y * other.z - this->z * other.y),
+    - (this->x * other.z - this->z * other.x),
+    + (this->x * other.y - this->y * other.x)
+  };
+}
+
+vector3 vector3::element_wise(const vector3& other) const {
+  return {
+    this->x * other.x,
+    this->y * other.y,
+    this->z * other.z
+  };
+}
+
+double vector3::operator,(const vector3& other) const {
+  return this->dot(other);
+}
+
+vector3 vector3::operator^(const vector3& other) const {
+  return this->cross(other);
+}
+
+vector3 vector3::operator*(const vector3& other) const {
+  return this->element_wise(other);
+}
+
+vector2 vector3::project_to(const Plane project_plane) const {
+  vector2 result;
+
+  switch (project_plane) {
+    case XY: result = {this->x, this->y}; break;
+    case YZ: result = {this->y, this->z};	break;		
+    case XZ: result = {this->x, this->z};	break;
+  }
+
+  return result;
+}
+
+vector3& vector3::operator+=(const vector3& other) {
+  this->x += other.x;
+  this->y += other.y;
+  this->z += other.z;
+  return *this;
 }
 
 vector3 vector3::operator+(const vector3& other) const {
-	return { vec[X] + other.x(), vec[Y] + other.y(), vec[Z] + other.z() };
-}
-	
-vector3& vector3::operator+=(const vector3& other)
-{
-	vec[X] += other.x();
-	vec[Y] += other.y();
-	vec[Z] += other.z();
-
-	return *this;
-}
-
-vector3 vector3::operator*(double a) const {
-	return { vec[X]*a, vec[Y]*a, vec[Z]*a };
+  return {
+    this->x + other.x,
+    this->y + other.y,
+    this->z + other.z
+  };
 }
 
 vector3 vector3::operator/(double a) const {
-	return this->operator*(1./a);
+  return {
+    this->x / a,
+    this->y / a,
+    this->z / a
+  };
 }
 
-vector2 vector3::squeeze(const Axes axes) const
-{
-	vector2 temp;
-
-	switch (axes) {
-		case XY:
-			temp = {vec[X], vec[Y]};
-			break;
-		case YZ: 
-			temp = {vec[Y], vec[Z]};	 
-			break;		
-		case XZ:
-			temp = {vec[X], vec[Z]};	 
-			break;
-	}
-	
-	return temp;
+vector3 operator*(const vector3& v, double a) {
+  return { v.x * a, v.y * a, v.z * a };
 }
 
-
+vector3 operator*(double a, const vector3& v) {
+  return v * a;
+}
