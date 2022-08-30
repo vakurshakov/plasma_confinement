@@ -5,6 +5,9 @@ struct vector2 {
   double x = 0;
   double y = 0;
 
+  vector2() = default;
+  vector2(double x, double y);
+
   double& operator[](int i);
   double operator[](int i) const;
 
@@ -19,6 +22,9 @@ struct vector3 {
   double x = 0;
   double y = 0;
   double z = 0;
+
+  vector3() = default;
+  vector3(double x, double y, double z);
 
   double& operator[](int i);
   double operator[](int i) const;

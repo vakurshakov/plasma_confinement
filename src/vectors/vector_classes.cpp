@@ -1,5 +1,7 @@
 #include "src/vectors/vector_classes.hpp"
 
+vector2::vector2(double x, double y) : x(x), y(y) {}
+
 double& vector2::operator[](int i) {
   double *v = reinterpret_cast<double*>(this);
   return v[i];
@@ -27,6 +29,8 @@ vector2 operator*(const vector2& v, double a) {
 vector2 operator*(double a, const vector2& v) {
   return v * a;
 }
+
+vector3::vector3(double x, double y, double z) : x(x), y(y), z(z) {}
 
 double& vector3::operator[](int i) {
   double *v = reinterpret_cast<double*>(this);
