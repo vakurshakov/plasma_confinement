@@ -7,16 +7,19 @@
 
 /**
  * @brief Electric field specification of `basic_field`.
- * 
+ *
  * @details Simplifies adjoint indexing to help in the
  *  process of solving Maxwell's equation with FDTD.
- * 
+ *
  *  The `begin` and `end` methods provide indexes so
  *  that only the tangential components at the boundary
  *  are present.
  */
 class electric_field : public basic_field<3> {
  public:
+  electric_field(int size)
+    : basic_field(size) {}
+
   electric_field(int size_x, int size_y)
     : basic_field(size_x, size_y) {}
 
@@ -54,13 +57,16 @@ class electric_field : public basic_field<3> {
 
 /**
  * @brief Magnetic field specification of `basic_field`.
- * 
+ *
  * @details The `begin` and `end` methods here provide
  *  indexes so that only perpendicular components at
  *  the boundary are present.
  */
 class magnetic_field : public basic_field<3> {
  public:
+  magnetic_field(int size)
+    : basic_field(size) {}
+
   magnetic_field(int size_x, int size_y)
     : basic_field(size_x, size_y) {}
 
