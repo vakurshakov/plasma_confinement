@@ -7,7 +7,7 @@ struct spline_shape {
   virtual ~spline_shape() = default;
   spline_shape(int width);
 
-  const int width;
+  const int radius;
   virtual double form(double x, double dx) const = 0;
 };
 
