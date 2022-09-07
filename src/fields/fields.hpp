@@ -1,7 +1,5 @@
-#ifndef MANAGERS_FIELDS_HPP
-#define MANAGERS_FIELDS_HPP
-
-//#################################################################################################
+#ifndef SRC_FIELDS_MANAGERS_FIELDS_HPP
+#define SRC_FIELDS_MANAGERS_FIELDS_HPP
 
 #include "src/pch.h"
 #include "../diagnostics/diagnostics.hpp"
@@ -33,7 +31,6 @@ public:
 	// additional
 	friend class Magnetic_field_half_step;
 	void add_Bz0(double Bz0);
-	void add_ion_current(int t);
 
 private:
 	v3f_up E_, B_, J_;
@@ -43,6 +40,4 @@ private:
 	std::vector<diagnostic_up> diagnostics_;
 };
 
-//#################################################################################################
-
-#endif // MANAGERS_FIELDS_HPP
+#endif  // SRC_FIELDS_MANAGERS_FIELDS_HPP
