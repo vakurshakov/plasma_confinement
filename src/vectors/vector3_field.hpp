@@ -4,13 +4,20 @@
 #include "src/pch.h"
 #include "vector_classes.hpp"
 
+/**
+ * @brief This class provides an interface for a vector field.
+ * It proxies indexing at the border, so simple boundary
+ * conditions automatically works.
+ * 
+ * @todo Refactor this class to adopting strategies.
+ * @todo Replace vector<vector3> and get_vector
+ * by vector<double> and indexing_impl.
+ */
 class vector3_field {
 public:
 	vector3_field() = default;
 
-	vector3_field(int size_x, int size_y) : size_x_(size_x), size_y_(size_y) {
-		field_.reserve(size_x_*size_y_);
-	};
+	vector3_field(int size_x, int size_y);
 
 	virtual ~vector3_field() = default;
 
@@ -26,9 +33,9 @@ public:
 	double& y(int ny, int nx);
 	double& z(int ny, int nx);
 
-	const double&  x(int ny, int nx) const;
-	const double&  y(int ny, int nx) const;
-	const double&  z(int ny, int nx) const;
+	double x(int ny, int nx) const;
+	double y(int ny, int nx) const;
+	double z(int ny, int nx) const;
 
 protected:
 	int size_x_, size_y_;

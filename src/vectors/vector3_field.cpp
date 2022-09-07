@@ -1,21 +1,24 @@
 #include "vector3_field.hpp"
 
-/*
-*	Возникла ошибка неправильного обращения к массивам (для записи). Исправление
-*	могло бы быть организовано просто заменой всех границ в get_vector на 
-*	ix(y)_first(last), однако это решение очень медлительное из-за частых вызовов.
-*	Оптимизировать его было решено следующим образом:
-*	   1. Использовать для константных методов полные границы, заданные константами,  
-*	   2. Для неконстантных методов использовать простейший контейнер с границами.
-*/
+// Возникла ошибка неправильного обращения к массивам (для записи). Исправление
+// могло бы быть организовано просто заменой всех границ в get_vector на 
+// ix(y)_first(last), однако это решение очень медлительное из-за частых вызовов.
+// Оптимизировать его было решено следующим образом:
+//   1. Использовать для константных методов полные границы, заданные константами,  
+//   2. Для неконстантных методов использовать простейший контейнер с границами.
 
+vector3_field::vector3_field(int size_x, int size_y)
+		: size_x_(size_x), size_y_(size_y) {
+	field_.reserve(size_x_ * size_y_);
+}
+	
 double&  vector3_field::x(int ny, int nx) { return get_vector(X, ny, nx).x(); }
 double&  vector3_field::y(int ny, int nx) { return get_vector(Y, ny, nx).y(); }
 double&  vector3_field::z(int ny, int nx) { return get_vector(Z, ny, nx).z(); }
 
-const double&  vector3_field::x(int ny, int nx) const { return get_vector(ny, nx).x(); }
-const double&  vector3_field::y(int ny, int nx) const { return get_vector(ny, nx).y(); }
-const double&  vector3_field::z(int ny, int nx) const { return get_vector(ny, nx).z(); }
+double vector3_field::x(int ny, int nx) const { return get_vector(ny, nx).x(); }
+double vector3_field::y(int ny, int nx) const { return get_vector(ny, nx).y(); }
+double vector3_field::z(int ny, int nx) const { return get_vector(ny, nx).z(); }
 
 
 int px_py_vector3_field::ix_first (Axis) const { return 0; }
