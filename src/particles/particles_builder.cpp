@@ -367,14 +367,14 @@ auto Particles_builder::choose_decomposition(const vector<string> description,
 
 	const auto& setting = description[PCONF::decomposition]; 
 
-	// if ( setting.find("Esirkepov_density_decomposition") != string::npos ) {
-	// 	decomposition_up = make_unique<Esirkepov_density_decomposition>(
-	// 		parameters, fields.J());
-	// 	std::cout << "done" << std::endl;
-	// }
-	// else {
-	// 	std::cout << "\n\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
-	// }
+	if ( setting.find("Esirkepov_density_decomposition") != string::npos ) {
+		decomposition_up = make_unique<Esirkepov_density_decomposition>(
+			parameters, fields.J());
+		std::cout << "done" << std::endl;
+	}
+	else {
+		std::cout << "\n\t\t\t\twhat():  Initialization error: No matching density decomposition" << std::endl;	
+	}
 
 	return decomposition_up;
 }

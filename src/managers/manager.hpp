@@ -14,15 +14,11 @@ public:
 	void calculates();
 
 private:
-	// Необходимые для работы cущности
+	// Необходимые для работы сущности
 	Fields fields_;
 
 	using particles_up = std::unique_ptr<Particles>;
 	std::map<std::string, particles_up> list_of_particles_;
-
-	void aggregate_sources();
-
-	std::vector<Single_field_diagnostic> current_diagnostics;
 
 	// Команды
 	using Command_up = std::unique_ptr<Command>;

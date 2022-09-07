@@ -38,9 +38,6 @@ public:
 	friend class Set_particles;
 	friend class Copy_coordinates;
 	friend class Ionize_particles;
-
-	// плоха
-	rx_ry_vector3_field J;
 	
 private:
 	// main Kinetic_particles fields

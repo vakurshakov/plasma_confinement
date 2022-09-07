@@ -61,23 +61,6 @@ void Manager::initializes()
  	for (const auto& command : presets)
 		command->execute(0);
 	presets.clear();
-
-#if there_are_electrons && there_are_plasma_ions
-	Particles* const plasma_electrons = list_of_particles_["plasma_electrons"].get();
-	Particles* const plasma_ions = list_of_particles_["plasma_ions"].get();
-	
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jpe_x", plasma_electrons->J, Axis::X, 1000, 2000, 1000, 2000));
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jpe_y", plasma_electrons->J, Axis::Y, 1000, 2000, 1000, 2000));
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jpi_x", plasma_ions->J, Axis::X, 1000, 2000, 1000, 2000));
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jpi_y", plasma_ions->J, Axis::Y, 1000, 2000, 1000, 2000));
-#endif
-
-#if there_are_ions
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jbi_x", ionized->J, Axis::X, 1000, 2000, 1000, 2000));
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jbi_y", ionized->J, Axis::Y, 1000, 2000, 1000, 2000));
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jbe_x", lost->J, Axis::X, 1000, 2000, 1000, 2000));
-	current_diagnostics.push_back(Single_field_diagnostic(dir_name + "/fields/whole_field/Jbe_y", lost->J, Axis::Y, 1000, 2000, 1000, 2000));
-#endif
 }
 
 
@@ -109,14 +92,6 @@ void Manager::calculates()
 		}
 		#endif
 
-		#pragma omp parallel for shared(current_diagnostics)
-		for(const auto& d : current_diagnostics)
-		{
-			d.diagnose(t);
-		}
-
-		this->aggregate_sources();
-
 		#if there_are_fields
 		fields_.diagnose(t);
 		fields_.propogate();
@@ -126,27 +101,4 @@ void Manager::calculates()
  	}
 
 	timer.elapsed();
-}
-
-void Manager::aggregate_sources()
-{
-	v3f& J = fields_.J();
-
-	#pragma omp parallel for
-	for (int ny = 0; ny < SIZE_Y; ++ny) {
-	for (int nx = 0; nx < SIZE_X; ++nx) {
-	
-		for(const auto& [_, sort]: list_of_particles_)
-		{
-			v3f& Js = sort->J;
-
-			J.x(ny,nx) += Js.x(ny,nx);
-			J.y(ny,nx) += Js.y(ny,nx);
-			J.z(ny,nx) += Js.z(ny,nx);
-
-			Js.x(ny,nx) = 0.;
-			Js.y(ny,nx) = 0.;
-			Js.z(ny,nx) = 0.;
-		}
-	}}
 }

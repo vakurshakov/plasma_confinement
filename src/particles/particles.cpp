@@ -19,21 +19,18 @@ Particles::Particles(
 	std::function<void(Point&, double)>&& y_boundary,
 	std::vector<diagnostic_up>&& diagnostics ) 
 	: 	parameters_(parameters),
-	  	push_(std::move(push)),
-	  	interpolation_(std::move(interpolation)),
+		push_(std::move(push)),
+		interpolation_(std::move(interpolation)),
+		decomposition_(std::move(decomposition)),
 		x_boundary_(std::move(x_boundary)),
 		y_boundary_(std::move(y_boundary)),
-		diagnostics_(std::move(diagnostics)),
-		J("Electric", SIZE_X, SIZE_Y) // плоха!!!
-	{
-		decomposition_ = std::make_unique<Esirkepov_density_decomposition>(parameters_, this->J);
-	}
+		diagnostics_(std::move(diagnostics)) {}
 
 
 void Particles::push()
 {
-    auto push		  = std::mem_fn(&Pusher::process);
-    auto interpolate  = std::mem_fn(&Interpolation::process);
+	auto push		  = std::mem_fn(&Pusher::process);
+	auto interpolate  = std::mem_fn(&Interpolation::process);
 	auto decompose	  = std::mem_fn(&Decomposition::process);
 	
 	#pragma omp parallel for shared(particles_), num_threads(THREAD_NUM),	\
