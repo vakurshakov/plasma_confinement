@@ -1,66 +1,27 @@
-#ifndef MANAGERS_PARTICLES_HPP
-#define MANAGERS_PARTICLES_HPP
-
-//#################################################################################################
+#ifndef SRC_PARTICLES_PARTICLES_HPP
+#define SRC_PARTICLES_PARTICLES_HPP
 
 #include "src/pch.h"
-#include "./particle/particle.hpp"
-#include "../diagnostics/diagnostics.hpp"
-#include "../solvers/abstract_strategies.hpp" 
-#include "../vectors/vector3_field.hpp"
-#include "../constants.h"
+#include "src/particles/sort_common.hpp"
 
 class Particles {
-public:
-	using diagnostic_up = std::unique_ptr<Particles_diagnostic>;
+ public:
+  virtual ~Particles() = default;
 
-	Particles() = default;
-	
-	Particles(
-		Parameters&&,
-		std::unique_ptr<Pusher>,
-		std::unique_ptr<Interpolation>,
-		std::unique_ptr<Decomposition>,
-		std::function<void(Point&, double)>&& x_boundary,
-		std::function<void(Point&, double)>&& y_boundary,
-		std::vector<diagnostic_up>&&	);
-	
-	const std::vector<Particle>& get_particles() const { return particles_; }
-	const Parameters& get_parameters() const { return parameters_; }
+  Particles(Common_parameters&& parameters)
+    : parameters_(std::move(parameters)) {}
 
-	void add_particle(const Point& point, ...);
-	void add_diagnostic(diagnostic_up&& diagnostic);
+  using Particle_id = size_t;
+  virtual double n(Particle_id i) const { return parameters_.n; }
+  virtual double q(Particle_id i) const { return parameters_.q; }
+  virtual double m(Particle_id i) const { return parameters_.m; }
 
-	// main Particles methods
-	void push();
-	void diagnose(int t) const;
-	
-	friend class Set_particles;
-	friend class Copy_coordinates;
-	friend class Ionize_particles;
+  const Particle_id number() { return number_in_sort; }
+  const Common_parameters& get_parameters() const { return parameters_; }
 
-	// плоха
-	rx_ry_vector3_field J;
-	
-private:
-	// main Kinetic_particles fields
-	size_t number_in_sort = 0;
-	Parameters parameters_;
-	std::vector<Particle> particles_;
-
-	// solvers for particles
-	std::unique_ptr<Pusher> push_;
-	std::unique_ptr<Interpolation> interpolation_;
-	std::unique_ptr<Decomposition> decomposition_;
-	
-	void boundaries_processing(Point&, double size_x, double size_y);
-	std::function<void(Point&, double)> x_boundary_ = nullptr;
-	std::function<void(Point&, double)> y_boundary_ = nullptr;	
-
-	// vector of diagnostics for Particles
-	std::vector<diagnostic_up> diagnostics_;
+protected:
+  size_t number_in_sort = 0;
+  Common_parameters parameters_;
 };
 
-//#################################################################################################
-
-#endif // MANAGERS_PARTICLES_HPP
+#endif  // SRC_PARTICLES_PARTICLES_HPP

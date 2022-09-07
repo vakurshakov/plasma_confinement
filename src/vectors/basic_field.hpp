@@ -20,10 +20,15 @@ enum SpaceDim : std::int8_t {
  *  field. Row-major indexing used internally.
  * 
  * @tparam tensor_dim Dimension of the field. 
+ *
+ * @todo specification for basic_field<1>
  */
 template<std::int8_t tensor_dim>
 class basic_field {
  public:
+  basic_field(int size)
+    : basic_field(size, size) {}
+
   basic_field(int size_x, int size_y)
     : size_{size_x, size_y}, data_(size_x * size_y * tensor_dim, 0) {}
 
@@ -58,11 +63,11 @@ class basic_field {
   }
 
   // Alias version of `operator()(int comp, int x, int y)`
-  double& operator()(int comp, grid_indexes::index g) {
+  double& operator()(int comp, const grid_indexes::index& g) {
     return data_[indexing_impl(comp, tensor_dim, g.x, size_[kX], g.y, size_[kY])];
   }
 
-  double operator()(int comp, grid_indexes::index g) const {
+  double operator()(int comp, const grid_indexes::index& g) const {
     return data_[indexing_impl(comp, tensor_dim, g.x, size_[kX], g.y, size_[kY])];
   }
 
@@ -102,7 +107,7 @@ class basic_field {
 
  protected:
   inline constexpr int indexing_impl(
-    int f_comp, int f_dim, int x, int size_x, int y, int size_y) {
+    int f_comp, int f_dim, int x, int size_x, int y, int size_y) const {
     return (x * size_y + y) * f_dim + f_comp;
   }
 
