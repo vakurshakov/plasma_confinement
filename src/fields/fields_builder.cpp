@@ -48,12 +48,6 @@ std::unique_ptr<vector3_field> Fields_builder::load_field(string type)
 	else if ( boundaries == "rx_ry" ) {
 		field = make_unique<rx_ry_vector3_field>(type, SIZE_X, SIZE_Y);
 	}
-	else if ( boundaries == "rx_py" ) {
-		field = make_unique<rx_py_vector3_field>(type, SIZE_X, SIZE_Y);
-	}
-	else if ( boundaries == "px_ry" ) {
-		field = make_unique<px_ry_vector3_field>(type, SIZE_X, SIZE_Y);
-	}
 	else {
 		std::cout << "load_field:  Initialization error: No matching boundaries" << std::endl;	
 	}
