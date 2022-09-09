@@ -21,14 +21,14 @@ SOLVERS     := FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp \
            concrete_point_interpolation.cpp
 MANAGERS    := fields.cpp fields_builder.cpp particles.cpp \
             particles_builder.cpp particles_load.cpp manager.cpp
-ADDITIONALS := add_Bz0.cpp
+FIELDS 			:= add_Bz0.cpp open_boundaries_processor.cpp
 DIAGNOSTICS := energy.cpp whole_field.cpp field_along_the_line.cpp field_at_point.cpp \
 						distribution_moment.cpp chosen_particles.cpp single_field.cpp
 COMMANDS    := set_particles.cpp copy_coordinates.cpp ionize_particles.cpp \
             magnetic_field_half_step.cpp
 FILEWRITERS := txt_file.cpp bin_file.cpp
 
-SRCs := $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(ADDITIONALS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)
+SRCs := $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(FIELDS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)
 OBJs := $(SRCs:%.cpp=$(OBJDIR)/%.o)
 DEPs := $(OBJs:$(OBJDIR)/%.o=$(OBJDIR)/%.d)
 

@@ -1,7 +1,5 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-
-//#################################################################################################
+#ifndef SRC_CONSTANTS_H
+#define SRC_CONSTANTS_H
 
 #include <string>
 #include <vector>
@@ -21,16 +19,13 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	#define there_are_fields				true
 		#define there_are_Bz0				true
 		#define fields_are_diagnosed 			true
-		//#define there_are_current_add 		false
-		//#define there_are_density_add 		false
 
-
-//######## PARTICLES CONSTANTS #######################################################
 	inline const double e 	= 1.;
 	inline const double me 	= 1.;
 	inline const double Mp  = 1836.;
 	
 //######## CONFIGURATION IN GENERAL ##################################################
+	inline const string dir_name = "./results/particles_in_segment";
 	inline const int THREAD_NUM = 1;
 
 	inline const double dx 	= 0.05;
@@ -45,7 +40,6 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	
 	inline const string boundaries = "rx_ry";
 
-//######## MAGNETIC MIRROR PARAMETERS ################################################
 	inline const double Bz0  = 0.8;		// Bz0  = 0.2 [T]  { 0.197 }
 
 //######## PARTICLES DESCRIPTION #####################################################
@@ -144,36 +138,21 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 		};
 	#endif
 
-//######## FIELDS DESCRIPTION ########################################################
-	inline const vector<string> field_configuration = { boundaries, to_string(SIZE_X), to_string(SIZE_Y) };
+namespace config {
 
-	inline const multimap<string, vector<string>> fields_diagnostics = {
-		#if fields_are_diagnosed
-		{ "whole_field", { "E", "x" } },
-		{ "whole_field", { "E", "y" } },
-		{ "whole_field", { "j", "x" } },
-		{ "whole_field", { "j", "y" } },
-		{ "whole_field", { "B", "z" } },
-		
-		// { "field_along_x_axis", { "E", "x", to_string(SIZE_Y/2) } },
-		// { "field_along_x_axis", { "E", "y", to_string(SIZE_Y/2) } },
-		// { "field_along_x_axis", { "B", "z", to_string(SIZE_Y/2) } },
-
-		// { "field_along_y_axis", { "E", "x", to_string(SIZE_X/2) } },
-		// { "field_along_y_axis", { "E", "y", to_string(SIZE_X/2) } },
-		// { "field_along_y_axis", { "B", "z", to_string(SIZE_X/2) } },
-
-		// { "field_at_point", { "B", "z", to_string(SIZE_X/2), to_string(SIZE_Y/2) } }
-		#endif
-		};
-
-//######## SOLVERS ###################################################################
-	inline const string field_solver = "FDTD_2D"; 
-
-//######## NAMING A DIRECTORY ########################################################
-	inline const string dir_name = "./results/particles_in_segment";
-
-//#################################################################################################
-
+inline const multimap<string, vector<string>> fields_diagnostics = {
+#if fields_are_diagnosed
+  { "whole_field", { "E", "x", "1000", "2000", "1000", "2000" } },
+  { "whole_field", { "E", "y", "1000", "2000", "1000", "2000" } },
+  { "whole_field", { "j", "x", "1000", "2000", "1000", "2000" } },
+  { "whole_field", { "j", "y", "1000", "2000", "1000", "2000" } },
+  { "whole_field", { "B", "z", "1000", "2000", "1000", "2000" } },
 #endif
-										      
+};
+
+inline const double absorbing_layer_width = 3;
+inline const double absorption_factor = 0.1;
+
+}  // namespace config
+
+#endif  // SRC_CONSTANTS_H

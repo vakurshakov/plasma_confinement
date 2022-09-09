@@ -1,22 +1,20 @@
 #include "manager.hpp"
 
 #include "time_manager.hpp"
-#include "../command/command.hpp"
-#include "../command/cmd_add_Bz0.hpp"
-#include "../command/ionize_particles.hpp"
-#include "../command/magnetic_field_half_step.hpp"
-#include "../diagnostics/chosen_particles.hpp"
-#include "../fields/fields_builder.hpp"
-#include "../particles/particles_builder.hpp"
-#include "../particles/particles_load.hpp"
+#include "src/command/command.hpp"
+#include "src/command/cmd_add_Bz0.hpp"
+#include "src/command/ionize_particles.hpp"
+#include "src/command/magnetic_field_half_step.hpp"
+#include "src/diagnostics/chosen_particles.hpp"
+#include "src/fields/fields_builder.hpp"
+#include "src/particles/particles_builder.hpp"
+#include "src/particles/particles_load.hpp"
 
-
-void Manager::initializes()
-{
+void Manager::initializes() {
 	std::list<Command_up> presets;
 
 	Fields_builder fields_builder;
-	fields_ = std::move(fields_builder.build());
+	fields_ = Fields(fields_builder);
 	
 	each_step_presets.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
 
@@ -94,7 +92,7 @@ void Manager::calculates()
 
 		#if there_are_fields
 		fields_.diagnose(t);
-		fields_.propogate();
+		fields_.propagate();
 		#endif
 
 		timer.tick(t);
