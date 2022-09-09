@@ -27,9 +27,9 @@ Fields_builder::build_field(string type) {
 
 Boundaries_processor_up
 Fields_builder::build_boundary_processor(vector3_field& E, vector3_field& B) {
-  Absorbing_layer layer;
-  layer.width = config::absorbing_layer_width;
-  layer.absorption_factor = config::absorption_factor;
+  Damping_layer layer;
+  layer.width = config::damping_layer_width;
+  layer.damping_factor = config::damping_factor;
 
   return std::make_unique<Open_boundaries_processor>(E, B, layer);
 }

@@ -25,7 +25,7 @@ using std::vector, std::map, std::multimap, std::string, std::to_string;
 	inline const double Mp  = 1836.;
 	
 //######## CONFIGURATION IN GENERAL ##################################################
-	inline const string dir_name = "./results/particles_in_segment";
+	inline const string dir_name = "../results/particles_in_segment";
 	inline const int THREAD_NUM = 1;
 
 	inline const double dx 	= 0.05;
@@ -150,8 +150,8 @@ inline const multimap<string, vector<string>> fields_diagnostics = {
 #endif
 };
 
-inline const double absorbing_layer_width = 3;
-inline const double absorption_factor = 0.1;
+inline const int damping_layer_width = 40;
+inline const double damping_factor = 0.8;
 
 }  // namespace config
 

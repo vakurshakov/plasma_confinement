@@ -1,7 +1,7 @@
 #include "open_boundaries_processor.hpp"
 
-double Absorbing_layer::absorption_coeff(int x) {
-  return 1. - this->absorption_factor *
+double Damping_layer::damping_coeff(int x) {
+  return 1. - this->damping_factor *
     pow(((double) x / (double) this->width - 1.), 2.);
 }
 
@@ -9,7 +9,7 @@ double Absorbing_layer::absorption_coeff(int x) {
 Open_boundaries_processor::Open_boundaries_processor(
   vector3_field& fields_E,
   vector3_field& fields_B,
-  Absorbing_layer layer)
+  Damping_layer layer)
   : fields_E(fields_E),
     fields_B(fields_B),
     layer(layer) {}
@@ -29,7 +29,7 @@ void Open_boundaries_processor::left_right_bounds() {
   for (int y = 0; y < fields_E.size_y(); ++y) {
     for (int x = 0; x < layer.width; ++x) {
       // left
-      double coeff = layer.absorption_coeff(x);
+      double coeff = layer.damping_coeff(x);
 
       fields_E.x(y, x) *= coeff;
       fields_E.y(y, x) *= coeff;
@@ -63,7 +63,7 @@ void Open_boundaries_processor::top_bottom_bounds() {
     #pragma omp parallel for num_threads(THREAD_NUM)
     for (int x = 0; x < fields_E.size_x(); ++x) {
       // top
-      double coeff = layer.absorption_coeff(y);
+      double coeff = layer.damping_coeff(y);
 
       fields_E.x(y, x) *= coeff;
       fields_E.y(y, x) *= coeff;
