@@ -1,51 +1,46 @@
-#ifndef POINT_H
-#define POINT_H
+#ifndef SRC_PARTICLES_POINT_HPP
+#define SRC_PARTICLES_POINT_HPP
 
-//#################################################################################################
+#include "src/pch.h"
+#include "src/vectors/vector_classes.hpp"
 
-#include "../../vectors/vector_classes.hpp"
+/**
+ * @brief Small storage of the kinetic part of a particle. 
+ * 
+ * @param r Radius vector of a point.
+ * @param p Momentum of a point.
+ */
+struct Point {
+  Point() = delete;
 
+  Point(const vector2& r, const vector3& p)
+    : r(r), p(p) {}
 
-class Point {
-public:
-	// Default constructor.
-	Point() = delete;
-	
-	/**
-	 * @param r Radius vector of a point.
-	 * @param p Momentum of a point.
-	 */
-	Point(const vector2& r, const vector3& p): r_(r), p_(p) {}
+  Point(vector2&& r, vector3&& p)
+    : r(std::move(r)), p(std::move(p)) {}
 
-	vector2& r() { return r_; }
-	double&  x() { return r_.x(); }
-	double&  y() { return r_.y(); }
-	
-	const vector2& r() const { return r_; }
-	double  x() const { return r_.x(); }
-	double  y() const { return r_.y(); }
+  inline double& x() { return r.x(); }
+  inline double& y() { return r.y(); }
 
-	vector3& p() { return p_; }
-	double& px() { return p_.x(); }
-	double& py() { return p_.y(); }
-	double& pz() { return p_.z(); }
-	
-	const vector3& p() const { return p_; }
-	double px() const { return p_.x(); }
-	double py() const { return p_.y(); }
-	double pz() const { return p_.z(); }
+  inline double x() const { return r.x(); }
+  inline double y() const { return r.y(); }
 
-private:
-	vector2 r_;
-	vector3 p_;
+  inline double& px() { return p.x(); }
+  inline double& py() { return p.y(); }
+  inline double& pz() { return p.z(); }
+
+  inline double px() const { return p.x(); }
+  inline double py() const { return p.y(); }
+  inline double pz() const { return p.z(); }
+
+  vector2 r;
+  vector3 p;
 };
 
-
+// point-boundary interation
 void reflective_Xboundary(Point&, double size_x);
 void reflective_Yboundary(Point&, double size_y);
 void periodic_Xboundary(Point&, double size_x);
 void periodic_Yboundary(Point&, double size_y);
 
-//#################################################################################################
-
-#endif
+#endif  // SRC_PARTICLES_POINT_HPP

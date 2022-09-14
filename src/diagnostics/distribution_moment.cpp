@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 const vector3 get_velocity(const Particle& particle)
 {
 	double m = particle.m();
-	const vector3& p = particle.get_point().p();
+	const vector3& p = particle.point.p;
 
 	return p / sqrt(m * m + p.dot(p));
 }
@@ -18,12 +18,12 @@ const vector3 get_velocity(const Particle& particle)
 //------- projectors ------------------------------------------------------------------------------
 double XY_projector::project_to_x(const Particle& particle) const
 {
-	return particle.get_point().x();
+	return particle.point.x();
 }
 
 double XY_projector::project_to_y(const Particle& particle) const
 {
-	return particle.get_point().y();
+	return particle.point.y();
 }
 
 
@@ -59,8 +59,8 @@ double first_Vy_moment::get_quantity_to_be_averaged_(const Particle& particle) c
 
 double first_Vr_moment::get_quantity_to_be_averaged_(const Particle& particle) const
 {
-	double x = particle.get_point().x() - 0.5 * SIZE_X * dx;
-	double y = particle.get_point().y() - 0.5 * SIZE_Y * dy;
+	double x = particle.point.x() - 0.5 * SIZE_X * dx;
+	double y = particle.point.y() - 0.5 * SIZE_Y * dy;
 	double r = sqrt(x * x + y * y);
 
 	// Частицы, близкие к центру не учитываются
@@ -72,8 +72,8 @@ double first_Vr_moment::get_quantity_to_be_averaged_(const Particle& particle) c
 
 double first_Vphi_moment::get_quantity_to_be_averaged_(const Particle& particle) const
 {
-	double x = particle.get_point().x() - 0.5 * SIZE_X * dx;
-	double y = particle.get_point().y() - 0.5 * SIZE_Y * dy;
+	double x = particle.point.x() - 0.5 * SIZE_X * dx;
+	double y = particle.point.y() - 0.5 * SIZE_Y * dy;
 	double r = sqrt(x * x + y * y);
 
 	// Частицы, близкие к центру не учитываются 

@@ -10,8 +10,8 @@ void Esirkepov_density_decomposition::process(const Particle& particle, const ve
 	double n = particle.n();
 	double q = particle.q();
 
-	const int nearest_edge_to_rx = int(round(particle.get_point().x() / dx));
-	const int nearest_edge_to_ry = int(round(particle.get_point().y() / dy));
+	const int nearest_edge_to_rx = int(round(particle.point.x() / dx));
+	const int nearest_edge_to_ry = int(round(particle.point.y() / dy));
 
 	p_v3f temp_J(2 * charge_cloud_ + 1, 2 * charge_cloud_ + 1);
 
@@ -23,7 +23,7 @@ void Esirkepov_density_decomposition::process(const Particle& particle, const ve
 
 void Esirkepov_density_decomposition::decompose_x(const Particle& particle, const vector2& r0, double n, double q, int ne_x, int ne_y, p_v3f& temp_J)
 {
-	const vector2& r = particle.get_point().r();
+	const vector2& r = particle.point.r;
 
 	long int node_x, node_y;
 	node_x = ne_x - charge_cloud_;
@@ -58,7 +58,7 @@ void Esirkepov_density_decomposition::decompose_x(const Particle& particle, cons
 
 void Esirkepov_density_decomposition::decompose_y(const Particle& particle, const vector2& r0, double n, double q, int ne_x, int ne_y, p_v3f& temp_J)
 {
-	const vector2& r = particle.get_point().r();
+	const vector2& r = particle.point.r;
 
 	long int node_x, node_y;
 	node_y = ne_y - charge_cloud_;
@@ -95,8 +95,8 @@ void Esirkepov_density_decomposition::decompose_z(const Particle& particle, cons
 {
 	double m = particle.m();
 
-	const vector2& r = particle.get_point().r();
-	const vector3& p = particle.get_point().p();
+	const vector2& r = particle.point.r;
+	const vector3& p = particle.point.p;
 
 	double gamma_m = sqrt(m * m + p.dot(p));
 	double vz = p.z() / gamma_m;

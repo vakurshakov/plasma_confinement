@@ -12,7 +12,7 @@ std::vector<int> choose_indexes(const std::vector<Particle>& particles)
     
     for(decltype(particles.size()) i = 0; i < particles.size(); i += Npe)
     {
-        auto& point = particles[i].get_point();
+        auto& point = particles[i].point;
         
         double x = round(point.x() / dx);
         double y = round(point.y() / dy);
@@ -60,12 +60,12 @@ void chosen_particles::diagnose(const Parameters&, const std::vector<Particle>& 
         int ith_particle = 0;
         for(const auto& i : indexes_of_chosen_particles_)
         {
-            const Point& ith_point = particles[i].get_point(); 
+            const Point& ith_point = particles[i].point; 
 
             files_for_results_[ith_particle]->write(ith_point.x() / dx);
             files_for_results_[ith_particle]->write(ith_point.y() / dy);
 
-            const vector3& p = ith_point.p();
+            const vector3& p = ith_point.p;
 
             files_for_results_[ith_particle]->write(p.x());
             files_for_results_[ith_particle]->write(p.y());
