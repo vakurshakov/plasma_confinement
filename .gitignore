@@ -16,4 +16,5 @@
 /diagnostics_python
 /tmp
 /todo
+*.json
 log

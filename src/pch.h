@@ -1,5 +1,5 @@
-#ifndef SRC_PCH_HPP
-#define SRC_PCH_HPP
+#ifndef SRC_PCH_H
+#define SRC_PCH_H
 
 #include <omp.h>
 
@@ -20,5 +20,6 @@
 #include <filesystem>
 
 #include "constants.h"
+#include "managers/time_manager.hpp"
 
-#endif  // SRC_PCH_HPP
+#endif  // SRC_PCH_H

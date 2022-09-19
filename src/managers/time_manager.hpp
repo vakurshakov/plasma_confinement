@@ -1,54 +1,112 @@
-#include "src/pch.h"
+#ifndef SRC_MANAGERS_TIME_MANAGER_HPP
+#define SRC_MANAGERS_TIME_MANAGER_HPP
+
+// Basic instrumentation profiler by Cherno.
+
+#include <omp.h>
+
+#include <string>
 #include <chrono>
+#include <algorithm>
+#include <fstream>
 
-
-namespace ch = std::chrono;
-
-
-class Timer {
-public:
-	Timer() = default;
-
-	void set_up() {
-		start_ = ch::steady_clock::now();
-		state = "set up";
-	}
-	
-	void tick(int t) {
-		if (!(state == "set up")) {
-			std::cout << "Timer::tick(int): Timer wasn't set up" << std::endl;
-		}
-		else {
-		if ( t % (TIME/10) == 0 ) {
-			if ( t == 0 ) {
-				std::cout << std::endl;
-			}
-			
-			auto current_time = ch::steady_clock::now();
-			ch::duration<double> elapsed_time = current_time - start_;
-			
-			std::cout << "\t[";
-			for (int n = 0; n <= TIME; n+= TIME/10) {
-				if ( n <= t ) { std::cout << "#"; }
-				else { std::cout << " "; }
-			}
-			std::cout << "]\t" << elapsed_time.count() << "s" << std::endl;
-		}
-		}
-	}
-
-	void elapsed() {
-		if (!(state == "set up")) {
-			std::cout << "Timer::tick(int): Timer wasn't set up" << std::endl;
-		}
-		else {
-			auto end = ch::steady_clock::now();
-			ch::duration<double> elapsed_time = end - start_;
-			std::cout << "\n\n\truntime:\t" << elapsed_time.count() << "s\n" << std::endl;
-		}
-	}
-
-private:
-	decltype(ch::steady_clock::now()) start_;
-	std::string state = "set down";
+struct Profile_result {
+  std::string name;  // recorded profile;
+  int64_t duration;  // elapsed time in miliseconds;
+  int thread_num;    // thread number given by omp call.
 };
+
+class Instrumentor {
+ public:
+  Instrumentor()
+  : profile_count_(0) {}
+
+  void begin_session(const std::string& filepath = "results.json") {
+    output_stream_.open(filepath);
+    write_header();
+  }
+
+  void end_session() {
+    write_footer();
+
+    output_stream_.close();
+    profile_count_ = 0;
+  }
+
+  void write_profile(const Profile_result& result) {
+    if (profile_count_++ > 0)
+        output_stream_ << ",\n";
+
+    std::string name = result.name;
+    std::replace(name.begin(), name.end(), '"', '\'');
+
+    output_stream_ << "  {";
+    output_stream_ << " \"name\": \"" << name << "\",";
+    output_stream_ << " \"dur\": " << result.duration << ",";
+    output_stream_ << " \"tid\": " << result.thread_num << " }";
+    output_stream_.flush();
+  }
+
+  static Instrumentor& get() {
+    static Instrumentor instance;
+    return instance;
+  }
+
+ private:
+  std::ofstream output_stream_;
+  int profile_count_;
+
+  void write_header() {
+    output_stream_ << "{ \"record\": [\n";
+    output_stream_.flush();
+  }
+
+  void write_footer() {
+    output_stream_ << "\n]}";
+    output_stream_.flush();
+  }
+};
+
+class Instrumentation_timer {
+ public:
+  Instrumentation_timer(const char* name)
+    : name_(name), stopped_(false) {
+    start_ = std::chrono::steady_clock::now();
+  }
+
+  ~Instrumentation_timer() {
+    if (!stopped_)
+     stop();
+  }
+
+  void stop() {
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<
+                    std::chrono::milliseconds>(end - start_);
+    
+    int thread_num = omp_get_thread_num();
+    Instrumentor::get().write_profile({ name_, elapsed.count(), thread_num });
+
+    stopped_ = true;
+  }
+
+ private:
+  const char* name_;
+  std::chrono::time_point<std::chrono::steady_clock> start_;
+  bool stopped_;
+};
+
+#define TIME_PROFILING 1
+#if TIME_PROFILING
+#define BEGIN_SESSION(filepath)  ::Instrumentor::get().begin_session(filepath)
+#define END_SESSION()            ::Instrumentor::get().end_session()
+#define PROFILE_SCOPE(name)      ::Instrumentation_timer timer##__LINE__(name)
+#define PROFILE_FUNCTION()       PROFILE_SCOPE(__PRETTY_FUNCTION__)
+#else
+#define BEGIN_SESSION(filepath)
+#define END_SESSION()
+#define PROFILE_SCOPE(name)
+#define PROFILE_FUNCTION()
+#endif
+
+#endif  // SRC_MANAGERS_TIME_MANAGER_HPP
