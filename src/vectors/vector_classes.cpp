@@ -16,7 +16,7 @@ vector2 vector2::operator/(double a) const {
 vector2 operator*(const vector2& v, double a) {
   return {
     v.vec[X] * a,
-    v.vec[X] * a
+    v.vec[Y] * a
   };
 }
 

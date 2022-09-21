@@ -35,6 +35,7 @@ struct vector3 {
   inline double y() const { return vec[Y]; }
   inline double z() const { return vec[Z]; }
 
+  /// @todo tolerance on other == zero?
   double dot(const vector3& other) const;
   vector3 cross(const vector3& other) const;
   vector3 element_wise(const vector3& other) const;
