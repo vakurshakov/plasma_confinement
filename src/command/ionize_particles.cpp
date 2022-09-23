@@ -135,15 +135,13 @@ void Ionize_particles::execute(int t) const {
 				std::isinf(pl_x) || std::isinf(pl_y) || std::isinf(pl_z));
 
 
-			#pragma omp critical
 			ionized->add_particle(Point({x, y}, {pi_x, pi_y, pi_z})
 			#if density_beam_profile_is_set
 				, density_beam_profile(x, y)
 			#endif
 			);
 
-			#pragma omp critical
-        	lost->add_particle(Point({x, y}, {pl_x, pl_y, pl_z})
+			lost->add_particle(Point({x, y}, {pl_x, pl_y, pl_z})
 			#if density_beam_profile_is_set
 				, density_beam_profile(x, y)
 			#endif

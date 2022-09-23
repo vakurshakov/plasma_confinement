@@ -43,7 +43,7 @@ void Single_field_diagnostic::diagnose(int t) const
 {
 	if (t % diagnose_time_step != 0) return;
 
-	auto file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
+	auto file_for_results_ = std::make_unique<BIN_File>(directory_path_, std::to_string(t));
 
     for (int ny = begin_x_; ny < end_x_; ++ny) {
 	for (int nx = begin_y_; nx < end_y_; ++nx) {

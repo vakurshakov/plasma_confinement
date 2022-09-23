@@ -12,13 +12,17 @@ Fields::Fields(Fields_builder& builder) {
 }
 
 void Fields::propagate() {
+  PROFILE_FUNCTION();
+
   FDTD_2D(*E_, *B_, *J_);
 
   boundary_processor_->process();
 }
 
 void Fields::diagnose(int t) const {
-  #pragma omp parallel for shared(diagnostics_), num_threads(THREAD_NUM)
+  PROFILE_FUNCTION();
+
+  #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
   for (auto& diagnostic : diagnostics_) {
     diagnostic->diagnose(*E_, *B_, *J_, t);
   }

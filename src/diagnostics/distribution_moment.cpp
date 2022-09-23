@@ -164,7 +164,7 @@ void distribution_moment::diagnose(
 	{
 		if ((t % diagnose_time_step) == 0) {
 		
-		file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
+	file_for_results_ = std::make_unique<BIN_File>(directory_path_, std::to_string(t));
 
 		this->collect(parameters, particles);
 

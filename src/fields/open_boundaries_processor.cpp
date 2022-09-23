@@ -25,7 +25,7 @@ void Open_boundaries_processor::left_right_bounds() {
   // * . . *
   // vy
 
-  #pragma omp parallel for num_threads(THREAD_NUM)
+  #pragma omp parallel for num_threads(NUM_THREADS)
   for (int y = 0; y < fields_E.size_y(); ++y) {
     for (int x = 0; x < layer.width; ++x) {
       // left
@@ -60,7 +60,7 @@ void Open_boundaries_processor::top_bottom_bounds() {
   // vy
 
   for (int y = 0; y < layer.width; ++y) {
-    #pragma omp parallel for num_threads(THREAD_NUM)
+    #pragma omp parallel for num_threads(NUM_THREADS)
     for (int x = 0; x < fields_E.size_x(); ++x) {
       // top
       double coeff = layer.damping_coeff(y);

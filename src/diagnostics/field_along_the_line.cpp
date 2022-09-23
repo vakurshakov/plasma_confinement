@@ -50,7 +50,7 @@ void field_along_x_axis::diagnose(const v3f& E, const v3f& B, const v3f& j, int 
 {
 	if ((t % diagnose_time_step) == 0 ) {
 	
-	file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
+	file_for_results_ = std::make_unique<BIN_File>(directory_path_, std::to_string(t));
 
 	if ( field_ == "E" ) { this->diagnose(E); }
 	else if ( field_ == "B" ) { this->diagnose(B); }
@@ -105,7 +105,7 @@ void field_along_y_axis::diagnose(const v3f& E, const v3f& B, const v3f& j, int 
 {
 	if ((t % diagnose_time_step) == 0 ) {
 
-	file_for_results_ = std::make_unique<BIN_File>(directory_path_, to_string(t));
+	file_for_results_ = std::make_unique<BIN_File>(directory_path_, std::to_string(t));
 
 	if ( field_ == "E" ) { this->diagnose(E); }
 	else if ( field_ == "B" ) { this->diagnose(B); }

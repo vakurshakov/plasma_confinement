@@ -11,13 +11,11 @@
  * @param p Momentum of a point.
  */
 struct Point {
-  Point() = delete;
+  Point() = default;
 
-  Point(const vector2& r, const vector3& p)
-    : r(r), p(p) {}
-
-  Point(vector2&& r, vector3&& p)
-    : r(std::move(r)), p(std::move(p)) {}
+  template<class R = vector2, class P = vector3>
+  Point(R&& r, P&& p)
+    : r{std::forward<R>(r)}, p{std::forward<P>(p)} {}
 
   inline double& x() { return r.x(); }
   inline double& y() { return r.y(); }
@@ -38,9 +36,9 @@ struct Point {
 };
 
 // point-boundary interation
-void reflective_Xboundary(Point&, double size_x);
-void reflective_Yboundary(Point&, double size_y);
-void periodic_Xboundary(Point&, double size_x);
-void periodic_Yboundary(Point&, double size_y);
+void reflective_x(Point&, double left, double right);
+void reflective_y(Point&, double bottom, double top);
+void periodic_x(Point&, double left, double right);
+void periodic_y(Point&, double bottom, double top);
 
 #endif  // SRC_PARTICLES_POINT_HPP

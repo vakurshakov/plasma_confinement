@@ -1,14 +1,13 @@
-#ifndef MANAGERS_PARTICLES_HPP
-#define MANAGERS_PARTICLES_HPP
-
-//#################################################################################################
+#ifndef SRC_PARTICLES_PARTICLES_HPP
+#define SRC_PARTICLES_PARTICLES_HPP
 
 #include "src/pch.h"
-#include "./particle/particle.hpp"
-#include "../diagnostics/diagnostics.hpp"
-#include "../solvers/abstract_strategies.hpp" 
-#include "../vectors/vector3_field.hpp"
-#include "../constants.h"
+#include "src/particles/particle/particle.hpp"
+#include "src/solvers/abstract_strategies.hpp"
+#include "src/diagnostics/diagnostics.hpp"
+#include "src/particles/particles_builder.hpp"
+
+#include "src/particles/particle-boundary_processor.hpp"
 
 class Particles {
 public:
@@ -16,14 +15,7 @@ public:
 
 	Particles() = default;
 	
-	Particles(
-		Parameters&&,
-		std::unique_ptr<Pusher>,
-		std::unique_ptr<Interpolation>,
-		std::unique_ptr<Decomposition>,
-		std::function<void(Point&, double)>&& x_boundary,
-		std::function<void(Point&, double)>&& y_boundary,
-		std::vector<diagnostic_up>&&	);
+	Particles(Particles_builder& builder);
 	
 	const std::vector<Particle>& get_particles() const { return particles_; }
 	const Parameters& get_parameters() const { return parameters_; }
@@ -31,33 +23,29 @@ public:
 	void add_particle(const Point& point, ...);
 	void add_diagnostic(diagnostic_up&& diagnostic);
 
-	// main Particles methods
 	void push();
 	void diagnose(int t) const;
 	
 	friend class Set_particles;
 	friend class Copy_coordinates;
 	friend class Ionize_particles;
-	
+
+	/// @todo refactor this out
+	friend class Clone_layer_particles;
+	friend class Plasma_boundary_processor;
+	friend class Beam_boundary_processor;
+
 private:
-	// main Kinetic_particles fields
-	size_t number_in_sort = 0;
 	Parameters parameters_;
 	std::vector<Particle> particles_;
 
-	// solvers for particles
 	std::unique_ptr<Pusher> push_;
 	std::unique_ptr<Interpolation> interpolation_;
 	std::unique_ptr<Decomposition> decomposition_;
-	
-	void boundaries_processing(Point&, double size_x, double size_y);
-	std::function<void(Point&, double)> x_boundary_ = nullptr;
-	std::function<void(Point&, double)> y_boundary_ = nullptr;	
 
-	// vector of diagnostics for Particles
+	std::unique_ptr<Particle_boundary_processor> boundaries_processor_;
+
 	std::vector<diagnostic_up> diagnostics_;
 };
 
-//#################################################################################################
-
-#endif // MANAGERS_PARTICLES_HPP
+#endif  // SRC_PARTICLES_PARTICLES_HPP

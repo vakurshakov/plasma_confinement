@@ -33,7 +33,7 @@ class Instrumentor {
     profile_count_ = 0;
   }
 
-  void write_profile(const Profile_result& result) {
+  void write_profile(Profile_result&& result) {
     if (profile_count_++ > 0)
         output_stream_ << ",\n";
 
@@ -82,10 +82,13 @@ class Instrumentation_timer {
   void stop() {
     auto end = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<
-                    std::chrono::milliseconds>(end - start_);
+                    std::chrono::microseconds>(end - start_);
     
-    int thread_num = omp_get_thread_num();
-    Instrumentor::get().write_profile({ name_, elapsed.count(), thread_num });
+    #pragma omp critical
+    {
+      int thread_num = omp_get_thread_num();
+      Instrumentor::get().write_profile({ name_, elapsed.count(), thread_num });
+    }
 
     stopped_ = true;
   }

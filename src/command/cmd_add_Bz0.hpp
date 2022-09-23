@@ -16,7 +16,7 @@ public:
 		: fields_(fields), Bz0_(Bz0) {};
 		
 	void execute(int t) const override {
-		fields_->add_Bz0(Bz0);
+		fields_->add_Bz0(Bz0_);
 	};
 
 private:

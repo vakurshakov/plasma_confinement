@@ -1,26 +1,19 @@
 #include "src/pch.h"
-#include "../fields/fields.hpp"
-#include "../particles/particles.hpp"
-#include "../command/command.hpp"
-#include "../constants.h"
-#include "../diagnostics/single_field.hpp"
-
+#include "src/fields/fields.hpp"
+#include "src/particles/particles.hpp"
+#include "src/command/command.hpp"
 
 class Manager {
-public:
-	Manager() = default;
+ public:
+  Manager() = default;
 
-	void initializes();
-	void calculates();
+  void initializes();
+  void calculates();
 
-private:
-	// Необходимые для работы сущности
-	Fields fields_;
+ private:
+  Fields fields_;
+  std::vector<Particles> particles_species_;
 
-	using particles_up = std::unique_ptr<Particles>;
-	std::map<std::string, particles_up> list_of_particles_;
-
-	// Команды
-	using Command_up = std::unique_ptr<Command>;
-	std::list<Command_up> each_step_presets;
+  using Command_up = std::unique_ptr<Command>;
+  std::list<Command_up> step_presets_;
 };

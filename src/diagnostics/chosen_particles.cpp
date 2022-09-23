@@ -10,7 +10,7 @@ std::vector<int> choose_indexes(const std::vector<Particle>& particles)
 {
     std::vector<int> indexes_of_chosen_particles;
     
-    for(decltype(particles.size()) i = 0; i < particles.size(); i += Npe)
+    for(decltype(particles.size()) i = 0; i < particles.size(); i += config::Npe)
     {
         auto& point = particles[i].point;
         
@@ -35,7 +35,7 @@ chosen_particles::chosen_particles(std::string directory_path, std::vector<int> 
         
         for(int i = 0; i < indexes_of_chosen_particles_.size(); ++i)
         {
-            files_for_results_.emplace_back(std::make_unique<BIN_File>(directory_path_, to_string(i) + "_particle"));
+            files_for_results_.emplace_back(std::make_unique<BIN_File>(directory_path_, std::to_string(i) + "_particle"));
         }
     }
 
@@ -69,17 +69,6 @@ void chosen_particles::diagnose(const Parameters&, const std::vector<Particle>& 
 
             files_for_results_[ith_particle]->write(p.x());
             files_for_results_[ith_particle]->write(p.y());
-            files_for_results_[ith_particle]->write(p.z());
-            
-            double x = ith_point.x() - 0.5 * SIZE_X * dx;
-            double y = ith_point.y() - 0.5 * SIZE_Y * dy;
-            double r = sqrt(x * x + y * y);
-
-            double p_r = p.x() * (+x / r) + p.y() * (+y / r);
-	        double p_a = p.x() * (-y / r) + p.y() * (+x / r);
-
-            files_for_results_[ith_particle]->write(p_r  );
-            files_for_results_[ith_particle]->write(p_a  );
             files_for_results_[ith_particle]->write(p.z());
 
             files_for_results_[ith_particle]->flush();

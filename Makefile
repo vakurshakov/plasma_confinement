@@ -16,7 +16,7 @@ PCH := pch.h
 
 MAIN        := main.cpp
 VECTORS     := vector_classes.cpp vector3_field.cpp
-PARTICLES   := particles_form-factors.cpp point_bound_interact.cpp
+PARTICLES   := particles_form-factors.cpp point_bound_interact.cpp particle-boundary_processor.cpp
 SOLVERS     := FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp \
            concrete_point_interpolation.cpp
 MANAGERS    := fields.cpp fields_builder.cpp particles.cpp \
@@ -24,7 +24,7 @@ MANAGERS    := fields.cpp fields_builder.cpp particles.cpp \
 FIELDS 			:= add_Bz0.cpp open_boundaries_processor.cpp
 DIAGNOSTICS := energy.cpp whole_field.cpp field_along_the_line.cpp field_at_point.cpp \
 						distribution_moment.cpp chosen_particles.cpp single_field.cpp
-COMMANDS    := set_particles.cpp copy_coordinates.cpp ionize_particles.cpp \
+COMMANDS    := set_particles.cpp copy_coordinates.cpp clone_layer_particles.cpp \
             magnetic_field_half_step.cpp
 FILEWRITERS := txt_file.cpp bin_file.cpp
 

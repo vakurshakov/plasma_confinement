@@ -78,11 +78,11 @@ public:
 	 * @param Tz Temperature in z direction.
 	 * @param p0 Initial impulse (absolute value).
 	 * @param charge_cloud Width of the spline.
-	 * @param form_factor Shape of the macroparticle.
+	 * @param form_factor Shape of the macro-particle.
 	 */
 	Parameters(
 		int Np, double m, std::unique_ptr<Variadic_parameter> n, std::unique_ptr<Variadic_parameter> q,
-		double p0, double Tx, double Ty, double Tz, int charge_cloud = 2,
+		double p0, double Tx, double Ty, double Tz, int charge_cloud = 3,
 		std::function<double(double, double)> form_factor = second_order_spline)
 		: Np_(Np), m_(m), n_(std::move(n)), q_(std::move(q)), p0_(p0),
 		  charge_cloud_(charge_cloud), form_factor_(form_factor)
@@ -92,20 +92,8 @@ public:
 			  T_[z] = Tz;
 		  };
 
-	Parameters(Parameters& other)
-	{
-		Np_   = other.Np_;
-		m_    = other.m_;
-		p0_   = other.p0_;
-		T_[x] = other.T_[x];
-		T_[y] = other.T_[y];
-		T_[z] = other.T_[z];
-		charge_cloud_ = other.charge_cloud_;
-		form_factor_  = other.form_factor_;
-
-		n_.swap(other.n_);
-		q_.swap(other.q_);
-	}
+	Parameters(Parameters&& other) = default;
+	Parameters& operator=(Parameters&& other) = default;
 
 	int Np() 	const { return Np_;   }
 	double m()  const { return m_; 	  }
