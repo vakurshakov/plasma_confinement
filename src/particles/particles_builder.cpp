@@ -7,10 +7,6 @@
 #include "src/command/set_particles.hpp"
 #include "src/command/copy_coordinates.hpp"
 
-#include "src/diagnostics/energy.hpp"
-#include "src/diagnostics/chosen_particles.hpp"
-#include "src/diagnostics/distribution_moment.hpp"
-
 #include "src/solvers/Boris_pusher.hpp"
 #include "src/solvers/Esirkepov_density_decomposition.hpp"
 #include "src/solvers/concrete_point_interpolation.hpp"
@@ -37,10 +33,8 @@ std::vector<std::string>
 Particles_builder::get_description(const string& parameter) {
   auto description_it = sort_description_.find(parameter);
 
-  if (description_it == sort_description_.end()) {  
-    throw std::runtime_error("Initialization error: Parameter " + parameter
-      + "isn't defined on sort " + sort_name_ + " in constants.h");
-  }
+  if (description_it == sort_description_.end())
+    throw std::runtime_error("Initialization error: Parameter " + parameter + "isn't defined on sort " + sort_name_ + " in constants.h");
 
   return description_it->second;
 }
@@ -117,7 +111,7 @@ Particles_builder::build_interpolation(const Parameters& parameters) {
   else if ((pos = setting.find("Concrete_point_interpolation")) != string::npos ) {
     if ((pos = setting.find("Homogenius_field", pos)) == string::npos)
       throw std::runtime_error("\n\t\t\t\twhat():  Known interpolation not adder");
-      
+
     pos = setting.find("E0=", pos);
     pos += 3;
 
@@ -161,71 +155,4 @@ Particles_builder::build_decomposition(const Parameters& parameters) {
     throw std::runtime_error("Initialization error: No matching density decomposition");
 
   return make_unique<Esirkepov_density_decomposition>(parameters, fields_.J());
-}
-
-std::vector<std::unique_ptr<Particles_diagnostic>>
-Particles_builder::build_diagnostics() {
-  std::vector<std::unique_ptr<Particles_diagnostic>> particles_diagnostics = {};
-
-#if particles_are_diagnosed
-  for (const auto& [diag, description] : sort_description_) {
-    if (diag == "density") {
-      particles_diagnostics.emplace_back(make_unique<distribution_moment>(
-        dir_name + "/" + sort_name_,
-        stod(description[0]), stod(description[1]), stod(description[2]),
-        stod(description[3]), stod(description[4]), stod(description[5]),
-        make_unique<XY_projector>(),
-        make_unique<zeroth_moment>()
-      ));
-    }
-    else if (diag == "1_of_VxVy") {
-      std::cout << "Warning: predefined boundary values for 1_of_VxVy will be used" << std::endl;
-      particles_diagnostics.emplace_back(make_unique<distribution_moment>(
-        dir_name + "/" + sort_name_,
-        -1.0,  +1.0,  0.01,
-        -1.0,  +1.0,  0.01,
-        make_unique<VxVy_projector>(),
-        make_unique<zeroth_moment>()));
-    }
-    else if (diag == "first_Vx_moment") {
-      particles_diagnostics.emplace_back(make_unique<distribution_moment>(
-        dir_name + "/" + sort_name_,
-        stod(description[0]), stod(description[1]), stod(description[2]),
-        stod(description[3]), stod(description[4]), stod(description[5]),
-        make_unique<XY_projector>(),
-        make_unique<first_Vx_moment>()));
-    }
-    else if (diag == "first_Vy_moment") {
-      particles_diagnostics.emplace_back(make_unique<distribution_moment>(
-        dir_name + "/" + sort_name_,
-        stod(description[0]), stod(description[1]), stod(description[2]),
-        stod(description[3]), stod(description[4]), stod(description[5]),
-        make_unique<XY_projector>(),
-        make_unique<first_Vy_moment>()));
-    }
-    else if (diag == "first_Vr_moment") {
-      particles_diagnostics.emplace_back(make_unique<distribution_moment>(
-        dir_name + "/" + sort_name_,
-        stod(description[0]), stod(description[1]), stod(description[2]),
-        stod(description[3]), stod(description[4]), stod(description[5]),
-        make_unique<XY_projector>(),
-        make_unique<first_Vr_moment>()));
-    }
-    else if (diag == "first_Vphi_moment") {
-      particles_diagnostics.emplace_back(make_unique<distribution_moment>(
-        dir_name + "/" + sort_name_,
-        stod(description[0]), stod(description[1]), stod(description[2]),
-        stod(description[3]), stod(description[4]), stod(description[5]),
-        make_unique<XY_projector>(),
-        make_unique<first_Vphi_moment>()));
-    }
-    else if (diag == "energy") {
-      particles_diagnostics.emplace_back(make_unique<particles_energy>(
-        dir_name + "/" + sort_name_ + "/" + diag));
-    }
-  }
-  particles_diagnostics.shrink_to_fit();
-#endif
-
-  return particles_diagnostics;
 }

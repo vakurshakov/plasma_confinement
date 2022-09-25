@@ -4,48 +4,44 @@
 #include "src/pch.h"
 #include "src/particles/particle/particle.hpp"
 #include "src/solvers/abstract_strategies.hpp"
-#include "src/diagnostics/diagnostics.hpp"
 #include "src/particles/particles_builder.hpp"
 
 #include "src/particles/particle-boundary_processor.hpp"
 
 class Particles {
-public:
-	using diagnostic_up = std::unique_ptr<Particles_diagnostic>;
+ public:
 
-	Particles() = default;
-	
-	Particles(Particles_builder& builder);
-	
-	const std::vector<Particle>& get_particles() const { return particles_; }
-	const Parameters& get_parameters() const { return parameters_; }
+  Particles() = default;
 
-	void add_particle(const Point& point, ...);
-	void add_diagnostic(diagnostic_up&& diagnostic);
+  Particles(Particles_builder& builder);
 
-	void push();
-	void diagnose(int t) const;
-	
-	friend class Set_particles;
-	friend class Copy_coordinates;
-	friend class Ionize_particles;
+  const auto& get_name() const { return sort_name_; }
+  const auto& get_particles() const { return particles_; }
+  const auto& get_parameters() const { return parameters_; }
 
-	/// @todo refactor this out
-	friend class Clone_layer_particles;
-	friend class Plasma_boundary_processor;
-	friend class Beam_boundary_processor;
+  void add_particle(const Point& point, ...);
 
-private:
-	Parameters parameters_;
-	std::vector<Particle> particles_;
+  void push();
 
-	std::unique_ptr<Pusher> push_;
-	std::unique_ptr<Interpolation> interpolation_;
-	std::unique_ptr<Decomposition> decomposition_;
+  /// @todo refactor this out
+  friend class Set_particles;
+  friend class Copy_coordinates;
+  friend class Ionize_particles;
 
-	std::unique_ptr<Particle_boundary_processor> boundaries_processor_;
+  friend class Clone_layer_particles;
+  friend class Plasma_boundary_processor;
+  friend class Beam_boundary_processor;
 
-	std::vector<diagnostic_up> diagnostics_;
+ private:
+  std::string sort_name_;
+  Parameters parameters_;
+  std::vector<Particle> particles_;
+
+  std::unique_ptr<Pusher> push_;
+  std::unique_ptr<Interpolation> interpolation_;
+  std::unique_ptr<Decomposition> decomposition_;
+
+  std::unique_ptr<Particle_boundary_processor> boundaries_processor_;
 };
 
 #endif  // SRC_PARTICLES_PARTICLES_HPP

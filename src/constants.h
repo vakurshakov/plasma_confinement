@@ -8,16 +8,16 @@
 #include <unordered_map>
 
 #define there_are_particles             true
+  #define particles_are_diagnosed       true
   #define there_are_plasma_electrons    true
   #define there_are_plasma_ions         false
   #define there_are_beam_electrons      false
   #define there_are_beam_ions           false
   #define density_beam_profile_is_set   false
-  #define particles_are_diagnosed       true
 
-#define there_are_fields                false
-  #define there_are_Bz0                 true
+#define there_are_fields                true
   #define fields_are_diagnosed          true
+  #define there_are_Bz0                 false
 
 inline const double e   = 1.0;
 inline const double me  = 1.0;
@@ -26,13 +26,13 @@ inline const double Mp  = 1836.0;
 inline const std::string dir_name = "./results/test_dir_name";
 inline const int NUM_THREADS = 2;
 
-inline const double dx 	= 0.05;
-inline const double dy	= 0.05;
+inline const double dx  = 0.05;
+inline const double dy  = 0.05;
 inline const int SIZE_X = 200;
 inline const int SIZE_Y = 200;
 
-inline const double dt 	= 0.5 * dx;
-inline const int TIME	= 10'000;
+inline const double dt = 0.5 * dx;
+inline const int TIME  = 10'000;
 
 inline const int diagnose_time_step = 5;
 
@@ -76,7 +76,7 @@ inline const umap<std::string,
         "Esirkepov_density_decomposition",
     }},
     // Diagnostics with their config parameters
-    { "density", { "0", "10", "0.05", "0", "10", "0.05" }},
+    { "density", { "0", "0", "10", "10", "0.05", "0.05" }},
   }},
 #endif
 
@@ -88,11 +88,9 @@ inline const double damping_factor = 0.8;
 
 inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
 #if there_are_fields && fields_are_diagnosed
-  { "whole_field", { "E", "x", "1000", "2000", "1000", "2000" } },
-  { "whole_field", { "E", "y", "1000", "2000", "1000", "2000" } },
-  { "whole_field", { "j", "x", "1000", "2000", "1000", "2000" } },
-  { "whole_field", { "j", "y", "1000", "2000", "1000", "2000" } },
-  { "whole_field", { "B", "z", "1000", "2000", "1000", "2000" } },
+  { "whole_field", { "E", "x", "0", "0", "200", "200" }},
+  { "whole_field", { "E", "y", "0", "0", "200", "200" }},
+  { "whole_field", { "B", "z", "0", "0", "200", "200" }},
 #endif
 };
 

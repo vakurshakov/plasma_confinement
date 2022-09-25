@@ -1,177 +1,174 @@
-#include "distribution_moment.hpp" 
-
-#include "../particles/particle/particle.hpp"
+#include "distribution_moment.hpp"
+#include "src/file_writers/bin_file.hpp"
 
 namespace fs = std::filesystem;
 
+distribution_moment::distribution_moment(
+  std::string result_directory,
+  const Particles& particles,
+  std::unique_ptr<Moment> moment,
+  std::unique_ptr<Projector2D> projector)
+  : Diagnostic(result_directory + "/" +
+    moment->name + "_of_" + projector->axes_names),
+    particles_(particles) {
+  moment_ = std::move(moment);
+  projector_ = std::move(projector);
 
-//------- additional ------------------------------------------------------------------------------
-const vector3 get_velocity(const Particle& particle)
-{
-	double m = particle.m();
-	const vector3& p = particle.point.p;
+  min_[X] = int(projector_->area.min[X] / projector_->area.dp[X]);
+  min_[Y] = int(projector_->area.min[Y] / projector_->area.dp[Y]);
+  max_[X] = int(projector_->area.max[X] / projector_->area.dp[X]);
+  max_[Y] = int(projector_->area.max[Y] / projector_->area.dp[Y]);
+  data_.reserve((max_[X] - min_[X]) * (max_[Y] - min_[Y]));
 
-	return p / sqrt(m * m + p.dot(p));
+  save_parameters();
+}
+
+void distribution_moment::save_parameters() const {
+  fs::create_directories(fs::path(result_directory_));
+
+  std::ofstream diagnostic_parameters_((result_directory_ +
+    "/parameters.txt").c_str(), std::ios::out);
+
+  diagnostic_parameters_ << "#TIME, dt, DTS\n" <<
+    TIME << " " << dt << " " << diagnose_time_step << " \n";
+
+  diagnostic_parameters_ << "#npx_min, npx_max, dpx\n" <<
+    min_[X] << " " << max_[X] << " " << projector_->area.dp[X] << " \n";
+
+  diagnostic_parameters_ << "#npy_min, npy_max, dpy\n" <<
+    min_[Y] << " " << max_[Y] << " " << projector_->area.dp[Y] << " \n";
+
+  diagnostic_parameters_ << "#sizeof(float), CHAR_BIT\n" <<
+    sizeof(float) << " " << CHAR_BIT << " " << std::endl;
+}
+
+void distribution_moment::diagnose(int t) {
+  if (t % diagnose_time_step != 0) return;
+
+  PROFILE_FUNCTION();
+
+  file_for_results_ = std::make_unique<BIN_File>(
+    result_directory_, std::to_string(t));
+
+  collect();
+
+  for (int npy = 0; npy < (max_[Y] - min_[Y]); ++npy) {
+  for (int npx = 0; npx < (max_[X] - min_[X]); ++npx) {
+    file_for_results_->write(data_[npy * (max_[X] - min_[X]) + npx]);
+  }}
+
+  reset();
+}
+
+void distribution_moment::collect() {
+  int Np = particles_.get_parameters().Np();
+
+  #pragma omp parallel for
+  for (const auto& particle : particles_.get_particles()) {
+    double pr_x = projector_->get_x(particle);
+    double pr_y = projector_->get_y(particle);
+
+    int npx = int(round(pr_x / projector_->area.dp[X]));
+    int npy = int(round(pr_y / projector_->area.dp[Y]));
+
+    if ((min_[X] < npx && npx < max_[X]) &&
+        (min_[Y] < npy && npy < max_[Y])) {
+      #pragma omp atomic
+      data_[(npy - min_[Y]) * (max_[X] - min_[X]) +
+        (npx - min_[X])] += moment_->get(particle) / Np;
+    }
+    else continue;
+  }
+}
+
+void distribution_moment::reset() {
+  #pragma omp parallel for
+  for (auto npy = 0; npy < (max_[Y] - min_[Y]); ++npy) {
+  for (auto npx = 0; npx < (max_[X] - min_[X]); ++npx) {
+    data_[npy * (max_[X] - min_[X]) + npx] = 0;
+  }}
 }
 
 
-//------- projectors ------------------------------------------------------------------------------
-double XY_projector::project_to_x(const Particle& particle) const
-{
-	return particle.point.x();
+inline double get_zeroth_moment(const Particle& particle) {
+  return particle.n();
 }
 
-double XY_projector::project_to_y(const Particle& particle) const
-{
-	return particle.point.y();
+inline double get_first_Vx_moment(const Particle& particle) {
+  return particle.velocity().x();
 }
 
-
-double VxVy_projector::project_to_x(const Particle& particle) const
-{
-	return get_velocity(particle).x();
+inline double get_first_Vy_moment(const Particle& particle) {
+  return particle.velocity().y();
 }
 
-double VxVy_projector::project_to_y(const Particle& particle) const
-{
-	return get_velocity(particle).y();
+inline double get_first_Vr_moment(const Particle& particle) {
+  double x = particle.point.x() - 0.5 * SIZE_X * dx;
+  double y = particle.point.y() - 0.5 * SIZE_Y * dy;
+  double r = sqrt(x * x + y * y);
+
+  // Частицы, близкие к центру не учитываются
+  if (!std::isfinite(1. / r)) return 0;
+
+  return particle.velocity().x() * (+x / r) +
+    particle.velocity().y() * (y / r);
 }
 
+inline double get_first_Vphi_moment(const Particle& particle) {
+  double x = particle.point.x() - 0.5 * SIZE_X * dx;
+  double y = particle.point.y() - 0.5 * SIZE_Y * dy;
+  double r = sqrt(x * x + y * y);
 
-//------- moment ----------------------------------------------------------------------------------
-double zeroth_moment::get_quantity_to_be_averaged_(const Particle& particle) const
-{
-	return particle.n();
+  // Частицы, близкие к центру не учитываются
+  if (!std::isfinite(1. / r)) return 0;
+
+  return particle.velocity().x() * (-y / r) +
+    particle.velocity().y() * (x / r);
 }
 
-
-double first_Vx_moment::get_quantity_to_be_averaged_(const Particle& particle) const
-{
-	return get_velocity(particle).x();
-}
-
-
-double first_Vy_moment::get_quantity_to_be_averaged_(const Particle& particle) const
-{
-	return get_velocity(particle).y();
-}
-
-
-double first_Vr_moment::get_quantity_to_be_averaged_(const Particle& particle) const
-{
-	double x = particle.point.x() - 0.5 * SIZE_X * dx;
-	double y = particle.point.y() - 0.5 * SIZE_Y * dy;
-	double r = sqrt(x * x + y * y);
-
-	// Частицы, близкие к центру не учитываются
-	if (!std::isfinite(1. / r)) return 0.;
-
-	return get_velocity(particle).x() * (+x / r) + get_velocity(particle).y() * (y / r);
-}
-
-
-double first_Vphi_moment::get_quantity_to_be_averaged_(const Particle& particle) const
-{
-	double x = particle.point.x() - 0.5 * SIZE_X * dx;
-	double y = particle.point.y() - 0.5 * SIZE_Y * dy;
-	double r = sqrt(x * x + y * y);
-
-	// Частицы, близкие к центру не учитываются 
-	if (!std::isfinite(1. / r)) return 0.;
-
-	return get_velocity(particle).x() * (-y / r) + get_velocity(particle).y() * (x / r);
+Moment::Moment(std::string name) : name(name) {
+  if (name == "zeroth_moment") {
+    get = get_zeroth_moment;
+  }
+  else if (name == "first_Vx_moment") {
+    get = get_first_Vx_moment;
+  }
+  else if (name == "first_Vy_moment") {
+    get = get_first_Vy_moment;
+  }
+  else if (name == "first_Vr_moment") {
+    get = get_first_Vr_moment;
+  }
+  else if (name == "first_Vphi_moment") {
+    get = get_first_Vphi_moment;
+  }
 }
 
 
-
-distribution_moment::distribution_moment(std::string directory_path,
-	/*additional*/
-	double px_min, double px_max, double dpx,
-	double py_min, double py_max, double dpy,
-	std::unique_ptr<Projector> projector,
-	std::unique_ptr<Moment>    moment	)
-	: 	Particles_diagnostic(
-			directory_path + "/" +
-			moment->get_moment_name() + "_of_" +
-			projector->get_axes_names())
-	{
-		dpx_ = dpx;
-		dpy_ = dpy;
-		npx_min_ = int(round(px_min / dpx_));
-		npy_min_ = int(round(py_min / dpy_));
-		npx_max_ = int(round(px_max / dpx_));
-		npy_max_ = int(round(py_max / dpy_));
-
-		projector_ = std::move(projector);
-		moment_	   = std::move(moment);
-
-		data_.reserve((npx_max_ - npx_min_) * (npy_max_ - npy_min_));
-
-		this->save_parameters(directory_path_);
-	}
-
-
-void distribution_moment::save_parameters(std::string directory_path) 
-{	
-	fs::create_directories(fs::path(directory_path));
-	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
-	diagnostic_parameters_ << "#TIME, dt, DTS" << std::endl;
-	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
-	diagnostic_parameters_ << "#npx_min, npx_max, dpx" << std::endl;
-	diagnostic_parameters_ << npx_min_ << " " << npx_max_ << " " << dpx_ << " " << std::endl;
-	diagnostic_parameters_ << "#npy_min, npy_max, dpy" << std::endl;
-	diagnostic_parameters_ << npy_min_ << " " << npy_max_ << " " << dpy_ << " " << std::endl;
-	diagnostic_parameters_ << "#sizeof(float), CHAR_BIT" << std::endl;
-	diagnostic_parameters_ << sizeof(float) << " " << __CHAR_BIT__ << " " << std::endl;
+inline double project_to_x(const Particle& particle) {
+  return particle.point.x();
 }
 
-
-//! @todo interpolated particle density.
-void distribution_moment::collect(const Parameters& parameters, const std::vector<Particle>& particles)
-{
-	int Np = parameters.Np();
-
-	for (const auto& particle : particles) {
-		double pr_x = projector_->project_to_x(particle);
-		double pr_y = projector_->project_to_y(particle);
-
-		int npx = int(round(pr_x / dpx_));   
-		int npy = int(round(pr_y / dpy_));
-
-		if ((npx_min_ < npx && npx < npx_max_) &&
-			(npy_min_ < npy && npy < npy_max_))
-		{
-			data_[(npy - npy_min_) * (npx_max_ - npx_min_) +  (npx - npx_min_)]
-				+= moment_->get_quantity_to_be_averaged_(particle) / Np;
-		}
-		else continue;
-	}
+inline double project_to_y(const Particle& particle) {
+  return particle.point.y();
 }
 
-
-void distribution_moment::clear()
-{
-	#pragma omp parallel for
-	for (auto npy = 0; npy < (npx_max_ - npx_min_); ++npy) {
-	for (auto npx = 0; npx < (npy_max_ - npy_min_); ++npx) {
-		data_[ npy * (npx_max_ - npx_min_) + npx ] = 0;
-	}}
+inline double project_to_vx(const Particle& particle) {
+  return particle.velocity().x();
 }
 
+inline double project_to_vy(const Particle& particle) {
+  return particle.velocity().y();
+}
 
-void distribution_moment::diagnose(
-	const Parameters& parameters, const std::vector<Particle>& particles, int t)
-	{
-		if ((t % diagnose_time_step) == 0) {
-		
-	file_for_results_ = std::make_unique<BIN_File>(directory_path_, std::to_string(t));
-
-		this->collect(parameters, particles);
-
-		for (auto npy = 0; npy < (npx_max_ - npx_min_); ++npy) {
-		for (auto npx = 0; npx < (npy_max_ - npy_min_); ++npx) {
-			file_for_results_->write(data_[ npy * (npx_max_ - npx_min_) + npx ]);
-		}}
-
-		this->clear();
-	}}
+Projector2D::Projector2D(std::string axes_names, diag_area area)
+    : axes_names(axes_names), area(area) {
+  if (axes_names == "XY") {
+    get_x = project_to_x;
+    get_y = project_to_y;
+  }
+  else if (axes_names == "VxVy") {
+    get_x = project_to_vx;
+    get_y = project_to_vy;
+  }
+}

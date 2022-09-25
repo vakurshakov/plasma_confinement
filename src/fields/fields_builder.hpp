@@ -4,21 +4,19 @@
 #include "src/pch.h"
 #include "src/vectors/vector3_field.hpp"
 #include "src/fields/open_boundaries_processor.hpp"
-#include "src/diagnostics/diagnostics.hpp"
-
-using std::map, std::multimap, std::string, std::vector;
+#include "src/diagnostics/diagnostic.hpp"
 
 class Fields_builder {
  public:
   Fields_builder() = default;
 
   std::unique_ptr<vector3_field>
-  build_field(string type);
+  build_field(std::string type);
 
   Boundaries_processor_up
   build_boundary_processor(vector3_field& E, vector3_field& B);
 
-	vector<std::unique_ptr<Fields_diagnostic>>
+	std::vector<std::unique_ptr<Diagnostic>>
   build_diagnostics();
 };
 

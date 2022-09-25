@@ -4,11 +4,9 @@
 
 #include "src/vectors/vector_classes.hpp"
 #include "src/particles/particles_load.hpp"
-#include "src/diagnostics/chosen_particles.hpp"
-
-#include "src/managers/time_manager.hpp"
 
 Particles::Particles(Particles_builder& builder) {
+  sort_name_ = builder.get_sort_name();
   parameters_ = builder.build_parameters();
 
   push_ = builder.build_pusher();
@@ -24,8 +22,6 @@ Particles::Particles(Particles_builder& builder) {
       config::domain_top
     )
   );
-
-  diagnostics_ = builder.build_diagnostics();
 }
 
 /// @warning Algorithm ends up with seg. fault
@@ -50,23 +46,14 @@ void Particles::push() {
     vector3 local_E = {0., 0., 0.};
     vector3 local_B = {0., 0., 0.};
 
-    // interpolate(interpolation_, r0, local_E, local_B);
+    interpolate(interpolation_, r0, local_E, local_B);
     push(push_, *it, local_E, local_B);
-    // decompose(decomposition_, *it, r0);
+    decompose(decomposition_, *it, r0);
 
     boundaries_processor_->add(it->point, r0);
   }
 }
   boundaries_processor_->remove();
-}
-
-void Particles::diagnose(int t) const {
-  PROFILE_FUNCTION();
-
-  #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
-  for (auto& diagnostic : diagnostics_) {
-    diagnostic->diagnose(parameters_, particles_, t);
-  }
 }
 
 /**

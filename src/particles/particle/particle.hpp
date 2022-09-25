@@ -20,6 +20,10 @@ class Particle {
   double q() const { return parameters->q(id); };
   double m() const { return parameters->m(); }
 
+  vector3 velocity() const {
+    return point.p / sqrt(m() * m() + point.p.square());
+  }
+
  protected:
   size_t id;
 

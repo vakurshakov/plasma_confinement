@@ -22,8 +22,8 @@ SOLVERS     := FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp \
 MANAGERS    := fields.cpp fields_builder.cpp particles.cpp \
             particles_builder.cpp particles_load.cpp manager.cpp
 FIELDS 			:= add_Bz0.cpp open_boundaries_processor.cpp
-DIAGNOSTICS := energy.cpp whole_field.cpp field_along_the_line.cpp field_at_point.cpp \
-						distribution_moment.cpp chosen_particles.cpp single_field.cpp
+DIAGNOSTICS := energy.cpp whole_field.cpp field_on_segment.cpp field_at_point.cpp \
+						distribution_moment.cpp chosen_particles.cpp diagnostics_builder.cpp
 COMMANDS    := set_particles.cpp copy_coordinates.cpp clone_layer_particles.cpp \
             magnetic_field_half_step.cpp
 FILEWRITERS := txt_file.cpp bin_file.cpp

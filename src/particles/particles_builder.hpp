@@ -12,28 +12,26 @@ class Particles_builder {
   Particles_builder(Fields& fields);
 
   void set_sort(const std::string& sort_name);
+  const std::string& get_sort_name() const { return sort_name_; }
 
   Parameters build_parameters();
 
   std::unique_ptr<Pusher>
   build_pusher();
-  
+
   std::unique_ptr<Interpolation>
   build_interpolation(const Parameters&);
-  
+
   std::unique_ptr<Decomposition>
   build_decomposition(const Parameters&);
 
-  std::vector<std::unique_ptr<Particles_diagnostic>>
-  build_diagnostics();
- 
  private:
   Fields& fields_;
 
   std::vector<std::string> get_description(const std::string& parameter);
 
   std::string sort_name_ = "undefined";
-  config::umap<string, vector<string>> sort_description_;
+  config::umap<std::string, std::vector<std::string>> sort_description_;
   std::vector<std::string> sort_parameters_;
   std::vector<std::string> sort_integration_steps_;
 };
