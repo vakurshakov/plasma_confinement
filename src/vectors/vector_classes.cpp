@@ -1,5 +1,7 @@
 #include "vector_classes.hpp"
 
+#include <cmath>
+
 vector2::vector2(double x, double y)
   : vec{x, y} {}
 
@@ -33,6 +35,14 @@ double vector3::dot(const vector3 &other) const {
     this->vec[X] * other.vec[X] +
     this->vec[Y] * other.vec[Y] +
     this->vec[Z] * other.vec[Z];
+}
+
+double vector3::square() const {
+  return this->dot(*this);
+}
+
+double vector3::l2_norm() const {
+  return sqrt(this->square());
 }
 
 vector3 vector3::cross(const vector3 &other) const {

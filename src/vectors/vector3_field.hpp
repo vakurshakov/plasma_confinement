@@ -8,75 +8,79 @@
  * @brief This class provides an interface for a vector field.
  * It proxies indexing at the border, so simple boundary
  * conditions automatically works.
- * 
+ *
+ * @todo Replace .g(y, x) onto .g(x, y) everywhere.
  * @todo Refactor this class to adopting strategies.
- * @todo Replace vector<vector3> and get_vector
- * by vector<double> and indexing_impl.
  */
 class vector3_field {
-public:
-	vector3_field() = default;
+ public:
+  vector3_field() = default;
 
-	vector3_field(int size_x, int size_y);
+  vector3_field(int size_x, int size_y);
 
-	virtual ~vector3_field() = default;
+  virtual ~vector3_field() = default;
 
-	int size_x() const { return size_x_; }
-	int size_y() const { return size_y_; }
+  int size_x() const { return size_x_; }
+  int size_y() const { return size_y_; }
 
-	virtual int ix_first (Axis) const = 0;
-	virtual int iy_first (Axis) const = 0;
-	virtual int ix_last	 (Axis) const = 0;
-	virtual int iy_last	 (Axis) const = 0;
+  virtual int ix_first (Axis ax) const = 0;
+  virtual int iy_first (Axis ax) const = 0;
+  virtual int ix_last	(Axis ax) const = 0;
+  virtual int iy_last	(Axis ax) const = 0;
 
-	double& x(int ny, int nx);
-	double& y(int ny, int nx);
-	double& z(int ny, int nx);
+  double& x(int ny, int nx);
+  double& y(int ny, int nx);
+  double& z(int ny, int nx);
 
-	double x(int ny, int nx) const;
-	double y(int ny, int nx) const;
-	double z(int ny, int nx) const;
+  double x(int ny, int nx) const;
+  double y(int ny, int nx) const;
+  double z(int ny, int nx) const;
 
-protected:
-	int size_x_, size_y_;
-	std::vector<vector3> field_;
+  virtual vector3& operator()(Axis ax, int ny, int nx) = 0;
+  virtual const vector3& operator()(int ny, int nx) const = 0;
 
-	virtual vector3& get_vector(Axis, int ny, int nx) = 0;
-	virtual const vector3&  get_vector(int ny, int nx) const = 0;
+ protected:
+  int size_x_, size_y_;
+  std::vector<vector3> field_;
 };
+
 
 class px_py_vector3_field : public vector3_field {
-public:
-	px_py_vector3_field(int size_x, int size_y)
-		: vector3_field(size_x, size_y) {};
+ public:
+  px_py_vector3_field(int size_x, int size_y);
 
-	int ix_first (Axis) const override;
-	int iy_first (Axis) const override;
-	int ix_last	 (Axis) const override;
-	int iy_last	 (Axis) const override;
+  int ix_first (Axis ax) const override;
+  int iy_first (Axis ax) const override;
+  int ix_last	(Axis ax) const override;
+  int iy_last	(Axis ax) const override;
 
-private:
-	vector3& get_vector(Axis axis, int ny, int nx) override;
-	const vector3&  get_vector(int ny, int nx) const override;
+  vector3& operator()(Axis ax, int ny, int nx) override;
+  const vector3& operator()(int ny, int nx) const override;
 };
 
+
 class rx_ry_vector3_field : public vector3_field {
-public:
-	rx_ry_vector3_field(std::string type, int size_x, int size_y);
+ public:
+  rx_ry_vector3_field(std::string type, int size_x, int size_y);
 
-	int ix_first (Axis) const override;
-	int iy_first (Axis) const override;
-	int ix_last	 (Axis) const override;
-	int iy_last	 (Axis) const override;
+  int ix_first (Axis ax) const override;
+  int iy_first (Axis ax) const override;
+  int ix_last	(Axis ax) const override;
+  int iy_last	(Axis ax) const override;
 
-private:
-	enum Boundaries { left=3*0, right=3*1, upper=3*2, lower=3*3 };
-	double bound[3*4];
-	
-	vector3 zero_ = {0, 0, 0};
+  vector3& operator()(Axis ax, int ny, int nx) override;
+  const vector3& operator()(int ny, int nx) const override;
 
-	vector3& get_vector(Axis axis, int ny, int nx) override;
-	const vector3&  get_vector(int ny, int nx) const override;
+ private:
+  struct index_boundaries {
+    int left[3];
+    int lower[3];
+    int right[3];
+    int upper[3];
+  };
+
+  index_boundaries bound_;
+  vector3 zero_ = {0, 0, 0};
 };
 
 #endif  // SRC_VECTORS_VECTOR3_FIELD_HPP
