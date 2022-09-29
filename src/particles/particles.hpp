@@ -4,9 +4,9 @@
 #include "src/pch.h"
 #include "src/particles/particle/particle.hpp"
 #include "src/solvers/abstract_strategies.hpp"
-#include "src/particles/particles_builder.hpp"
 
-#include "src/particles/particle-boundary_processor.hpp"
+#include "particle-boundary_processor.hpp"
+#include "particles_builder.hpp"
 
 class Particles {
  public:

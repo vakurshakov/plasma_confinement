@@ -50,14 +50,14 @@ void Plasma_boundary_processor::add(
 
 inline bool Plasma_boundary_processor::
 passed_through_left(double x0, double ref_x) const {
-  return 
+  return
     x0 - geom_.left < dx &&
     ref_x - geom_.left > dx;
 }
 
 inline bool Plasma_boundary_processor::
 passed_through_right(double x0, double ref_x) const {
-  return 
+  return
     geom_.right - x0 < dx &&
     geom_.right - ref_x > dx;
 }
@@ -65,6 +65,8 @@ passed_through_right(double x0, double ref_x) const {
 // Passing of a particle to the buffer cell is
 // followed by its removing from the simulation
 void Plasma_boundary_processor::remove() {
+  PROFILE_FUNCTION();
+
   auto new_last = std::remove_if(
     particles_vec_.begin(),
     particles_vec_.end(),

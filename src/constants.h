@@ -19,6 +19,8 @@
   #define fields_are_diagnosed          true
   #define there_are_Bz0                 false
 
+#define TIME_PROFILING 1
+
 inline const double e   = 1.0;
 inline const double me  = 1.0;
 inline const double Mp  = 1836.0;
@@ -32,7 +34,7 @@ inline const int SIZE_X = 200;
 inline const int SIZE_Y = 200;
 
 inline const double dt = 0.5 * dx;
-inline const int TIME  = 10'000;
+inline const int TIME  = 1000;
 
 inline const int diagnose_time_step = 5;
 

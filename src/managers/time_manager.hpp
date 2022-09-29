@@ -12,7 +12,8 @@
 
 struct Profile_result {
   std::string name;  // recorded profile;
-  int64_t duration;  // elapsed time in miliseconds;
+  int64_t start;     // profile beginning in microseconds;
+  int64_t duration;  // elapsed time in microseconds;
   int thread_num;    // thread number given by omp call.
 };
 
@@ -42,6 +43,7 @@ class Instrumentor {
 
     output_stream_ << "  {";
     output_stream_ << " \"name\": \"" << name << "\",";
+    output_stream_ << " \"start\": " << result.start << ",";
     output_stream_ << " \"dur\": " << result.duration << ",";
     output_stream_ << " \"tid\": " << result.thread_num << " }";
     output_stream_.flush();
@@ -81,13 +83,19 @@ class Instrumentation_timer {
 
   void stop() {
     auto end = std::chrono::steady_clock::now();
+
+    auto start = std::chrono::duration_cast<
+      std::chrono::microseconds>(start_.time_since_epoch());
+
     auto elapsed = std::chrono::duration_cast<
-                    std::chrono::microseconds>(end - start_);
-    
+      std::chrono::microseconds>(end - start_);
+
     #pragma omp critical
     {
       int thread_num = omp_get_thread_num();
-      Instrumentor::get().write_profile({ name_, elapsed.count(), thread_num });
+      Instrumentor::get().write_profile({
+        name_, start.count(), elapsed.count(), thread_num
+      });
     }
 
     stopped_ = true;
@@ -99,7 +107,6 @@ class Instrumentation_timer {
   bool stopped_;
 };
 
-#define TIME_PROFILING 1
 #if TIME_PROFILING
 #define BEGIN_SESSION(filepath)  ::Instrumentor::get().begin_session(filepath)
 #define END_SESSION()            ::Instrumentor::get().end_session()

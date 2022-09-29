@@ -43,9 +43,9 @@ void distribution_moment::save_parameters() const {
 }
 
 void distribution_moment::diagnose(int t) {
-  if (t % diagnose_time_step != 0) return;
-
   PROFILE_FUNCTION();
+  
+  if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
     result_directory_, std::to_string(t));

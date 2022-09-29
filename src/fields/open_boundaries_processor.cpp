@@ -15,6 +15,8 @@ Open_boundaries_processor::Open_boundaries_processor(
     layer(layer) {}
 
 void Open_boundaries_processor::process() {
+  PROFILE_FUNCTION();
+
   left_right_bounds();
   top_bottom_bounds();
 }

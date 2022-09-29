@@ -1,5 +1,4 @@
 #include "src/fields/fields.hpp"
-#include "src/solvers/FDTD.hpp"
 
 Fields::Fields(Fields_builder& builder) {
   E_ = builder.build_field("Electric");

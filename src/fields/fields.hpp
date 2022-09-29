@@ -3,8 +3,8 @@
 
 #include "src/pch.h"
 #include "src/vectors/vector3_field.hpp"
-#include "src/fields/open_boundaries_processor.hpp"
 
+#include "open_boundaries_processor.hpp"
 #include "fields_builder.hpp"
 
 class Fields {
@@ -29,5 +29,7 @@ private:
   v3f_up E_, B_, J_;
   Boundaries_processor_up boundary_processor_;
 };
+
+void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J);
 
 #endif  // SRC_FIELDS_MANAGERS_FIELDS_HPP
