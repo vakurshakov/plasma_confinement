@@ -9,7 +9,7 @@ OBJDIR := bin-int
 
 VPATH := src/
 VPATH += src/diagnostics/ src/fields/ src/file_writers/ src/managers/ src/solvers/
-VPATH += src/vectors/ src/command/ src/particles/ src/particles/particle/
+VPATH += src/vectors/ src/command/ src/particles/ src/particles/particle/ src/utils/transition_layer
 
 # Precompiled header
 PCH := pch.h
@@ -21,20 +21,21 @@ SOLVERS     := FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp \
            concrete_point_interpolation.cpp
 MANAGERS    := fields.cpp fields_builder.cpp particles.cpp \
             particles_builder.cpp particles_load.cpp manager.cpp
-FIELDS 			:= add_Bz0.cpp open_boundaries_processor.cpp
+FIELDS      := add_Bz0.cpp open_boundaries_processor.cpp
 DIAGNOSTICS := energy.cpp whole_field.cpp field_on_segment.cpp field_at_point.cpp \
-						distribution_moment.cpp chosen_particles.cpp diagnostics_builder.cpp
+            distribution_moment.cpp chosen_particles.cpp diagnostics_builder.cpp
 COMMANDS    := set_particles.cpp copy_coordinates.cpp clone_layer_particles.cpp \
-            magnetic_field_half_step.cpp
+            magnetic_field_half_step.cpp set_Bz_distribution.cpp
 FILEWRITERS := txt_file.cpp bin_file.cpp
+UTILS       := parameter_function.cpp particles_distribution.cpp 
 
-SRCs := $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(FIELDS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN)
+SRCs := $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(FIELDS) $(FILEWRITERS) $(DIAGNOSTICS) $(SOLVERS) $(MAIN) $(UTILS)
 OBJs := $(SRCs:%.cpp=$(OBJDIR)/%.o)
 DEPs := $(OBJs:$(OBJDIR)/%.o=$(OBJDIR)/%.d)
 
 all: $(PCH).gch $(RESDIR)/$(EXECUTABLE)
 
--include $(DEPs) 
+-include $(DEPs)
 
 $(PCH).gch: $(PCH)
 	@echo -e "\033[0;33m\nCompiling header src/pch.h.\033[0m"
@@ -64,4 +65,3 @@ clean:
 .INTERMEDIATE: message_compiling
 message_compiling:
 	@echo -e "\033[0;33m\nCompiling files from src/**.\033[0m"
-	

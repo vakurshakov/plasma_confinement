@@ -37,3 +37,8 @@ private:
     Random_generator(Random_generator&&) = delete;
     Random_generator& operator=(Random_generator&&) = delete;
 };
+
+inline double random_01() {
+  static auto distribution = std::uniform_real_distribution(0., std::nextafter(1., 2.));
+  return distribution(Random_generator::get());
+}

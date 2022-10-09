@@ -18,7 +18,7 @@ class Manager {
   using Diagnostic_up = std::unique_ptr<Diagnostic>;
   std::vector<Diagnostic_up> diagnostics_;
 
-  void diagnose(int t) const;
+  void diagnose(size_t t) const;
 
   using Command_up = std::unique_ptr<Command>;
   std::list<Command_up> step_presets_;

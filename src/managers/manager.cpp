@@ -1,6 +1,6 @@
 #include "manager.hpp"
 
-#include "src/command/cmd_add_Bz0.hpp"
+#include "src/command/set_Bz_distribution.hpp"
 #include "src/command/magnetic_field_half_step.hpp"
 #include "src/command/set_particles.hpp"
 #include "src/command/clone_layer_particles.hpp"
@@ -8,6 +8,8 @@
 #include "src/fields/fields_builder.hpp"
 #include "src/particles/particles_builder.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
+
+#include "src/utils/transition_layer/particles_distribution.hpp"
 
 void Manager::initializes() {
   PROFILE_FUNCTION();
@@ -21,37 +23,26 @@ void Manager::initializes() {
   step_presets_.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
 
 #if there_are_Bz0
-  presets.push_back(std::make_unique<Add_Bz0>(&fields_, config::Bz0));
+  presets.push_back(std::make_unique<Set_Bz_distribution>(&fields_));
 #endif
 #endif
 
+#if there_are_particles && there_are_plasma_ions
   Particles_builder particles_builder(fields_);
 
-  particles_builder.set_sort("plasma_electrons");
-  Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
+  particles_builder.set_sort("plasma_ions");
+  Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
+  auto generator = std::make_unique<transition_layer::Random_coordinate_generator>();
+  int num_particles_to_load = generator->get_particles_number();
   presets.push_back(std::make_unique<Set_particles>(
-    &plasma_electrons, 10'000 /* чтобы не происходило ресайзов неожиданных */,
-    [] (int cx, int cy) -> bool {
-      return
-        (cx == config::domain_left / dx + 3 && cy == SIZE_Y / 2 + 5) ||
-        (cx == config::domain_left / dx + 3 && cy == SIZE_Y / 2 - 5);
-    },
-    [] (double x, double y,
-        double mass, double Tx, double Ty, double Tz,
-        double p0, double *px, double *py, double *pz) -> void {
-      *px = -1e-2;
-      *py = 0.0;
-      *pz = 0.0;
-    },
-    [] (int, int, int nx, int ny, double *x, double *y) -> void {
-      *x = nx * dx;
-      *y = ny * dy;
-    }
+    &plasma_ions, num_particles_to_load,
+    std::move(generator),
+    transition_layer::load_ions_impulse
   ));
 
   step_presets_.push_back(std::make_unique<Clone_layer_particles>(
-    &plasma_electrons,
+    &plasma_ions,
     Domain_geometry(
       config::domain_left,
       config::domain_right,
@@ -59,6 +50,7 @@ void Manager::initializes() {
       config::domain_top
     )
   ));
+#endif
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);
   diagnostics_ = diagnostics_builder.build();
@@ -71,19 +63,8 @@ void Manager::initializes() {
 }
 
 void Manager::calculates() {
-  for (int t = 1; t <= TIME; ++t) {
+  for (size_t t = 1u; t <= TIME; ++t) {
     PROFILE_SCOPE("one timestep");
-
-    // Removing unnecessary elements.
-    step_presets_.remove_if(
-    [t] (const Command_up& command) {
-      return command->needs_to_be_removed(t);
-    });
-
-    // Executing the rest of the commands.
-    for (const auto& command : step_presets_) {
-      command->execute(t);
-    }
 
 #if there_are_particles
     for (auto& sort : particles_species_) {
@@ -99,7 +80,7 @@ void Manager::calculates() {
   }
 }
 
-void Manager::diagnose(int t) const {
+void Manager::diagnose(size_t t) const {
   PROFILE_FUNCTION();
 
   #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
