@@ -83,4 +83,12 @@ class rx_ry_vector3_field : public vector3_field {
   vector3 zero_ = {0, 0, 0};
 };
 
+class cx_py_vector3_field : public px_py_vector3_field {
+ public:
+  cx_py_vector3_field(int size_x, int size_y);
+
+  vector3& operator()(Axis /* axis */, int ny, int nx) override;
+  const vector3& operator()(int ny, int nx) const override;
+};
+
 #endif  // SRC_VECTORS_VECTOR3_FIELD_HPP

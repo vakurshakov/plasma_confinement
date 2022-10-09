@@ -13,6 +13,7 @@
 #include "src/pch.h"
 #include "src/vectors/vector3_field.hpp"
 
+/// @todo Data about layer geometry is duplicated, remove it 
 struct Damping_layer {
   int width;
   double damping_factor;

@@ -9,6 +9,18 @@ inline int periodic(int g, int begin, int end) {
   return pg;
 }
 
+inline int continuous(int x, int begin, int end) {
+  if (begin <= x && x < end) {
+    return x;
+  }
+  else if (x < begin) {
+    return begin;
+  }
+  else {
+    return end - 1;
+  }
+}
+
 inline bool in_bounds(int x, int begin, int end) {
   return begin <= x && x < end;
 }
@@ -44,25 +56,25 @@ const vector3& px_py_vector3_field::operator()(int ny, int nx) const {
 }
 
 vector3& px_py_vector3_field::operator()(Axis axis, int ny, int nx) {
-  int px = periodic(nx, ix_first(axis), ix_last(axis));
-  int py = periodic(ny, iy_first(axis), iy_last(axis));
+  int px = periodic(nx, 0, size_x_);
+  int py = periodic(ny, 0, size_y_);
 
   return field_[py * size_x_ + px];
 }
 
 
 rx_ry_vector3_field::rx_ry_vector3_field(std::string type, int size_x, int size_y)
-    :  vector3_field(size_x, size_y) {
+    : vector3_field(size_x, size_y) {
   if ( type == "Electric" ) {
     bound_.left [X] = 0;       bound_.left [Y] = 1;       bound_.left [Z] = 0;
     bound_.lower[X] = 1;       bound_.lower[Y] = 0;       bound_.lower[Z] = 0;
-    bound_.right[X] = size_x_; bound_.right[Y] = size_x;  bound_.right[Z] = size_x_-1;
+    bound_.right[X] = size_x_; bound_.right[Y] = size_x_; bound_.right[Z] = size_x_-1;
     bound_.upper[X] = size_y_; bound_.upper[Y] = size_y_; bound_.upper[Z] = size_y_-1;
   }
   else if (type == "Magnetic") {
     bound_.left [X] = 0;         bound_.left [Y] = 0;         bound_.left [Z] = 0;
     bound_.lower[X] = 0;         bound_.lower[Y] = 0;         bound_.lower[Z] = 0;
-    bound_.right[X] = size_x_-1; bound_.right[Y] = size_x;    bound_.right[Z] = size_x_;
+    bound_.right[X] = size_x_-1; bound_.right[Y] = size_x_;   bound_.right[Z] = size_x_;
     bound_.upper[X] = size_y_;   bound_.upper[Y] = size_y_-1; bound_.upper[Z] = size_y_;
   }
 }
@@ -80,7 +92,7 @@ const vector3& rx_ry_vector3_field::operator()(int ny, int nx) const {
   else {
     // const_cast<vector3&>(zero_) = {0, 0, 0};  // ???
     return zero_;
-  };
+  }
 }
 
 vector3& rx_ry_vector3_field::operator()(Axis axis, int ny, int nx) {
@@ -92,4 +104,21 @@ vector3& rx_ry_vector3_field::operator()(Axis axis, int ny, int nx) {
     zero_ = {0, 0, 0};
     return zero_;
   }
+}
+
+cx_py_vector3_field::cx_py_vector3_field(int size_x, int size_y)
+    : px_py_vector3_field(size_x, size_y) {}
+
+const vector3& cx_py_vector3_field::operator()(int ny, int nx) const {
+  int cx = continuous(nx, 0, size_x_);
+  int py = periodic(ny, 0, size_y_);
+  
+  return field_[py * size_x_ + cx];
+}
+
+vector3& cx_py_vector3_field::operator()(Axis /* axis */, int ny, int nx) {
+  int cx = continuous(nx, 0, size_x_);
+  int py = periodic(ny, 0, size_y_);
+  
+  return field_[py * size_x_ + cx];
 }
