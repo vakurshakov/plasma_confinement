@@ -8,6 +8,7 @@
 
 class Coordinate_generator {
  public:
+  virtual ~Coordinate_generator() = default;
   virtual void load(double* x, double* y) = 0;
 };
 

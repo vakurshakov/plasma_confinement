@@ -38,8 +38,8 @@ void distribution_moment::save_parameters() const {
   diagnostic_parameters_ << "#npy_min, npy_max, dpy\n" <<
     min_[Y] << " " << max_[Y] << " " << projector_->area.dp[Y] << " \n";
 
-  diagnostic_parameters_ << "#sizeof(float), CHAR_BIT\n" <<
-    sizeof(float) << " " << CHAR_BIT << " " << std::endl;
+  diagnostic_parameters_ << "#sizeof(float)\n" <<
+    sizeof(float) << " " << std::endl;
 }
 
 void distribution_moment::diagnose(int t) {
