@@ -34,6 +34,7 @@ void Particles::push() {
   auto interpolate = std::mem_fn(&Interpolation::process);
 
   auto particles_fixed_end = this->particles_.end();
+  int size = particles_fixed_end - particles_.begin();
 
 // firstprivate attribute initializes the thread-local variables
 // with the values of the original object outside of this scope
@@ -46,11 +47,17 @@ void Particles::push() {
     vector3 local_E = {0., 0., 0.};
     vector3 local_B = {0., 0., 0.};
 
-    interpolate(interpolation_, r0, local_E, local_B);
-    push(push_, *it, local_E, local_B);
-    decompose(decomposition_, *it, r0);
+    ACCUMULATIVE_PROFILE("field interpolation process", size,
+      interpolate(interpolation_, r0, local_E, local_B));
 
-    boundaries_processor_->add(it->point, r0);
+    ACCUMULATIVE_PROFILE("particle push process", size,
+      push(push_, *it, local_E, local_B));
+
+    ACCUMULATIVE_PROFILE("current decomposition process", size,
+      decompose(decomposition_, *it, r0));
+
+    ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
+      boundaries_processor_->add(it->point, r0));
   }
 }
   boundaries_processor_->remove();

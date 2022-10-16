@@ -9,7 +9,7 @@ OBJDIR := bin-int
 
 VPATH := src/
 VPATH += src/diagnostics/ src/fields/ src/file_writers/ src/managers/ src/solvers/
-VPATH += src/vectors/ src/command/ src/particles/ src/particles/particle/ src/utils/transition_layer
+VPATH += src/vectors/ src/command/ src/particles/ src/particles/particle/ src/utils/ src/utils/transition_layer
 
 # Precompiled header
 PCH := pch.h
@@ -20,7 +20,7 @@ PARTICLES   := particles_form-factors.cpp point_bound_interact.cpp particle-boun
 SOLVERS     := FDTD.cpp Boris_pusher.cpp Esirkepov_density_decomposition.cpp \
            concrete_point_interpolation.cpp
 MANAGERS    := fields.cpp fields_builder.cpp particles.cpp \
-            particles_builder.cpp particles_load.cpp manager.cpp
+            particles_builder.cpp particles_load.cpp time_manager.cpp manager.cpp
 FIELDS      := add_Bz0.cpp open_boundaries_processor.cpp
 DIAGNOSTICS := energy.cpp whole_field.cpp field_on_segment.cpp field_at_point.cpp \
             distribution_moment.cpp chosen_particles.cpp diagnostics_builder.cpp
@@ -33,13 +33,14 @@ SRCs := $(COMMANDS) $(VECTORS) $(PARTICLES) $(MANAGERS) $(FIELDS) $(FILEWRITERS)
 OBJs := $(SRCs:%.cpp=$(OBJDIR)/%.o)
 DEPs := $(OBJs:$(OBJDIR)/%.o=$(OBJDIR)/%.d)
 
-all: $(PCH).gch $(RESDIR)/$(EXECUTABLE)
+all: $(OBJDIR)/$(PCH).gch $(RESDIR)/$(EXECUTABLE)
 
 -include $(DEPs)
 
-$(PCH).gch: $(PCH)
+$(OBJDIR)/$(PCH).gch: $(PCH)
+	$(dir_guard)
 	@echo -e "\033[0;33m\nCompiling header src/pch.h.\033[0m"
-	$(CC) $(CFLAGs) $<
+	$(CC) $(CFLAGs) $< -o $@
 
 # Creates a directory for the target if it doesn't exist
 dir_guard=@mkdir -p $(@D)
@@ -59,9 +60,9 @@ $(OBJDIR)/%.d: %.cpp
 
 .PHONY: clean
 clean:
-	@rm $(DEPs) $(OBJs) $(RESDIR)/$(EXECUTABLE)
+	@rm $(OBJDIR)/$(PCH).gch $(DEPs) $(OBJs) $(RESDIR)/$(EXECUTABLE)
 
 # To prevent multiple messages
 .INTERMEDIATE: message_compiling
 message_compiling:
-	@echo -e "\033[0;33m\nCompiling files from src/**.\033[0m"
+	@echo -e "\033[0;33m\nCompiling other files from src/**.\033[0m"
