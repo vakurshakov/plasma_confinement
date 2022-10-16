@@ -41,7 +41,7 @@ void Open_boundaries_processor::left_right_bounds() {
       fields_B.y(y, x) *= coeff;
       fields_B.z(y, x) *= coeff;
 
-#if WAVES_RUNS_TO_THE_RIGHT
+#if 1 // WAVES_RUNS_TO_THE_RIGHT
       // right
       int right_x = (fields_E.size_x() - 1) - x;
 

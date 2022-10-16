@@ -9,7 +9,18 @@
 #include "src/particles/particles_builder.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
 
-#include "src/utils/transition_layer/particles_distribution.hpp"
+#include "src/managers/random_number_generator.hpp"
+#include "src/particles/particles_load.hpp"
+
+class Random_coordinate : public Coordinate_generator {
+ public:
+  Random_coordinate() = default;
+
+  void load(double *x, double *y) override {
+    *x = config::domain_left + random_01() * (config::domain_right - config::domain_left);
+    *y = random_01() * SIZE_Y * dy;
+  }
+};
 
 void Manager::initializes() {
   PROFILE_FUNCTION();
@@ -33,12 +44,11 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
-  auto generator = std::make_unique<transition_layer::Random_coordinate_generator>();
-  int num_particles_to_load = generator->get_particles_number();
+  int num_particles_to_load = pow(SIZE_X - 2 * config::damping_layer_width, 2) * config::Npi;
   presets.push_back(std::make_unique<Set_particles>(
     &plasma_ions, num_particles_to_load,
-    std::move(generator),
-    transition_layer::load_ions_impulse
+    std::make_unique<Random_coordinate>(),
+    load_uniform_impulse
   ));
 
   step_presets_.push_back(std::make_unique<Clone_layer_particles>(

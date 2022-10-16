@@ -14,7 +14,7 @@
 
 #define there_are_fields                true
   #define fields_are_diagnosed          true
-  #define there_are_Bz0                 true
+  #define there_are_Bz0                 false
 
 #define TIME_PROFILING                  true
 
@@ -23,18 +23,18 @@ inline const double me  = 1.0;
 inline const double Mp  = 1836.0;
 
 inline const std::string dir_name = "./results/test_dir_name";
-inline const int NUM_THREADS = 16;
+inline const int NUM_THREADS = 10;
 
 inline const double dx  = 0.05;
-inline const int SIZE_X = 200 / dx;
+inline const int SIZE_X = 180;
 
 inline const double dy  = 0.05;
-inline const int SIZE_Y = 40 / dy;
+inline const int SIZE_Y = 100;
 
 inline const double dt = 0.5 * dx;
-inline const int TIME  = 0;
+inline const int TIME  = 1'000;
 
-inline const int diagnose_time_step = 1;
+inline const int diagnose_time_step = 10;
 
 namespace config {
 
@@ -44,10 +44,10 @@ inline const double Omega_max = 0.5;
 inline const double n0 = 1.0;
 inline const int   Npe = 1;
 inline const double ni = 1.0;
-inline const int   Npi = 100;
+inline const int   Npi = 10;
 
 inline const double V_ions = 1.0 / 40.0;
-inline const double mi_me  = 400.0;
+inline const double mi_me  = 1.0; //  400.0;
 
 // Domain_geometry
 inline const double domain_left   = 40 * dx;
@@ -70,7 +70,7 @@ inline const umap<std::string,
         "global, " + to_string(+e),  // Particle charge [in units of e]
         to_string(mi_me),            // Particle mass [in units mₑ]
         to_string(Npi),              // Number of particles representing the density n0
-        "0", "0", "0",               // Temperature in x, y and z direction [in KeV]
+        "10e-3", "10e-3", "10e-3",   // Temperature in x, y and z direction [in KeV]
         to_string(V_ions)            // Absolute value of the initial impulse [in mₑc]
     }},
     { "integration_steps", {
@@ -79,9 +79,7 @@ inline const umap<std::string,
         "Esirkepov_density_decomposition",
     }},
     // Diagnostics with their config parameters
-    { "density",         { "0", "0", "200", "40", "0.05", "0.05" }},
-    { "first_Vx_moment", { "0", "0", "200", "40", "0.05", "0.05" }},
-    { "first_Vy_moment", { "0", "0", "200", "40", "0.05", "0.05" }},
+    { "density", { "0", "0", to_string(SIZE_X * dx), to_string(SIZE_Y * dy), "0.05", "0.05" }},
   }},
 #endif
 
@@ -113,9 +111,9 @@ inline const double damping_factor = 0.8;
 
 inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
 #if there_are_fields && fields_are_diagnosed
-  { "whole_field", { "E", "x", "0", "0", "4000", "800" }},
-  { "whole_field", { "E", "y", "0", "0", "4000", "800" }},
-  { "whole_field", { "B", "z", "0", "0", "4000", "800" }},
+  { "whole_field", { "E", "x", "0", "0", "180", "100" }},
+  { "whole_field", { "E", "y", "0", "0", "180", "100" }},
+  { "whole_field", { "B", "z", "0", "0", "180", "100" }},
 #endif
 };
 
