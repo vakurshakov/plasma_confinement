@@ -5,7 +5,6 @@
 #include "src/utils/transition_layer/parameter_function.hpp" 
 #include "src/managers/random_number_generator.hpp"
 
-/// @todo Check it is thread-safe
 static auto& __func = transition_layer::Parameter_function::instance();
 
 namespace transition_layer {
@@ -47,6 +46,7 @@ int Random_coordinate_generator::get_particles_number() const {
   return int(round(integral * SIZE_Y * config::Npi));
 }
 
+
 void load_ions_impulse(double x, double y,
 	  double mass, double Tx, double Ty, double Tz,
 	  double p0, double* px, double* py, double* pz) {
@@ -58,8 +58,8 @@ void load_ions_impulse(double x, double y,
     theta = - M_PI - asin(__func.get_value(x)) + random_01() * d_theta(x);
   }
 
-  *px = config::mi_me * config::V_ions * cos(theta);
-  *py = config::mi_me * config::V_ions * sin(theta);
+  *px = p0 * cos(theta);
+  *py = p0 * sin(theta);
   *pz = 0.0;
 }
 

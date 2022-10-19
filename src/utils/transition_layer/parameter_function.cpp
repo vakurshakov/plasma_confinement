@@ -1,9 +1,11 @@
 #include "parameter_function.hpp"
 
+#include "src/pch.h"
+
 namespace transition_layer {
 
 Parameter_function::Parameter_function() {
-  this->evaluate_from_file("src/utils/transition_layer/evaluated_function_20.0X0_0.05DX_400.0mi_me.bin");
+  this->evaluate_from_file(config::path_to_parameter_function);
 }
 
 /// Class is always carry some function table.
@@ -26,13 +28,13 @@ void Parameter_function::evaluate_from_file(const char* filename) {
 
   FILE* file = fopen(filename, "rb");
   if (!file) {
-    perror("failed to open");
+    perror((std::string("failed to open file: ") + filename).c_str());
     exit(EXIT_FAILURE);
   }
 
   struct stat sb;
   if (stat(filename, &sb) == -1) {
-    perror("failed to read stat");
+    perror((std::string("failed to read stat from file: ") + filename).c_str());
     exit(EXIT_FAILURE);
   }
 

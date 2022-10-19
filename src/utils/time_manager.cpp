@@ -62,7 +62,7 @@ void Instrumentation_timer::stop() {
   {
     const auto end = std::chrono::system_clock::now();
 
-    const auto elapsed = duration_cast<
+    const auto elapsed = std::chrono::duration_cast<
       std::chrono::microseconds>(end - start_);
 
     int thread_num = omp_get_thread_num();
