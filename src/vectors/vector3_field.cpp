@@ -1,19 +1,20 @@
 #include "vector3_field.hpp"
 
+// It doesn't include cases where begin > 0.
 inline int periodic(int g, int begin, int end) {
-  int pg = g % (end - begin);
+  int pg = g % end;
 
   if (g < begin)
-    pg += (end - 1);
+    pg += end;  // actually, not funny at all
 
   return pg;
 }
 
-inline int continuous(int x, int begin, int end) {
-  if (begin <= x && x < end) {
-    return x;
+inline int continuous(int g, int begin, int end) {
+  if (begin <= g && g < end) {
+    return g;
   }
-  else if (x < begin) {
+  else if (g < begin) {
     return begin;
   }
   else {
@@ -21,45 +22,54 @@ inline int continuous(int x, int begin, int end) {
   }
 }
 
-inline bool in_bounds(int x, int begin, int end) {
-  return begin <= x && x < end;
+inline bool in_bounds(int g, int begin, int end) {
+  return begin <= g && g < end;
 }
 
 
 vector3_field::vector3_field(int size_x, int size_y)
     : size_x_(size_x), size_y_(size_y) {
-  field_.reserve(size_x_ * size_y_);
+  fx_.reserve(size_x_ * size_y_);
+  fy_.reserve(size_x_ * size_y_);
+  fz_.reserve(size_x_ * size_y_);
 }
 
-double& vector3_field::x(int ny, int nx) { return operator()(X, ny, nx).x(); }
-double& vector3_field::y(int ny, int nx) { return operator()(Y, ny, nx).y(); }
-double& vector3_field::z(int ny, int nx) { return operator()(Z, ny, nx).z(); }
-
-double vector3_field::x(int ny, int nx) const { return operator()(ny, nx).x(); }
-double vector3_field::y(int ny, int nx) const { return operator()(ny, nx).y(); }
-double vector3_field::z(int ny, int nx) const { return operator()(ny, nx).z(); }
+constexpr int vector3_field::index(int ny, int nx) const {
+  return ny * size_x_ + nx;
+}
 
 
 px_py_vector3_field::px_py_vector3_field(int size_x, int size_y)
-    : vector3_field(size_x, size_y) {}
+  : vector3_field(size_x, size_y) {}
 
 int px_py_vector3_field::ix_first (Axis ax) const { return 0; }
 int px_py_vector3_field::iy_first (Axis ax) const { return 0; }
 int px_py_vector3_field::ix_last (Axis ax) const { return size_x_; }
 int px_py_vector3_field::iy_last (Axis ax) const { return size_y_; }
 
-const vector3& px_py_vector3_field::operator()(int ny, int nx) const {
-  int px = periodic(nx, 0, size_x_);
-  int py = periodic(ny, 0, size_y_);
-
-  return field_[py * size_x_ + px];
+double& px_py_vector3_field::x(int ny, int nx) {
+  return fx_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
+}
+double& px_py_vector3_field::y(int ny, int nx) {
+  return fy_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
+}
+double& px_py_vector3_field::z(int ny, int nx) {
+  return fz_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
 }
 
-vector3& px_py_vector3_field::operator()(Axis axis, int ny, int nx) {
-  int px = periodic(nx, 0, size_x_);
-  int py = periodic(ny, 0, size_y_);
+double px_py_vector3_field::x(int ny, int nx) const {
+  return fx_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
+}
+double px_py_vector3_field::y(int ny, int nx) const {
+  return fy_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
+}
+double px_py_vector3_field::z(int ny, int nx) const {
+  return fz_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
+}
 
-  return field_[py * size_x_ + px];
+vector3 px_py_vector3_field::operator()(int ny, int nx) const {
+  int ind = index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_));
+  return {fx_[ind], fy_[ind], fz_[ind]};
 }
 
 
@@ -84,41 +94,48 @@ int rx_ry_vector3_field::iy_first (Axis axis) const { return bound_.lower[axis];
 int rx_ry_vector3_field::ix_last (Axis axis) const  { return bound_.right[axis]; }
 int rx_ry_vector3_field::iy_last (Axis axis) const  { return bound_.upper[axis]; }
 
-const vector3& rx_ry_vector3_field::operator()(int ny, int nx) const {
-  if (in_bounds(nx, 0, size_x_) &&
-      in_bounds(ny, 0, size_y_)) {
-    return field_[ny * size_x_ + nx];
+/// @todo returning zero is not configured 
+double& rx_ry_vector3_field::x(int ny, int nx) { return fx_[index(ny, nx)]; }
+double& rx_ry_vector3_field::y(int ny, int nx) { return fy_[index(ny, nx)]; }
+double& rx_ry_vector3_field::z(int ny, int nx) { return fz_[index(ny, nx)]; }
+
+double rx_ry_vector3_field::x(int ny, int nx) const { return fx_[index(ny, nx)]; }
+double rx_ry_vector3_field::y(int ny, int nx) const { return fy_[index(ny, nx)]; }
+double rx_ry_vector3_field::z(int ny, int nx) const { return fz_[index(ny, nx)]; }
+
+vector3 rx_ry_vector3_field::operator()(int ny, int nx) const {
+  if (in_bounds(nx, 0, size_x_) && in_bounds(ny, 0, size_y_)) {
+    int ind = index(ny, nx);
+    return {fx_[ind], fy_[ind], fz_[ind]};
   }
-  else {
-    // const_cast<vector3&>(zero_) = {0, 0, 0};  // ???
-    return zero_;
-  }
+  else return zero_;
 }
 
-vector3& rx_ry_vector3_field::operator()(Axis axis, int ny, int nx) {
-  if (in_bounds(nx, ix_first(axis), ix_last(axis)) &&
-      in_bounds(ny, iy_first(axis), iy_last(axis))) {
-    return field_[ny * size_x_ + nx];
-  }
-  else {
-    zero_ = {0, 0, 0};
-    return zero_;
-  }
-}
 
 cx_py_vector3_field::cx_py_vector3_field(int size_x, int size_y)
-    : px_py_vector3_field(size_x, size_y) {}
+  : px_py_vector3_field(size_x, size_y) {}
 
-const vector3& cx_py_vector3_field::operator()(int ny, int nx) const {
-  int cx = continuous(nx, 0, size_x_);
-  int py = periodic(ny, 0, size_y_);
-  
-  return field_[py * size_x_ + cx];
+double& cx_py_vector3_field::x(int ny, int nx) {
+  return fx_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double& cx_py_vector3_field::y(int ny, int nx) {
+  return fy_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double& cx_py_vector3_field::z(int ny, int nx) {
+  return fz_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
 
-vector3& cx_py_vector3_field::operator()(Axis /* axis */, int ny, int nx) {
-  int cx = continuous(nx, 0, size_x_);
-  int py = periodic(ny, 0, size_y_);
-  
-  return field_[py * size_x_ + cx];
+double cx_py_vector3_field::x(int ny, int nx) const {
+  return fx_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double cx_py_vector3_field::y(int ny, int nx) const {
+  return fy_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double cx_py_vector3_field::z(int ny, int nx) const {
+  return fz_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+
+vector3 cx_py_vector3_field::operator()(int ny, int nx) const {
+  int ind = index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_));
+  return {fx_[ind], fy_[ind], fz_[ind]};
 }
