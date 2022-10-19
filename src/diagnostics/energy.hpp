@@ -22,7 +22,6 @@ class fields_energy : public energy_parameters_saver {
   void diagnose(int t) override;
 
  private:
-  double W = 0;
   const vector3_field& electric_;
   const vector3_field& magnetic_;
 };
@@ -37,7 +36,6 @@ class particles_energy : public energy_parameters_saver {
   void diagnose(int t) override;
 
  private:
-  double W = 0;
   const Particles& particles_;
 };
 

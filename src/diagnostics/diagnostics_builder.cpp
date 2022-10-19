@@ -110,7 +110,7 @@ Diagnostics_builder::get_component(const std::string& component) {
 
 BUILD_FIELD_DIAG(fields_energy) {
   return std::make_unique<fields_energy>(
-    dir_name + "/fields_energy", fields_.E(), fields_.B());
+    dir_name + "/fields", fields_.E(), fields_.B());
 }
 
 BUILD_FIELD_DIAG(field_at_point) {
