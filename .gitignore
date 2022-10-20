@@ -1,22 +1,9 @@
-# Prerequisites & Compiled object files
-*.d
-*.o
-
-# Precompiled Headers
-*.gch
-*.pch
-
 # Executables
-*.out
+bin/
 
-.vscode
-.gitignore
-/results
-/diagnostics
-/diagnostics_python
-/tmp
-/todo
-*.txt
+# Prerequisites & Compiled object files
+bin-int/
+
+log/
+results/
 *.bin
-*.json
-log
