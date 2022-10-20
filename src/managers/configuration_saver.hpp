@@ -1,11 +1,11 @@
 #ifndef CONFIGURATION_SAVER_HPP
 #define CONFIGURATION_SAVER_HPP
 
-//#################################################################################################
-
 #include "src/pch.h"
-namespace fs = std::filesystem;
 
+#include <iostream>
+
+namespace fs = std::filesystem;
 
 class Configuration_saver {
 public:
@@ -16,8 +16,7 @@ public:
 			fs::copy("./src/constants.h", dir_name + "/constants.h");
 		}
 		catch(fs::filesystem_error const& ex) {
-			switch(ex.code().value()) 
-			{
+			switch(ex.code().value()) {
 				case 2: // "No such file or directory"
 					fs::create_directories(dir_name);
 					fs::copy("./src/constants.h", dir_name + "/constants.h");
@@ -37,11 +36,8 @@ public:
 					break;
 			}
 		}
-	
-		};
+	}
 };
 
-
-//#################################################################################################
 
 #endif // CONFIGURATION_SAVER_HPP

@@ -16,6 +16,7 @@
   #define fields_are_diagnosed          true
   #define there_are_Bz0                 true
 
+#define LOGGING                         true
 #define TIME_PROFILING                  true
 
 inline const double e   = 1.0;

@@ -13,6 +13,7 @@
 
 void Manager::initializes() {
   PROFILE_FUNCTION();
+  LOG_TRACE("Initialization process...");
 
   std::list<Command_up> presets;
 
@@ -35,6 +36,9 @@ void Manager::initializes() {
 
   auto generator = std::make_unique<transition_layer::Random_coordinate_generator>();
   int num_particles_to_load = generator->get_particles_number();
+
+  LOG_INFO("{} plasma ions will be set", num_particles_to_load);
+
   presets.push_back(std::make_unique<Set_particles>(
     &plasma_ions, num_particles_to_load,
     std::move(generator),

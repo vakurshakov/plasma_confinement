@@ -20,6 +20,7 @@ using vector_of_diagnostics = std::vector<std::unique_ptr<Diagnostic>>;
 
 vector_of_diagnostics Diagnostics_builder::build() {
   PROFILE_FUNCTION();
+  LOG_TRACE("Building diagnostics...");
 
   vector_of_diagnostics diagnostics;
 
@@ -29,15 +30,19 @@ vector_of_diagnostics Diagnostics_builder::build() {
 
   for (const auto& [name, description] : config::fields_diagnostics) {
     if (name == "energy") {
+      LOG_INFO("Add fields energy diagnostic");
       diagnostics.emplace_back(build_diag_fields_energy(description));
     }
     else if (name == "field_at_point") {
+      LOG_INFO("Add field_at_point diagnostic for {}", description[0] + description[1]);
       diagnostics.emplace_back(build_diag_field_at_point(description));
     }
     else if (name == "field_on_segment") {
+      LOG_INFO("Add field_on_segment diagnostic for {}", description[0] + description[1]);
       diagnostics.emplace_back(build_diag_field_on_segment(description));
     }
     else if (name == "whole_field") {
+      LOG_INFO("Add whole_field diagnostic for {}", description[0] + description[1]);
       diagnostics.emplace_back(build_diag_whole_field(description));
     }
   }
@@ -50,29 +55,36 @@ vector_of_diagnostics Diagnostics_builder::build() {
   for (const auto& [sort, sort_description] : config::species_description) {
   for (const auto& [diag, diag_description] : sort_description) {
     if (diag == "energy") {
+      LOG_INFO("Add {} energy diagnostics", sort);
       diagnostics.emplace_back(build_diag_particles_energy(sort));
     }
     else if (diag == "density") {
+      LOG_INFO("Add density diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "zeroth_moment", "XY", diag_description));
     }
     else if (diag == "velocity_distribution") {
+      LOG_INFO("Add velocity_distribution diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "zeroth_moment", "VxVy", diag_description));
     }
     else if (diag == "first_Vx_moment") {
+      LOG_INFO("Add first_Vx_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "first_Vx_moment", "XY", diag_description));
     }
     else if (diag == "first_Vy_moment") {
+      LOG_INFO("Add first_Vy_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "first_Vy_moment", "XY", diag_description));
     }
     else if (diag == "first_Vr_moment") {
+      LOG_INFO("Add first_Vr_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "first_Vr_moment", "XY", diag_description));
     }
     else if (diag == "first_Vphi_moment") {
+      LOG_INFO("Add first_Vphi_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "first_Vphi_moment", "XY", diag_description));
     }
