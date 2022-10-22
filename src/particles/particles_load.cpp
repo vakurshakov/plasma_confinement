@@ -1,7 +1,7 @@
 #include "particles_load.hpp"
 
 #include "src/pch.h"
-#include "src/managers/random_number_generator.hpp"
+#include "src/utils/random_number_generator.hpp"
 
 void fill_randomly(int sequential_number, int Np,
 		int cell_number_nx, int cell_number_ny,

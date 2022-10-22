@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "src/particles/particles_load.hpp"
+#include "src/utils/random_number_generator.hpp"
 
 Particle_boundary_processor::Particle_boundary_processor(
     std::vector<Particle>& particles_vec, Parameters& params,

@@ -3,7 +3,7 @@
 
 #include "src/pch.h"
 #include "src/utils/transition_layer/parameter_function.hpp" 
-#include "src/managers/random_number_generator.hpp"
+#include "src/utils/random_number_generator.hpp"
 
 static auto& __func = transition_layer::Parameter_function::instance();
 
