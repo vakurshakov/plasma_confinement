@@ -60,15 +60,15 @@ void Plasma_boundary_processor::add(
 inline bool Plasma_boundary_processor::
 passed_through_left(double x0, double ref_x) const {
   return
-    x0 - geom_.left < dx &&
-    ref_x - geom_.left > dx;
+    x0    - (geom_.left + dx) < 0 &&
+    ref_x - (geom_.left + dx) > 0;
 }
 
 inline bool Plasma_boundary_processor::
 passed_through_right(double x0, double ref_x) const {
   return
-    geom_.right - x0 < dx &&
-    geom_.right - ref_x > dx;
+    x0    - (geom_.right - dx) > 0 &&
+    ref_x - (geom_.right - dx) < 0;
 }
 
 // Passing of a particle to the buffer cell is
