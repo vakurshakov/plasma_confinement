@@ -61,6 +61,8 @@ void Particles::push() {
   }
 }
   boundaries_processor_->remove();
+
+  LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
 }
 
 /**

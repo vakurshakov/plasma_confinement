@@ -11,5 +11,5 @@ void Log::Init(const char* filename) {
   logger_->set_pattern("%^[%D %T]: %v %$");
   
   logger_->set_level(spdlog::level::trace);
-  logger_->flush_on(spdlog::level::info);
+  logger_->flush_on(spdlog::level::warn);
 }

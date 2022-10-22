@@ -68,6 +68,7 @@ void Manager::initializes() {
 
 void Manager::calculates() {
   for (size_t t = 1u; t <= TIME; ++t) {
+    LOG_TRACE("------------------------------ one timestep ------------------------------");
     PROFILE_SCOPE("one timestep");
 
 #if there_are_particles
@@ -89,6 +90,6 @@ void Manager::diagnose(size_t t) const {
 
   #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
   for (const auto& diagnostic : diagnostics_) {
-      diagnostic->diagnose(t);
+    diagnostic->diagnose(t);
   }
 }

@@ -30,13 +30,18 @@ void Plasma_boundary_processor::add(
   if (passed_through_left(r0.x(), reference_point.x())) {
     particle_to_be_added = true;
     new_r = { reference_point.x() - dx, reference_point.y() };
+    LOG_TRACE("Particle passed through the left={:.5f}: x0={:.5f}, x={:.5f}",
+      geom_.left, r0.x(), reference_point.x());
   }
   else if (passed_through_right(r0.x(), reference_point.x())) {
     particle_to_be_added = true;
     new_r = { reference_point.x() + dx, reference_point.y() };
+    LOG_TRACE("Particle passed through the right={:.5f}: x0={:.5f}, x={:.5f}",
+      geom_.right, r0.x(), reference_point.x());
   }
 
   if (!particle_to_be_added) return;
+  LOG_TRACE("Creating a new one with x={:.5f}", new_r.x());
 
   vector3&& new_p = generate_moment(reference_point);
 
@@ -77,7 +82,7 @@ void Plasma_boundary_processor::remove() {
   });
 
   if (new_last != particles_vec_.end()) {
-    #pragma omp critical
+    LOG_TRACE("{} particle(s) removed", particles_vec_.end() - new_last);
     particles_vec_.erase(new_last, particles_vec_.end());
   }
 }
