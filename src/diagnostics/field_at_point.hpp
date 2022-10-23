@@ -1,37 +1,29 @@
-#ifndef DIAGNOSTICS_FIELD_AT_POINT_HPP
-#define DIAGNOSTICS_FIELD_AT_POINT_HPP
+#ifndef SRC_DIAGNOSTICS_FIELD_AT_POINT_HPP
+#define SRC_DIAGNOSTICS_FIELD_AT_POINT_HPP
 
-//#################################################################################################
+#include "diagnostic.hpp"
+#include "src/vectors/vector3_field.hpp"
 
-#include "diagnostics.hpp"
+struct diag_point {
+  int x, y;
 
-#include <string>
-#include <vector>
-
-#include "../vectors/vector3_field.hpp"
-
-
-using std::string;
-using v3f = vector3_field;
-
-
-class field_at_point : public Fields_diagnostic {
-public:
-	field_at_point(string directory_path, string file_name,
-	/*additional*/ string field_to_diagnose, string field_axis,
-		int point_x, int point_y);
-
-	void save_parameters(string directory_path) override;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
-
-	
-private:
-	void diagnose(const v3f& F);
-	
-	string field_, axis_;
-	int px_, py_;
+  diag_point(int x, int y)
+    : x(x), y(y) {}
 };
 
-//#################################################################################################
+class field_at_point : public Diagnostic {
+ public:
+  field_at_point(std::string result_directory, std::string file_name,
+    const vector3_field& field, Axis field_comp, diag_point point);
 
-#endif // DIAGNOSTICS_FIELD_AT_POINT_HPP
+  void diagnose(int t) override;
+
+  void save_parameters() const override;
+
+ private:
+  const vector3_field& field_;
+  Axis component_;
+  diag_point point_;
+};
+
+#endif  // SRC_DIAGNOSTICS_FIELD_AT_POINT_HPP

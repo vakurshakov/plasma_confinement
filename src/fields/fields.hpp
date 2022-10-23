@@ -1,51 +1,35 @@
-#ifndef MANAGERS_FIELDS_HPP
-#define MANAGERS_FIELDS_HPP
+#ifndef SRC_FIELDS_MANAGERS_FIELDS_HPP
+#define SRC_FIELDS_MANAGERS_FIELDS_HPP
 
-//#################################################################################################
+#include "src/pch.h"
+#include "src/vectors/vector3_field.hpp"
 
-#include <memory>
-#include <vector>
-#include <functional>
-
-#include "../diagnostics/diagnostics.hpp"
-#include "../vectors/vector3_field.hpp"
-#include "../constants.h"
-
+#include "open_boundaries_processor.hpp"
+#include "fields_builder.hpp"
 
 class Fields {
 public:
-	Fields() = default;
+  Fields() = default;
 
-	using v3f = vector3_field;
-	using v3f_up = std::unique_ptr<v3f>;
-	using diagnostic_up = std::unique_ptr<Fields_diagnostic>;
-	
-	Fields( v3f_up&& E, v3f_up&& B, v3f_up&& J,
-			std::function<void(v3f& E, v3f& B, v3f& J)>&& propogator,
-			std::vector<diagnostic_up>&& diagnostics 		);
-	
-	// getters
-	v3f& E() { return *E_; };
-	v3f& B() { return *B_; };
-	v3f& J() { return *J_; };
+  using v3f_up = std::unique_ptr<vector3_field>;
 
-	// main Field methods
-	void propogate();
-	void diagnose(int t) const;
+  Fields(Fields_builder& builder);
 
-	// additional
-	friend class Magnetic_field_half_step;
-	void add_Bz0(double Bz0);
-	void add_ion_current(int t);
+  vector3_field& E() { return *E_; };
+  vector3_field& B() { return *B_; };
+  vector3_field& J() { return *J_; };
+
+  void propagate();
+
+  // additional
+  friend class Magnetic_field_half_step;
+  void add_Bz0(double Bz0);
 
 private:
-	v3f_up E_, B_, J_;
-
-	std::function<void(v3f& E, v3f& B, v3f& J)> propogate_ = nullptr;
-	
-	std::vector<diagnostic_up> diagnostics_;
+  v3f_up E_, B_, J_;
+  Boundaries_processor_up boundary_processor_;
 };
 
-//#################################################################################################
+void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J);
 
-#endif // MANAGERS_FIELDS_HPP
+#endif  // SRC_FIELDS_MANAGERS_FIELDS_HPP

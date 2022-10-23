@@ -1,47 +1,41 @@
 #include "point.hpp"
-#include "../../constants.h"
 
-
-void reflective_Xboundary(Point& point, double size_x)
-{
-	if ( point.x() < 0.5*dx ) {
-		point.x() = 0.5*dx;
-		point.px() *= -1; 
-	}
-	else if ( point.x() > size_x - 0.5*dx ) {
-		point.x() = size_x - 0.5*dx;
-		point.px() *= -1;
-	}
+void reflective_x(Point& point, double left, double right) {
+  if (point.x() < left) {
+    point.x() = left;
+    point.px() *= -1.0;
+  }
+  else if (point.x() > right) {
+    point.x() = right;
+    point.px() *= -1.0;
+  }
 }
 
-void reflective_Yboundary(Point& point, double size_y)
-{
-	if ( point.y() < 0.5*dy ) {
-		point.y() = 0.5*dy;
-		point.py() *= -1; 
-	}
-	else if ( point.y() > size_y - 0.5*dy ) {
-		point.y() = size_y - 0.5*dy;
-		point.py() *= -1; 
-	}
+void reflective_y(Point& point, double bottom, double top) {
+  if (point.y() < bottom) {
+    point.y() = bottom;
+    point.py() *= -1.0;
+  }
+  else if (point.y() > top) {
+    point.y() = top;
+    point.py() *= -1.0;
+  }
 }
 
-void periodic_Xboundary(Point& point, double size_x)
-{
-	if ( point.x() <= 0 ) {
-		point.x() += size_x;
-	}
-	else if ( point.x() >= size_x ) {
-		point.x() -= size_x;
-	}
+void periodic_x(Point& point, double left, double right) {
+  if (point.x() < left) {
+    point.x() = right - (left - point.x());
+  }
+  else if (point.x() > right) {
+    point.x() = left + (point.x() - right);
+  }
 }
 
-void periodic_Yboundary(Point& point, double size_y)
-{
-	if ( point.y() <= 0 ) {
-		point.y() += size_y;
-	}
-	else if ( point.y() >= size_y ) {
-		point.y() -= size_y;
-	}
+void periodic_y(Point& point, double bottom, double top) {
+  if (point.y() < bottom) {
+    point.y() = top - (bottom - point.y());
+  }
+  else if (point.y() > top) {
+    point.y() = bottom + (point.y() - top);
+  }
 }

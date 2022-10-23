@@ -1,8 +1,6 @@
 #include "Boris_pusher.hpp"
 
-#include <cmath>
-#include <functional>
-
+#include "src/pch.h"
 #include "../particles/particle/particle.hpp"
 #include "../vectors/vector3_field.hpp"
 #include "../constants.h"
@@ -44,8 +42,8 @@ void Boris_pusher::process(Particle& particle, const vector3& local_E, const vec
 	// getting a usefull variabels from %parameters and %point
 	const double q0 = 0.5 * dt * particle.q();
 	const double m  = particle.m(); 
-	vector2& r = particle.get_point().r();
-	vector3& p = particle.get_point().p();
+	vector2& r = particle.point.r;
+	vector3& p = particle.point.p;
 
 	// Realization of a Boris pusher
 

@@ -1,87 +1,93 @@
-#include "energy.hpp" 
+#include "energy.hpp"
+#include "src/file_writers/bin_file.hpp"
 
-#include <omp.h>
-#include <string>
-#include <memory>
-#include <filesystem>
+namespace fs = std::filesystem;
 
-#include "../particles/particle/particle.hpp"
-#include "../vectors/vector3_field.hpp"
-#include "../constants.h"
+energy_parameters_saver::energy_parameters_saver(
+    std::string result_directory)
+    : Diagnostic(result_directory) {
+  save_parameters();
+}
 
-
-//######## fields energy ##########################################################################
+void energy_parameters_saver::save_parameters() const {}
 
 
-fields_energy::fields_energy(std::string directory_path)
-	: Fields_diagnostic(directory_path + "fields_energy")
-	{
-		this->save_parameters(directory_path);
-		file_for_results_ = std::make_unique<BIN_File>(directory_path_, "total");
-	};
+fields_energy::fields_energy(
+    std::string result_directory,
+    const vector3_field& electric,
+    const vector3_field& magnetic)
+    : energy_parameters_saver(result_directory),
+      electric_(electric),
+      magnetic_(magnetic) {
+  file_for_results_ = std::make_unique<BIN_File>(
+    result_directory_, "fields_energy");
+}
 
-void fields_energy::save_parameters(std::string directory_path)
-{
-	namespace fs = std::filesystem;
-	
-	fs::create_directories(fs::path(directory_path));
-	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
-	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
-	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
-	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
-	diagnostic_parameters_ << sizeof(float) << std::endl;
+void fields_energy::diagnose(int t) {
+  PROFILE_FUNCTION();
+
+  double Wex = 0, Wey = 0, Wez = 0;
+  double Wbx = 0, Wby = 0, Wbz = 0;
+
+  #pragma omp parallel for reduction(+: Wex, Wey, Wez, Wbx, Wby, Wbz)
+  for (int y = 0; y < SIZE_Y; ++y) {
+  for (int x = 0; x < SIZE_X; ++x) {
+    Wex += 0.5 * electric_.x(y, x) * electric_.x(y, x) * dx * dy;
+    Wey += 0.5 * electric_.y(y, x) * electric_.y(y, x) * dx * dy;
+    Wez += 0.5 * electric_.z(y, x) * electric_.z(y, x) * dx * dy;
+
+    Wbx += 0.5 * magnetic_.x(y, x) * magnetic_.x(y, x) * dx * dy;
+    Wby += 0.5 * magnetic_.y(y, x) * magnetic_.y(y, x) * dx * dy;
+    Wbz += 0.5 * magnetic_.z(y, x) * magnetic_.z(y, x) * dx * dy;
+  }}
+
+  file_for_results_->write(Wex);
+  file_for_results_->write(Wey);
+  file_for_results_->write(Wez);
+  file_for_results_->write(Wbx);
+  file_for_results_->write(Wby);
+  file_for_results_->write(Wbz);
+
+  file_for_results_->write(Wex + Wey + Wez + Wbx + Wby + Wbz);
+
+  LOG_INFO("Fields energy: Ex = {:.5e}, Ey = {:.5e}, Ez = {:.5e}", Wex, Wey, Wez);
+  LOG_INFO("               Bx = {:.5e}, By = {:.5e}, Bz = {:.5e}", Wbx, Wby, Wbz);
+  LOG_INFO("            Total = {}", Wex + Wey + Wez + Wbx + Wby + Wbz);
+
+  if (t % diagnose_time_step == 0)
+    file_for_results_->flush();
 }
 
 
-void fields_energy::diagnose(const v3f& E, const v3f& B, const v3f& j, int t)
-{
-	#pragma omp parallel for reduction(+: W)
-	for (int y = 0; y < SIZE_Y; ++y) {
-	for (int x = 0; x < SIZE_X; ++x) {
-		W += 0.5*( E.x(y,x)*E.x(y,x) + E.y(y,x)*E.y(y,x) + E.z(y,x)*E.z(y,x) +
-				   B.x(y,x)*B.x(y,x) + B.y(y,x)*B.y(y,x) + B.z(y,x)*B.z(y,x) )*dx*dy;		
-	}
-	}
-	file_for_results_->write(W);
-	W = 0;
+particles_energy::particles_energy(
+    std::string result_directory, std::string sort_name,
+    const Particles& particles)
+    : energy_parameters_saver(result_directory),
+      particles_(particles) {
+  file_for_results_ = std::make_unique<BIN_File>(
+    result_directory_, sort_name + "_energy");
 }
 
-//######## particles energy #######################################################################
+void particles_energy::diagnose(int t) {
+  PROFILE_FUNCTION();
 
+  const int Np = particles_.get_parameters().Np();
 
-particles_energy::particles_energy(std::string directory_path)
-	: Particles_diagnostic(directory_path)
-	{
-		this->save_parameters(directory_path);
-		file_for_results_ = std::make_unique<BIN_File>(directory_path_, "total");
-	};
+  double W = 0;
 
+  #pragma omp parallel for reduction(+: W)
+  for (const auto& particle : particles_.get_particles()) {
+    const double m = particle.m();
+    const double n = particle.n();
+    const vector3& p = particle.point.p;
 
-// как убрать дублирование кода в этом случае?
-void particles_energy::save_parameters(std::string directory_path)
-{
-	std::ofstream diagnostic_parameters_((directory_path + "/parameters.txt").c_str(), std::ios::out);
-	diagnostic_parameters_ << "#TIME dt DTS" << std::endl;
-	diagnostic_parameters_ << TIME << " " << dt << " " << diagnose_time_step << " " << std::endl;
-	diagnostic_parameters_ << "#sizeof(float)" << std::endl;
-	diagnostic_parameters_ << sizeof(float) << std::endl;
+    W += sqrt(m * m + p.square()) * dx * dy * n / Np;
+  }
+
+  file_for_results_->write(W);
+
+  LOG_INFO("Energy in {} = {}", particles_.get_name(), W);
+
+  if (t % diagnose_time_step == 0)
+    file_for_results_->flush();
 }
-
-
-void particles_energy::diagnose(
-	const Parameters& parameters, const std::vector<Particle>& particles, int t)
-	{
-		const int Np = parameters.Np();
-
-		#pragma omp parallel for reduction(+: W)
-		for (const auto& particle : particles)
-		{
-			const double m = particle.m();
-			const double n = particle.n();
-			const vector3& p = particle.get_point().p();
-
-			W += sqrt( m * m + p.dot(p) ) * dx * dy * n / Np;
-		}
-		file_for_results_->write(W);
-		W = 0;
-	}

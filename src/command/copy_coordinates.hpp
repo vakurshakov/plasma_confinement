@@ -5,9 +5,7 @@
 
 #include "command.hpp"
 
-#include <vector>
-#include <string>
-
+#include "src/pch.h"
 #include "../particles/particles.hpp"
 
 /**

@@ -1,70 +1,47 @@
-#ifndef MANAGERS_PARTICLES_HPP
-#define MANAGERS_PARTICLES_HPP
+#ifndef SRC_PARTICLES_PARTICLES_HPP
+#define SRC_PARTICLES_PARTICLES_HPP
 
-//#################################################################################################
+#include "src/pch.h"
+#include "src/particles/particle/particle.hpp"
+#include "src/solvers/abstract_strategies.hpp"
 
-#include <memory>
-#include <vector>
-#include <string>
-#include <functional>
-
-#include "./particle/particle.hpp"
-#include "../diagnostics/diagnostics.hpp"
-#include "../solvers/abstract_strategies.hpp" 
-#include "../vectors/vector3_field.hpp"
-#include "../constants.h"
+#include "particle-boundary_processor.hpp"
+#include "particles_builder.hpp"
 
 class Particles {
-public:
-	using diagnostic_up = std::unique_ptr<Particles_diagnostic>;
+ public:
 
-	Particles() = default;
-	
-	Particles(
-		Parameters&&,
-		std::unique_ptr<Pusher>,
-		std::unique_ptr<Interpolation>,
-		std::unique_ptr<Decomposition>,
-		std::function<void(Point&, double)>&& x_boundary,
-		std::function<void(Point&, double)>&& y_boundary,
-		std::vector<diagnostic_up>&&	);
-	
-	const std::vector<Particle>& get_particles() const { return particles_; }
-	const Parameters& get_parameters() const { return parameters_; }
+  Particles() = default;
 
-	void add_particle(const Point& point, ...);
-	void add_diagnostic(diagnostic_up&& diagnostic);
+  Particles(Particles_builder& builder);
 
-	// main Particles methods
-	void push();
-	void diagnose(int t) const;
-	
-	friend class Set_particles;
-	friend class Copy_coordinates;
-	friend class Ionize_particles;
+  const auto& get_name() const { return sort_name_; }
+  const auto& get_particles() const { return particles_; }
+  const auto& get_parameters() const { return parameters_; }
 
-	// плоха
-	rx_ry_vector3_field J;
-	
-private:
-	// main Kinetic_particles fields
-	size_t number_in_sort = 0;
-	Parameters parameters_;
-	std::vector<Particle> particles_;
+  void add_particle(const Point& point, ...);
 
-	// solvers for particles
-	std::unique_ptr<Pusher> push_;
-	std::unique_ptr<Interpolation> interpolation_;
-	std::unique_ptr<Decomposition> decomposition_;
-	
-	void boundaries_processing(Point&, double size_x, double size_y);
-	std::function<void(Point&, double)> x_boundary_ = nullptr;
-	std::function<void(Point&, double)> y_boundary_ = nullptr;	
+  void push();
 
-	// vector of diagnostics for Particles
-	std::vector<diagnostic_up> diagnostics_;
+  /// @todo refactor this out
+  friend class Set_particles;
+  friend class Copy_coordinates;
+  friend class Ionize_particles;
+
+  friend class Clone_layer_particles;
+  friend class Plasma_boundary_processor;
+  friend class Beam_boundary_processor;
+
+ private:
+  std::string sort_name_;
+  Parameters parameters_;
+  std::vector<Particle> particles_;
+
+  std::unique_ptr<Pusher> push_;
+  std::unique_ptr<Interpolation> interpolation_;
+  std::unique_ptr<Decomposition> decomposition_;
+
+  std::unique_ptr<Particle_boundary_processor> boundaries_processor_;
 };
 
-//#################################################################################################
-
-#endif // MANAGERS_PARTICLES_HPP
+#endif  // SRC_PARTICLES_PARTICLES_HPP

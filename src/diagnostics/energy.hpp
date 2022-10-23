@@ -1,44 +1,42 @@
-#ifndef DIAGNOSTCS_ENERGY_HPP
-#define DIAGNOSTCS_ENERGY_HPP
+#ifndef SRC_DIAGNOSTICS_ENERGY_HPP
+#define SRC_DIAGNOSTICS_ENERGY_HPP
 
-//#################################################################################################
+#include "diagnostic.hpp"
+#include "src/particles/particles.hpp"
+#include "src/vectors/vector3_field.hpp"
 
-#include "diagnostics.hpp"
+class energy_parameters_saver : public Diagnostic {
+ protected:
+  energy_parameters_saver(std::string result_directory);
 
-#include <string>
-#include <vector>
-
-#include "../particles/particle/particle.hpp"
-#include "../vectors/vector3_field.hpp"
-
-
-class fields_energy : public Fields_diagnostic {
-public:
-	fields_energy(std::string directory_path);
-
-	void save_parameters(std::string directory_path);
-
-
-	using v3f = vector3_field;
-	void diagnose(const v3f& E, const v3f& B, const v3f& j, int t) override;
-	
-private:
-	double W = 0;
+  void save_parameters() const final;
 };
 
 
-class particles_energy : public Particles_diagnostic {
-public:
-	particles_energy(std::string directory_path);
-	
-	void save_parameters(std::string directory_path);
+class fields_energy : public energy_parameters_saver {
+ public:
+  fields_energy(std::string result_directory,
+    const vector3_field& electric,
+    const vector3_field& magnetic);
 
-	void diagnose(const Parameters&, const std::vector<Particle>&, int t) override;
-	
-private:
-	double W = 0;
+  void diagnose(int t) override;
+
+ private:
+  const vector3_field& electric_;
+  const vector3_field& magnetic_;
 };
 
-//#################################################################################################
 
-#endif // DIAGNOSTCS_ENERGY_HPP
+class particles_energy : public energy_parameters_saver {
+ public:
+  particles_energy(
+    std::string result_directory, std::string sort_name,
+    const Particles& particles_sort);
+
+  void diagnose(int t) override;
+
+ private:
+  const Particles& particles_;
+};
+
+#endif  // SRC_DIAGNOSTICS_ENERGY_HPP

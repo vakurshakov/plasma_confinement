@@ -1,35 +1,39 @@
-#ifndef PARTICLE_INTERFACE_HPP 
-#define PARTICLE_INTERFACE_HPP
+#ifndef SRC_PARTICLES_PARTICLE_PARTICLE_HPP
+#define SRC_PARTICLES_PARTICLE_PARTICLE_HPP
 
-//#################################################################################################
+#include "src/particles/particle/point.hpp"
+#include "src/particles/particle/parameters.hpp"
 
-#include <memory>
-
-#include "point.hpp"
-#include "parameters.hpp"
-
-
+/**
+ * @todo It would be easier to simplify the Particle
+ * class to just a set of attributes without storing
+ * pointers to outer parameters.
+ */
 class Particle {
-public:
-    Particle() = delete;
+ public:
+  Particle(size_t id, const Point& point, const Parameters& parameters)
+    : point(point), id(id), parameters(&parameters) {}
 
-    Particle(size_t id, const Point& point, const Parameters& parameters)
-    :   id(id), point(point), parameters(parameters) {}
+  Point point;
 
-    Point& get_point() { return point; } 
-    const Point& get_point() const { return point; }
+  double n() const { return parameters->n(id); };
+  double q() const { return parameters->q(id); };
+  double m() const { return parameters->m(); }
 
-    double n() const { return parameters.n(id); };
-    double q() const { return parameters.q(id); };
-    double m() const { return parameters.m(); }
+  vector3 velocity() const {
+    return point.p / sqrt(m() * m() + point.p.square());
+  }
 
-protected:
-    size_t id;
-    Point point;
-    const Parameters& parameters;
+ protected:
+  size_t id;
+
+  /**
+   * pointer here to be able to use move semantic
+   * @warn: it will be ok if you move particle, but
+   * it will cause a seg. fault after particles
+   * being moved.
+   */
+  const Parameters* parameters;
 };
 
-
-//#################################################################################################
-
-#endif //PARTICLE_INTERFACE_HPP
+#endif  //SRC_PARTICLES_PARTICLE_PARTICLE_HPP

@@ -3,10 +3,10 @@
 
 void Magnetic_field_half_step::execute(int _) const
 {
-    vector3_field& E = fields_->E();
+	vector3_field& E = fields_->E();
 	vector3_field& B = fields_->B();
 	
-    #pragma omp parallel shared(E, B), num_threads(THREAD_NUM)
+		#pragma omp parallel shared(E, B), num_threads(NUM_THREADS)
 	{
 		// Bx(y, x+1/2) at t+1/2 ----------------------------------------------------
 		#pragma omp for 

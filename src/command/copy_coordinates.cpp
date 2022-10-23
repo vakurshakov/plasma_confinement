@@ -1,10 +1,6 @@
 #include "copy_coordinates.hpp"
-
-#include <cmath> // for isinf(double)
-
 #include "../particles/particle/particle.hpp"
-
-
+  
 // А как быть, если плотности сортов разные?  
 void Copy_coordinates::execute(int _) const
 {
@@ -18,8 +14,8 @@ void Copy_coordinates::execute(int _) const
 
 	for (const auto& particle : particles_to_copy->particles_)
     {
-        double x = particle.get_point().x();
-        double y = particle.get_point().y();
+        double x = particle.point.x();
+        double y = particle.point.y();
     
         double px, py, pz;
         do

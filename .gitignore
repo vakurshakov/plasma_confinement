@@ -1,12 +1,9 @@
-/results
-/tmp
-/diagnostics
-/diagnostics_python
-/todo
-dep
-obj
-.vscode
-.gitignore
-log
-*.txt
-*.out
+# Executables
+bin/
+
+# Prerequisites & Compiled object files
+bin-int/
+
+log/
+results/
+*.bin

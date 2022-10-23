@@ -1,39 +1,23 @@
-#ifndef FIELDS_BUILDER_HPP
-#define FIELDS_BUILDER_HPP
+#ifndef SRC_FIELDS_FIELDS_BUILDER_HPP
+#define SRC_FIELDS_FIELDS_BUILDER_HPP
 
-//#################################################################################################
-
-#include "fields.hpp"
-
-#include <map>
-#include <string>
-#include <vector>
-#include <memory>
-#include <functional>
-
-#include "../particles/particles.hpp"
-
-using std::map, std::multimap, std::string, std::vector;
-	
+#include "src/pch.h"
+#include "src/vectors/vector3_field.hpp"
+#include "src/fields/open_boundaries_processor.hpp"
+#include "src/diagnostics/diagnostic.hpp"
 
 class Fields_builder {
-public:
-	Fields_builder() = default;
-	Fields build();
-	
-private:
-	// Методы для постороения полей
-	using v3f = vector3_field;
-	using v3f_up = std::unique_ptr<vector3_field>;
-	std::function<void(v3f& E, v3f& B, v3f& j)> propogator();
-	v3f_up load_field(string type);
+ public:
+  Fields_builder() = default;
 
-	// Возвращает список диагностик
-	using diagnostic_up = std::unique_ptr<Fields_diagnostic>;
-	vector<diagnostic_up> diagnostics_list(multimap<string, vector<string>> description);
+  std::unique_ptr<vector3_field>
+  build_field(std::string type);
+
+  Boundaries_processor_up
+  build_boundary_processor(vector3_field& E, vector3_field& B);
+
+	std::vector<std::unique_ptr<Diagnostic>>
+  build_diagnostics();
 };
 
-
-//#################################################################################################
-
-#endif //FIELDS_BUILDER_HPP
+#endif  //SRC_FIELDS_FIELDS_BUILDER_HPP
