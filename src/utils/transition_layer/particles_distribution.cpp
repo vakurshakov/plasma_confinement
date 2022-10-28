@@ -21,14 +21,14 @@ void Random_coordinate_generator::load(double* x, double* y) {
     
     *y = random_01() * SIZE_Y * dx;
   }
-  while (random_01() > get_probability(*x, *y));
+  while (random_01() > get_probability(*x));
 }
 
-double Random_coordinate_generator::get_probability(double x, double y) const {
+double Random_coordinate_generator::get_probability(double x) const {
   if (x <= __func.get_x0()) {
     return 1.0;
   }
-  else if (x < __func.get_xmax()) {
+  else if (x <= __func.get_xmax()) {
     return d_theta(x) / (2 * M_PI);
   }
   else {
@@ -39,8 +39,8 @@ double Random_coordinate_generator::get_probability(double x, double y) const {
 int Random_coordinate_generator::get_particles_number() const {
   double integral = 0;
 
-  for (double x = config::domain_left; x < __func.get_xmax(); x += dx) {
-    integral += get_probability(x, 0);
+  for (double x = config::domain_left; x <= __func.get_xmax(); x += dx) {
+    integral += get_probability(x);
   }
 
   return int(round(integral * SIZE_Y * config::Npi));
@@ -54,7 +54,7 @@ void load_ions_impulse(double x, double y,
   if (x <= __func.get_x0()) {
     theta = 2 * M_PI * random_01(); 
   }
-  else if (x < __func.get_xmax()) {
+  else if (x <= __func.get_xmax()) {
     theta = - M_PI - asin(__func.get_value(x)) + random_01() * d_theta(x);
   }
 

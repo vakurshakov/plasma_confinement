@@ -14,7 +14,7 @@ void Set_Bz_distribution::execute(int /* timestep */) const {
     if (x * dx < __func.get_x0()) {
       continue;
     }
-    else if (x * dx < __func.get_xmax()) {
+    else if (x * dx <= __func.get_xmax()) {
       double fx = __func.get_value(x * dx);
       
       fields_->B().z(y, x) = config::Omega_max / M_SQRT_PI *

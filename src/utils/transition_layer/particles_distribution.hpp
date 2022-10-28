@@ -14,7 +14,7 @@ class Random_coordinate_generator : public Coordinate_generator {
   void load(double* x, double* y) override;
 
  private:
-  double get_probability(double x, double y) const;
+  double get_probability(double x) const;
 };
 
 void load_ions_impulse(double x, double y,
