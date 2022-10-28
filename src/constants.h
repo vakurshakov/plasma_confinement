@@ -43,16 +43,19 @@ inline const std::string boundaries = "cx_py";
 
 inline const double Omega_max = 0.5;
 
-inline const double n0 = 1.0;
-inline const int   Npe = 1;
-inline const double ni = 1.0;
-inline const int   Npi = 10;
-
-inline const double V_ions = 1.0 / 40.0;
 inline const double mi_me  = 16.0;
+
+// Ions velocity must satisfy the transverse
+// equilibrium condition: ½ mᵢn₀V² = Bᵥ²/8π
+inline const double V_ions = Omega_max / sqrt(mi_me);
 
 inline const char* path_to_parameter_function =
   "src/utils/transition_layer/evaluated_function_20.0X0_0.05DX_16.0mi_me.bin";
+
+inline const double n0 = 1.0;
+inline const int   Npe = 1;
+inline const double ni = 1.0;
+inline const int   Npi = 100;
 
 template<class K, class V>
 using umap = std::unordered_multimap<K, V>;
@@ -65,12 +68,13 @@ inline const umap<std::string,
 #if there_are_plasma_ions
   { "plasma_ions", {
     { "parameters", {
-        "global, " + to_string(n0),  // Particle density [in units of reference density]
-        "global, " + to_string(+e),  // Particle charge [in units of e]
-        to_string(mi_me),            // Particle mass [in units mₑ]
-        to_string(Npi),              // Number of particles representing the density n0
-        "0", "0", "0",               // Temperature in x, y and z direction [in KeV]
-        to_string(mi_me * V_ions)    // Absolute value of the initial impulse [in mₑc]
+        "global, " + to_string(n0),     // Particle density [in units of n₀]
+        "global, " + to_string(+e),     // Particle charge [in units of e]
+        to_string(mi_me),               // Particle mass [in units mₑ]
+        to_string(Npi),                 // Number of particles representing the density n₀
+        "0", "0", "0",                  // Temperature in x, y and z direction [in KeV]
+        to_string(mi_me * V_ions /      // Absolute value of the initial impulse [in mₑc]
+          sqrt(1.0 - V_ions * V_ions))
     }},
     { "integration_steps", {
         "Boris_pusher:+Push_particle",

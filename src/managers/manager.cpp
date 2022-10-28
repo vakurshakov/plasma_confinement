@@ -29,6 +29,8 @@ void Manager::initializes() {
 #endif
 
 #if there_are_particles && there_are_plasma_ions
+  assert(config::V_ions < 1 && "ions velocity is greater the c!");
+
   Particles_builder particles_builder(fields_);
 
   particles_builder.set_sort("plasma_ions");
