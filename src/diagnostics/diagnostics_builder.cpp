@@ -7,6 +7,7 @@
 
 #include "src/diagnostics/chosen_particles.hpp"
 #include "src/diagnostics/distribution_moment.hpp"
+#include "src/diagnostics/x0_distribution_function.hpp"
 
 Diagnostics_builder::Diagnostics_builder(
     std::vector<Particles>& particles_species, Fields& fields)
@@ -87,6 +88,11 @@ vector_of_diagnostics Diagnostics_builder::build() {
       LOG_INFO("Add first_Vphi_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "first_Vphi_moment", "XY", diag_description));
+    }
+    else if (diag == "x0_distribution_function") {
+      LOG_INFO("Add x0_distribution_function diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_x0_distribution_function(
+        sort, diag_description));
     }
   }}
 #endif
@@ -240,4 +246,22 @@ Diagnostics_builder::build_diag_distribution_moment(
     particles_species_.at(sort_name),
     std::make_unique<Moment>(moment_name),
     std::make_unique<Projector2D>(axes_names, area));
+}
+
+inline std::unique_ptr<Diagnostic>
+Diagnostics_builder::build_diag_x0_distribution_function(
+    const std::string& sort_name,
+    const std::vector<std::string>& description) {
+  int x0 = std::stoi(description[0]);
+
+  diag_area area{
+    std::stod(description[1]), std::stod(description[2]),
+    std::stod(description[3]), std::stod(description[4]),
+    std::stod(description[5]), std::stod(description[6]),
+  };
+
+  return std::make_unique<x0_distribution_function>(
+    dir_name + "/" + sort_name,
+    particles_species_.at(sort_name),
+    x0, area);
 }

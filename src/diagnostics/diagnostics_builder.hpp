@@ -43,6 +43,11 @@ class Diagnostics_builder {
     const std::string& moment_name,
     const std::string& axes_names,
     const std::vector<std::string>& description);
+
+  inline std::unique_ptr<Diagnostic>
+  build_diag_x0_distribution_function(
+    const std::string& sort_name,
+    const std::vector<std::string>& description);
 };
 
 #endif  // SRC_DIAGNOSTICS_DIAGNOSTICS_BUILDER_HPP
