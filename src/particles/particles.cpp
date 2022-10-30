@@ -12,16 +12,6 @@ Particles::Particles(Particles_builder& builder) {
   push_ = builder.build_pusher();
   interpolation_ = builder.build_interpolation(this->parameters_);
   decomposition_ = builder.build_decomposition(this->parameters_);
-
-  boundaries_processor_ = std::make_unique<Plasma_boundary_processor>(
-    this->particles_, this->parameters_,
-    Domain_geometry(
-      config::domain_left,
-      config::domain_right,
-      config::domain_bottom,
-      config::domain_top
-    )
-  );
 }
 
 /// @warning Algorithm ends up with seg. fault

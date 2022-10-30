@@ -1,9 +1,18 @@
 #include "clone_layer_particles.hpp"
 
 Clone_layer_particles::Clone_layer_particles(
-  Particles* const particles_inout, Domain_geometry geom)
+  Particles* const particles_inout,
+  Domain_geometry geom)
   :	particles_in_(particles_inout),
     particles_out_(particles_inout),
+    geom_(geom) {}
+
+Clone_layer_particles::Clone_layer_particles(
+  Particles* const particles_in,
+  Particles* const particles_out,
+  Domain_geometry geom)
+  :	particles_in_(particles_in),
+    particles_out_(particles_out),
     geom_(geom) {}
 
 void Clone_layer_particles::execute(int /* timestep */) const {

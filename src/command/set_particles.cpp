@@ -24,7 +24,7 @@ void Set_particles::execute(int /* timestep */) const {
   const double p0   = particles_->get_parameters().p0();
 
   // чтобы не происходило ресайзов неожиданных
-  particles_->particles_.reserve(num_particles_to_load_ + 10'000);
+  particles_->particles_.reserve(num_particles_to_load_ + 100'000);
 
   for (std::size_t p_id = 0u; p_id < num_particles_to_load_; ++p_id) {
     double x, y;

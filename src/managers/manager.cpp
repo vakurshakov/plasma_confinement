@@ -33,8 +33,20 @@ void Manager::initializes() {
 
   Particles_builder particles_builder(fields_);
 
+  particles_species_.reserve(2);
+
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
+
+  plasma_ions.boundaries_processor_ = std::make_unique<Plasma_boundary_processor>(
+    plasma_ions.particles_, plasma_ions.parameters_,
+    Domain_geometry(
+      config::domain_left,
+      config::domain_right,
+      config::domain_bottom,
+      config::domain_top
+    )
+  );
 
   auto generator = std::make_unique<transition_layer::Random_coordinate_generator>();
   int num_particles_to_load = generator->get_particles_number();
@@ -47,8 +59,16 @@ void Manager::initializes() {
     transition_layer::load_ions_impulse
   ));
 
+  Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
+  buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
+
+  buffer_ions.boundaries_processor_ = std::make_unique<Buffer_processor>(
+    buffer_ions.particles_, buffer_ions.parameters_
+  );
+
   step_presets_.push_back(std::make_unique<Clone_layer_particles>(
     &plasma_ions,
+    &buffer_ions,
     Domain_geometry(
       config::domain_left,
       config::domain_right,
@@ -68,10 +88,15 @@ void Manager::initializes() {
   diagnose(0);
 }
 
+
 void Manager::calculates() {
   for (size_t t = 1u; t <= TIME; ++t) {
     LOG_TRACE("------------------------------ one timestep ------------------------------");
     PROFILE_SCOPE("one timestep");
+
+    for (const auto& command : step_presets_) {
+      command->execute(t);
+    }
 
 #if there_are_particles
     for (auto& sort : particles_species_) {
@@ -79,13 +104,20 @@ void Manager::calculates() {
     }
 #endif
 
+    /// @todo Separate sources zeroing and field propagation
+    /// @note Placed here to catch electric currents
+    diagnose(t);
+
 #if there_are_fields
     fields_.propagate();
 #endif
 
-    diagnose(t);
+    step_presets_.remove_if([t](const Command_up& command) {
+      return command->needs_to_be_removed(t);
+    });
   }
 }
+
 
 void Manager::diagnose(size_t t) const {
   PROFILE_FUNCTION();

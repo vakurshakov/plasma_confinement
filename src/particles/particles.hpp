@@ -23,7 +23,9 @@ class Particles {
 
   void push();
 
-  /// @todo refactor this out
+  /// @todo REFACTOR THIS OUT!
+  friend class Manager;
+
   friend class Set_particles;
   friend class Copy_coordinates;
   friend class Ionize_particles;

@@ -17,6 +17,8 @@ struct Domain_geometry {
   double bottom;
   double top;
 
+  Domain_geometry() = default;
+
   Domain_geometry(double left, double right, double bottom, double top)
     : left(left), right(right), bottom(bottom), top(top) {}
 };
@@ -62,6 +64,17 @@ class Beam_boundary_processor : public Plasma_boundary_processor {
     : Plasma_boundary_processor(particles_vec, params, geom) {}
 
   void add(Point& reference_point, const vector2& r0) override {}
+};
+
+
+class Buffer_processor : public Particle_boundary_processor {
+ public:
+  Buffer_processor(std::vector<Particle>& particles_vec,
+    Parameters& params)
+    : Particle_boundary_processor(particles_vec, params, Domain_geometry()) {}
+
+  void add(Point& reference_point, const vector2& r0) override {}
+  void remove() override { particles_vec_.clear(); }
 };
 
 #endif  // SRC_PARTICLES_PARTICLE_BOUNDARY_PROCESSOR_HPP

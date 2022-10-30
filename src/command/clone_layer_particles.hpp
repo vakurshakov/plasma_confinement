@@ -9,7 +9,14 @@
 
 class Clone_layer_particles : public Command {
  public:
-  Clone_layer_particles(Particles* const particles_inout, Domain_geometry geom);
+  Clone_layer_particles(
+    Particles* const particles_inout,
+    Domain_geometry geom);
+  
+  Clone_layer_particles(
+    Particles* const particles_in,
+    Particles* const particles_out,
+    Domain_geometry geom);
 
   void execute(int /* timestep */) const override;
 
