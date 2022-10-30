@@ -48,8 +48,8 @@ int Random_coordinate_generator::get_particles_number() const {
 
 
 void load_ions_impulse(double x, double y,
-	  double mass, double Tx, double Ty, double Tz,
-	  double p0, double* px, double* py, double* pz) {
+    double mass, double Tx, double Ty, double Tz,
+    double p0, double* px, double* py, double* pz) {
   double theta = 0.0;
   if (x <= __func.get_x0()) {
     theta = 2 * M_PI * random_01(); 
