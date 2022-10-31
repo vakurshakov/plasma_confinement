@@ -18,10 +18,10 @@ void Random_coordinate_generator::load(double* x, double* y) {
   do {
     *x = config::domain_left + random_01() *
       (__func.get_xmax() - config::domain_left);
-    
-    *y = random_01() * SIZE_Y * dx;
   }
   while (random_01() > get_probability(*x));
+
+  *y = random_01() * SIZE_Y * dx;
 }
 
 double Random_coordinate_generator::get_probability(double x) const {
