@@ -44,8 +44,9 @@ void x0_distribution_function::collect() {
     double pr_x = projector_->get_x(particle);
     double pr_y = projector_->get_y(particle);
 
-    int npx = int(round(pr_x / projector_->area.dp[X]));
-    int npy = int(round(pr_y / projector_->area.dp[Y]));
+    // floor(x) here to avoid problems on borders with rounding up and down
+    int npx = int(floor(pr_x / projector_->area.dp[X]));
+    int npy = int(floor(pr_y / projector_->area.dp[Y]));
 
     if ((min_[X] < npx && npx < max_[X]) &&
         (min_[Y] < npy && npy < max_[Y])) {
