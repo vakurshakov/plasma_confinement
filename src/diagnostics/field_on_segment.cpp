@@ -30,7 +30,7 @@ void field_on_segment::save_parameters() const {
 void field_on_segment::diagnose(int t) {
   PROFILE_FUNCTION();
   
-  if (t % diagnose_time_step != 0) return;
+  // if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
     result_directory_, std::to_string(t));
@@ -45,8 +45,8 @@ void field_on_segment::diagnose(int t) {
 
 constexpr bool field_on_segment::belongs_to_segment(int x, int y) const {
   return
-    (segment_.begin[X] < x && x < segment_.end[X]) &&
-    (segment_.begin[Y] < y && y < segment_.end[Y]) &&
+    (segment_.begin[X] <= x && x <= segment_.end[X]) &&
+    (segment_.begin[Y] <= y && y <= segment_.end[Y]) &&
     ((y - segment_.begin[Y]) * (segment_.end[X] - segment_.begin[X]) ==
      (x - segment_.begin[X]) * (segment_.end[Y] - segment_.begin[Y]));
 }
