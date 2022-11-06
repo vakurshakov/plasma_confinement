@@ -30,5 +30,13 @@ class Random_generator {
 
 inline double random_01() {
   static auto distribution = std::uniform_real_distribution(0.0, 1.0);
-  return distribution(Random_generator::get());
+
+  double value;
+
+  /// @todo critical section can slow everything
+  /// down, try here: #pragma omp atomic
+  #pragma omp critical
+  value = distribution(Random_generator::get());
+
+  return value;
 }
