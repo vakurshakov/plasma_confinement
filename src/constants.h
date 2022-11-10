@@ -30,7 +30,7 @@ inline const double dx  = 0.05;
 inline const int SIZE_X = 1460;
 
 inline const double dy  = 0.05;
-inline const int SIZE_Y = 800;
+inline const int SIZE_Y = 400;
 
 inline const double dt = 0.5 * dx;
 inline const int TIME  = 1;
@@ -62,6 +62,17 @@ inline const int   Npe = 1;
 inline const double ni = 1.0;
 inline const int   Npi = 100;
 
+// Constants describing damping layer and calculation domain
+inline const int damping_layer_width = 30;
+inline const double damping_factor = 0.8;
+
+// Domain_geometry
+inline const double domain_left   = damping_layer_width * dx;
+inline const double domain_right  = (SIZE_X - damping_layer_width) * dx;
+inline const double domain_bottom = 0;
+inline const double domain_top    = SIZE_Y * dy;
+
+
 template<class K, class V>
 using umap = std::unordered_multimap<K, V>;
 using std::to_string;
@@ -87,10 +98,14 @@ inline const umap<std::string,
         "Esirkepov_density_decomposition",
     }},
     // Diagnostics with their config parameters
-    { "energy",          { "empty description" }},
-    { "density",         { "0", "0", to_string(SIZE_X * dx), to_string(SIZE_Y * dy), "0.05", "0.05" }},
-    { "first_Vx_moment", { "0", "0", to_string(SIZE_X * dx), to_string(SIZE_Y * dy), "0.05", "0.05" }},
-    { "first_Vy_moment", { "0", "0", to_string(SIZE_X * dx), to_string(SIZE_Y * dy), "0.05", "0.05" }},
+    { "energy", { "empty description" }},
+
+    { "density", { "0", "0", to_string(SIZE_X * dx), to_string(SIZE_Y * dy), "0.05", "0.05" }},
+
+    { "x0_distribution_function", { to_string(damping_layer_width), to_string(-4 * V_ions), to_string(-4 * V_ions), to_string(+4 * V_ions), to_string(+4 * V_ions), to_string(+8 * V_ions / 200), to_string(+8 * V_ions / 200) }},
+    { "x0_distribution_function", { "400", to_string(-4 * V_ions), to_string(-4 * V_ions), to_string(+4 * V_ions), to_string(+4 * V_ions), to_string(+8 * V_ions / 200), to_string(+8 * V_ions / 200) }},
+    { "x0_distribution_function", { "800", to_string(-4 * V_ions), to_string(-4 * V_ions), to_string(+4 * V_ions), to_string(+4 * V_ions), to_string(+8 * V_ions / 200), to_string(+8 * V_ions / 200) }},
+    { "x0_distribution_function", { "840", to_string(-4 * V_ions), to_string(-4 * V_ions), to_string(+4 * V_ions), to_string(+4 * V_ions), to_string(+8 * V_ions / 200), to_string(+8 * V_ions / 200) }},
   }},
 #endif
 
@@ -117,21 +132,18 @@ inline const umap<std::string,
 #endif
 };
 
-inline const int damping_layer_width = 30;
-inline const double damping_factor = 0.8;
-
-// Domain_geometry
-inline const double domain_left   = damping_layer_width * dx;
-inline const double domain_right  = (SIZE_X - damping_layer_width) * dx;
-inline const double domain_bottom = 0;
-inline const double domain_top    = SIZE_Y * dy;
-
 inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
 #if there_are_fields && fields_are_diagnosed
   { "energy",      { "empty description" }},
+
+  { "whole_field", { "J", "x", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
+  { "whole_field", { "J", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "E", "x", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "E", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "B", "z", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
+
+  { "field_on_segment", { "J", "y", "0", to_string(SIZE_Y / 2), to_string(SIZE_X), to_string(SIZE_Y / 2) }},
+  { "field_on_segment", { "E", "x", "0", to_string(SIZE_Y / 2), to_string(SIZE_X), to_string(SIZE_Y / 2) }},
 #endif
 };
 

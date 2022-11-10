@@ -1,3 +1,5 @@
+#include <omp.h>
+
 #include <random>
 
 /**
@@ -17,7 +19,8 @@ class Random_generator {
   }
 
  private:
-  std::minstd_rand gen;
+  std::random_device rd;
+  std::minstd_rand gen = std::minstd_rand(rd());
 
   Random_generator() = default;
 
@@ -29,7 +32,7 @@ class Random_generator {
 };
 
 inline double random_01() {
-  static auto distribution = std::uniform_real_distribution(0.0, 1.0);
+  static std::uniform_real_distribution distribution(0.0, 1.0);
 
   double value;
 
@@ -37,6 +40,17 @@ inline double random_01() {
   /// down, try here: #pragma omp atomic
   #pragma omp critical
   value = distribution(Random_generator::get());
+
+  return value;
+}
+
+inline int random_sign() { 
+  static std::bernoulli_distribution distribution(0.5);
+
+  int value;
+
+  #pragma omp critical
+  value = distribution(Random_generator::get()) ? +1 : -1;
 
   return value;
 }

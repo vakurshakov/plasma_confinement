@@ -16,9 +16,13 @@ Particle_boundary_processor::Particle_boundary_processor(
 // according to the initial distribution
 vector3 Particle_boundary_processor::generate_moment(
     const Point& reference_point) {
-  double new_py = params_.p0() * sin(2 * M_PI * random_01());
+  double p0 = params_.p0();
+
+  double old_px = reference_point.px();
+  double new_py = random_sign() * p0 * sqrt(1.0 - pow(old_px / p0, 2.0));
   double new_pz = 0.0;
-  return { reference_point.px(), new_py, new_pz };
+
+  return { old_px, new_py, new_pz };
 }
 
 
