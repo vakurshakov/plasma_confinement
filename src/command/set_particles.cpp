@@ -26,6 +26,7 @@ void Set_particles::execute(int /* timestep */) const {
   // чтобы не происходило ресайзов неожиданных
   particles_->particles_.reserve(num_particles_to_load_ + 100'000);
 
+  #pragma omp parallel for num_threads(NUM_THREADS)
   for (std::size_t p_id = 0u; p_id < num_particles_to_load_; ++p_id) {
     double x, y;
     coordinate_generator_->load(&x, &y);
