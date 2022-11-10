@@ -39,6 +39,11 @@ inline const int diagnose_time_step = 1;
 
 namespace config {
 
+// This factor describes how many times the
+// width of the copy layer is greater than the
+// half-width of the one particle cloud
+inline const double COPY_LAYER_MULT = 1;
+
 inline const std::string boundaries = "cx_py";
 
 inline const double Omega_max = 0.5;
