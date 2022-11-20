@@ -20,8 +20,13 @@ class distribution_moment : public Diagnostic {
 
   void save_parameters() const override;
 
- private:
-  void collect();
+ protected:
+  distribution_moment(
+    std::string result_directory,
+    const Particles& particles,
+    int x0, std::unique_ptr<Projector2D>);
+
+  virtual void collect();
   void reset();
 
   const Particles& particles_;

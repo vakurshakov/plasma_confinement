@@ -7,3 +7,4 @@ bin-int/
 log/
 results/
 *.bin
+*.npy

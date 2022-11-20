@@ -26,7 +26,7 @@ void periodic_x(Point& point, double left, double right) {
   if (point.x() < left) {
     point.x() = right - (left - point.x());
   }
-  else if (point.x() > right) {
+  else if (point.x() >= right) {
     point.x() = left + (point.x() - right);
   }
 }
@@ -35,7 +35,7 @@ void periodic_y(Point& point, double bottom, double top) {
   if (point.y() < bottom) {
     point.y() = top - (bottom - point.y());
   }
-  else if (point.y() > top) {
+  else if (point.y() >= top) {
     point.y() = bottom + (point.y() - top);
   }
 }

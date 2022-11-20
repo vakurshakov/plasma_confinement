@@ -5,6 +5,7 @@
 
 #include "src/pch.h"
 #include "src/particles/particles.hpp"
+#include "src/particles/particles_load.hpp"
 
 class Coordinate_generator {
  public:
@@ -22,9 +23,7 @@ class Set_particles : public Command {
     Particles* const particles,
     std::size_t num_particles_to_load,
     std::unique_ptr<Coordinate_generator> coordinate_generator,
-    std::function<void(double x, double y,
-      double mass, double Tx, double Ty, double Tz,
-      double p0, double* px, double* py, double* pz)> load_impulse);
+    const impulse_loader& load_impulse);
 
   void execute(int /* timestep */) const override;
 
@@ -35,9 +34,7 @@ class Set_particles : public Command {
 
   std::unique_ptr<Coordinate_generator> coordinate_generator_;
 
-  std::function<void(double x, double y,
-    double mass, double Tx, double Ty, double Tz,
-    double p0, double* px, double* py, double* pz)> load_impulse_;
+  impulse_loader load_impulse_;
 };
 
 #endif  // SRC_COMMAND_SET_PARTICLES_HPP

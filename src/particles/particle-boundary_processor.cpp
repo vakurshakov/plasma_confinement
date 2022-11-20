@@ -5,27 +5,43 @@
 #include "src/utils/random_number_generator.hpp"
 
 Particle_boundary_processor::Particle_boundary_processor(
-    std::vector<Particle>& particles_vec, Parameters& params,
-    Domain_geometry geom)
-    : particles_vec_(particles_vec), params_(params),
-      geom_(geom) {}
+    std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom)
+    : particles_vec_(particles_vec), params_(params), geom_(geom) {}
 
 // This generate_moment method is problem-specific.
 // As soon as our particles regenerated only near
 // the left boundary, we give them a moment
 // according to the initial distribution
-vector3 Particle_boundary_processor::generate_moment(
-    const Point& reference_point) {
-  double new_py = params_.p0() * sin(2 * M_PI * random_01());
+vector3 Particle_boundary_processor::
+generate_moment(const Point& reference_point) {
+  /// @warning
+  /// Implementation here isn't good. Because of the numerical
+  /// heating, particle px can be even bigger than p0 and here
+  /// we will calculate the root of the negative value
+  ///
+  /// @note
+  /// Maybe we can reduce new_py to the simpler version
+  ///   random_sign() * reference_point.py();
+  double p0 = params_.p0();
+
+  double new_px = reference_point.px();
+  double new_py = random_sign() * p0 * sqrt(1.0 - (new_px / p0) * (new_px / p0));
   double new_pz = 0.0;
-  return { reference_point.px(), new_py, new_pz };
+
+  return { new_px, new_py, new_pz };
 }
 
 
+Plasma_boundary_processor::Plasma_boundary_processor(
+    std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom)
+    : Particle_boundary_processor(particles_vec, params, geom) {}
+
 // If a particle moves from the zero cell to the first one,
 // a new particle with the shifted x-coordinate is created
-void Plasma_boundary_processor::add(
-    Point& reference_point, const vector2& r0) {
+void Plasma_boundary_processor::
+add(Point& reference_point, const vector2& r0) {
 
   periodic_y(reference_point, geom_.bottom, geom_.top);
 
@@ -34,19 +50,13 @@ void Plasma_boundary_processor::add(
   if (passed_through_left(r0.x(), reference_point.x())) {
     particle_to_be_added = true;
     new_r = { reference_point.x() - dx, reference_point.y() };
-    LOG_TRACE("Particle passed through the left={:.5f}: x0={:.5f}, x={:.5f}",
-      geom_.left, r0.x(), reference_point.x());
   }
   else if (passed_through_right(r0.x(), reference_point.x())) {
     particle_to_be_added = true;
     new_r = { reference_point.x() + dx, reference_point.y() };
-    LOG_TRACE("Particle passed through the right={:.5f}: x0={:.5f}, x={:.5f}",
-      geom_.right, r0.x(), reference_point.x());
   }
 
   if (!particle_to_be_added) return;
-  LOG_TRACE("Creating a new one with x={:.5f}", new_r.x());
-
   vector3&& new_p = generate_moment(reference_point);
 
   /// @todo make emplace parallel with emplacing them by hand,
@@ -89,4 +99,55 @@ void Plasma_boundary_processor::remove() {
     LOG_TRACE("{} particle(s) removed", particles_vec_.end() - new_last);
     particles_vec_.erase(new_last, particles_vec_.end());
   }
+}
+
+
+Beam_boundary_processor::Beam_boundary_processor(
+    std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom)
+    : Plasma_boundary_processor(particles_vec, params, geom) {}
+
+void Beam_boundary_processor::
+add(Point& reference_point, const vector2& r0) {
+  periodic_y(reference_point, geom_.bottom, geom_.top);
+}
+
+
+Beam_buffer_processor::Beam_buffer_processor(
+    std::vector<Particle>& buff_beam_vec,
+    std::vector<Particle>& main_beam_vec,
+    Parameters& main_params,
+    Domain_geometry geom)
+    : Plasma_boundary_processor(buff_beam_vec, main_params, geom),
+      main_beam_vec_(main_beam_vec) {}
+
+void Beam_buffer_processor::
+add(Point& reference_point, const vector2& r0) {
+  periodic_y(reference_point, geom_.bottom, geom_.top);
+}
+
+void Beam_buffer_processor::remove() {
+  PROFILE_FUNCTION();
+
+  // Firstly, we remove particle that wasn't pass the border 
+  Plasma_boundary_processor::remove();
+
+  // Secondly, we move remaining particles to the main vector
+  LOG_TRACE("{} particles will come from buffer", particles_vec_.size());
+
+  for (const auto& particle : particles_vec_) {
+    main_beam_vec_.emplace_back(
+      particles_vec_.size(),
+      Point {
+        { particle.point.x(),  particle.point.y() },
+        { particle.point.px(), particle.point.py(), particle.point.pz() }
+      },
+      params_);
+  }
+
+  LOG_TRACE("{} particles in the {} after merging buffer",
+    main_beam_vec_.size(), params_.sort_name_);
+
+  // Thirdly, clear the buffer
+  particles_vec_.clear();
 }

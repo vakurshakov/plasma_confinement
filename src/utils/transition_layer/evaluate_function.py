@@ -10,7 +10,7 @@ import numpy as np
 
 x0 = 20.0   # , c/wp - Start coordinate 
 dx = 0.05   # , c/wp - Grid spacing
-mi = 400.0  # , me - Mass of ions
+mi = 16.0   # , me - Mass of ions
 me = 1.0    # , me - Mass of electrons
 
 eps = 1e-6  # Calculation tolerance
@@ -92,6 +92,8 @@ if rank == 0:
     x_range = np.arange(x0, x_value(-1.0)[0], dx)
 
     f_values = {x: float(interpolated_function(x)) for x in x_range}
+
+    np.save(evaluate_to, f_values)
 
     # Writing table function to the binary file, not mpi-parallel.
     parameters = [x0, x_range[-1], dx, mi, me]

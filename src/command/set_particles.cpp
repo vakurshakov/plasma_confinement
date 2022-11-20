@@ -6,9 +6,7 @@ Set_particles::Set_particles(
   Particles* const particles,
   std::size_t num_particles_to_load,
   std::unique_ptr<Coordinate_generator> coordinate_generator,
-  std::function<void(double x, double y,
-    double mass, double Tx, double Ty, double Tz,
-    double p0, double* px, double* py, double* pz)> load_impulse)
+  const impulse_loader& load_impulse)
   : particles_(particles),
     num_particles_to_load_(num_particles_to_load),
     coordinate_generator_(std::move(coordinate_generator)),
@@ -16,6 +14,7 @@ Set_particles::Set_particles(
 
 void Set_particles::execute(int /* timestep */) const {
   PROFILE_FUNCTION();
+  LOG_TRACE("Setting {} distribution", particles_->get_name());
 
   const double mass = particles_->get_parameters().m();
   const double Tx   = particles_->get_parameters().Tx();
@@ -24,8 +23,9 @@ void Set_particles::execute(int /* timestep */) const {
   const double p0   = particles_->get_parameters().p0();
 
   // чтобы не происходило ресайзов неожиданных
-  particles_->particles_.reserve(num_particles_to_load_ + 10'000);
+  particles_->particles_.reserve(num_particles_to_load_ + 100'000);
 
+  #pragma omp parallel for num_threads(NUM_THREADS)
   for (std::size_t p_id = 0u; p_id < num_particles_to_load_; ++p_id) {
     double x, y;
     coordinate_generator_->load(&x, &y);

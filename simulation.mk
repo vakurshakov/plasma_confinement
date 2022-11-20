@@ -23,8 +23,9 @@ SRCS +=                                       \
   src/diagnostics/whole_field.cpp             \
   src/diagnostics/field_on_segment.cpp        \
   src/diagnostics/field_at_point.cpp          \
-  src/diagnostics/distribution_moment.cpp     \
   src/diagnostics/chosen_particles.cpp        \
+  src/diagnostics/distribution_moment.cpp     \
+  src/diagnostics/x0_distribution_function.cpp\
   src/diagnostics/diagnostics_builder.cpp     \
 
 # fields

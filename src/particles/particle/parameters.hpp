@@ -114,6 +114,8 @@ public:
 	const std::string& n_type() { return n_->get_type(); }
 	const std::string& q_type() { return q_->get_type(); }
 
+	std::string sort_name_;
+
 private:
 	int Np_;
 	double m_;
