@@ -8,6 +8,7 @@
 Particles::Particles(Particles_builder& builder) {
   sort_name_ = builder.get_sort_name();
   parameters_ = builder.build_parameters();
+  parameters_.sort_name_ = sort_name_;
 
   push_ = builder.build_pusher();
   interpolation_ = builder.build_interpolation(this->parameters_);
