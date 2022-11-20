@@ -4,13 +4,13 @@
 namespace fs = std::filesystem;
 
 distribution_moment::distribution_moment(
-  std::string result_directory,
-  const Particles& particles,
-  std::unique_ptr<Moment> moment,
-  std::unique_ptr<Projector2D> projector)
-  : Diagnostic(result_directory + "/" +
-    moment->name + "_of_" + projector->axes_names),
-    particles_(particles) {
+    std::string result_directory,
+    const Particles& particles,
+    std::unique_ptr<Moment> moment,
+    std::unique_ptr<Projector2D> projector)
+    : Diagnostic(result_directory + "/" +
+      moment->name + "_of_" + projector->axes_names),
+      particles_(particles) {
   moment_ = std::move(moment);
   projector_ = std::move(projector);
 

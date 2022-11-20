@@ -35,7 +35,7 @@ double temperature_impulse(double temperature, double mass) {
   return sqrt(-2.0 * (temperature * mass / mec2) * log(random_01()));
 }
 
-void load_uniform_impulse(double x, double y,
+void load_maxwellian_impulse(double x, double y,
     double mass, double Tx, double Ty, double Tz,
     double p0, double* px, double* py, double* pz) {
   *px = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tx, mass);

@@ -5,7 +5,7 @@
 
 double temperature_impulse(double temperature, double mass);
 
-void load_uniform_impulse(double x, double y,
+void load_maxwellian_impulse(double x, double y,
   double mass, double Tx, double Ty, double Tz,
   double p0, double* px, double* py, double* pz);
 

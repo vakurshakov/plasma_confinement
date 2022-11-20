@@ -5,7 +5,7 @@
 namespace transition_layer {
 
 Parameter_function::Parameter_function() {
-  this->evaluate_from_file(config::path_to_parameter_function);
+  this->evaluate_from_file("src/utils/transition_layer/evaluated_function_20.0X0_0.05DX_16.0mi_me.bin");
 }
 
 /// Class is always carry some function table.
