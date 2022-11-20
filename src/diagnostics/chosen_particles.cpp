@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 std::vector<int> choose_indexes(const std::vector<Particle>& particles) {
   std::vector<int> indexes_of_chosen_particles;
 
-  for(decltype(particles.size()) i = 0; i < particles.size(); i += config::Npe) {
+  for(size_t i = 0u; i < particles.size(); i += config::Npi) {
     auto& point = particles[i].point;
 
     double x = round(point.x() / dx);
@@ -31,7 +31,7 @@ chosen_particles::chosen_particles(
       indexes_of_chosen_particles_(std::move(indexes_of_chosen_particles)) {
   save_parameters();
 
-  for(int i = 0; i < indexes_of_chosen_particles_.size(); ++i) {
+  for(size_t i = 0u; i < indexes_of_chosen_particles_.size(); ++i) {
     files_for_results_.emplace_back(std::make_unique<BIN_File>(
       result_directory_, std::to_string(i) + "_particle"));
   }
