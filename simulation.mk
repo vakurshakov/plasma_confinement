@@ -16,6 +16,7 @@ SRCS +=                                       \
   src/command/clone_layer_particles.cpp       \
   src/command/magnetic_field_half_step.cpp    \
   src/command/set_Bz_distribution.cpp         \
+  src/command/ionize_particles.cpp            \
 
 # diagnostics
 SRCS +=                                       \
