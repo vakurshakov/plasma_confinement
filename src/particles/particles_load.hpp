@@ -1,8 +1,6 @@
 #ifndef SRC_PARTICLES_PARTICLES_LOAD_HPP
 #define SRC_PARTICLES_PARTICLES_LOAD_HPP
 
-/// @todo impulse loader?
-
 double temperature_impulse(double temperature, double mass);
 
 void load_uniform_impulse(double x, double y,

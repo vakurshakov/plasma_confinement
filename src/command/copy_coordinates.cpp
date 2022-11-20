@@ -1,29 +1,35 @@
 #include "copy_coordinates.hpp"
-#include "../particles/particle/particle.hpp"
-  
-// А как быть, если плотности сортов разные?  
-void Copy_coordinates::execute(int _) const
-{
-    const double mass = particles_that_copies->get_parameters().m();
-    const double Tx   = particles_that_copies->get_parameters().Tx();
-    const double Ty   = particles_that_copies->get_parameters().Ty();
-    const double Tz   = particles_that_copies->get_parameters().Tz();
-    const double p0   = particles_that_copies->get_parameters().p0();
-	
-	particles_that_copies->particles_.reserve(particles_to_copy->particles_.size());
 
-	for (const auto& particle : particles_to_copy->particles_)
-    {
-        double x = particle.point.x();
-        double y = particle.point.y();
-    
-        double px, py, pz;
-        do
-        {
-		    load_impulse(x, y, mass, Tx, Ty, Tz, p0, &px, &py, &pz);
-        }
-        while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
-        
-        particles_that_copies->add_particle(Point({x, y}, {px, py, pz}));    
-	}
+Copy_coordinates::Copy_coordinates(
+    Particles* const particles_copy_to,
+    const Particles* const particles_copy_from,
+    const impulse_loader& load_impulse)
+    : particles_copy_to_(particles_copy_to),
+      particles_copy_from_(particles_copy_from),
+      load_impulse_(load_impulse) {}
+
+void Copy_coordinates::execute(int /* timestep */) const {
+  LOG_TRACE("Setting distribution for {}, copying coordinates from {}",
+    particles_copy_from_->get_name(), particles_copy_to_->get_name());
+
+  const double mass = particles_copy_to_->get_parameters().m();
+  const double Tx   = particles_copy_to_->get_parameters().Tx();
+  const double Ty   = particles_copy_to_->get_parameters().Ty();
+  const double Tz   = particles_copy_to_->get_parameters().Tz();
+  const double p0   = particles_copy_to_->get_parameters().p0();
+
+  particles_copy_to_->particles_.reserve(particles_copy_from_->particles_.size());
+
+  for (const auto& particle : particles_copy_from_->particles_) {
+    double x = particle.point.x();
+    double y = particle.point.y();
+
+    double px, py, pz;
+    do {
+      load_impulse_(x, y, mass, Tx, Ty, Tz, p0, &px, &py, &pz);
+    }
+    while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
+
+    particles_copy_to_->add_particle(Point{{x, y}, {px, py, pz}});
+  }
 }

@@ -1,55 +1,42 @@
 #ifndef COMMAND_COPY_COORDINATES_HPP
 #define COMMAND_COPY_COORDINATES_HPP
 
-//#######################################################################################
-
 #include "command.hpp"
 
 #include "src/pch.h"
-#include "../particles/particles.hpp"
+#include "src/particles/particles.hpp"
+#include "src/particles/particles_load.hpp"
 
 /**
  * @brief Command to copy coordinates from another particles.
  */
 class Copy_coordinates : public Command {
-public:
-	
-    /**
-     * @brief Constructor of the command.
-     * 
-     * @param particles_that_copies Pointer on particles that will copy coordinates. 
-     * @param particles_to_copy Pointer on particles which will share coordinates.
-     * @param load_impulse Impulse distribution function.
-     */
-	Copy_coordinates(
-		Particles* const particles_that_copies,
-        const Particles* const particles_to_copy,
-        std::function<void(double x, double y,
-		  double mass, double Tx, double Ty, double Tz,
-		  double p0, double* px, double* py, double* pz)> load_impulse)
-		  : particles_that_copies(particles_that_copies),
-            particles_to_copy(particles_to_copy),
-            load_impulse(load_impulse) {};
+ public:
 
-    /**
-     * @brief Passes through every particle of particles_to_copy vector,
-     *      copies coordinates from it to particles_that_copies and 
-     *      gives to this points another impulse.
-     * 
-     * @param _ Placeholder for the time, pass 0.
-     */
-	void execute(int _) const override;
+  /**
+   * @brief Constructor of the command.
+   *
+   * @param particles_copy_to Pointer on particles that will copy coordinates.
+   * @param particles_copy_from Pointer on particles which will share coordinates.
+   * @param load_impulse Impulse distribution function.
+   */
+  Copy_coordinates(
+    Particles* const particles_copy_to,
+    const Particles* const particles_copy_from,
+    const impulse_loader& load_impulse);
 
-private:
-	Particles* const particles_that_copies;
+  /**
+   * @brief Passes through every particle of particles_copy_from vector,
+   *  copies coordinates from it to particles_copy_to and
+   *  gives to this points another impulse.
+   */
+  void execute(int /* timestep */) const override;
 
-    const Particles* const particles_to_copy;
-    
-    std::function<void(double x, double y,
-	    double mass, double Tx, double Ty, double Tz,
-	    double p0, double* px, double* py, double* pz)> load_impulse;    
+ private:
+  Particles* const particles_copy_to_;
+  const Particles* const particles_copy_from_;
+
+  impulse_loader load_impulse_;
 };
-
-//#######################################################################################
 
 #endif // COMMAND_COPY_COORDINATES_HPP
