@@ -17,14 +17,7 @@ class Random_coordinate_generator : public Coordinate_generator {
   double get_probability(double x) const;
 };
 
-class Boundary_coordinate_generator : public Random_coordinate_generator {
- public:
-  Boundary_coordinate_generator() = default;
-
-  int get_particles_number() const override;
-
-  void load(double* x, double* y) override;
-};
+void set_on_segment(double* x, double* y);
 
 void load_monoenergetic_impulse(double x, double y,
   double mass, double Tx, double Ty, double Tz,

@@ -2,7 +2,8 @@
 
 double Damping_layer::damping_coeff(int x) {
   return 1. - this->damping_factor *
-    pow(((double) x / (double) this->width - 1.), 2.);
+    ((double) x / (double) this->width - 1.) *
+    ((double) x / (double) this->width - 1.);
 }
 
 
@@ -21,7 +22,6 @@ void Open_boundaries_processor::process() {
   // top_bottom_bounds();
 }
 
-// #define COPYING_FIELDS_TO_THE_BUFFER_CELLS
 void Open_boundaries_processor::left_right_bounds() {
   // * . . * >x
   // *     *
@@ -30,19 +30,6 @@ void Open_boundaries_processor::left_right_bounds() {
 
   #pragma omp parallel for num_threads(NUM_THREADS)
   for (int y = 0; y < fields_E.size_y(); ++y) {
-#ifdef COPYING_FIELDS_TO_THE_BUFFER_CELLS
-    for (int copy_to_x = layer.width; copy_to_x > layer.width - 3; --copy_to_x) {
-      int copy_from_x = layer.width + 1;
-      fields_E.x(y, copy_to_x) = fields_E.x(y, copy_from_x);
-      fields_E.y(y, copy_to_x) = fields_E.y(y, copy_from_x);
-      fields_E.z(y, copy_to_x) = fields_E.z(y, copy_from_x);
-
-      fields_B.x(y, copy_to_x) = fields_B.x(y, copy_from_x);
-      fields_B.y(y, copy_to_x) = fields_B.y(y, copy_from_x);
-      fields_B.z(y, copy_to_x) = fields_B.z(y, copy_from_x);
-    }
-#endif
-
     for (int x = 0; x < layer.width; ++x) {
       // left
       double coeff = layer.damping_coeff(x);
@@ -53,7 +40,11 @@ void Open_boundaries_processor::left_right_bounds() {
 
       fields_B.x(y, x) *= coeff;
       fields_B.y(y, x) *= coeff;
+#if BEAM_INJECTION_SETUP
+      fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
+#else
       fields_B.z(y, x) *= coeff;
+#endif
 
       // right
       int right_x = (fields_E.size_x() - 1) - x;

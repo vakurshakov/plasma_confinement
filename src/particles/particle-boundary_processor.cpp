@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "src/utils/random_number_generator.hpp"
+#include "src/particles/particles_load.hpp"
 
 Particle_boundary_processor::Particle_boundary_processor(
     std::vector<Particle>& particles_vec,
@@ -15,18 +16,8 @@ Particle_boundary_processor::Particle_boundary_processor(
 // according to the initial distribution
 vector3 Particle_boundary_processor::
 generate_moment(const Point& reference_point) {
-  /// @warning
-  /// Implementation here isn't good. Because of the numerical
-  /// heating, particle px can be even bigger than p0 and here
-  /// we will calculate the root of the negative value
-  ///
-  /// @note
-  /// Maybe we can reduce new_py to the simpler version
-  ///   random_sign() * reference_point.py();
-  double p0 = params_.p0();
-
   double new_px = reference_point.px();
-  double new_py = random_sign() * p0 * sqrt(1.0 - (new_px / p0) * (new_px / p0));
+  double new_py = sin(2.0 * M_PI * random_01()) * temperature_impulse(params_.Ty(), params_.m());
   double new_pz = 0.0;
 
   return { new_px, new_py, new_pz };

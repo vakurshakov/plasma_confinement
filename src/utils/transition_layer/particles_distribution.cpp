@@ -47,13 +47,9 @@ int Random_coordinate_generator::get_particles_number() const {
 }
 
 
-void Boundary_coordinate_generator::load(double* x, double* y) {
-  *x = config::domain_left + (random_01() - 1) * dx;
+void set_on_segment(double* x, double* y) {
+  *x = (0.5 * SIZE_X + (random_01() - 0.5)) * dx;
   *y = random_01() * SIZE_Y * dy;
-}
-
-int Boundary_coordinate_generator::get_particles_number() const {
-  return SIZE_Y * config::Npi;
 }
 
 
