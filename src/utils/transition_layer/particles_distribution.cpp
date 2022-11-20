@@ -21,7 +21,7 @@ void Random_coordinate_generator::load(double* x, double* y) {
   }
   while (random_01() > get_probability(*x));
 
-  *y = random_01() * SIZE_Y * dx;
+  *y = random_01() * SIZE_Y * dy;
 }
 
 double Random_coordinate_generator::get_probability(double x) const {
@@ -47,7 +47,17 @@ int Random_coordinate_generator::get_particles_number() const {
 }
 
 
-void load_ions_impulse(double x, double y,
+void Boundary_coordinate_generator::load(double* x, double* y) {
+  *x = config::domain_left + (random_01() - 1) * dx;
+  *y = random_01() * SIZE_Y * dy;
+}
+
+int Boundary_coordinate_generator::get_particles_number() const {
+  return SIZE_Y * config::Npi;
+}
+
+
+void load_monoenergetic_impulse(double x, double y,
     double mass, double Tx, double Ty, double Tz,
     double p0, double* px, double* py, double* pz) {
   double theta = 0.0;

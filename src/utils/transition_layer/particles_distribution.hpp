@@ -9,7 +9,7 @@ class Random_coordinate_generator : public Coordinate_generator {
  public:
   Random_coordinate_generator() = default;
 
-  int get_particles_number() const;
+  virtual int get_particles_number() const;
 
   void load(double* x, double* y) override;
 
@@ -17,7 +17,16 @@ class Random_coordinate_generator : public Coordinate_generator {
   double get_probability(double x) const;
 };
 
-void load_ions_impulse(double x, double y,
+class Boundary_coordinate_generator : public Random_coordinate_generator {
+ public:
+  Boundary_coordinate_generator() = default;
+
+  int get_particles_number() const override;
+
+  void load(double* x, double* y) override;
+};
+
+void load_monoenergetic_impulse(double x, double y,
   double mass, double Tx, double Ty, double Tz,
   double p0, double* px, double* py, double* pz);
 
