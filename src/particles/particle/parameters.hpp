@@ -39,8 +39,6 @@ struct Parameters {
   constexpr const auto& form_factor() const { return form_factor_; }
 
   constexpr const std::string& get_name() const { return sort_name_; }
-
-	enum Axis { x = 0, y, z };
 };
 
 #endif //GLOBAL_PARAMETERS_HPP

@@ -12,6 +12,7 @@
 #include "src/particles/particles_load.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
 
+#include "src/utils/transition_layer/particles_distribution.hpp"
 #include "src/utils/random_number_generator.hpp"
 
 void Manager::initializes() {
@@ -90,7 +91,8 @@ void Manager::initializes() {
     config::domain_top
   };
 
-  int total_num_particles = config::PER_STEP_PARTICLES * config::INJECTION_TIME + 10'000;
+  constexpr int total_num_particles = config::PER_STEP_PARTICLES * TIME + 10'000;
+  LOG_INFO("{} particles will be set in total to each plasma specie", total_num_particles);
 
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
@@ -111,7 +113,7 @@ void Manager::initializes() {
 
   step_presets_.emplace_back(std::make_unique<Ionize_particles>(
     &plasma_ions, &plasma_electrons,
-    set_time_distribution(config::INJECTION_TIME, total_num_particles),
+    set_time_distribution(TIME, total_num_particles),
     transition_layer::set_on_segment,
     uniform_probability,
     load_maxwellian_impulse

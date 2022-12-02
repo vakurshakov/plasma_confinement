@@ -10,15 +10,16 @@ Particle_boundary_processor::Particle_boundary_processor(
     Parameters& params, Domain_geometry geom)
     : particles_vec_(particles_vec), params_(params), geom_(geom) {}
 
-// This generate_moment method is problem-specific.
-// As soon as our particles regenerated only near
-// the left boundary, we give them a moment
-// according to the initial distribution
 vector3 Particle_boundary_processor::
 generate_moment(const Point& reference_point) {
   double new_px = reference_point.px();
-  double new_py = sin(2.0 * M_PI * random_01()) * temperature_impulse(params_.Ty(), params_.m());
-  double new_pz = 0.0;
+
+  double new_transverse_temp = 0.5 / params_.m() * (
+    reference_point.py() * reference_point.py() + 
+    reference_point.pz() * reference_point.pz());
+
+  double new_py = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_transverse_temp, params_.m());
+  double new_pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_transverse_temp, params_.m());
 
   return { new_px, new_py, new_pz };
 }

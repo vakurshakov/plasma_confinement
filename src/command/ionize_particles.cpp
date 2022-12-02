@@ -17,7 +17,7 @@ Ionize_particles::Ionize_particles(
 void Ionize_particles::execute(int t) const {
   PROFILE_FUNCTION();
   LOG_INFO("Injecting particles, {} particles will be loaded into {} and {}",
-    per_step_particles_num[t],
+    per_step_particles_num[t-1],  // timestep count starts from 1;
     ionized->get_parameters().get_name(),
     ejected->get_parameters().get_name());
 
@@ -33,7 +33,7 @@ void Ionize_particles::execute(int t) const {
   const double Tl_z = ejected->get_parameters().Tz();
   const double pl_0 = ejected->get_parameters().p0();
 
-  for (size_t i = 0u; i < per_step_particles_num[t]; ++i) {
+  for (size_t i = 0u; i < per_step_particles_num[t-1]; ++i) {
     double x, y;
 
     do {

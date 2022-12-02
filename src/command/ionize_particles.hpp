@@ -58,7 +58,7 @@ public:
    * the time of injection, "false" otherwise.
    */
   bool needs_to_be_removed(int t) const override {
-    return !(t < config::INJECTION_TIME);
+    return false;  // continuos injection
   }
 
 private:

@@ -48,7 +48,7 @@ int Random_coordinate_generator::get_particles_number() const {
 
 
 void set_on_segment(double* x, double* y) {
-  *x = (0.5 * SIZE_X + (random_01() - 0.5)) * dx;
+  *x = (0.5 * SIZE_X + (random_01() - 0.5) * config::WIDTH_OF_INJECTION_AREA) * dx;
   *y = random_01() * SIZE_Y * dy;
 }
 
