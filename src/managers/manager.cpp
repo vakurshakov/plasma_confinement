@@ -16,8 +16,53 @@
 
 void Manager::initializes() {
   PROFILE_FUNCTION();
-  LOG_TRACE("Initialization process...");
 
+  // Common information
+  LOG_INFO("Note: Dimensionless units are used. So, for density 1e13:");
+  LOG_INFO("  frequency,   w_pe = {:.2e} 1/sec", 5.64e4 * sqrt(1e13));
+  LOG_INFO("  time,      1/w_pe = {:.2e} sec", 1.77e-5 / sqrt(1e13));
+  LOG_INFO("  length,    c/w_pe = {:.2e} cm", 531915 / sqrt(1e13));
+  LOG_INFO("  electric field, E = {:.2e} MV/cm", 9.63e-7 * sqrt(1e13));
+  LOG_INFO("  magnetic field, B = {:.2e} T", 3.21e-7 * sqrt(1e13));
+
+  // Commenting useful information about the current setup
+  LOG_INFO("Constants for the current setup...");
+  
+  LOG_INFO("Simulation area:");
+  LOG_INFO("  length along x axis,  Lx = {:.2e} c/w_pe ({} cells)", SIZE_X * dx, SIZE_X);
+  LOG_INFO("  length along y axis,  Ly = {:.2e} c/w_pe ({} cells)", SIZE_Y * dy, SIZE_Y);
+  LOG_INFO("  total simulation time, T = {:.2e} 1/w_pe ({} timesteps)", TIME * dt, TIME);
+  LOG_INFO("  magnetic field,    B_max = {:.2e} m_e*c*w_pe/e", config::Omega_max);
+  LOG_INFO("  injection time,    T_inj = {:.2e} 1/w_pe ({} timesteps)",
+    config::INJECTION_TIME * dt, config::INJECTION_TIME);
+  LOG_INFO("  injection rate,    R_inj = {} part/step", config::PER_STEP_PARTICLES);
+  
+  LOG_INFO("Plasma ions:");
+  LOG_INFO("  temperature,              T_i = {:.2e} KeV", config::T_ions);
+  LOG_INFO("  thermal velocity,        v_Ti = {:.2e} c", config::V_ions);
+  LOG_INFO("  Debye length,            L_di = {:.2e} c/w_pe", config::V_ions * sqrt(config::mi_me));
+  LOG_INFO("  cyclotron frequency,     Om_i = {:.2e} w_pe", config::Omega_max / config::mi_me);
+  LOG_INFO("  cyclotron period, 2 pi / Om_i = {:.2e} 1/w_pe ({} timesteps)",
+    2 * M_PI / (config::Omega_max / config::mi_me),
+    int(2 * M_PI / (config::Omega_max / config::mi_me) / dt));
+  LOG_INFO("  cyclotron radius,       rho_i = {:.2e} c/w_pe ({} cells)",
+    config::V_ions * config::mi_me / config::Omega_max,
+    int(config::V_ions * config::mi_me / config::Omega_max / dx));
+  
+  LOG_INFO("Plasma electrons:");
+  LOG_INFO("  temperature,              T_e = {:.2e} KeV", config::T_electrons);
+  LOG_INFO("  thermal velocity,        v_Te = {:.2e} c", config::V_electrons);
+  LOG_INFO("  Debye length,            L_de = {:.2e} c/w_pe", config::V_electrons);
+  LOG_INFO("  cyclotron frequency,     Om_e = {:.2e} w_pe", config::Omega_max);
+  LOG_INFO("  cyclotron period, 2 pi / Om_e = {:.2e} 1/w_pe ({} timesteps)",
+    2 * M_PI / (config::Omega_max),
+    int(2 * M_PI / (config::Omega_max) / dt));
+  LOG_INFO("  cyclotron radius,       rho_e = {:.2e} c/w_pe ({} cells)",
+    config::V_electrons / config::Omega_max,
+    int(config::V_electrons / config::Omega_max / dx)); 
+  LOG_FLUSH();
+
+  LOG_TRACE("Initialization process...");
   std::list<Command_up> presets;
 
 #if there_are_fields
