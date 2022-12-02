@@ -15,11 +15,15 @@ class Particles {
 
   Particles(Particles_builder& builder);
 
-  const auto& get_name() const { return sort_name_; }
   const auto& get_particles() const { return particles_; }
   const auto& get_parameters() const { return parameters_; }
 
-  void add_particle(const Point& point, ...);
+  void add_particle(
+    const Point& point
+  #if !IS_DENSITY_GLOBAL
+    , double particle_n
+  #endif
+  );
 
   void push();
 

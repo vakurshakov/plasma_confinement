@@ -8,7 +8,6 @@
 Particles::Particles(Particles_builder& builder) {
   sort_name_ = builder.get_sort_name();
   parameters_ = builder.build_parameters();
-  parameters_.sort_name_ = sort_name_;
 
   push_ = builder.build_pusher();
   interpolation_ = builder.build_interpolation(this->parameters_);
@@ -58,22 +57,17 @@ void Particles::push() {
 
 /**
  * @brief Adds a particle to the end of the array.
- *
  * @param point Coordinates and impulse of the particle.
- * @param ... Local parameters.
  */
-void Particles::add_particle(const Point& point, ...) {
-  va_list list;
-  va_start(list, point);
-
-  if (parameters_.n_type() == "local")
-    parameters_.set_n(static_cast<double>(va_arg(list, double)));
-
-  if (parameters_.q_type() == "local")
-    parameters_.set_q(static_cast<double>(va_arg(list, double)));
-
-  va_end(list);
-
+void Particles::add_particle(const Point& point
+  #if !IS_DENSITY_GLOBAL
+  , double particle_local_n
+  #endif
+) {
   #pragma omp critical
-  particles_.emplace_back(particles_.size(), point, parameters_);
+  Particle new_particle = particles_.emplace_back(point, parameters_);
+
+  #if !IS_DENSITY_GLOBAL
+  new_particle.n_ = particle_local_n;
+  #endif
 }

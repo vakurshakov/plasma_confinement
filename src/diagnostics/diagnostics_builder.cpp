@@ -13,7 +13,7 @@ Diagnostics_builder::Diagnostics_builder(
     std::vector<Particles>& particles_species, Fields& fields)
     : fields_(fields) {
   for (auto& sort : particles_species) {
-    particles_species_.emplace(sort.get_name(), sort);
+    particles_species_.emplace(sort.get_parameters().get_name(), sort);
   }
 }
 
@@ -128,7 +128,7 @@ Diagnostics_builder::get_component(const std::string& component) {
 
 BUILD_FIELD_DIAG(fields_energy) {
   return std::make_unique<fields_energy>(
-    dir_name + "/fields", fields_.E(), fields_.B());
+    dir_name + "/", fields_.E(), fields_.B());
 }
 
 BUILD_FIELD_DIAG(field_at_point) {
@@ -146,7 +146,8 @@ BUILD_FIELD_DIAG(field_at_point) {
   }
 
   return std::make_unique<field_at_point>(
-    dir_name + "/fields/field_at_point",
+    dir_name + "/" + description[0] + description[1]+ "/point_(" +
+      description[2] + "," + description[3] + ")",
     description[0] + description[1],
     get_field(description[0]),
     get_component(description[1]),
@@ -170,7 +171,9 @@ BUILD_FIELD_DIAG(field_on_segment) {
   }
 
   return std::make_unique<field_on_segment>(
-    dir_name + "/fields/field_on_segment/" + description[0] + description[1],
+    dir_name + "/" + description[0] + description[1] + "/segment_(" +
+      description[2] + "," + description[3] + ")_(" +
+      description[4] + "," + description[5] + ")/",
     get_field(description[0]),
     get_component(description[1]),
     segment);
@@ -193,7 +196,7 @@ BUILD_FIELD_DIAG(whole_field) {
   }
 
   return std::make_unique<whole_field>(
-    dir_name + "/fields/whole_field/" + description[0] + description[1],
+    dir_name + "/" + description[0] + description[1] + "/whole_field/",
     get_field(description[0]),
     get_component(description[1]),
     diag_segment{
@@ -209,7 +212,7 @@ inline std::unique_ptr<Diagnostic>
 Diagnostics_builder::build_diag_particles_energy(
     const std::string& sort_name) {
   return std::make_unique<particles_energy>(
-    dir_name + "/" + sort_name, sort_name,
+    dir_name + "/", sort_name,
     particles_species_.at(sort_name));
 }
 

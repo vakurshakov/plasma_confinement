@@ -54,8 +54,7 @@ add(Point& reference_point, const vector2& r0) {
   /// maybe you should write a small and predictable container
   /// to simplify the process
   #pragma omp critical
-  particles_vec_.emplace_back(particles_vec_.size(),
-    Point{std::move(new_r), std::move(new_p)}, params_);
+  particles_vec_.emplace_back(Point{std::move(new_r), std::move(new_p)}, params_);
 }
 
 inline bool Plasma_boundary_processor::
@@ -128,7 +127,6 @@ void Beam_buffer_processor::remove() {
 
   for (const auto& particle : particles_vec_) {
     main_beam_vec_.emplace_back(
-      particles_vec_.size(),
       Point {
         { particle.point.x(),  particle.point.y() },
         { particle.point.px(), particle.point.py(), particle.point.pz() }

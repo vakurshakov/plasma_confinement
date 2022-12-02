@@ -14,7 +14,7 @@ Set_particles::Set_particles(
 
 void Set_particles::execute(int /* timestep */) const {
   PROFILE_FUNCTION();
-  LOG_TRACE("Setting {} distribution", particles_->get_name());
+  LOG_TRACE("Setting {} distribution", particles_->get_parameters().get_name());
 
   const double mass = particles_->get_parameters().m();
   const double Tx   = particles_->get_parameters().Tx();

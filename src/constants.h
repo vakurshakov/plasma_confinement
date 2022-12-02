@@ -11,6 +11,7 @@
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
+  #define IS_DENSITY_GLOBAL             true
 
 #define there_are_fields                true
   #define fields_are_diagnosed          true

@@ -10,7 +10,8 @@ Copy_coordinates::Copy_coordinates(
 
 void Copy_coordinates::execute(int /* timestep */) const {
   LOG_TRACE("Setting distribution for {}, copying coordinates from {}",
-    particles_copy_from_->get_name(), particles_copy_to_->get_name());
+    particles_copy_from_->get_parameters().get_name(),
+    particles_copy_to_->get_parameters().get_name());
 
   const double mass = particles_copy_to_->get_parameters().m();
   const double Tx   = particles_copy_to_->get_parameters().Tx();

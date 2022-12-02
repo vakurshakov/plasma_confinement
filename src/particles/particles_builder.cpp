@@ -40,44 +40,18 @@ Particles_builder::get_description(const string& parameter) {
 }
 
 Parameters Particles_builder::build_parameters() {
-  size_t pos = string::npos;
-  string setting = sort_parameters_[0];
+  Parameters parameters;
+  parameters.n_  = stod(sort_parameters_[0]);
+  parameters.q_  = stod(sort_parameters_[1]);
+  parameters.m_  = stod(sort_parameters_[2]);
+  parameters.Np_ = stoi(sort_parameters_[3]);
+  parameters.Tx_ = stod(sort_parameters_[4]);
+  parameters.Ty_ = stod(sort_parameters_[5]);
+  parameters.Tz_ = stod(sort_parameters_[6]);
+  parameters.p0_ = stod(sort_parameters_[7]);
 
-  std::unique_ptr<Variadic_parameter> n;
-  if (pos = setting.find("local"); pos != string::npos) {
-    n = make_unique<Local_parameter>();
-  }
-  else if (pos = setting.find("global, "); pos != string::npos) {
-    pos += string("global, ").length();
-    int end = setting.length();
-
-    double n0 = stod(setting.substr(pos, end - pos));
-    n = make_unique<Global_parameter>(n0);
-  }
-
-  pos = string::npos;
-  setting = sort_parameters_[1];
-
-  std::unique_ptr<Variadic_parameter> q;
-  if (pos = setting.find("local"); pos != string::npos) {
-    q = make_unique<Local_parameter>();
-  }
-  else if (pos = setting.find("global, "); pos != string::npos) {
-    pos += string("global, ").length();
-    int end = setting.length();
-
-    double q0 = stod(setting.substr(pos, end - pos));
-    q = make_unique<Global_parameter>(q0);
-  }
-
-  return Parameters(
-    stoi(sort_parameters_[3]),
-    stod(sort_parameters_[2]),
-    std::move(n), std::move(q),
-    stod(sort_parameters_[7]),
-    stod(sort_parameters_[4]),
-    stod(sort_parameters_[5]),
-    stod(sort_parameters_[6]));
+  parameters.sort_name_ = get_sort_name();
+  return parameters;
 }
 
 std::unique_ptr<Pusher>

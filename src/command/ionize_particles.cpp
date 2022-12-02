@@ -17,7 +17,9 @@ Ionize_particles::Ionize_particles(
 void Ionize_particles::execute(int t) const {
   PROFILE_FUNCTION();
   LOG_INFO("Injecting particles, {} particles will be loaded into {} and {}",
-    per_step_particles_num[t], ionized->get_name(), ejected->get_name());
+    per_step_particles_num[t],
+    ionized->get_parameters().get_name(),
+    ejected->get_parameters().get_name());
 
   const double mi =   ionized->get_parameters().m();
   const double Ti_x = ionized->get_parameters().Tx();

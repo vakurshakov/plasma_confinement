@@ -86,7 +86,7 @@ void particles_energy::diagnose(int t) {
 
   file_for_results_->write(W);
 
-  LOG_INFO("Energy in {} = {}", particles_.get_name(), W);
+  LOG_INFO("Energy in {} = {}", particles_.get_parameters().get_name(), W);
 
   if (t % diagnose_time_step == 0)
     file_for_results_->flush();
