@@ -4,6 +4,9 @@ bin/
 # Prerequisites & Compiled object files
 bin-int/
 
+# External dependencies
+external/
+
 log/
 results/
 *.bin

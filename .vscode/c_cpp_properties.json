@@ -5,7 +5,7 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/",
-                "${workspaceFolder}/external/spdlog/include/"
+                "${workspaceFolder}/external/"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
