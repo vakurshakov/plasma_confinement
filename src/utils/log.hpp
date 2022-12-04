@@ -2,7 +2,7 @@
 #define SRC_UTILS_LOG_HPP
 
 #include <memory>
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 class Log {
  public:
