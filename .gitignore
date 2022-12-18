@@ -9,5 +9,6 @@ external/
 
 log/
 results/
+__pycache__/
 *.bin
 *.npy
