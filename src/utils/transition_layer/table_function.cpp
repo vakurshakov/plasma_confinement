@@ -1,4 +1,4 @@
-#include "table_function.h"
+#include "table_function.hpp"
 
 Table_function::Table_function(const std::string& filename) {
   evaluate_from_file(filename);
