@@ -10,7 +10,7 @@
 #define there_are_particles             true
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
-  #define there_are_plasma_electrons    true
+  #define there_are_plasma_electrons    false
   #define IS_DENSITY_GLOBAL             true
 
 #define there_are_fields                true
@@ -20,8 +20,6 @@
 #define LOGGING                         true
 #define TIME_PROFILING                  true
 
-#define BEAM_INJECTION_SETUP            false
-#define PLASMA_MAG_FIELD_SETUP          true
 
 inline const double e   = 1.0;
 inline const double me  = 1.0;
@@ -48,29 +46,24 @@ namespace config {
 // half-width of the one particle cloud
 inline const double COPY_LAYER_MULT = 1;
 
+inline const double layer_beginning = 30.0;
+
 inline const std::string boundaries = "cx_py";
 
 inline const double n0 = 1.0;
-inline const int   Npi = 50;
+inline const int   Npi = 20;
 
 inline const double mi_me  = 16.0;
 
-inline const double Omega_max = 0.2;
+inline const double T_ions = 10.0;  // KeV
+inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
-// Injection is done so that after INJECTION_TIME there would be n0
-inline const int INJECTION_TIME = 40'000;
-inline const int WIDTH_OF_INJECTION_AREA = 500;
-inline const int PER_STEP_PARTICLES = SIZE_Y * WIDTH_OF_INJECTION_AREA * Npi / INJECTION_TIME;
+inline const double T_electrons = 1e-3;  // KeV
+inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
-// Ions temperature must satisfy the transverse
-// equilibrium condition: n₀kT = Bᵥ²/8π
-inline const double IONS_TEMPERATURE_MULT = 1.0;
-inline const double T_ions = 0.5 * Omega_max * Omega_max / n0 * 511.0 * IONS_TEMPERATURE_MULT;  // [in KeV], ~10 KeV for mi = 16
-inline const double V_ions = sqrt(2 * T_ions / mi_me / 511.0);
+inline const double Omega_max = sqrt(4 * M_PI * n0 * mi_me * V_ions * V_ions);
 
-inline const double ELECTRONS_TEMPERATURE_MULT = 0.005;
-inline const double T_electrons = ELECTRONS_TEMPERATURE_MULT * T_ions;  // ~50 eV for ETM = 0.005
-inline const double V_electrons = sqrt(2 * T_electrons / me / 511.0);
+inline const std::string postfix = "0.05dx_16.0mi_me_10.0Ti.bin";
 
 // Constants describing damping layer and calculation domain
 inline const int damping_layer_width = 50;
@@ -131,12 +124,6 @@ inline const umap<std::string,
       to_string(+10 * V_ions), to_string(+10 * V_ions),             // maximum captured velocity [in units of c]
       to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)  // step between nearest velocities [in units of c]
     }},
-    { "x0_distribution_function", {
-      to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
   }},
 #endif
 
@@ -180,12 +167,6 @@ inline const umap<std::string,
       to_string(+10 * V_ions), to_string(+10 * V_ions),
       to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
     }},
-    { "x0_distribution_function", {
-      to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
   }},
 #endif
 
@@ -217,24 +198,6 @@ inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
     to_string(SIZE_X / 2), "0",
     to_string(SIZE_X / 2), to_string(SIZE_Y)
   }},
-
-#if BEAM_INJECTION_SETUP
-  { "field_on_segment", {
-    "E", "x",
-    to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2), "0",
-    to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2), to_string(SIZE_Y)
-  }},
-  { "field_on_segment", {
-    "E", "y",
-    to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2), "0",
-    to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2), to_string(SIZE_Y)
-  }},
-  { "field_on_segment", {
-    "B", "z",
-    to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2), "0",
-    to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2), to_string(SIZE_Y)
-  }},
-#endif
 #endif
 };
 
