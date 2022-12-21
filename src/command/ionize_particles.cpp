@@ -64,7 +64,7 @@ std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_n
   std::vector<size_t> array_of_particles_to_load(t_inj);
 
   for (size_t t = 0u; t < t_inj; ++t) {
-    array_of_particles_to_load[t] = config::PER_STEP_PARTICLES;
+    array_of_particles_to_load[t] = 0;
   }
 
   return array_of_particles_to_load;

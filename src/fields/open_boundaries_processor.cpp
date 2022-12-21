@@ -40,11 +40,7 @@ void Open_boundaries_processor::left_right_bounds() {
 
       fields_B.x(y, x) *= coeff;
       fields_B.y(y, x) *= coeff;
-#if BEAM_INJECTION_SETUP
-      fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
-#else
       fields_B.z(y, x) *= coeff;
-#endif
 
       // right
       int right_x = (fields_E.size_x() - 1) - x;

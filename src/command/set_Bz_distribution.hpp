@@ -5,7 +5,7 @@
 
 #include "src/pch.h"
 #include "src/fields/fields.hpp"
-#include "src/utils/transition_layer/parameter_function.hpp"
+#include "src/utils/transition_layer/table_function.hpp"
 
 class Set_Bz_distribution : public Command {
  public:

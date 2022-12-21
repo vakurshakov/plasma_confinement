@@ -39,23 +39,28 @@ _Bz = interp1d(raw_xg[1][1:] * sqrt(mi_me),
 _ng = interp1d(raw_ng[0], raw_ng[1])
 _n  = interp1d(raw_xg[1] * sqrt(mi_me), _ng(raw_xg[0]))
 
+# g is normalized to v_th
+_Gx = interp1d(raw_xg[1] * sqrt(mi_me), raw_xg[0] * v_th)
+
 
 xmax = 10 * sqrt(mi_me)
-x_range = np.arange(0, xmax, dx)
+x_range = np.arange(0, xmax + dx, dx)
 
 Jy = {x: float(_Jy(x)) for x in x_range}
 Bz = {x: float(_Bz(x)) for x in x_range}
 n  = {x: float(_n(x))  for x in x_range}
+Gx = {x: float(_Gx(x)) for x in x_range}
 
 # Saving interpolated functions into numpy binaries
 np.save(f'../Jy_{postfix}.npy', Jy)
 np.save(f'../Bz_{postfix}.npy', Bz)
 np.save(f'../n_{postfix}.npy',  n)
+np.save(f'../Gx_{postfix}.npy', Gx)
 
 # Writing table functions to the binary file
 parameters = [0, xmax, dx]
 
-for table, name in zip([Jy, Bz, n], ['Jy', 'Bz', 'n']):
+for table, name in zip([Jy, Bz, n, Gx], ['Jy', 'Bz', 'n', 'Gx']):
   with open(f'../{name}_{postfix}.bin', 'wb') as file:
     plain_dict = []
     for x, v in table.items():
@@ -74,15 +79,15 @@ plt.rc('xtick', labelsize=12)   # fontsize of the tick labels
 plt.rc('ytick', labelsize=12)   # fontsize of the tick labels
 plt.rc('legend', fontsize=12)   # legend fontsize
 
-Bz = load(f'Bz_{postfix}.npy', allow_pickle=True).item()
+Bz = load(f'../Bz_{postfix}.npy', allow_pickle=True).item()
 plt.plot(np.array(list(Bz.keys())) / sqrt(mi_me), np.array(list(Bz.values())) / sqrt(4 * pi * mi_me * v_th * v_th), label='$B_z\,(x)\,/\,B_v$')
 # plt.fill_between(np.array(list(Bz.keys())) / sqrt(mi_me), 0, np.array(list(Bz.values())) / sqrt(4 * pi * mi_me * v_th * v_th), alpha = 0.4)
 
-Jy = load(f'Jy_{postfix}.npy', allow_pickle=True).item()
+Jy = load(f'../Jy_{postfix}.npy', allow_pickle=True).item()
 plt.plot(np.array(list(Jy.keys())) / sqrt(mi_me), -np.array(list(Jy.values())) / v_th, label='$- J_y\,(x)\,/\,e n_0 v_{th}$')
 # plt.fill_between(np.array(list(Jy.keys())) / sqrt(mi_me), 0, -np.array(list(Jy.values())) / v_th, alpha = 0.4)
 
-n = load(f'n_{postfix}.npy', allow_pickle=True).item()
+n = load(f'../n_{postfix}.npy', allow_pickle=True).item()
 plt.plot(np.array(list(n.keys())) / sqrt(mi_me), n.values(), label='$n\,(x)\,/\,n_0$')
 # plt.fill_between(np.array(list(n.keys())) / sqrt(mi_me), 0, np.array(list(n.values())), alpha = 0.4)
 

@@ -42,10 +42,16 @@ void Table_function::evaluate_from_file(const std::string& filename) {
   fclose(file);
 }
 
+double Table_function::operator()(double x /*, c/wp */) const {
+  return get_value(x);
+}
+
 /// Using linear interpolation it computes a value
 /// of the stored parameter-function for a given x.
 double Table_function::get_value(double x /*, c/wp */) const {
-  assert((x0_ <= x && x <= xmax_) && "given x misses the boundaries");
+  assert((get_x0() <= x && x <= get_xmax()) && "given x misses the boundaries");
+
+  x -= get_x0();
 
   int pair_index = (int) round((x - x0_) / dx_);
 

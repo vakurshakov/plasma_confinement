@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "src/pch.h"
+
 /**
  * @brief Carries the table-function values.
  *
@@ -26,13 +28,17 @@ class Table_function {
 
   /// @param x Coordinate to find a function value at (in c/w_pe units)
   /// @return Linearly interpolated value of a stored parameter function.
+  double operator()(double x) const;
+  
+  /// @param x Coordinate to find a function value at (in c/w_pe units)
+  /// @return Linearly interpolated value of a stored parameter function.
   double get_value(double x) const;
 
   // Minimal coordinate
-  double get_x0() const { return x0_; }
+  double get_x0() const { return config::layer_beginning +  x0_; }
 
   // Maximum coordinate
-  double get_xmax() const { return xmax_; }
+  double get_xmax() const { return config::layer_beginning + xmax_; }
 
  private:
   Table_function() = delete;

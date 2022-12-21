@@ -1,17 +1,14 @@
 SIMULATION_DIR := $(PWD)
 SPDLOG_DIR     := $(PWD)/external/spdlog
-OPENPMD_DIR    := $(PWD)/external/openPMD-api
 
 INC_PATH :=
 INC_PATH += -I$(SIMULATION_DIR)/
 INC_PATH += -I$(SPDLOG_DIR)/include
-INC_PATH += -I$(OPENPMD_DIR)/include
 
 LIB_PATH :=
 LIB_PATH += -L$(SPDLOG_DIR)/lib
-LIB_PATH += -L$(OPENPMD_DIR)/lib
 
-LIBS += -lspdlog -lopenPMD
+LIBS += -lspdlog
 
 CXX    := g++
 CFLAGS :=
@@ -91,7 +88,7 @@ SRCS +=                                                \
 SRCS +=                                                    \
   src/utils/log.cpp                                        \
   src/utils/time_manager.cpp                               \
-  src/utils/transition_layer/parameter_function.cpp        \
+  src/utils/transition_layer/table_function.cpp            \
   src/utils/transition_layer/particles_distribution.cpp    \
 
 # vectors
@@ -117,7 +114,7 @@ $(OBJDIR)/$(PCH).gch: $(PCH)
 $(RESDIR)/$(EXECUTABLE): $(OBJS)
 	@echo -e "\033[0;33m\nCreating the resulting binary.\033[0m"
 	$(MKDIR)
-	$(CXX) $(CFLAGS) $(LIB_PATH) $^ -Wl,-rpath=$(SPDLOG_DIR)/lib:$(OPENPMD_DIR)/lib $(LIBS) -o $@
+	$(CXX) $(CFLAGS) $(LIB_PATH) $^ -Wl,-rpath=$(SPDLOG_DIR)/lib $(LIBS) -o $@
 
 $(OBJDIR)/%.o: %.cpp message_compiling
 	$(MKDIR)

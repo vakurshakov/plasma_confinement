@@ -34,10 +34,7 @@ void Manager::initializes() {
   LOG_INFO("  length along y axis,  Ly = {:.2e} c/w_pe ({} cells)", SIZE_Y * dy, SIZE_Y);
   LOG_INFO("  total simulation time, T = {:.2e} 1/w_pe ({} timesteps)", TIME * dt, TIME);
   LOG_INFO("  magnetic field,    B_max = {:.2e} m_e*c*w_pe/e", config::Omega_max);
-  LOG_INFO("  injection time,    T_inj = {:.2e} 1/w_pe ({} timesteps)",
-    config::INJECTION_TIME * dt, config::INJECTION_TIME);
-  LOG_INFO("  injection rate,    R_inj = {} part/step", config::PER_STEP_PARTICLES);
-  
+
   LOG_INFO("Plasma ions:");
   LOG_INFO("  temperature,              T_i = {:.2e} KeV", config::T_ions);
   LOG_INFO("  thermal velocity,        v_Ti = {:.2e} c", config::V_ions);
@@ -79,47 +76,6 @@ void Manager::initializes() {
 #endif
 #endif
 
-#if BEAM_INJECTION_SETUP
-  Particles_builder particles_builder(fields_);
-
-  particles_species_.reserve(2);
-
-  Domain_geometry domain{
-    config::domain_left,
-    config::domain_right,
-    config::domain_bottom,
-    config::domain_top
-  };
-
-  constexpr int total_num_particles = config::PER_STEP_PARTICLES * TIME + 10'000;
-  LOG_INFO("{} particles will be set in total to each plasma specie", total_num_particles);
-
-  particles_builder.set_sort("plasma_ions");
-  Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
-
-  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  plasma_ions.particles_.reserve(total_num_particles);
-
-
-  particles_builder.set_sort("plasma_electrons");
-  Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
-
-  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  plasma_electrons.particles_.reserve(total_num_particles);
-
-  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
-    &plasma_ions, &plasma_electrons,
-    set_time_distribution(TIME, total_num_particles),
-    transition_layer::set_on_segment,
-    uniform_probability,
-    load_maxwellian_impulse
-  ));
-
-#elif PLASMA_MAG_FIELD_SETUP
   Particles_builder particles_builder(fields_);
 
   particles_species_.reserve(
@@ -137,39 +93,30 @@ void Manager::initializes() {
     config::domain_top
   };
 
-  int total_num_particles = SIZE_X / 2 * SIZE_Y * config::Npi;
+  auto generator = std::make_unique<transition_layer::Random_coordinate_generator>();
+  const int total_num_particles = generator->get_particles_number();
   LOG_INFO("{} particles will be set in total to each plasma specie", total_num_particles);
 
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
-  plasma_ions.boundaries_processor_ = std::make_unique<Plasma_boundary_processor>(
+  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
     plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  struct Generate_on_half : public Coordinate_generator {
-    void load(double* x, double* y) override {
-      *x = config::domain_left + random_01() * (
-          0.5 * SIZE_X * dx - config::domain_left);
-
-      *y = random_01() * SIZE_Y * dy;
-    }
-  };
 
   presets.emplace_back(std::make_unique<Set_particles>(
     &plasma_ions, total_num_particles,
-    std::make_unique<Generate_on_half>(),
-    load_maxwellian_impulse
+    std::move(generator),
+    transition_layer::load_maxwellian_impulse
   ));
-
 
   Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
   buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
 
-  int approximate_buffer_size = 5 * SIZE_Y * config::Npi + 100'000;
+  const int approximate_buffer_size = 5 * SIZE_Y * config::Npi + 100'000;
   buffer_ions.particles_.reserve(approximate_buffer_size);
 
-  buffer_ions.boundaries_processor_ = std::make_unique<Plasma_buffer_processor>(
-    buffer_ions.particles_, buffer_ions.parameters_);
+  buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
+    buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
 
   step_presets_.emplace_back(std::make_unique<Clone_layer_particles>(
     &plasma_ions, &buffer_ions, domain));
@@ -179,12 +126,12 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_electrons");
   Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
 
-  plasma_electrons.boundaries_processor_ = std::make_unique<Plasma_boundary_processor>(
+  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
     plasma_electrons.particles_, plasma_electrons.parameters_, domain);
 
   presets.emplace_back(std::make_unique<Copy_coordinates>(
     &plasma_electrons, &plasma_ions,
-    load_maxwellian_impulse
+    transition_layer::load_maxwellian_impulse
   ));
 
 
@@ -199,7 +146,6 @@ void Manager::initializes() {
   step_presets_.emplace_back(std::make_unique<Clone_layer_particles>(
     &plasma_electrons, &buffer_electrons, domain));
 
-#endif
 #endif
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);

@@ -31,7 +31,7 @@ void fill_periodically(int sequential_number, int Np,
 
 
 double temperature_impulse(double temperature, double mass) {
-  static const double mec2 = 511.0;
+  static const double mec2 = 511.0;  // KeV
   return sqrt(-2.0 * (temperature * mass / mec2) * log(random_01()));
 }
 

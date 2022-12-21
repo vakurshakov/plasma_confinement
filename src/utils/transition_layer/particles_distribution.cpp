@@ -1,23 +1,19 @@
 #include "particles_distribution.hpp"
-#include "parameter_function.hpp"
 
 #include "src/pch.h"
-#include "src/utils/transition_layer/parameter_function.hpp" 
+#include "src/particles/particles_load.hpp"
 #include "src/utils/random_number_generator.hpp"
-
-static auto& __func = transition_layer::Parameter_function::instance();
+#include "src/utils/transition_layer/table_function.hpp"
 
 namespace transition_layer {
 
-double d_theta(double x) {
-  return M_PI + 2 * asin(__func.get_value(x));
-}
-
+static auto __n = Table_function("src/utils/transition_layer/n_" + config::postfix);
+static auto __Gx = Table_function("src/utils/transition_layer/Gx_" + config::postfix);
 
 void Random_coordinate_generator::load(double* x, double* y) {
   do {
     *x = config::domain_left + random_01() *
-      (__func.get_xmax() - config::domain_left);
+      (__n.get_xmax() - config::domain_left);
   }
   while (random_01() > get_probability(*x));
 
@@ -25,11 +21,11 @@ void Random_coordinate_generator::load(double* x, double* y) {
 }
 
 double Random_coordinate_generator::get_probability(double x) const {
-  if (x <= __func.get_x0()) {
+  if (x <= __n.get_x0()) {
     return 1.0;
   }
-  else if (x <= __func.get_xmax()) {
-    return d_theta(x) / (2 * M_PI);
+  else if (x <= __n.get_xmax()) {
+    return __n(x);
   }
   else {
     return 0.0;
@@ -39,7 +35,7 @@ double Random_coordinate_generator::get_probability(double x) const {
 int Random_coordinate_generator::get_particles_number() const {
   double integral = 0;
 
-  for (double x = config::domain_left; x <= __func.get_xmax(); x += dx) {
+  for (double x = config::domain_left; x <= __n.get_xmax(); x += dx) {
     integral += get_probability(x);
   }
 
@@ -47,26 +43,32 @@ int Random_coordinate_generator::get_particles_number() const {
 }
 
 
-void set_on_segment(double* x, double* y) {
-  *x = (0.5 * SIZE_X + (random_01() - 0.5) * config::WIDTH_OF_INJECTION_AREA) * dx;
-  *y = random_01() * SIZE_Y * dy;
-}
-
-
-void load_monoenergetic_impulse(double x, double y,
+void load_maxwellian_impulse(double x, double y,
     double mass, double Tx, double Ty, double Tz,
     double p0, double* px, double* py, double* pz) {
-  double theta = 0.0;
-  if (x <= __func.get_x0()) {
-    theta = 2 * M_PI * random_01(); 
+  static std::chi_squared_distribution<double> distribution(2.0);
+
+  if (x <= __Gx.get_x0()) {
+    double p = distribution(Random_generator::get()) * Tx / (2 * mass);  // Tx = Ty!
+    double theta = 2 * M_PI * random_01();
+
+    *px = p * cos(theta);
+    *py = p * sin(theta);
   }
-  else if (x <= __func.get_xmax()) {
-    theta = - M_PI - asin(__func.get_value(x)) + random_01() * d_theta(x);
+  else if (x <= __Gx.get_xmax()) {
+    double p, e, theta;
+    do {
+      p = distribution(Random_generator::get()) * Tx / (2 * mass);  // Tx = Ty!
+      e = sqrt(p * p + mass * mass);
+      theta = - M_PI - asin(1.0 - __Gx(x) * e / p) + random_01() * (M_PI + 2 * asin(1.0 - __Gx(x) * e / p));
+    }
+    while (isnan(theta));
+
+    *px = p * cos(theta);
+    *py = p * sin(theta);
   }
 
-  *px = p0 * cos(theta);
-  *py = p0 * sin(theta);
-  *pz = 0.0;
+  *pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tz, mass);
 }
 
 }  // namespace transition_layer
