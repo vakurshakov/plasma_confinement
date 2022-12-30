@@ -17,8 +17,8 @@ integral_of_Jyg = interp1d(raw_integral_of_Jyg[0], raw_integral_of_Jyg[1])
 evaluate_to = 'integral_of_xg'
 
 
-def Bz_value(g):
-  return sqrt(- 2 * integral_of_Jyg(g))
+def xg_integrand(g):
+  return 1 / sqrt(-2 * integral_of_Jyg(g))
 
 
 if __name__ == '__main__':
@@ -32,7 +32,7 @@ if __name__ == '__main__':
   for g in gs:
     if rank == 0:
       print(f'g={g:.3f}')
-    dxs.append(1 / Bz_value(g))
+    dxs.append(xg_integrand(g))
 
   # Calculating non-evenly spaced x value.
   dxs_all = comm.allgather(dxs); dxs_all = aggregate_list(dxs_all)
