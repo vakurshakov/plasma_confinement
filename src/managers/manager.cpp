@@ -28,7 +28,7 @@ void Manager::initializes() {
 
   // Commenting useful information about the current setup
   LOG_INFO("Constants for the current setup...");
-  
+
   LOG_INFO("Simulation area:");
   LOG_INFO("  length along x axis,  Lx = {:.2e} c/w_pe ({} cells)", SIZE_X * dx, SIZE_X);
   LOG_INFO("  length along y axis,  Ly = {:.2e} c/w_pe ({} cells)", SIZE_Y * dy, SIZE_Y);
@@ -46,7 +46,7 @@ void Manager::initializes() {
   LOG_INFO("  cyclotron radius,       rho_i = {:.2e} c/w_pe ({} cells)",
     config::V_ions * config::mi_me / config::Omega_max,
     int(config::V_ions * config::mi_me / config::Omega_max / dx));
-  
+
   LOG_INFO("Plasma electrons:");
   LOG_INFO("  temperature,              T_e = {:.2e} KeV", config::T_electrons);
   LOG_INFO("  thermal velocity,        v_Te = {:.2e} c", config::V_electrons);
@@ -57,7 +57,7 @@ void Manager::initializes() {
     int(2 * M_PI / (config::Omega_max) / dt));
   LOG_INFO("  cyclotron radius,       rho_e = {:.2e} c/w_pe ({} cells)",
     config::V_electrons / config::Omega_max,
-    int(config::V_electrons / config::Omega_max / dx)); 
+    int(config::V_electrons / config::Omega_max / dx));
   LOG_FLUSH();
 
   LOG_TRACE("Initialization process...");
@@ -112,15 +112,23 @@ void Manager::initializes() {
   Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
   buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
 
-  const int approximate_buffer_size = 5 * SIZE_Y * config::Npi + 100'000;
-  buffer_ions.particles_.reserve(approximate_buffer_size);
+  const int buffer_ions_size = config::RIGHT_BUFFER_WIDTH * SIZE_Y * config::Npi;
+
+  class Set_on_the_right final : public Coordinate_generator {
+    void load(double* x, double* y) override {
+      *x = config::domain_left - (1.0 - random_01()) * config::RIGHT_BUFFER_WIDTH * dx;
+      *y = random_01() * SIZE_Y * dy;
+    }
+  };
+
+  step_presets_.emplace_back(std::make_unique<Set_particles>(
+    &buffer_ions, buffer_ions_size,
+    std::make_unique<Set_on_the_right>(),
+    transition_layer::load_maxwellian_impulse
+  ));
 
   buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
     buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  step_presets_.emplace_back(std::make_unique<Clone_layer_particles>(
-    &plasma_ions, &buffer_ions, domain));
-
 
 #if there_are_plasma_electrons
   particles_builder.set_sort("plasma_electrons");
@@ -138,7 +146,7 @@ void Manager::initializes() {
   Particles& buffer_electrons = particles_species_.emplace_back(particles_builder);
   buffer_electrons.sort_name_ = "buffer_plasma_electrons";  // changed from "plasma_electrons"
 
-  buffer_electrons.particles_.reserve(approximate_buffer_size);
+  buffer_electrons.particles_.reserve(buffer_ions_size);
 
   buffer_electrons.boundaries_processor_ = std::make_unique<Plasma_buffer_processor>(
     buffer_electrons.particles_, buffer_electrons.parameters_);

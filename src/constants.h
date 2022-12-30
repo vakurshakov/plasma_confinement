@@ -45,6 +45,7 @@ namespace config {
 // width of the copy layer is greater than the
 // half-width of the one particle cloud
 inline const double COPY_LAYER_MULT = 1;
+inline const int RIGHT_BUFFER_WIDTH = 5;
 
 inline const double layer_beginning = 30.0;
 
@@ -61,7 +62,7 @@ inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 inline const double T_electrons = 1e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
-inline const double Omega_max = sqrt(4 * M_PI * n0 * mi_me * V_ions * V_ions);
+inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 
 inline const std::string postfix = "0.05dx_16.0mi_me_10.0Ti.bin";
 
