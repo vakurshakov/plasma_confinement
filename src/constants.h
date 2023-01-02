@@ -1,6 +1,10 @@
 #ifndef SRC_CONSTANTS_H
 #define SRC_CONSTANTS_H
 
+//! @todo Refactor constants.h to contain only the global
+//! constants other constants should be represented by some 
+//! name-accessible class (equivalent to map).
+
 #include <cmath>
 
 #include <string>
@@ -10,7 +14,7 @@
 #define there_are_particles             true
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
-  #define there_are_plasma_electrons    false
+  #define there_are_plasma_electrons    true
   #define IS_DENSITY_GLOBAL             true
 
 #define there_are_fields                true
@@ -45,7 +49,12 @@ namespace config {
 // width of the copy layer is greater than the
 // half-width of the one particle cloud
 inline const double COPY_LAYER_MULT = 1;
+
 inline const int RIGHT_BUFFER_WIDTH = 5;
+
+// Additional (to Npi) number of particles in the left
+// buffer can provide better energy conservation
+inline const int ADDITIONAL_BUFFER_NPI = 0;
 
 inline const double layer_beginning = 30.0;
 
