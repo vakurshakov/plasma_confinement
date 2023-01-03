@@ -142,7 +142,7 @@ void Manager::initializes() {
 
   presets.emplace_back(std::make_unique<Copy_coordinates>(
     &plasma_electrons, &plasma_ions,
-    transition_layer::load_maxwellian_impulse
+    load_maxwellian_impulse
   ));
 
 
@@ -153,7 +153,7 @@ void Manager::initializes() {
 
   step_presets_.emplace_back(std::make_unique<Copy_coordinates>(
     &buffer_electrons, &buffer_ions,
-    transition_layer::load_maxwellian_impulse
+    load_maxwellian_impulse
   ));
 
   buffer_electrons.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
