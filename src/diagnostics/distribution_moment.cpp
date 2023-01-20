@@ -113,15 +113,23 @@ inline double get_zeroth_moment(const Particle& particle) {
   return particle.n();
 }
 
-inline double get_first_Vx_moment(const Particle& particle) {
+inline double get_Vx_moment(const Particle& particle) {
   return particle.velocity().x();
 }
 
-inline double get_first_Vy_moment(const Particle& particle) {
+inline double get_Vy_moment(const Particle& particle) {
   return particle.velocity().y();
 }
 
-inline double get_first_Vr_moment(const Particle& particle) {
+inline double get_mVxVx_moment(const Particle& particle) {
+  return particle.m() * get_Vx_moment(particle) * get_Vx_moment(particle);
+}
+
+inline double get_mVxVy_moment(const Particle& particle) {
+  return particle.m() * get_Vx_moment(particle) * get_Vy_moment(particle);
+}
+
+inline double get_Vr_moment(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
@@ -133,7 +141,7 @@ inline double get_first_Vr_moment(const Particle& particle) {
     particle.velocity().y() * (y / r);
 }
 
-inline double get_first_Vphi_moment(const Particle& particle) {
+inline double get_Vphi_moment(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
@@ -149,17 +157,23 @@ Moment::Moment(std::string name) : name(name) {
   if (name == "zeroth_moment") {
     get = get_zeroth_moment;
   }
-  else if (name == "first_Vx_moment") {
-    get = get_first_Vx_moment;
+  else if (name == "Vx_moment") {
+    get = get_Vx_moment;
   }
-  else if (name == "first_Vy_moment") {
-    get = get_first_Vy_moment;
+  else if (name == "Vy_moment") {
+    get = get_Vy_moment;
   }
-  else if (name == "first_Vr_moment") {
-    get = get_first_Vr_moment;
+  else if (name == "Vr_moment") {
+    get = get_Vr_moment;
   }
-  else if (name == "first_Vphi_moment") {
-    get = get_first_Vphi_moment;
+  else if (name == "Vphi_moment") {
+    get = get_Vphi_moment;
+  }
+  else if (name == "mVxVx_moment") {
+    get = get_mVxVx_moment;
+  }
+  else if (name == "mVxVy_moment") {
+    get = get_mVxVy_moment;
   }
 }
 

@@ -2,7 +2,7 @@
 #define SRC_CONSTANTS_H
 
 //! @todo Refactor constants.h to contain only the global
-//! constants other constants should be represented by some 
+//! constants other constants should be represented by some
 //! name-accessible class (equivalent to map).
 
 #include <cmath>
@@ -118,12 +118,12 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
     }},
-    { "first_Vx_moment", {                                          //
+    { "Vy_moment", {                                                //
       "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
     }},
-    { "first_Vy_moment", {                                          //
+    { "mVxVx_moment", {                                             //
       "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
@@ -161,12 +161,12 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "first_Vx_moment", {
+    { "Vy_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "first_Vy_moment", {
+    { "mVxVx_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
@@ -187,10 +187,8 @@ inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
 #if there_are_fields && fields_are_diagnosed
   { "energy", { "empty description" }},
 
-  { "whole_field", { "J", "x", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "J", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "E", "x", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
-  { "whole_field", { "E", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "B", "z", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
 
   { "field_on_segment", {
