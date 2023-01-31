@@ -19,4 +19,6 @@ void whole_field::diagnose(int t) {
   for (int nx = segment_.begin[X]; nx < segment_.end[X]; ++nx) {
     file_for_results_->write(field_(ny, nx).vec[component_]);
   }}
+
+  file_for_results_->flush();
 }
