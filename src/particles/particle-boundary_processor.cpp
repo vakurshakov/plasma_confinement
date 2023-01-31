@@ -12,14 +12,12 @@ Particle_boundary_processor::Particle_boundary_processor(
 
 vector3 Particle_boundary_processor::
 generate_moment(const Point& reference_point) {
-  double new_px = reference_point.px();
+  double new_Ty = (reference_point.py() * reference_point.py()) / (2.0 * params_.m());
+  double new_Tz = (reference_point.pz() * reference_point.pz()) / (2.0 * params_.m());
 
-  double new_transverse_temp = 0.5 / params_.m() * (
-    reference_point.py() * reference_point.py() + 
-    reference_point.pz() * reference_point.pz());
-
-  double new_py = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_transverse_temp, params_.m());
-  double new_pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_transverse_temp, params_.m());
+  double new_px = -reference_point.px();
+  double new_py = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_Ty, params_.m());
+  double new_pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_Tz, params_.m());
 
   return { new_px, new_py, new_pz };
 }
@@ -93,6 +91,39 @@ void Plasma_boundary_processor::remove() {
 }
 
 
+Reflective_boundary_processor::Reflective_boundary_processor(
+    std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom)
+    : Plasma_boundary_processor(particles_vec, params, geom) {}
+
+void Reflective_boundary_processor::
+add(Point& reference_point, const vector2& r0) {
+
+  periodic_y(reference_point, geom_.bottom, geom_.top);
+
+  if (reference_point.x() < geom_.left) {
+    reference_point.x() += dx;
+    reference_point.p = generate_moment(reference_point);
+  }
+}
+
+void Reflective_boundary_processor::remove() {
+  PROFILE_FUNCTION();
+
+  auto new_last = std::remove_if(
+    particles_vec_.begin(),
+    particles_vec_.end(),
+    [&] (const Particle& particle) {
+      return
+        particle.point.x() > geom_.right;
+  });
+
+  if (new_last != particles_vec_.end()) {
+    LOG_TRACE("{} particle(s) removed", particles_vec_.end() - new_last);
+    particles_vec_.erase(new_last, particles_vec_.end());
+  }
+}
+
 Beam_boundary_processor::Beam_boundary_processor(
     std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom)
@@ -120,7 +151,7 @@ add(Point& reference_point, const vector2& r0) {
 void Beam_buffer_processor::remove() {
   PROFILE_FUNCTION();
 
-  // Firstly, we remove particle that wasn't pass the border 
+  // Firstly, we remove particle that wasn't pass the border
   Plasma_boundary_processor::remove();
 
   // Secondly, we move remaining particles to the main vector

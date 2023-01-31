@@ -80,9 +80,9 @@ void Manager::initializes() {
 
   particles_species_.reserve(
 #if !there_are_plasma_electrons
-  2
+i  1
 #else
-  4
+  2
 #endif
   );
 
@@ -100,7 +100,7 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
-  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
+  plasma_ions.boundaries_processor_ = std::make_unique<Reflective_boundary_processor>(
     plasma_ions.particles_, plasma_ions.parameters_, domain);
 
   presets.emplace_back(std::make_unique<Set_particles>(
@@ -109,55 +109,17 @@ void Manager::initializes() {
     transition_layer::load_maxwellian_impulse
   ));
 
-
-  Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
-  buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
-
-  const int buffer_ions_size = config::RIGHT_BUFFER_WIDTH * SIZE_Y * (config::Npi + config::ADDITIONAL_BUFFER_NPI);
-
-  class Set_on_the_right final : public Coordinate_generator {
-    void load(double* x, double* y) override {
-      *x = config::domain_left - (1.0 - random_01()) * config::RIGHT_BUFFER_WIDTH * dx;
-      *y = random_01() * SIZE_Y * dy;
-    }
-  };
-
-  step_presets_.emplace_back(std::make_unique<Set_particles>(
-    &buffer_ions, buffer_ions_size,
-    std::make_unique<Set_on_the_right>(),
-    transition_layer::load_maxwellian_impulse
-  ));
-
-  buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
-    buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
-
 #if there_are_plasma_electrons
   particles_builder.set_sort("plasma_electrons");
   Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
 
-  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
+  plasma_electrons.boundaries_processor_ = std::make_unique<Reflective_boundary_processor>(
     plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  plasma_electrons.particles_.reserve(total_num_particles + 100'000);
 
   presets.emplace_back(std::make_unique<Copy_coordinates>(
     &plasma_electrons, &plasma_ions,
     load_maxwellian_impulse
   ));
-
-
-  Particles& buffer_electrons = particles_species_.emplace_back(particles_builder);
-  buffer_electrons.sort_name_ = "buffer_plasma_electrons";  // changed from "plasma_electrons"
-
-  buffer_electrons.particles_.reserve(buffer_ions_size + 10'000);
-
-  step_presets_.emplace_back(std::make_unique<Copy_coordinates>(
-    &buffer_electrons, &buffer_ions,
-    load_maxwellian_impulse
-  ));
-
-  buffer_electrons.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
-    buffer_electrons.particles_, plasma_electrons.particles_, plasma_electrons.parameters_, domain);
 
 #endif
 

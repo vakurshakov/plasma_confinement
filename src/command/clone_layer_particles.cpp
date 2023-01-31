@@ -30,7 +30,7 @@ void Clone_layer_particles::execute(int /* timestep */) const {
 
 inline bool
 Clone_layer_particles::particle_be_should_cloned(const Point& point) const {
-  double width = particles_in_->get_parameters().charge_cloud() * config::COPY_LAYER_MULT * dx;
+  double width = particles_in_->get_parameters().charge_cloud() * dx;
 
   return particle_on_the_left(point.x(), width) ||
     particle_on_the_right(point.x(), width);
@@ -48,7 +48,7 @@ Clone_layer_particles::particle_on_the_right(double x, double width) const {
 
 inline Point
 Clone_layer_particles::configure_point(const Point& point) const {
-  double width = particles_in_->get_parameters().charge_cloud() * config::COPY_LAYER_MULT * dx;
+  double width = particles_in_->get_parameters().charge_cloud() * dx;
 
   double new_x = particle_on_the_left(point.x(), width)?
     2 * geom_.left - point.x():

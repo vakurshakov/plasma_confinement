@@ -30,7 +30,7 @@ inline const double me  = 1.0;
 inline const double Mp  = 1836.0;
 
 inline const std::string dir_name = "./results/test_dir_name";
-inline const int NUM_THREADS = 1;
+inline const int NUM_THREADS = 16;
 
 inline const double dx  = 0.05;
 inline const int SIZE_X = 2100;
@@ -45,23 +45,12 @@ inline const int diagnose_time_step = 1;
 
 namespace config {
 
-// This factor describes how many times the
-// width of the copy layer is greater than the
-// half-width of the one particle cloud
-inline const double COPY_LAYER_MULT = 1;
-
-inline const int RIGHT_BUFFER_WIDTH = 5;
-
-// Additional (to Npi) number of particles in the left
-// buffer can provide better energy conservation
-inline const int ADDITIONAL_BUFFER_NPI = 0;
-
 inline const double layer_beginning = 30.0;
 
 inline const std::string boundaries = "cx_py";
 
 inline const double n0 = 1.0;
-inline const int   Npi = 20;
+inline const int   Npi = 50;
 
 inline const double mi_me  = 16.0;
 
@@ -77,10 +66,11 @@ inline const std::string postfix = "0.05dx_16.0mi_me_10.0Ti.bin";
 
 // Constants describing damping layer and calculation domain
 inline const int damping_layer_width = 50;
-inline const double damping_factor = 0.9;
+inline const double damping_factor = 0.6;
 
 // Domain_geometry
-inline const double domain_left   = damping_layer_width * dx;
+inline const int left_offset      = damping_layer_width / 2;
+inline const double domain_left   = (damping_layer_width - left_offset) * dx;
 inline const double domain_right  = (SIZE_X - damping_layer_width) * dx;
 inline const double domain_bottom = 0;
 inline const double domain_top    = SIZE_Y * dy;

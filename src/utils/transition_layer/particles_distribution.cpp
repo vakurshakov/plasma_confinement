@@ -46,10 +46,8 @@ int Random_coordinate_generator::get_particles_number() const {
 void load_maxwellian_impulse(double x, double y,
     double mass, double Tx, double Ty, double Tz,
     double p0, double* px, double* py, double* pz) {
-  static std::gamma_distribution<double> distribution;
-
   if (x <= __Gx.get_x0()) {
-    double p = Tx / mass * sqrt(2 * distribution(Random_generator::get()));  // Tx = Ty!
+    double p = temperature_impulse(Tx, mass);  // Tx = Ty!
     double theta = 2 * M_PI * random_01();
 
     *px = p * cos(theta);
@@ -58,7 +56,7 @@ void load_maxwellian_impulse(double x, double y,
   else if (x <= __Gx.get_xmax()) {
     double p, e, theta;
     do {
-      p = Tx / mass * sqrt(2 * distribution(Random_generator::get()));  // Tx = Ty!
+      p = temperature_impulse(Tx, mass);  // Tx = Ty!
       e = sqrt(p * p + mass * mass);
       theta = - M_PI - asin(1.0 - __Gx(x) * e / p) + random_01() * (M_PI + 2 * asin(1.0 - __Gx(x) * e / p));
     }

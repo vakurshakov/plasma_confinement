@@ -55,6 +55,16 @@ class Plasma_boundary_processor : public Particle_boundary_processor {
 };
 
 
+class Reflective_boundary_processor : public Plasma_boundary_processor {
+ public:
+  Reflective_boundary_processor(std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom);
+
+  void add(Point& reference_point, const vector2& r0) override;
+  void remove() override;
+};
+
+
 class Beam_boundary_processor : public Plasma_boundary_processor {
  public:
   Beam_boundary_processor(std::vector<Particle>& particles_vec,
