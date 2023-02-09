@@ -12,12 +12,9 @@ Particle_boundary_processor::Particle_boundary_processor(
 
 vector3 Particle_boundary_processor::
 generate_moment(const Point& reference_point) {
-  double new_Ty = (reference_point.py() * reference_point.py()) / (2.0 * params_.m());
-  double new_Tz = (reference_point.pz() * reference_point.pz()) / (2.0 * params_.m());
-
-  double new_px = -reference_point.px();
-  double new_py = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_Ty, params_.m());
-  double new_pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(new_Tz, params_.m());
+  double new_px = +reference_point.px();
+  double new_py = random_sign() * reference_point.py();
+  double new_pz = random_sign() * reference_point.pz();
 
   return { new_px, new_py, new_pz };
 }
@@ -80,8 +77,8 @@ void Plasma_boundary_processor::remove() {
     particles_vec_.end(),
     [&] (const Particle& particle) {
       return
-        particle.point.x() < geom_.left ||
-        particle.point.x() > geom_.right;
+        particle.point.x() <= geom_.left ||
+        particle.point.x() >= geom_.right;
   });
 
   if (new_last != particles_vec_.end()) {
