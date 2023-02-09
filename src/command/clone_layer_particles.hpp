@@ -26,7 +26,7 @@ class Clone_layer_particles : public Command {
 
   Domain_geometry geom_;
 
-  inline bool particle_be_should_cloned(const Point&) const;
+  inline bool particle_should_be_cloned(const Point&) const;
   inline bool particle_on_the_left(double x, double width) const;
   inline bool particle_on_the_right(double x, double width) const;
 

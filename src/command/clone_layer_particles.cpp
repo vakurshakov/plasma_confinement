@@ -22,15 +22,15 @@ void Clone_layer_particles::execute(int /* timestep */) const {
 
   #pragma omp parallel for num_threads(NUM_THREADS)
   for (auto it = particles_in_->particles_.begin(); it != particles_fixed_end; ++it) {
-    if (particle_be_should_cloned(it->point)) {
+    if (particle_should_be_cloned(it->point)) {
       particles_out_->add_particle(configure_point(it->point));
     }
   }
 }
 
 inline bool
-Clone_layer_particles::particle_be_should_cloned(const Point& point) const {
-  double width = particles_in_->get_parameters().charge_cloud() * dx;
+Clone_layer_particles::particle_should_be_cloned(const Point& point) const {
+  double width = config::BUFFER_SIZE * dx;
 
   return particle_on_the_left(point.x(), width) ||
     particle_on_the_right(point.x(), width);
@@ -48,7 +48,7 @@ Clone_layer_particles::particle_on_the_right(double x, double width) const {
 
 inline Point
 Clone_layer_particles::configure_point(const Point& point) const {
-  double width = particles_in_->get_parameters().charge_cloud() * dx;
+  double width = config::BUFFER_SIZE * dx;
 
   double new_x = particle_on_the_left(point.x(), width)?
     2 * geom_.left - point.x():
