@@ -3,6 +3,8 @@
 
 #include "src/pch.h"
 
+double zeroth_order_spline(double x, double grid_mesh);
+double first_order_spline(double x, double grid_mesh);
 double second_order_spline(double x, double grid_mesh);
 double third_order_spline(double x, double grid_mesh);
 double fourth_order_spline(double x, double grid_mesh);
