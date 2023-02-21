@@ -1,12 +1,13 @@
 #ifndef SRC_UTILS_LOG_HPP
 #define SRC_UTILS_LOG_HPP
 
+#include <string>
 #include <memory>
 #include <spdlog/spdlog.h>
 
 class Log {
  public:
-  static void Init(const char * filename);
+  static void Init(const std::string& filename);
 
   inline static std::shared_ptr<spdlog::logger>& GetLogger() { return logger_; }
 
