@@ -30,17 +30,6 @@ void Open_boundaries_processor::left_right_bounds() {
 
   #pragma omp parallel for num_threads(NUM_THREADS)
   for (int y = 0; y < fields_E.size_y(); ++y) {
-    for (int x = layer.width - config::left_offset - 1; x <= layer.width - config::left_offset + 1; ++x) {
-      // left
-      fields_E.x(y, x) = fields_E.x(y, x + 3);
-      fields_E.y(y, x) = fields_E.y(y, x + 3);
-      fields_E.z(y, x) = fields_E.z(y, x + 3);
-
-      fields_B.x(y, x) = fields_B.x(y, x + 3);
-      fields_B.y(y, x) = fields_B.y(y, x + 3);
-      fields_B.z(y, x) = fields_B.z(y, x + 3);
-    }
-
     for (int x = 0; x < layer.width; ++x) {
       // left
       double coeff = layer.damping_coeff(x);
