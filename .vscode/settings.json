@@ -92,5 +92,7 @@
             "addWords": true,
             "scope": "workspace"
         }
-    }
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
 }
