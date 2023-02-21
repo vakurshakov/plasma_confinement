@@ -16,7 +16,7 @@ class Particle {
 
   Point point;
 
-#if IS_DENSITY_GLOBAL
+#if GLOBAL_DENSITY
   constexpr double n() const { return parameters->n(); }
 #else
   double n_;

@@ -12,10 +12,10 @@
 #include <unordered_map>
 
 #define there_are_particles             true
+  #define GLOBAL_DENSITY                false
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
-  #define there_are_plasma_electrons    true
-  #define IS_DENSITY_GLOBAL             true
+  #define there_are_plasma_electrons    false
 
 #define there_are_fields                true
   #define fields_are_diagnosed          true
@@ -97,8 +97,8 @@ inline const umap<std::string,
         "0"                 // Absolute value of the initial impulse [in units of mₑc]
     }},
     { "integration_steps", {
-        "Boris_pusher:+Push_particle",
-        "Boris_pusher:+Interpolation;",
+        "Boris_pusher",
+        "Simple_interpolation",
         "Esirkepov_density_decomposition",
     }},
     // Diagnostics with their config parameters
@@ -140,8 +140,8 @@ inline const umap<std::string,
         "0"
     }},
     { "integration_steps", {
-        "Boris_pusher:+Push_particle",
-        "Boris_pusher:+Interpolation;",
+        "Boris_pusher",
+        "Simple_interpolation",
         "Esirkepov_density_decomposition",
     }},
     // Diagnostics with their config parameters

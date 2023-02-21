@@ -11,15 +11,15 @@ double fifth_order_spline(double x, double grid_mesh);
 
 struct Parameters {
   int Np_;               // Number of particles in a cell.
-  double n_;             // Initial density of the particles.
-  double q_;             // Initial charge of the particles.
+  double n_;             // Reference density of the particles.
+  double q_;             // Reference charge of the particles.
   double m_;             // Mass of the particles in a sort.
   double p0_;            // Initial impulse (absolute value).
   double Tx_, Ty_, Tz_;  // Temperature in x, y and z directions.
-  
+
   int charge_cloud_ = 2;
   std::function<double(double, double)> form_factor_ = second_order_spline;
-  
+
   std::string sort_name_;
 
   Parameters() = default;

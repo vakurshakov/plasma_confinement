@@ -18,12 +18,11 @@ class Particles {
   const auto& get_particles() const { return particles_; }
   const auto& get_parameters() const { return parameters_; }
 
-  void add_particle(
-    const Point& point
-  #if !IS_DENSITY_GLOBAL
-    , double particle_n
-  #endif
-  );
+#if GLOBAL_DENSITY
+  void add_particle(const Point& point);
+#else
+  void add_particle(const Point& point, double local_n);
+#endif
 
   void push();
 

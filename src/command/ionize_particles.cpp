@@ -1,5 +1,7 @@
 #include "ionize_particles.hpp"
 
+#if GLOBAL_DENSITY
+
 #include "src/utils/random_number_generator.hpp"
 
 Ionize_particles::Ionize_particles(
@@ -69,3 +71,5 @@ std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_n
 
   return array_of_particles_to_load;
 }
+
+#endif

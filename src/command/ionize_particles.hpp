@@ -16,7 +16,7 @@ class Ionize_particles : public Command {
 public:
 
   /**
-   * @brief 
+   * @brief
    * Constructor of the command.
    *
    * @param ionized Particles that will be ionized.

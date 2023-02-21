@@ -55,19 +55,19 @@ void Particles::push() {
   LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
 }
 
-/**
- * @brief Adds a particle to the end of the array.
- * @param point Coordinates and impulse of the particle.
- */
-void Particles::add_particle(const Point& point
-  #if !IS_DENSITY_GLOBAL
-  , double particle_local_n
-  #endif
-) {
+#if GLOBAL_DENSITY
+void Particles::add_particle(const Point& point) {
   #pragma omp critical
-  Particle new_particle = particles_.emplace_back(point, parameters_);
-
-  #if !IS_DENSITY_GLOBAL
-  new_particle.n_ = particle_local_n;
-  #endif
+  particles_.emplace_back(point, parameters_);
 }
+
+#else
+void Particles::add_particle(const Point& point, double local_n) {
+  #pragma omp critical
+  {
+    Particle& new_particle = particles_.emplace_back(point, parameters_);
+    new_particle.n_ = local_n;
+  }
+}
+
+#endif

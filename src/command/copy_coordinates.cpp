@@ -19,7 +19,7 @@ void Copy_coordinates::execute(int /* timestep */) const {
   const double Tz   = particles_copy_to_->get_parameters().Tz();
   const double p0   = particles_copy_to_->get_parameters().p0();
 
-  particles_copy_to_->particles_.reserve(particles_copy_from_->particles_.capacity());
+  // particles_copy_to_->particles_.reserve(particles_copy_from_->particles_.capacity());
 
   for (const auto& particle : particles_copy_from_->particles_) {
     double x = particle.point.x();
@@ -31,6 +31,10 @@ void Copy_coordinates::execute(int /* timestep */) const {
     }
     while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
 
+#if GLOBAL_DENSITY
     particles_copy_to_->add_particle({{x, y}, {px, py, pz}});
+#else
+    particles_copy_to_->add_particle({{x, y}, {px, py, pz}}, particle.n());
+#endif
   }
 }
