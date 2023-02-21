@@ -17,7 +17,7 @@ def Bz_value(g):
 # %%
 # we'll choose the reference density n0 = 1.0 and e = 1.0
 
-dx = 0.05     # , c/w_pe - Grid spacing
+dx = 0.01     # , c/w_pe - Grid spacing
 mi_me = 16.0  # , me - Mass of ions
 Ti = 10.0     # , KeV - Ions temperature
 mec2 = 511.0  # , KeV - Mass of the electron
@@ -29,6 +29,7 @@ postfix = f'{dx}dx_{mi_me}mi_me_{Ti}Ti'
 
 raw_xg = load('integral_of_xg.npy', allow_pickle=True)
 raw_ng = load('value_of_ng.npy', allow_pickle=True)
+raw_Pg = load('value_of_pxx.npy', allow_pickle=True)
 
 # x values were normalized to rho_i = c/w_pi
 #
@@ -47,8 +48,11 @@ _Bz = interp1d(raw_xg[1][1:] * sqrt(mi_me),
 
 # normalized to n0 = 1
 _ng = interp1d(raw_ng[0], raw_ng[1])
-_n  = interp1d(raw_xg[1] * sqrt(mi_me),
-  _ng(raw_xg[0]))
+_n  = interp1d(raw_xg[1] * sqrt(mi_me), _ng(raw_xg[0]))
+
+_Pg = interp1d(raw_Pg[0], raw_Pg[1])
+_P  = interp1d(raw_xg[1] * sqrt(mi_me), raw_Pg[1] * Ti / mec2,
+  bounds_error=False, fill_value=(Ti / mec2, 0))
 
 # g is normalized to v_th
 _Gx = interp1d(raw_xg[1] * sqrt(mi_me),
@@ -61,6 +65,7 @@ x_range = np.arange(0, xmax + dx, dx)
 Jy = {x: float(_Jy(x)) for x in x_range}
 Bz = {x: float(_Bz(x)) for x in x_range}
 n  = {x: float(_n(x))  for x in x_range}
+P  = {x: float(_P(x))  for x in x_range}
 Gx = {x: float(_Gx(x)) for x in x_range}
 
 # Saving interpolated functions into numpy binaries
@@ -68,6 +73,7 @@ np.save(f'../Jy_{postfix}.npy', Jy)
 np.save(f'../Bz_{postfix}.npy', Bz)
 np.save(f'../n_{postfix}.npy',  n)
 np.save(f'../Gx_{postfix}.npy', Gx)
+np.save(f'../P_{postfix}.npy',  P)
 
 # Writing table functions to the binary file
 parameters = [0, xmax, dx]
@@ -78,7 +84,7 @@ for table, name in zip([Jy, Bz, n, Gx], ['Jy', 'Bz', 'n', 'Gx']):
     for x, v in table.items():
       plain_dict.append(x)
       plain_dict.append(v)
-    
+
     result = parameters + plain_dict
     file.write(struct.pack('d' * len(result), *result))
 
@@ -101,6 +107,10 @@ plt.plot(np.array(list(Jy.keys())) / sqrt(mi_me), -np.array(list(Jy.values())) /
 
 n = load(f'../n_{postfix}.npy', allow_pickle=True).item()
 plt.plot(np.array(list(n.keys())) / sqrt(mi_me), n.values(), label='$n\,(x)\,/\,n_0$')
+# plt.fill_between(np.array(list(n.keys())) / sqrt(mi_me), 0, np.array(list(n.values())), alpha = 0.4)
+
+P = load(f'../P_{postfix}.npy', allow_pickle=True).item()
+plt.plot(np.array(list(P.keys())) / sqrt(mi_me), np.array(list(P.values())) / (Ti / mec2), label='$\\Pi_xx\,(x)\,/\,T_i$')
 # plt.fill_between(np.array(list(n.keys())) / sqrt(mi_me), 0, np.array(list(n.values())), alpha = 0.4)
 
 plt.xlabel('$\\tilde{x}, c\,/\,\\omega_{pi}$')

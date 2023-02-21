@@ -8,9 +8,6 @@ from numpy             import sqrt, load, save
 
 import matplotlib.pyplot as plt
 
-dx = 0.05     # , c/wp - Grid spacing
-mi_me = 1.0   # , me - Mass of ions
-
 raw_integral_of_Jyg = load('integral_of_Jyg.npy', allow_pickle=True)
 integral_of_Jyg = interp1d(raw_integral_of_Jyg[0], raw_integral_of_Jyg[1])
 
