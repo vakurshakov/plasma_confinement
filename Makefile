@@ -80,9 +80,9 @@ SRCS +=                                                \
 # solvers
 SRCS +=                                                \
   src/solvers/FDTD.cpp                                 \
+  src/solvers/simple_interpolation.cpp                 \
   src/solvers/Boris_pusher.cpp                         \
   src/solvers/Esirkepov_density_decomposition.cpp      \
-  src/solvers/concrete_point_interpolation.cpp         \
 
 # utils
 SRCS +=                                                    \
