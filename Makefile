@@ -109,7 +109,7 @@ MKDIR=@mkdir -p $(@D)
 $(OBJDIR)/$(PCH).gch: $(PCH)
 	@echo -e "\033[0;33m\nCompiling header src/pch.h.\033[0m"
 	$(MKDIR)
-	$(CXX) $(INC_PATH) $< -o $@
+	$(CXX) $(CFLAGS) $(INC_PATH) $< -o $@
 
 $(RESDIR)/$(EXECUTABLE): $(OBJS)
 	@echo -e "\033[0;33m\nCreating the resulting binary.\033[0m"
