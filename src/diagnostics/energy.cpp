@@ -81,7 +81,7 @@ void particles_energy::diagnose(int t) {
     const double n = particle.n();
     const vector3& p = particle.point.p;
 
-    W += sqrt(m * m + p.square()) * dx * dy * n / Np;
+    W += (sqrt(m * m + p.square()) - m) * dx * dy * n / Np;
   }
 
   file_for_results_->write(W);
