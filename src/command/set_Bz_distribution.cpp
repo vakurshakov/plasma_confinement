@@ -2,7 +2,7 @@
 
 Set_Bz_distribution::Set_Bz_distribution(Fields* const fields) : fields_(fields) {}
 
-void Set_Bz_distribution::execute(int /* timestep */) const {
+void Set_Bz_distribution::execute(int /* timestep */) {
   PROFILE_FUNCTION();
 
   static auto __Bz = Table_function("src/utils/transition_layer/Bz_" + config::postfix);

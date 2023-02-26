@@ -12,13 +12,13 @@ class Clone_layer_particles : public Command {
   Clone_layer_particles(
     Particles* const particles_inout,
     Domain_geometry geom);
-  
+
   Clone_layer_particles(
     Particles* const particles_in,
     Particles* const particles_out,
     Domain_geometry geom);
 
-  void execute(int /* timestep */) const override;
+  void execute(int /* timestep */) override;
 
  private:
   Particles* const particles_in_;

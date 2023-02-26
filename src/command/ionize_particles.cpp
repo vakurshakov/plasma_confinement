@@ -18,7 +18,7 @@ Ionize_particles::Ionize_particles(
     ionized_energy(BIN_File(dir_name, "ionized_energy")),
     ejected_energy(BIN_File(dir_name, "ejected_energy")) {}
 
-void Ionize_particles::execute(int t) const {
+void Ionize_particles::execute(int t) {
   PROFILE_FUNCTION();
 
   if (t < config::INJECTION_START)

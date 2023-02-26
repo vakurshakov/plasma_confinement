@@ -47,7 +47,7 @@ public:
    * @param t Outer time step to load a concrete
    * amount of particles on that step.
    */
-  void execute(int t) const override;
+  void execute(int t) override;
 
   /**
    * @brief
@@ -74,8 +74,8 @@ private:
   std::function<double(double x, double y)> get_probability;
   impulse_loader load_impulse;
 
-  mutable BIN_File ionized_energy;
-  mutable BIN_File ejected_energy;
+  BIN_File ionized_energy;
+  BIN_File ejected_energy;
 };
 
 

@@ -31,7 +31,7 @@ Set_particles::Set_particles(
     load_impulse_(load_impulse) {}
 
 
-void Set_particles::execute(int /* timestep */) const {
+void Set_particles::execute(int /* timestep */) {
   PROFILE_FUNCTION();
   LOG_TRACE("Setting {} distribution", particles_->get_parameters().get_name());
 

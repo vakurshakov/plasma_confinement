@@ -8,7 +8,7 @@ Copy_coordinates::Copy_coordinates(
       particles_copy_from_(particles_copy_from),
       load_impulse_(load_impulse) {}
 
-void Copy_coordinates::execute(int /* timestep */) const {
+void Copy_coordinates::execute(int /* timestep */) {
   LOG_TRACE("Setting distribution for {}, copying coordinates from {}",
     particles_copy_from_->get_parameters().get_name(),
     particles_copy_to_->get_parameters().get_name());

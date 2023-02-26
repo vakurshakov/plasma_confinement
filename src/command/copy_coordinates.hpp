@@ -30,7 +30,7 @@ class Copy_coordinates : public Command {
    *  copies coordinates from it to particles_copy_to and
    *  gives to this points another impulse.
    */
-  void execute(int /* timestep */) const override;
+  void execute(int /* timestep */) override;
 
  private:
   Particles* const particles_copy_to_;

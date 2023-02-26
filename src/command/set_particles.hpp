@@ -31,7 +31,7 @@ class Set_particles : public Command {
     const Domain_geometry& geom,
     const impulse_loader& load_impulse);
 
-  void execute(int /* timestep */) const override;
+  void execute(int /* timestep */) override;
 
  private:
   Particles* const particles_;

@@ -11,7 +11,7 @@ class Set_Bz_distribution : public Command {
  public:
   Set_Bz_distribution(Fields* const fields);
 
-  void execute(int /* timestep */) const override;
+  void execute(int /* timestep */) override;
 
   virtual bool needs_to_be_removed(int t) const override { return t > 0; }
 

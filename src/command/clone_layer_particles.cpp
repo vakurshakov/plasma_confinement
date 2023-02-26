@@ -15,7 +15,7 @@ Clone_layer_particles::Clone_layer_particles(
     particles_out_(particles_out),
     geom_(geom) {}
 
-void Clone_layer_particles::execute(int /* timestep */) const {
+void Clone_layer_particles::execute(int /* timestep */) {
   PROFILE_FUNCTION();
 
   auto particles_fixed_end = particles_in_->particles_.end();
