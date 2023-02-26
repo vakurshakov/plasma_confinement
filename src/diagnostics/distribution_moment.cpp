@@ -62,7 +62,7 @@ void distribution_moment::save_parameters() const {
 
 void distribution_moment::diagnose(int t) {
   PROFILE_FUNCTION();
-  
+
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
@@ -79,7 +79,9 @@ void distribution_moment::diagnose(int t) {
 }
 
 void distribution_moment::collect() {
-  int Np = particles_.get_parameters().Np();
+  const int Np = particles_.get_parameters().Np();
+  const int width = particles_.get_parameters().charge_cloud();
+  const auto& shape = particles_.get_parameters().form_factor();
 
   #pragma omp parallel for
   for (const auto& particle : particles_.get_particles()) {
@@ -90,13 +92,18 @@ void distribution_moment::collect() {
     int npx = int(floor(pr_x / projector_->area.dp[X]));
     int npy = int(floor(pr_y / projector_->area.dp[Y]));
 
-    if ((min_[X] <= npx && npx < max_[X]) &&
-        (min_[Y] <= npy && npy < max_[Y])) {
-      #pragma omp atomic
-      data_[(npy - min_[Y]) * (max_[X] - min_[X]) +
-        (npx - min_[X])] += moment_->get(particle) / Np;
-    }
-    else continue;
+    for (int i = npx - width; i <= npx + width; ++i) {
+    for (int j = npy - width; j <= npy + width; ++j) {
+      if ((min_[X] <= i && i < max_[X]) &&
+          (min_[Y] <= j && j < max_[Y])) {
+        #pragma omp atomic
+        data_[(j - min_[Y]) * (max_[X] - min_[X]) + (i - min_[X])] +=
+          moment_->get(particle) * particle.n() / Np *
+          shape(pr_x - i * dx, dx) *
+          shape(pr_y - j * dy, dy);
+      }
+      else continue;
+    }}
   }
 }
 
@@ -110,7 +117,7 @@ void distribution_moment::reset() {
 
 
 inline double get_zeroth_moment(const Particle& particle) {
-  return particle.n();
+  return 1.0;
 }
 
 inline double get_Vx_moment(const Particle& particle) {
@@ -134,7 +141,7 @@ inline double get_Vr_moment(const Particle& particle) {
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
 
-  // Частицы, близкие к центру не учитываются
+  // Particles close to r=0 are not taken into account
   if (!std::isfinite(1. / r)) return 0;
 
   return particle.velocity().x() * (+x / r) +
@@ -146,7 +153,7 @@ inline double get_Vphi_moment(const Particle& particle) {
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
 
-  // Частицы, близкие к центру не учитываются
+  // Particles close to r=0 are not taken into account
   if (!std::isfinite(1. / r)) return 0;
 
   return particle.velocity().x() * (-y / r) +
