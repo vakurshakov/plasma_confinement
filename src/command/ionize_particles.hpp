@@ -7,6 +7,9 @@
 #include "src/particles/particles.hpp"
 #include "src/particles/particles_load.hpp"
 
+
+#include "src/file_writers/bin_file.hpp"
+
 /**
  * @brief
  * Command that sets fixed number of particles
@@ -70,6 +73,9 @@ private:
   std::function<void(double* x, double* y)> set_point_of_birth;
   std::function<double(double x, double y)> get_probability;
   impulse_loader load_impulse;
+
+  mutable BIN_File ionized_energy;
+  mutable BIN_File ejected_energy;
 };
 
 

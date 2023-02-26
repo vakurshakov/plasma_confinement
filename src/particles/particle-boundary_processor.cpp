@@ -155,12 +155,22 @@ void Beam_buffer_processor::remove() {
   LOG_TRACE("{} particles will come from buffer", particles_vec_.size());
 
   for (const auto& particle : particles_vec_) {
+#if GLOBAL_DENSITY
     main_beam_vec_.emplace_back(
       Point {
         { particle.point.x(),  particle.point.y() },
         { particle.point.px(), particle.point.py(), particle.point.pz() }
       },
       params_);
+#else
+    Particle& new_one = main_beam_vec_.emplace_back(
+      Point {
+        { particle.point.x(),  particle.point.y() },
+        { particle.point.px(), particle.point.py(), particle.point.pz() }
+      },
+      params_);
+    new_one.n_ = particle.n_;
+#endif
   }
 
   LOG_TRACE("{} particles in the {} after merging buffer",

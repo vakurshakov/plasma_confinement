@@ -25,6 +25,12 @@
 #define TIME_PROFILING                  true
 
 
+#define BEAM_INJECTION_SETUP            false
+#if BEAM_INJECTION_SETUP && !(GLOBAL_DENSITY && there_are_plasma_electrons)
+  #error "Beam injection setup only works with global density!"
+#endif
+
+
 inline const double e   = 1.0;
 inline const double me  = 1.0;
 inline const double Mp  = 1836.0;
@@ -35,11 +41,11 @@ inline const int NUM_THREADS = 16;
 inline const double dx  = 0.05;
 inline const int SIZE_X = 2100;
 
-inline const double dy  = 0.05;
+inline const double dy  = dx;
 inline const int SIZE_Y = 400;
 
 inline const double dt = 0.5 * dx;
-inline const int TIME  = 1;
+inline const int TIME  = 0;
 
 inline const int diagnose_time_step = 1;
 
@@ -52,6 +58,22 @@ inline const std::string boundaries = "cx_py";
 inline const double n0 = 1.0;
 inline const int   Npi = 50;
 
+inline const int BUFFER_SIZE = 3;
+
+#if !BEAM_INJECTION_SETUP
+inline const double density_limit = 0.0001;
+
+#else
+inline const int INJECTION_START = 2'000;
+inline const int INJECTION_TIME = 80'000;
+inline const int WIDTH_OF_INJECTION_AREA = 300;
+inline const int PER_STEP_PARTICLES = SIZE_Y * WIDTH_OF_INJECTION_AREA * Npi / INJECTION_TIME;
+
+inline const int WIDTH_OF_TARGET_PLASMA = 500;
+inline const double Temp_TARGET_PLASMA = 30e-3;  // KeV
+
+#endif
+
 inline const double mi_me  = 16.0;
 
 inline const double T_ions = 10.0;  // KeV
@@ -62,15 +84,14 @@ inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 
-inline const std::string postfix = "0.05dx_16.0mi_me_10.0Ti.bin";
+inline const std::string postfix = "0.01dx_16.0mi_me_10.0Ti.bin";
 
 // Constants describing damping layer and calculation domain
 inline const int damping_layer_width = 50;
-inline const double damping_factor = 0.6;
+inline const double damping_factor = 0.8;
 
 // Domain_geometry
-inline const int left_offset      = damping_layer_width / 2;
-inline const double domain_left   = (damping_layer_width - left_offset) * dx;
+inline const double domain_left   = damping_layer_width * dx;
 inline const double domain_right  = (SIZE_X - damping_layer_width) * dx;
 inline const double domain_bottom = 0;
 inline const double domain_top    = SIZE_Y * dy;
@@ -124,6 +145,17 @@ inline const umap<std::string,
       to_string(+10 * V_ions), to_string(+10 * V_ions),             // maximum captured velocity [in units of c]
       to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)  // step between nearest velocities [in units of c]
     }},
+    { "x0_distribution_function", {
+#if !BEAM_INJECTION_SETUP
+      to_string(int(domain_left / dx)),
+#else
+      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
+#endif
+      to_string(-10 * V_ions), to_string(-10 * V_ions),
+      to_string(+10 * V_ions), to_string(+10 * V_ions),
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
+    }},
+
   }},
 #endif
 
@@ -167,6 +199,113 @@ inline const umap<std::string,
       to_string(+10 * V_ions), to_string(+10 * V_ions),
       to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
     }},
+    { "x0_distribution_function", {
+#if !BEAM_INJECTION_SETUP
+      to_string(int(domain_left / dx)),
+#else
+      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
+#endif
+      to_string(-10 * V_ions), to_string(-10 * V_ions),
+      to_string(+10 * V_ions), to_string(+10 * V_ions),
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
+    }},
+
+  }},
+#endif
+
+#if BEAM_INJECTION_SETUP
+  { "target_ions", {
+    { "parameters", {
+        to_string(n0),
+        to_string(+e),
+        to_string(mi_me),
+        to_string(Npi),
+        to_string(Temp_TARGET_PLASMA),
+        to_string(Temp_TARGET_PLASMA),
+        to_string(Temp_TARGET_PLASMA),
+        "0"
+    }},
+    { "integration_steps", {
+        "Boris_pusher",
+        "Simple_interpolation",
+        "Esirkepov_density_decomposition",
+    }},
+    // Diagnostics with their config parameters
+    { "energy", { "empty description" }},
+    { "density", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vy_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVxVx_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "x0_distribution_function", {
+      to_string(SIZE_X / 2),
+      to_string(-10 * V_ions), to_string(-10 * V_ions),
+      to_string(+10 * V_ions), to_string(+10 * V_ions),
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
+    }},
+    { "x0_distribution_function", {
+      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
+      to_string(-10 * V_ions), to_string(-10 * V_ions),
+      to_string(+10 * V_ions), to_string(+10 * V_ions),
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
+    }},
+  }},
+
+  { "target_electrons", {
+    { "parameters", {
+        to_string(n0),
+        to_string(-e),
+        to_string(me),
+        to_string(Npi),
+        to_string(Temp_TARGET_PLASMA),
+        to_string(Temp_TARGET_PLASMA),
+        to_string(Temp_TARGET_PLASMA),
+        "0"
+    }},
+    { "integration_steps", {
+        "Boris_pusher",
+        "Simple_interpolation",
+        "Esirkepov_density_decomposition",
+    }},
+    // Diagnostics with their config parameters
+    { "energy", { "empty description" }},
+    { "density", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vy_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVxVx_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "x0_distribution_function", {
+      to_string(SIZE_X / 2),
+      to_string(-10 * V_ions), to_string(-10 * V_ions),
+      to_string(+10 * V_ions), to_string(+10 * V_ions),
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
+    }},
+    { "x0_distribution_function", {
+      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
+      to_string(-10 * V_ions), to_string(-10 * V_ions),
+      to_string(+10 * V_ions), to_string(+10 * V_ions),
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
+    }},
   }},
 #endif
 
@@ -179,6 +318,7 @@ inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
 
   { "whole_field", { "J", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "E", "x", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
+  { "whole_field", { "E", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "B", "z", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
 
   { "field_on_segment", {

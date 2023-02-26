@@ -8,6 +8,8 @@
  * @todo It would be easier to simplify the Particle
  * class to just a set of attributes without storing
  * pointers to outer parameters.
+ *
+ * @todo #if over constructor to catch this route also.
  */
 class Particle {
  public:

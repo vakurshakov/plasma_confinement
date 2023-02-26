@@ -9,6 +9,8 @@ void Set_Bz_distribution::execute(int /* timestep */) const {
 
   for (int y = fields_->B().iy_first(Z); y < fields_->B().iy_last(Z); ++y) {
   for (int x = fields_->B().ix_first(Z); x < fields_->B().ix_last(Z); ++x) {
+
+#if !BEAM_INJECTION_SETUP
     if (x * dx <= __Bz.get_x0()) {
       fields_->B().z(y, x) = 0.0;
     }
@@ -18,5 +20,8 @@ void Set_Bz_distribution::execute(int /* timestep */) const {
     else {
       fields_->B().z(y, x) = __Bz(__Bz.get_xmax());
     }
+#else
+    fields_->B().z(y, x) = config::Omega_max;
+#endif
   }}
 }
