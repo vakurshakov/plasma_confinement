@@ -4,23 +4,21 @@
 
 /**
  * @brief This is a singleton around the linear congruential
- *      engine (namely the minstd) for random numbers.
+ *      engine for random numbers.
  *
  * @see https://en.cppreference.com/w/cpp/numeric/random
- * @see https://en.cppreference.com/w/cpp/numeric/random/linear_congruential_engine
- *
  */
 class Random_generator {
  public:
 
-  static inline std::minstd_rand& get() {
+  static inline std::mt19937& get() {
     static Random_generator single_instance;
     return single_instance.gen;
   }
 
  private:
   std::random_device rd;
-  std::minstd_rand gen = std::minstd_rand(rd());
+  std::mt19937 gen = std::mt19937(rd());
 
   Random_generator() = default;
 
@@ -44,7 +42,7 @@ inline double random_01() {
   return value;
 }
 
-inline int random_sign() { 
+inline int random_sign() {
   static std::bernoulli_distribution distribution(0.5);
 
   int value;
