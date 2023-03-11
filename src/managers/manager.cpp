@@ -175,7 +175,7 @@ void Manager::initializes() {
 
 #else  // BEAM_INJECTION_SETUP
 
-  particles_species_.reserve(4);
+  particles_species_.reserve(2);
 
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
@@ -206,41 +206,6 @@ void Manager::initializes() {
     load_maxwellian_impulse
   ));
 
-
-  particles_builder.set_sort("target_ions");
-  Particles& target_ions = particles_species_.emplace_back(particles_builder);
-
-  target_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    target_ions.particles_, target_ions.parameters_, domain);
-
-  const int num_particles_in_target = config::WIDTH_OF_TARGET_PLASMA * SIZE_Y * config::Npi;
-  target_ions.particles_.reserve(num_particles_in_target);
-
-
-  particles_builder.set_sort("target_electrons");
-  Particles& target_electrons = particles_species_.emplace_back(particles_builder);
-
-  target_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    target_electrons.particles_, target_electrons.parameters_, domain);
-
-  target_electrons.particles_.reserve(num_particles_in_target);
-
-
-  presets.emplace_back(std::make_unique<Set_particles>(
-    &target_ions, num_particles_in_target,
-    Domain_geometry {
-      (SIZE_X - config::WIDTH_OF_TARGET_PLASMA) / 2 * dx,
-      (SIZE_X + config::WIDTH_OF_TARGET_PLASMA) / 2 * dx,
-      config::domain_bottom,
-      config::domain_top
-    },
-    load_maxwellian_impulse
-  ));
-
-  presets.emplace_back(std::make_unique<Copy_coordinates>(
-    &target_electrons, &target_ions,
-    load_maxwellian_impulse
-  ));
 #endif
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);

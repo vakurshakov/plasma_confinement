@@ -41,7 +41,12 @@ inline const std::string dir_name = "./results/test_dir_name";
 inline const int NUM_THREADS = 16;
 
 inline const double dx  = 0.05;
-inline const int SIZE_X = 2100;
+
+#if !BEAM_INJECTION_SETUP
+inline const int SIZE_X = 2200;
+#else
+inline const int SIZE_X = 4200;
+#endif
 
 inline const double dy  = dx;
 inline const int SIZE_Y = 400;
@@ -63,27 +68,28 @@ inline const int   Npi = 50;
 
 inline const int BUFFER_SIZE = 2;
 
-#if !BEAM_INJECTION_SETUP
-inline const double density_limit = 0.0001;
-
-#else
-inline const int INJECTION_START = 2'000;
-inline const int INJECTION_TIME = 80'000;
-inline const int WIDTH_OF_INJECTION_AREA = 300;
-inline const int PER_STEP_PARTICLES = SIZE_Y * WIDTH_OF_INJECTION_AREA * Npi / INJECTION_TIME;
-
-inline const int WIDTH_OF_TARGET_PLASMA = 500;
-inline const double Temp_TARGET_PLASMA = 30e-3;  // KeV
-
-#endif
-
 inline const double mi_me  = 16.0;
 
 inline const double T_ions = 10.0;  // KeV
 inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
+#if !BEAM_INJECTION_SETUP
+inline const double density_limit = 0.0001;
+
 inline const double T_electrons = 1e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
+
+#else
+inline const int INJECTION_START = 0;
+inline const int INJECTION_TIME = 40'000;
+
+inline const int WIDTH_OF_INJECTION_AREA = 500;
+inline const int PER_STEP_PARTICLES = SIZE_Y * WIDTH_OF_INJECTION_AREA * Npi / INJECTION_TIME;
+
+inline const double T_electrons = 50e-3;  // KeV
+inline const double V_electrons = sqrt(T_electrons / me / 511.0);
+
+#endif
 
 inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 
@@ -157,7 +163,7 @@ inline const umap<std::string,
 #if !BEAM_INJECTION_SETUP
       to_string(int(domain_left / dx)),
 #else
-      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
+      to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2),
 #endif
       to_string(-10 * V_ions), to_string(-10 * V_ions),
       to_string(+10 * V_ions), to_string(+10 * V_ions),
@@ -216,119 +222,13 @@ inline const umap<std::string,
 #if !BEAM_INJECTION_SETUP
       to_string(int(domain_left / dx)),
 #else
-      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
+      to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2),
 #endif
       to_string(-10 * V_ions), to_string(-10 * V_ions),
       to_string(+10 * V_ions), to_string(+10 * V_ions),
       to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
     }},
 
-  }},
-#endif
-
-#if BEAM_INJECTION_SETUP
-  { "target_ions", {
-    { "parameters", {
-        to_string(n0),
-        to_string(+e),
-        to_string(mi_me),
-        to_string(Npi),
-        to_string(Temp_TARGET_PLASMA),
-        to_string(Temp_TARGET_PLASMA),
-        "0",
-        "0"
-    }},
-    { "integration_steps", {
-        "Boris_pusher",
-        "Simple_interpolation",
-        "Esirkepov_density_decomposition",
-    }},
-    // Diagnostics with their config parameters
-    { "energy", { "empty description" }},
-    { "density", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "Vy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "mVxVx_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "mVyVy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "x0_distribution_function", {
-      to_string(SIZE_X / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
-    { "x0_distribution_function", {
-      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
-  }},
-
-  { "target_electrons", {
-    { "parameters", {
-        to_string(n0),
-        to_string(-e),
-        to_string(me),
-        to_string(Npi),
-        to_string(Temp_TARGET_PLASMA),
-        to_string(Temp_TARGET_PLASMA),
-        "0",
-        "0"
-    }},
-    { "integration_steps", {
-        "Boris_pusher",
-        "Simple_interpolation",
-        "Esirkepov_density_decomposition",
-    }},
-    // Diagnostics with their config parameters
-    { "energy", { "empty description" }},
-    { "density", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "Vy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "mVxVx_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "mVyVy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "x0_distribution_function", {
-      to_string(SIZE_X / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
-    { "x0_distribution_function", {
-      to_string((SIZE_X + WIDTH_OF_TARGET_PLASMA) / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
   }},
 #endif
 
