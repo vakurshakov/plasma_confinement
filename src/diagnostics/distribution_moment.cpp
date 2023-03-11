@@ -136,6 +136,10 @@ inline double get_mVxVy_moment(const Particle& particle) {
   return particle.m() * get_Vx_moment(particle) * get_Vy_moment(particle);
 }
 
+inline double get_mVyVy_moment(const Particle& particle) {
+  return particle.m() * get_Vy_moment(particle) * get_Vy_moment(particle);
+}
+
 inline double get_Vr_moment(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
@@ -181,6 +185,9 @@ Moment::Moment(std::string name) : name(name) {
   }
   else if (name == "mVxVy_moment") {
     get = get_mVxVy_moment;
+  }
+  else if (name == "mVyVy_moment") {
+    get = get_mVyVy_moment;
   }
 }
 

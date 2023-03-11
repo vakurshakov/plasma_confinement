@@ -99,6 +99,11 @@ vector_of_diagnostics Diagnostics_builder::build() {
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "mVxVy_moment", "XY", diag_description));
     }
+    else if (diag == "mVyVy_moment") {
+      LOG_INFO("Add mVxVy_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVyVy_moment", "XY", diag_description));
+    }
     else if (diag == "x0_distribution_function") {
       LOG_INFO("Add x0_distribution_function diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_x0_distribution_function(
