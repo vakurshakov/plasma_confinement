@@ -155,7 +155,13 @@ void load_maxwellian_impulse(double x, double y,
     *py = mass * vy / sqrt(1.0 - v * v);
   }
 
+#if _2D3V
   *pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tz, mass);
+
+#else  // _2D2V
+  *pz = 0.0;
+
+#endif
 }
 
 }  // namespace transition_layer

@@ -17,7 +17,10 @@ void Esirkepov_density_decomposition::process(const Particle& particle, const ve
 
   decompose_x(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
   decompose_y(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+
+#if _2D3V
   decompose_z(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+#endif
 }
 
 

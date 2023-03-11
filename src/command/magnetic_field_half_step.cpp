@@ -7,6 +7,7 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
 
 #pragma omp parallel shared(E, B), num_threads(NUM_THREADS)
 {
+#if _2D3V
   // Bx(y, x+1/2) at t+1/2
   #pragma omp for
   for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
@@ -22,6 +23,7 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
       B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
     }
   }
+#endif
 
   // Bz(y, x) at t+1/2
   #pragma omp for

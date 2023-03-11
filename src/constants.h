@@ -21,6 +21,8 @@
   #define fields_are_diagnosed          true
   #define there_are_Bz0                 true
 
+#define _2D3V                           false
+
 #define LOGGING                         true
 #define TIME_PROFILING                  true
 

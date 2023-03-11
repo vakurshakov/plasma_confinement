@@ -40,5 +40,12 @@ void load_maxwellian_impulse(double x, double y,
     double p0, double* px, double* py, double* pz) {
   *px = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tx, mass);
   *py = sin(2.0 * M_PI * random_01()) * temperature_impulse(Ty, mass);
+
+#if _2D3V
   *pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tz, mass);
+
+#else  // _2D2V
+  *pz = 0.0;
+
+#endif
 }

@@ -6,6 +6,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
 // in 2D-FDTD fields are independent of z, so every % / dz fractions will be zero
 #pragma omp parallel shared(E, B, J), num_threads(NUM_THREADS)
 {
+#if _2D3V
   // Bx(y, x+1/2) at t+1/2
   #pragma omp for
   for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
@@ -21,6 +22,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
       B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
     }
   }
+#endif
 
   // Bz(y, x) at t+1/2
   #pragma omp for
@@ -53,6 +55,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
     }
   }
 
+#if _2D3V
   // Ez(y+1/2,x+1/2) at t+1
   #pragma omp for
   for (int ny = E.iy_first(Z); ny < E.iy_last(Z); ++ny) {
@@ -63,5 +66,6 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
       J.z(ny, nx) = 0;
     }
   }
+#endif
 }
 }

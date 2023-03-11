@@ -26,11 +26,13 @@ void Simple_interpolation::process(const vector2& r0, vector3& local_E, vector3&
 
       local_E.x() += E_.x(ny,nx) * shape[shift::no].y() * shape[shift::sh].x();
       local_E.y() += E_.y(ny,nx) * shape[shift::sh].y() * shape[shift::no].x();
-      local_E.z() += E_.z(ny,nx) * shape[shift::sh].y() * shape[shift::sh].x();
+      local_B.z() += B_.z(ny,nx) * shape[shift::sh].y() * shape[shift::sh].x();
 
+#if _2D3V
+      local_E.z() += E_.z(ny,nx) * shape[shift::sh].y() * shape[shift::sh].x();
       local_B.x() += B_.x(ny,nx) * shape[shift::no].y() * shape[shift::sh].x();
       local_B.y() += B_.y(ny,nx) * shape[shift::sh].y() * shape[shift::no].x();
-      local_B.z() += B_.z(ny,nx) * shape[shift::sh].y() * shape[shift::sh].x();
+#endif
     }
   }
 }

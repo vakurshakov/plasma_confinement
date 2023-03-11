@@ -100,7 +100,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
         sort, "mVxVy_moment", "XY", diag_description));
     }
     else if (diag == "mVyVy_moment") {
-      LOG_INFO("Add mVxVy_moment diagnostic for {}", sort);
+      LOG_INFO("Add mVyVy_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "mVyVy_moment", "XY", diag_description));
     }
