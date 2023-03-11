@@ -113,10 +113,10 @@ void Manager::initializes() {
   presets.emplace_back(std::make_unique<Set_particles>(
     &plasma_ions, total_num_particles,
     Domain_geometry {
-      config::domain_left,
-      __n.get_xmax(),
-      0 * dy,
-      SIZE_Y * dy
+      floor(config::domain_left / dx),
+      floor(__n.get_xmax() / dx),
+      0,
+      SIZE_Y
     },
     transition_layer::load_maxwellian_impulse
   ));
@@ -124,6 +124,8 @@ void Manager::initializes() {
 
   Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
   buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
+
+  buffer_ions.interpolation_ = std::make_unique<Null_interpolation>();
 
   buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
     buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
@@ -133,10 +135,10 @@ void Manager::initializes() {
   step_presets_.emplace_back(std::make_unique<Set_particles>(
     &buffer_ions, buffer_ions_size,
     Domain_geometry {
-      config::domain_left - config::BUFFER_SIZE * dx,
-      config::domain_left,
-      0 * dy,
-      SIZE_Y * dy
+      floor(config::domain_left / dx) - config::BUFFER_SIZE,
+      floor(config::domain_left / dx),
+      0,
+      SIZE_Y
     },
     transition_layer::load_maxwellian_impulse
   ));

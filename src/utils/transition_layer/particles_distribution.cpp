@@ -95,8 +95,8 @@ void ziggurat_velocity_algorithm(double x, double& v, double& vx, double& vy) {
 
   while (true) {
     int i = random_level(Random_generator::get());
-
     double v_i = __param["v_" + std::to_string(i)];
+
     if (v_i < 0.5 * Gx) {
       continue;
     }
@@ -141,7 +141,7 @@ void load_maxwellian_impulse(double x, double y,
     double mass, double Tx, double Ty, double Tz,
     double p0, double* px, double* py, double* pz) {
   if (x <= __Gx.get_x0()) {
-    double p = temperature_impulse(config::T_ions, mass);
+    double p = 1.003 * temperature_impulse(config::T_ions, mass);
     double theta = 2.0 * M_PI * random_01();
 
     *px = p * cos(theta);

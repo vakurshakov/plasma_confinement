@@ -48,10 +48,10 @@ void Set_particles::execute(int /* timestep */) {
   /// 1. On the one hand it is hard to load particles randomly in parallel
   /// 2. It is not always possible to describe everything in such a cycle.
 
-  for (int i = int(floor(geom_.left / dx)); i < int(floor(geom_.right / dx)); ++i) {
+  for (int i = int(geom_.left); i < int(geom_.right); ++i) {
 
   #pragma omp parallel for num_threads(NUM_THREADS)
-  for (int j = int(floor(geom_.bottom / dx)); j < int(floor(geom_.top / dx)); ++j) {
+  for (int j = int(geom_.bottom); j < int(geom_.top); ++j) {
     for (int np = 0; np < config::Npi; ++np) {
       double x = (i + random_01()) * dx;
       double y = (j + random_01()) * dy;

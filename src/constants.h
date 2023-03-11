@@ -15,7 +15,7 @@
   #define GLOBAL_DENSITY                false
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
-  #define there_are_plasma_electrons    false
+  #define there_are_plasma_electrons    true
 
 #define there_are_fields                true
   #define fields_are_diagnosed          true
@@ -53,14 +53,15 @@ inline const int diagnose_time_step = 1;
 
 namespace config {
 
-inline const double layer_beginning = 30.0;
+// (transition layer width) = 800.0 * dx
+inline const double layer_beginning = 0.5 * (SIZE_X - 800.0) * dx;
 
 inline const std::string boundaries = "cx_py";
 
 inline const double n0 = 1.0;
 inline const int   Npi = 50;
 
-inline const int BUFFER_SIZE = 3;
+inline const int BUFFER_SIZE = 2;
 
 #if !BEAM_INJECTION_SETUP
 inline const double density_limit = 0.0001;
@@ -89,8 +90,8 @@ inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 inline const std::string postfix = "0.01dx_16.0mi_me_10.0Ti.bin";
 
 // Constants describing damping layer and calculation domain
-inline const int damping_layer_width = 50;
-inline const double damping_factor = 0.8;
+inline const int damping_layer_width = 100;
+inline const double damping_factor = 0.99;
 
 // Domain_geometry
 inline const double domain_left   = damping_layer_width * dx;
@@ -116,7 +117,7 @@ inline const umap<std::string,
         to_string(Npi),     // Number of particles representing the density n₀
         to_string(T_ions),  // Temperature in x, y and z direction [in KeV]
         to_string(T_ions),  //
-        to_string(T_ions),  //
+        "0",                //
         "0"                 // Absolute value of the initial impulse [in units of mₑc]
     }},
     { "integration_steps", {
@@ -137,6 +138,11 @@ inline const umap<std::string,
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
     }},
     { "mVxVx_moment", {                                             //
+      "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
+      to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
+    }},
+    { "mVyVy_moment", {                                             //
       "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
@@ -170,7 +176,7 @@ inline const umap<std::string,
         to_string(Npi),
         to_string(T_electrons),
         to_string(T_electrons),
-        to_string(T_electrons),
+        "0",
         "0"
     }},
     { "integration_steps", {
@@ -191,6 +197,11 @@ inline const umap<std::string,
       to_string(dx), to_string(dy),
     }},
     { "mVxVx_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVyVy_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
@@ -224,7 +235,7 @@ inline const umap<std::string,
         to_string(Npi),
         to_string(Temp_TARGET_PLASMA),
         to_string(Temp_TARGET_PLASMA),
-        to_string(Temp_TARGET_PLASMA),
+        "0",
         "0"
     }},
     { "integration_steps", {
@@ -245,6 +256,11 @@ inline const umap<std::string,
       to_string(dx), to_string(dy),
     }},
     { "mVxVx_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVyVy_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
@@ -271,7 +287,7 @@ inline const umap<std::string,
         to_string(Npi),
         to_string(Temp_TARGET_PLASMA),
         to_string(Temp_TARGET_PLASMA),
-        to_string(Temp_TARGET_PLASMA),
+        "0",
         "0"
     }},
     { "integration_steps", {
@@ -292,6 +308,11 @@ inline const umap<std::string,
       to_string(dx), to_string(dy),
     }},
     { "mVxVx_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVyVy_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
