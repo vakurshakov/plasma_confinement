@@ -51,7 +51,7 @@ _ng = interp1d(raw_ng[0], raw_ng[1])
 _n  = interp1d(raw_xg[1] * sqrt(mi_me), _ng(raw_xg[0]))
 
 _Pg = interp1d(raw_Pg[0], raw_Pg[1])
-_P  = interp1d(raw_xg[1] * sqrt(mi_me), raw_Pg[1] * Ti / mec2,
+_Pxx = interp1d(raw_xg[1] * sqrt(mi_me), raw_Pg[1] * Ti / mec2,
   bounds_error=False, fill_value=(Ti / mec2, 0))
 
 # g is normalized to v_th
@@ -62,23 +62,23 @@ _Gx = interp1d(raw_xg[1] * sqrt(mi_me),
 xmax = 10 * sqrt(mi_me)
 x_range = np.arange(0, xmax + dx, dx)
 
+n  = {x: float(_n(x))  for x in x_range}
 Jy = {x: float(_Jy(x)) for x in x_range}
 Bz = {x: float(_Bz(x)) for x in x_range}
-n  = {x: float(_n(x))  for x in x_range}
-P  = {x: float(_P(x))  for x in x_range}
 Gx = {x: float(_Gx(x)) for x in x_range}
+Pxx = {x: float(_Pxx(x))  for x in x_range}
 
 # Saving interpolated functions into numpy binaries
+np.save(f'../n_{postfix}.npy',  n)
 np.save(f'../Jy_{postfix}.npy', Jy)
 np.save(f'../Bz_{postfix}.npy', Bz)
-np.save(f'../n_{postfix}.npy',  n)
 np.save(f'../Gx_{postfix}.npy', Gx)
-np.save(f'../P_{postfix}.npy',  P)
+np.save(f'../Pxx_{postfix}.npy',  Pxx)
 
 # Writing table functions to the binary file
 parameters = [0, xmax, dx]
 
-for table, name in zip([Jy, Bz, n, Gx], ['Jy', 'Bz', 'n', 'Gx']):
+for table, name in zip([Jy, Bz, n, Gx, Pxx], ['n', 'Jy', 'Bz', 'Gx', 'Pxx']):
   with open(f'../{name}_{postfix}.bin', 'wb') as file:
     plain_dict = []
     for x, v in table.items():
