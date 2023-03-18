@@ -198,11 +198,29 @@ void Manager::initializes() {
   step_presets_.emplace_back(std::make_unique<Ionize_particles>(
     &plasma_ions, &plasma_electrons,
     set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
+    // set_point_of_birth:
     [](double *x, double *y) {
-      *x = (0.5 * SIZE_X + (random_01() - 0.5) * config::WIDTH_OF_INJECTION_AREA) * dx;
+      static const double sigma = /* fwhm */ config::WIDTH_OF_INJECTION_AREA * dx / 2.335;
+      static const double width = 6 * sigma;
+
+      *x = 0.5 * SIZE_X * dx + 2.0 * (random_01() - 0.5) * width;
       *y = random_01() * SIZE_Y * dy;
     },
-    uniform_probability,
+    // get_probability:
+    [](double x, double /* y */) -> double {
+      static const double sigma = /* fwhm */ config::WIDTH_OF_INJECTION_AREA * dx / 2.335;
+      static const double sigma2 = sigma * sigma;
+
+      static const double width = 6 * sigma;
+      static const double center = 0.5 * SIZE_X * dy;
+
+      x -= center;
+
+      if (abs(x) < width)
+        return exp(- 0.5 * x * x / sigma2) / sqrt(2.0 * M_PI * sigma2);
+
+      return 0.0;
+    },
     load_maxwellian_impulse
   ));
 
