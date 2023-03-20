@@ -47,7 +47,7 @@ void Particles::push() {
       decompose(decomposition_, *it, r0));
 
     ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
-      boundaries_processor_->add(it->point, r0));
+      boundaries_processor_->add(*it, r0));
   }
 }
   boundaries_processor_->remove();
