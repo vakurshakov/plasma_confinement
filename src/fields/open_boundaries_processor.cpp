@@ -28,6 +28,7 @@ void Open_boundaries_processor::left_right_bounds() {
   // * . . *
   // vy
 
+#if !BEAM_INJECTION_SETUP
   #pragma omp parallel for num_threads(NUM_THREADS)
   for (int y = 0; y < fields_E.size_y(); ++y) {
     for (int x = 0; x < layer.width; ++x) {
@@ -36,15 +37,12 @@ void Open_boundaries_processor::left_right_bounds() {
 
       fields_E.x(y, x) *= coeff;
       fields_E.y(y, x) *= coeff;
-      fields_E.z(y, x) *= coeff;
+      fields_B.z(y, x) *= coeff;
 
+#if _2D3V
+      fields_E.z(y, x) *= coeff;
       fields_B.x(y, x) *= coeff;
       fields_B.y(y, x) *= coeff;
-
-#if !BEAM_INJECTION_SETUP
-      fields_B.z(y, x) *= coeff;
-#else
-      fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
 #endif
 
       // right
@@ -52,13 +50,35 @@ void Open_boundaries_processor::left_right_bounds() {
 
       fields_E.x(y, right_x) *= coeff;
       fields_E.y(y, right_x) *= coeff;
-      fields_E.z(y, right_x) *= coeff;
+      fields_B.z(y, right_x) = fields_B.z(y, right_x) * coeff + config::Omega_max * (1.0 - coeff);
 
+#if _2D3V
+      fields_E.z(y, right_x) *= coeff;
       fields_B.x(y, right_x) *= coeff;
       fields_B.y(y, right_x) *= coeff;
-      fields_B.z(y, right_x) = fields_B.z(y, right_x) * coeff + config::Omega_max * (1.0 - coeff);
+#endif
     }
   }
+
+#else
+  #pragma omp parallel for num_threads(NUM_THREADS)
+  for (int y = 0; y < fields_E.size_y(); ++y) {
+    for (int x = 0; x < layer.width; ++x) {
+      // left
+      fields_E.x(y, x) = 0.0;
+      fields_E.y(y, x) = 0.0;
+      fields_B.z(y, x) = fields_B.z(y, layer.width + 1);
+
+      // right
+      int right_x = (fields_E.size_x() - 1) - x;
+
+      fields_E.x(y, right_x) = 0.0;
+      fields_E.y(y, right_x) = 0.0;
+      fields_B.z(y, right_x) = fields_B.z(y, (fields_E.size_x() - 1) - layer.width);
+    }
+  }
+
+#endif
 }
 
 void Open_boundaries_processor::top_bottom_bounds() {
