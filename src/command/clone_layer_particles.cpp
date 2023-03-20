@@ -1,5 +1,8 @@
 #include "clone_layer_particles.hpp"
 
+#include "src/utils/random_number_generator.hpp"
+
+
 Clone_layer_particles::Clone_layer_particles(
   Particles* const particles_inout,
   Domain_geometry geom)
@@ -35,9 +38,7 @@ void Clone_layer_particles::execute(int /* timestep */) {
 inline bool
 Clone_layer_particles::particle_should_be_cloned(const Point& point) const {
   double width = config::BUFFER_SIZE * dx;
-
-  return particle_on_the_left(point.x(), width) ||
-    particle_on_the_right(point.x(), width);
+  return particle_on_the_left(point.x(), width);
 }
 
 inline bool
@@ -52,11 +53,8 @@ Clone_layer_particles::particle_on_the_right(double x, double width) const {
 
 inline Point
 Clone_layer_particles::configure_point(const Point& point) const {
-  double width = config::BUFFER_SIZE * dx;
-
-  double new_x = particle_on_the_left(point.x(), width)?
-    2 * geom_.left - point.x():
-    2 * geom_.right - point.x();
-
-  return Point{{new_x, point.y()}, point.p};
+  return Point{
+    { config::domain_left - random_01() * config::BUFFER_SIZE * dx, random_01() * SIZE_Y * dx },  // 2 * geom_.left - point.x(), point.y()
+    { random_sign() * point.px(), random_sign() * point.py(), 0.0 },
+  };
 }

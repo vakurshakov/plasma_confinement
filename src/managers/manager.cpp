@@ -107,6 +107,8 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
+  plasma_ions.particles_.reserve(2 * total_num_particles);
+
   plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
     plasma_ions.particles_, plasma_ions.parameters_, domain);
 
@@ -125,12 +127,11 @@ void Manager::initializes() {
   Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
   buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
 
-  buffer_ions.interpolation_ = std::make_unique<Null_interpolation>();
-
   buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
     buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
 
   const int buffer_ions_size = config::BUFFER_SIZE * SIZE_Y * config::Npi;
+  buffer_ions.particles_.reserve(2 * buffer_ions_size);
 
   step_presets_.emplace_back(std::make_unique<Set_particles>(
     &buffer_ions, buffer_ions_size,
@@ -147,7 +148,7 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_electrons");
   Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
 
-  plasma_electrons.particles_.reserve(total_num_particles + 100'000);
+  plasma_electrons.particles_.reserve(2 * total_num_particles);
 
   plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
     plasma_electrons.particles_, plasma_electrons.parameters_, domain);
@@ -160,16 +161,13 @@ void Manager::initializes() {
   Particles& buffer_electrons = particles_species_.emplace_back(particles_builder);
   buffer_electrons.sort_name_ = "buffer_plasma_electrons";  // changed from "plasma_electrons"
 
-  buffer_electrons.interpolation_ = std::make_unique<Null_interpolation>();
-
-  buffer_electrons.particles_.reserve(buffer_ions_size + 10'000);
+  buffer_electrons.particles_.reserve(2 * buffer_ions_size);
 
   buffer_electrons.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
     buffer_electrons.particles_, plasma_electrons.particles_, plasma_electrons.parameters_, domain);
 
-  step_presets_.emplace_back(std::make_unique<Copy_coordinates>(
-    &buffer_electrons, &buffer_ions, load_maxwellian_impulse
-  ));
+  step_presets_.push_back(std::make_unique<Clone_layer_particles>(
+    &plasma_electrons, &buffer_electrons, domain));
 
 #endif
 

@@ -42,7 +42,7 @@ void Set_particles::execute(int /* timestep */) {
   const double p0   = particles_->get_parameters().p0();
 
   // чтобы не происходило ресайзов неожиданных
-  particles_->particles_.reserve(num_particles_to_load_ + 100'000);
+  // particles_->particles_.reserve(num_particles_to_load_ + 100'000);
 
   /// @todo Think carefully to combine two ways of setting particles:
   /// 1. On the one hand it is hard to load particles randomly in parallel

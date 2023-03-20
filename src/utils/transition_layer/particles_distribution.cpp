@@ -141,11 +141,11 @@ void load_maxwellian_impulse(double x, double y,
     double mass, double Tx, double Ty, double Tz,
     double p0, double* px, double* py, double* pz) {
   if (x <= __Gx.get_x0()) {
-    double p = 1.003 * temperature_impulse(config::T_ions, mass);
-    double theta = 2.0 * M_PI * random_01();
+    double v, vx, vy;
+    ziggurat_velocity_algorithm(__Gx.get_x0(), v, vx, vy);
 
-    *px = p * cos(theta);
-    *py = p * sin(theta);
+    *px = mass * vx / sqrt(1.0 - v * v);
+    *py = mass * vy / sqrt(1.0 - v * v);
   }
   else if (x <= __Gx.get_xmax()) {
     double v, vx, vy;
