@@ -26,6 +26,8 @@
 #define LOGGING                         true
 #define TIME_PROFILING                  true
 #define MAKE_BACKUPS                    true
+#define START_FROM_BACKUP               true
+
 
 #define BEAM_INJECTION_SETUP            true
 #if BEAM_INJECTION_SETUP && !(GLOBAL_DENSITY && there_are_plasma_electrons)

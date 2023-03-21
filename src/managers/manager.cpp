@@ -74,7 +74,7 @@ void Manager::initializes() {
   // the same half-timestep as electric field
   step_presets_.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
 
-#if there_are_Bz0
+#if there_are_Bz0 && !START_FROM_BACKUP
   presets.push_back(std::make_unique<Set_Bz_distribution>(&fields_));
 #endif
 #endif
@@ -206,39 +206,46 @@ void Manager::initializes() {
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);
   diagnostics_ = diagnostics_builder.build();
 
-#if MAKE_BACKUPS
-  diagnostics_.emplace_back(std::make_unique<Simulation_backup>(
-    /* backup timestep = */ 10'000,
+#if MAKE_BACKUPS || START_FROM_BACKUP
+  auto backup =  std::make_unique<Simulation_backup>(
+    /* backup timestep = */ 50,
     // named particle species to backup:
     std::unordered_map<std::string, Particles&>{
       { plasma_ions.sort_name_, plasma_ions },
-#if there_are_plasma_electrons
       { plasma_electrons.sort_name_, plasma_electrons }
-#endif
     },
     // named fields to backup:
     std::unordered_map<std::string, vector3_field&>{
       { "E", fields_.E() },
       { "B", fields_.B() }
-    }));
+  });
 
+#if START_FROM_BACKUP
+  START_ = backup->load();
 #endif
 
-  for (const auto& command : presets) {
-    command->execute(0);
-  }
+#if MAKE_BACKUPS
+  diagnostics_.emplace_back(std::move(backup));
+#endif
+#endif
 
-  diagnose(0);
+#if !START_FROM_BACKUP
+  for (const auto& command : presets) {
+    command->execute(START_);
+  }
+#endif
+
+  diagnose(START_);
   LOG_FLUSH();
 }
 
 
 void Manager::calculates() {
-  for (size_t t = 1u; t <= TIME; ++t) {
+  for (size_t t = START_; t <= TIME; ++t) {
     LOG_TRACE("------------------------------------ one timestep ------------------------------------");
     PROFILE_SCOPE("one timestep");
 
-    for (const auto& command : step_presets_) {
+    for (auto& command : step_presets_) {
       command->execute(t);
     }
 

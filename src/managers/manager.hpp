@@ -1,3 +1,6 @@
+#ifndef SRC_MANAGERS_MANAGER_HPP
+#define SRC_MANAGERS_MANAGER_HPP
+
 #include "src/pch.h"
 #include "src/fields/fields.hpp"
 #include "src/particles/particles.hpp"
@@ -12,6 +15,8 @@ class Manager {
   void calculates();
 
  private:
+  size_t START_ = 0u;
+
   Fields fields_;
   std::vector<Particles> particles_species_;
 
@@ -23,3 +28,5 @@ class Manager {
   using Command_up = std::unique_ptr<Command>;
   std::list<Command_up> step_presets_;
 };
+
+#endif  // SRC_MANAGERS_MANAGER_HPP

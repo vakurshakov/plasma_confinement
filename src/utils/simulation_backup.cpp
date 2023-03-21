@@ -3,6 +3,8 @@
 #include "src/utils/configuration_backup.hpp"
 #include "src/file_writers/bin_file.hpp"
 
+#include "src/particles/particle/point.hpp"
+
 namespace fs = std::filesystem;
 
 Simulation_backup::Simulation_backup(
@@ -73,13 +75,13 @@ void Simulation_backup::diagnose(int t) {
     fs::copy_options::overwrite_existing);
 #endif
 
-  fs::remove_all(result_directory_ + "/" + std::to_string(t - backup_timestep_));
+  fs::remove_all(result_directory_ + "/timestep_" + std::to_string(t - backup_timestep_));
 }
 
 void Simulation_backup::save_particles(int t) const {
   for (const auto& [name, container] : particles_) {
 
-    BIN_File file(result_directory_ + "/" + std::to_string(t), name);
+    BIN_File file(result_directory_ + "/timestep_" + std::to_string(t), name);
 
     for (const Particle& particle : container.get_particles()) {
       const Point& point = particle.point;
@@ -101,9 +103,9 @@ void Simulation_backup::save_particles(int t) const {
 
 void Simulation_backup::save_fields(int t) const {
   for (const auto& [name, field] : fields_) {
-    BIN_File comp_x(result_directory_ + "/" + std::to_string(t), name + "x");
-    BIN_File comp_y(result_directory_ + "/" + std::to_string(t), name + "y");
-    BIN_File comp_z(result_directory_ + "/" + std::to_string(t), name + "z");
+    BIN_File comp_x(result_directory_ + "/timestep_" + std::to_string(t), name + "x");
+    BIN_File comp_y(result_directory_ + "/timestep_" + std::to_string(t), name + "y");
+    BIN_File comp_z(result_directory_ + "/timestep_" + std::to_string(t), name + "z");
 
     for (int ny = 0; ny < SIZE_Y; ++ny) {
     for (int nx = 0; nx < SIZE_X; ++nx) {
@@ -119,17 +121,91 @@ void Simulation_backup::save_fields(int t) const {
 }
 
 
-void Simulation_backup::load() {
-  load_particles();
-  load_fields();
+/// @todo ENERGY DIAGNOSTIC IS CORRUPTED
+size_t Simulation_backup::load() {
+  if (!fs::exists(result_directory_)) {
+    throw std::runtime_error("Failed to load simulation backup! "
+      "No such directory in " + dir_name);
+  }
+
+  std::string timestep = get_last_timestep();
+  load_particles(timestep);
+  load_fields(timestep);
+
+  int from = timestep.find_last_of('/') + 10;  // "timestep_".size() = 10;
+  return std::stoul(timestep.substr(from));
 }
 
-void Simulation_backup::load_particles() {
+std::string Simulation_backup::get_last_timestep() {
+  for (const auto& directory : fs::directory_iterator(result_directory_)) {
+    auto directory_str = directory.path().string();
 
+    if (directory_str.find("timestep_") != std::string::npos)
+      return directory_str;
+  }
+
+  throw std::runtime_error("Failed to load simulation backup! "
+    "No timestep_%% directory in " + result_directory_);
 }
 
-void Simulation_backup::load_fields() {
+void Simulation_backup::load_particles(const std::string& timestep) {
+  for (const auto& [name, container] : particles_) {
+    std::string filename = timestep + "/" + name + ".bin";
+    std::ifstream input_file(filename, std::ios::in | std::ios::binary);
 
+    if (!input_file) {
+      throw std::runtime_error("Cannot open file! " + filename);
+    }
+
+    size_t size = get_number_of_particles(filename);
+    // container.particles_.reserve(size);
+
+    for (size_t i = 0u; i < size; ++i) {
+      Point point;
+
+      input_file.read(reinterpret_cast<char*>(&point.x()), sizeof(double));
+      input_file.read(reinterpret_cast<char*>(&point.y()), sizeof(double));
+      input_file.read(reinterpret_cast<char*>(&point.px()), sizeof(double));
+      input_file.read(reinterpret_cast<char*>(&point.py()), sizeof(double));
+      input_file.read(reinterpret_cast<char*>(&point.pz()), sizeof(double));
+
+#if GLOBAL_DENSITY
+      container.particles_.emplace_back(point, container.parameters_);
+#else
+      Particle& particle = container.particles_.emplace_back(point, container.parameters_);
+      input_file.read(reinterpret_cast<char*>(&particle.n_), sizeof(double));
+#endif
+    }
+  }
 }
 
+size_t Simulation_backup::get_number_of_particles(const std::string& filename) {
+#if GLOBAL_DENSITY
+  size_t number_of_particle_components = 5;
+#else
+  size_t number_of_particle_components = 6;
+#endif
 
+  return fs::file_size(filename) /
+    (number_of_particle_components * sizeof(double));
+}
+
+void Simulation_backup::load_fields(const std::string& timestep) {
+  for (const auto& [name, field] : fields_) {
+    std::string filename = timestep + "/" + name;
+    std::ifstream comp_x(filename + "x.bin", std::ios::in | std::ios::binary);
+    std::ifstream comp_y(filename + "y.bin", std::ios::in | std::ios::binary);
+    std::ifstream comp_z(filename + "z.bin", std::ios::in | std::ios::binary);
+
+    if (!comp_x || !comp_y || !comp_z) {
+      throw std::runtime_error("Cannot open file! " + filename + "%%.bin");
+    }
+
+    for (int ny = 0; ny < SIZE_Y; ++ny) {
+    for (int nx = 0; nx < SIZE_X; ++nx) {
+      comp_x.read(reinterpret_cast<char*>(&field.x(ny, nx)), sizeof(double));
+      comp_y.read(reinterpret_cast<char*>(&field.y(ny, nx)), sizeof(double));
+      comp_z.read(reinterpret_cast<char*>(&field.z(ny, nx)), sizeof(double));
+    }}
+  }
+}

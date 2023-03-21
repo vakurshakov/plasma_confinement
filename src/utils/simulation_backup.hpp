@@ -1,6 +1,7 @@
 #ifndef SRC_UTILS_SIMULATION_BACKUP_HPP
 #define SRC_UTILS_SIMULATION_BACKUP_HPP
 
+#include "src/pch.h"
 #include "src/diagnostics/diagnostic.hpp"
 #include "src/particles/particles.hpp"
 #include "src/vectors/vector3_field.hpp"
@@ -13,7 +14,7 @@ class Simulation_backup : public Diagnostic {
     std::unordered_map<std::string, vector3_field&> each_vector_field);
 
   void save(int t);
-  void load();
+  size_t load();
 
  private:
   int backup_timestep_;
@@ -26,8 +27,11 @@ class Simulation_backup : public Diagnostic {
   void save_particles(int t) const;
   void save_fields(int t) const;
 
-  void load_particles();
-  void load_fields();
+  std::string get_last_timestep();
+  void load_particles(const std::string& timestep);
+  size_t get_number_of_particles(const std::string& filename);
+
+  void load_fields(const std::string& timestep);
 };
 
 #endif  // SRC_UTILS_SIMULATION_BACKUP_HPP
