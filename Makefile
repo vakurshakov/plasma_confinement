@@ -88,6 +88,7 @@ SRCS +=                                                \
 SRCS +=                                                    \
   src/utils/log.cpp                                        \
   src/utils/time_manager.cpp                               \
+  src/utils/configuration_backup.cpp                       \
   src/utils/transition_layer/table_function.cpp            \
   src/utils/transition_layer/parameters_table.cpp          \
   src/utils/transition_layer/particles_distribution.cpp    \
