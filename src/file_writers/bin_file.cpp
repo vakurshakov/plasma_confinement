@@ -11,7 +11,11 @@ BIN_File::BIN_File(std::string directory_path, std::string file_name) {
 
 void BIN_File::write(double data) {
   float fdata = static_cast<float>(data);
-  bin_file_.write( (char*)&fdata, sizeof(float) );
+  bin_file_.write((char*)&fdata, sizeof(float));
+}
+
+void BIN_File::write_double(double data) {
+  bin_file_.write((char*)&data, sizeof(double));
 }
 
 void BIN_File::flush() {

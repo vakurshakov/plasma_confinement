@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 #define there_are_particles             true
-  #define GLOBAL_DENSITY                false
+  #define GLOBAL_DENSITY                true
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
@@ -25,9 +25,9 @@
 
 #define LOGGING                         true
 #define TIME_PROFILING                  true
+#define MAKE_BACKUPS                    true
 
-
-#define BEAM_INJECTION_SETUP            false
+#define BEAM_INJECTION_SETUP            true
 #if BEAM_INJECTION_SETUP && !(GLOBAL_DENSITY && there_are_plasma_electrons)
   #error "Beam injection setup only works with global density!"
 #endif
@@ -52,7 +52,7 @@ inline const double dy  = dx;
 inline const int SIZE_Y = 400;
 
 inline const double dt = 0.5 * dx;
-inline const int TIME  = 0;
+inline const int TIME  = 1000;
 
 inline const int diagnose_time_step = 1;
 

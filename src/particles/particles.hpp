@@ -36,6 +36,7 @@ class Particles {
   friend class Clone_layer_particles;
   friend class Plasma_boundary_processor;
   friend class Beam_boundary_processor;
+  friend class Simulation_backup;
 
  private:
   std::string sort_name_;

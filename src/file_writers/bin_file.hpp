@@ -10,6 +10,7 @@ class BIN_File : public IFile {
   BIN_File(std::string directory_path, std::string file_name);
 
   void write(double data) override;
+  void write_double(double data);
 
   virtual void flush() override;
 

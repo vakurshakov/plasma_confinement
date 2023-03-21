@@ -11,16 +11,12 @@
 #include "src/particles/particles_builder.hpp"
 #include "src/particles/particles_load.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
-#include "src/solvers/null_interpolation.hpp"
-#include "src/solvers/null_decomposition.hpp"
 
 #include "src/utils/transition_layer/particles_distribution.hpp"
 static auto __n = Table_function("src/utils/transition_layer/n_" + config::postfix);
 
 #include "src/utils/random_number_generator.hpp"
-
-
-#include "src/diagnostics/distribution_moment.hpp"
+#include "src/utils/simulation_backup.hpp"
 
 void Manager::initializes() {
   PROFILE_FUNCTION();
@@ -209,6 +205,24 @@ void Manager::initializes() {
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);
   diagnostics_ = diagnostics_builder.build();
+
+#if MAKE_BACKUPS
+  diagnostics_.emplace_back(std::make_unique<Simulation_backup>(
+    /* backup timestep = */ 10'000,
+    // named particle species to backup:
+    std::unordered_map<std::string, Particles&>{
+      { plasma_ions.sort_name_, plasma_ions },
+#if there_are_plasma_electrons
+      { plasma_electrons.sort_name_, plasma_electrons }
+#endif
+    },
+    // named fields to backup:
+    std::unordered_map<std::string, vector3_field&>{
+      { "E", fields_.E() },
+      { "B", fields_.B() }
+    }));
+
+#endif
 
   for (const auto& command : presets) {
     command->execute(0);
