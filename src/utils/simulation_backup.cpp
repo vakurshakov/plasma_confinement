@@ -133,7 +133,7 @@ void Simulation_backup::save_time_diagnostics() const {
 
     if (entry_str.find("energy") != std::string::npos ||
         entry_str.find("point_") != std::string::npos) {
-      auto begin = entry_str.find_first_not_of(dir_name) - 1;
+      auto begin = dir_name.size() + 1;
       auto end = entry_str.find_last_of("/") + 1;
 
       auto path = entry_str.substr(begin, (end - begin));
