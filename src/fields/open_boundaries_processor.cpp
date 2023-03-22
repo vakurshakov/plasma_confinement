@@ -59,25 +59,6 @@ void Open_boundaries_processor::left_right_bounds() {
 #endif
     }
   }
-
-#else
-  #pragma omp parallel for num_threads(NUM_THREADS)
-  for (int y = 0; y < fields_E.size_y(); ++y) {
-    for (int x = 0; x < layer.width; ++x) {
-      // left
-      fields_E.x(y, x) = 0.0;
-      fields_E.y(y, x) = 0.0;
-      fields_B.z(y, x) = fields_B.z(y, layer.width + 1);
-
-      // right
-      int right_x = (fields_E.size_x() - 1) - x;
-
-      fields_E.x(y, right_x) = 0.0;
-      fields_E.y(y, right_x) = 0.0;
-      fields_B.z(y, right_x) = fields_B.z(y, (fields_E.size_x() - 1) - layer.width);
-    }
-  }
-
 #endif
 }
 

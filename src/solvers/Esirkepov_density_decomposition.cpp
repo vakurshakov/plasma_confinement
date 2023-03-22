@@ -35,7 +35,7 @@ void Esirkepov_density_decomposition::decompose_x(
   for (int x = -charge_cloud_, y = -charge_cloud_; y <= +charge_cloud_; ++y) {
     node_y = ne_y + y;
     temp_J.x(y,x) = - q * n/Np_ * 0.5 * dx / dt *
-      (shape_at_(r.x() - node_x * dx, dx) - shape_at_(r0.x() - node_x * dx, dx)) *
+      (shape_at_(r.x() - (node_x + 0.5) * dx, dx) - shape_at_(r0.x() - (node_x + 0.5) * dx, dx)) *
       (shape_at_(r.y() - node_y * dy, dy) + shape_at_(r0.y() - node_y * dy, dy));
 
     #pragma omp atomic
@@ -50,7 +50,7 @@ void Esirkepov_density_decomposition::decompose_x(
 
     // Here is only "=" sign (not "+="!).
     temp_J.x(y,x) = temp_J.x(y,x-1) - q * n/Np_ * 0.5 * dx / dt *
-      (shape_at_(r.x() - node_x * dx, dx) - shape_at_(r0.x() - node_x * dx, dx)) *
+      (shape_at_(r.x() - (node_x + 0.5) * dx, dx) - shape_at_(r0.x() - (node_x + 0.5) * dx, dx)) *
       (shape_at_(r.y() - node_y * dy, dy) + shape_at_(r0.y() - node_y * dy, dy));
 
     #pragma omp atomic
@@ -72,7 +72,7 @@ void Esirkepov_density_decomposition::decompose_y(
 
     temp_J.y(y,x) = - q * n/Np_ * 0.5 * dy / dt *
       (shape_at_(r.x() - node_x * dx, dx) + shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - node_y * dy, dy) - shape_at_(r0.y() - node_y * dy, dy));
+      (shape_at_(r.y() - (node_y + 0.5) * dy, dy) - shape_at_(r0.y() - (node_y + 0.5) * dy, dy));
 
     #pragma omp atomic
     J_.y(node_y, node_x) += temp_J.y(y,x);
@@ -87,7 +87,7 @@ void Esirkepov_density_decomposition::decompose_y(
     // Here is only "=" sign (not "+="!).
     temp_J.y(y,x) = temp_J.y(y-1,x) - q * n/Np_ * 0.5 * dy / dt *
       (shape_at_(r.x() - node_x * dx, dx) + shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - node_y * dy, dy) - shape_at_(r0.y() - node_y * dy, dy));
+      (shape_at_(r.y() - (node_y + 0.5) * dy, dy) - shape_at_(r0.y() - (node_y + 0.5) * dy, dy));
 
     #pragma omp atomic
     J_.y(node_y, node_x) += temp_J.y(y,x);

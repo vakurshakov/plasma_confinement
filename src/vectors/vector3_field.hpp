@@ -23,10 +23,10 @@ class vector3_field {
   int size_x() const { return size_x_; }
   int size_y() const { return size_y_; }
 
-  virtual int ix_first (Axis ax) const = 0;
-  virtual int iy_first (Axis ax) const = 0;
-  virtual int ix_last	(Axis ax) const = 0;
-  virtual int iy_last	(Axis ax) const = 0;
+  virtual int ix_first(Axis axis) const = 0;
+  virtual int iy_first(Axis axis) const = 0;
+  virtual int ix_last(Axis axis) const = 0;
+  virtual int iy_last(Axis axis) const = 0;
 
   virtual double& x(int ny, int nx) = 0;
   virtual double& y(int ny, int nx) = 0;
@@ -39,7 +39,7 @@ class vector3_field {
   virtual vector3 operator()(int ny, int nx) const = 0;
 
  protected:
-  constexpr int index(int ny, int nx) const; 
+  constexpr int index(int ny, int nx) const;
 
   int size_x_, size_y_;
 
@@ -49,14 +49,15 @@ class vector3_field {
 };
 
 
+/// @brief Periodic field along both axis
 class px_py_vector3_field : public vector3_field {
  public:
   px_py_vector3_field(int size_x, int size_y);
 
-  int ix_first (Axis ax) const override;
-  int iy_first (Axis ax) const override;
-  int ix_last	(Axis ax) const override;
-  int iy_last	(Axis ax) const override;
+  int ix_first(Axis axis) const override;
+  int iy_first(Axis axis) const override;
+  int ix_last(Axis axis) const override;
+  int iy_last(Axis axis) const override;
 
   double& x(int ny, int nx) override;
   double& y(int ny, int nx) override;
@@ -70,14 +71,15 @@ class px_py_vector3_field : public vector3_field {
 };
 
 
-class rx_ry_vector3_field : public vector3_field {
+/// @brief PEC boundary along x-axis and periodic along y-axis
+class rx_py_vector3_field : public vector3_field {
  public:
-  rx_ry_vector3_field(std::string type, int size_x, int size_y);
+  rx_py_vector3_field(std::string type, int size_x, int size_y);
 
-  int ix_first (Axis ax) const override;
-  int iy_first (Axis ax) const override;
-  int ix_last	(Axis ax) const override;
-  int iy_last	(Axis ax) const override;
+  int ix_first(Axis axis) const override;
+  int iy_first(Axis axis) const override;
+  int ix_last(Axis axis) const override;
+  int iy_last(Axis axis) const override;
 
   double& x(int ny, int nx) override;
   double& y(int ny, int nx) override;
@@ -92,15 +94,18 @@ class rx_ry_vector3_field : public vector3_field {
  private:
   struct index_boundaries {
     int left[3];
-    int lower[3];
     int right[3];
-    int upper[3];
   };
 
   index_boundaries bound_;
-  vector3 zero_ = {0, 0, 0};
+  mutable double zero_ = 0.0;
+
+  inline double& get_proxied(Axis axis, int ny, int nx);
+  inline const double& get_proxied(Axis axis, int ny, int nx) const;
 };
 
+
+/// @note uses same index boundaries as px_py_vector3_field
 class cx_py_vector3_field : public px_py_vector3_field {
  public:
   cx_py_vector3_field(int size_x, int size_y);

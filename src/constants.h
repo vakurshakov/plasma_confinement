@@ -26,7 +26,7 @@
 #define LOGGING                         true
 #define TIME_PROFILING                  true
 #define MAKE_BACKUPS                    true
-#define START_FROM_BACKUP               true
+#define START_FROM_BACKUP               false
 
 
 #define BEAM_INJECTION_SETUP            true
@@ -54,7 +54,7 @@ inline const double dy  = dx;
 inline const int SIZE_Y = 400;
 
 inline const double dt = 0.5 * dx;
-inline const int TIME  = 1000;
+inline const int TIME  = 0;
 
 inline const int diagnose_time_step = 1;
 
@@ -62,8 +62,6 @@ namespace config {
 
 // (transition layer width) = 800.0 * dx
 inline const double layer_beginning = 0.5 * (SIZE_X - 800.0) * dx;
-
-inline const std::string boundaries = "cx_py";
 
 inline const double n0 = 1.0;
 inline const int   Npi = 50;
@@ -75,13 +73,28 @@ inline const double mi_me  = 16.0;
 inline const double T_ions = 10.0;  // KeV
 inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
+inline const double Omega_max = sqrt(2 * T_ions / 511.0);
+
+inline const std::string postfix = "0.01dx_16.0mi_me_10.0Ti.bin";
+
 #if !BEAM_INJECTION_SETUP
+inline const std::string boundaries = "cx_py";
+
+inline const int damping_layer_width = 100;
+inline const double damping_factor = 0.99;
+
 inline const double density_limit = 0.0001;
 
 inline const double T_electrons = 1e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 #else
+inline const std::string boundaries = "rx_py";
+
+// Here layer_width is treated as death zone for particles
+inline const int damping_layer_width = 1;
+inline const double damping_factor = 0.0;
+
 inline const int INJECTION_START = 0;
 inline const int INJECTION_TIME = 40'000;
 
@@ -92,14 +105,6 @@ inline const double T_electrons = 50e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 #endif
-
-inline const double Omega_max = sqrt(2 * T_ions / 511.0);
-
-inline const std::string postfix = "0.01dx_16.0mi_me_10.0Ti.bin";
-
-// Constants describing damping layer and calculation domain
-inline const int damping_layer_width = 100;
-inline const double damping_factor = 0.99;
 
 // Domain_geometry
 inline const double domain_left   = damping_layer_width * dx;
