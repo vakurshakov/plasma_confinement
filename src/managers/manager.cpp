@@ -249,23 +249,25 @@ void Manager::calculates() {
     LOG_TRACE("------------------------------------ one timestep ------------------------------------");
     PROFILE_SCOPE("one timestep");
 
+  #if there_are_fields
+    fields_.clear_sources();
+  #endif
+
     for (auto& command : step_presets_) {
       command->execute(t);
     }
 
-#if there_are_particles
+  #if there_are_particles
     for (auto& sort : particles_species_) {
       sort.push();
     }
-#endif
+  #endif
 
-    /// @todo Separate sources zeroing and field propagation
-    /// @note Placed here to catch electric currents
-    diagnose(t);
-
-#if there_are_fields
+  #if there_are_fields
     fields_.propagate();
-#endif
+  #endif
+
+    diagnose(t);
 
     step_presets_.remove_if([t](const Command_up& command) {
       return command->needs_to_be_removed(t);

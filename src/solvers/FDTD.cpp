@@ -41,7 +41,6 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
     for (int nx = E.ix_first(X); nx < E.ix_last(X); ++nx) {
       E.x(ny, nx) += - J.x(ny, nx) * dt +
         (B.z(ny, nx) - B.z(ny-1, nx)) * dt / dy;
-      J.x(ny, nx) = 0;
     }
   }
 
@@ -51,7 +50,6 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
     for (int nx = E.ix_first(Y); nx < E.ix_last(Y); ++nx) {
       E.y(ny, nx) += - J.y(ny, nx) * dt -
         (B.z(ny, nx) - B.z(ny, nx-1)) * dt / dx;
-      J.y(ny, nx) = 0;
     }
   }
 
@@ -63,7 +61,6 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
       E.z(ny, nx) += - J.z(ny, nx) * dt + (
         (B.y(ny, nx+1) - B.y(ny, nx)) / dx -
         (B.x(ny+1, nx) - B.x(ny, nx)) / dy) * dt;
-      J.z(ny, nx) = 0;
     }
   }
 #endif

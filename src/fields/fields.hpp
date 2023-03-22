@@ -20,6 +20,7 @@ public:
   vector3_field& J() { return *J_; };
 
   void propagate();
+  void clear_sources();
 
   // additional
   friend class Magnetic_field_half_step;
