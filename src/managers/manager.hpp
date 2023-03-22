@@ -15,6 +15,8 @@ class Manager {
   void calculates();
 
  private:
+  void log_information() const;
+
   size_t START_ = 0u;
 
   Fields fields_;

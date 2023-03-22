@@ -18,10 +18,8 @@ static auto __n = Table_function("src/utils/transition_layer/n_" + config::postf
 #include "src/utils/random_number_generator.hpp"
 #include "src/utils/simulation_backup.hpp"
 
-void Manager::initializes() {
-  PROFILE_FUNCTION();
 
-  // Common information
+void Manager::log_information() const {
   LOG_INFO("Note: Dimensionless units are used. So, for density 1e13:");
   LOG_INFO("  frequency,   w_pe = {:.2e} 1/sec", 5.64e4 * sqrt(1e13));
   LOG_INFO("  time,      1/w_pe = {:.2e} sec", 1.77e-5 / sqrt(1e13));
@@ -62,8 +60,15 @@ void Manager::initializes() {
     config::V_electrons / config::Omega_max,
     int(config::V_electrons / config::Omega_max / dx));
   LOG_FLUSH();
+}
 
+
+void Manager::initializes() {
+  PROFILE_FUNCTION();
+
+  Manager::log_information();
   LOG_TRACE("Initialization process...");
+
   std::list<Command_up> presets;
 
 #if there_are_fields
