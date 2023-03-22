@@ -161,9 +161,8 @@ BUILD_FIELD_DIAG(field_at_point) {
   }
 
   return std::make_unique<field_at_point>(
-    dir_name + "/" + description[0] + description[1]+ "/point_(" +
-      description[2] + "," + description[3] + ")",
-    description[0] + description[1],
+    dir_name + "/" + description[0] + description[1]+ "/",
+    "point_(" + description[2] + "," + description[3] + ")",
     get_field(description[0]),
     get_component(description[1]),
     point);
