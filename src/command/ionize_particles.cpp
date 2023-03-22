@@ -15,8 +15,13 @@ Ionize_particles::Ionize_particles(
     set_point_of_birth(std::move(set_point_of_birth)),
     get_probability(std::move(get_probability)),
     load_impulse(load_impulse),
+#if !START_FROM_BACKUP
     ionized_energy(BIN_File(dir_name, "ionized_energy")),
     ejected_energy(BIN_File(dir_name, "ejected_energy")) {}
+#else
+    ionized_energy(BIN_File::from_backup(dir_name, "ionized_energy")),
+    ejected_energy(BIN_File::from_backup(dir_name, "ejected_energy")) {}
+#endif
 
 void Ionize_particles::execute(int t) {
   PROFILE_FUNCTION();

@@ -10,7 +10,15 @@ field_at_point::field_at_point(
       field_(field), component_(field_comp),
       point_(point) {
   save_parameters();
+
+#if !START_FROM_BACKUP
   file_for_results_ = std::make_unique<BIN_File>(result_directory, file_name);
+
+#else
+  file_for_results_ = std::make_unique<BIN_File>(
+    BIN_File::from_backup(result_directory_, file_name));
+
+#endif
 }
 
 void field_at_point::save_parameters() const {

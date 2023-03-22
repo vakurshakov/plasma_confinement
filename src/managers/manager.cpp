@@ -79,6 +79,10 @@ void Manager::initializes() {
 #endif
 #endif
 
+#if START_FROM_BACKUP
+  Simulation_backup::restore_time_diagnostics();
+#endif
+
   Particles_builder particles_builder(fields_);
 
   Domain_geometry domain {
@@ -203,12 +207,9 @@ void Manager::initializes() {
 
 #endif
 
-  Diagnostics_builder diagnostics_builder(particles_species_, fields_);
-  diagnostics_ = diagnostics_builder.build();
-
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
-    /* backup timestep = */ 50,
+    /* backup timestep = */ 100 * diagnose_time_step,
     // named particle species to backup:
     std::unordered_map<std::string, Particles&>{
       { plasma_ions.sort_name_, plasma_ions },
@@ -219,20 +220,23 @@ void Manager::initializes() {
       { "E", fields_.E() },
       { "B", fields_.B() }
   });
-
-#if START_FROM_BACKUP
-  START_ = backup->load();
-#endif
-
-#if MAKE_BACKUPS
-  diagnostics_.emplace_back(std::move(backup));
-#endif
 #endif
 
 #if !START_FROM_BACKUP
   for (const auto& command : presets) {
     command->execute(START_);
   }
+#else
+  backup->load();
+  START_ = backup->get_last_timestep();
+  LOG_INFO("Configuration loaded from backup. Simulation will start from t={}", START_);
+#endif
+
+  Diagnostics_builder diagnostics_builder(particles_species_, fields_);
+  diagnostics_ = diagnostics_builder.build();
+
+#if MAKE_BACKUPS
+  diagnostics_.emplace_back(std::move(backup));
 #endif
 
   diagnose(START_);
@@ -241,7 +245,7 @@ void Manager::initializes() {
 
 
 void Manager::calculates() {
-  for (size_t t = START_; t <= TIME; ++t) {
+  for (size_t t = START_ + 1u; t <= TIME; ++t) {
     LOG_TRACE("------------------------------------ one timestep ------------------------------------");
     PROFILE_SCOPE("one timestep");
 

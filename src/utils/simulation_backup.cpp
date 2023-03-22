@@ -53,7 +53,7 @@ void Simulation_backup::save_parameters() const {
   param_file << "# is density global:\n";
   param_file << std::boolalpha << GLOBAL_DENSITY << "\n\n";
   param_file << "# sizeof(double)\n";
-  param_file << sizeof(double)<< std::endl;
+  param_file << sizeof(double) << std::endl;
 }
 
 void Simulation_backup::save(int t) {
@@ -67,6 +67,7 @@ void Simulation_backup::diagnose(int t) {
 
   save_particles(t);
   save_fields(t);
+  save_time_diagnostics();
 
 #if LOGGING
   LOG_FLUSH();
@@ -120,23 +121,52 @@ void Simulation_backup::save_fields(int t) const {
   }
 }
 
+void Simulation_backup::save_time_diagnostics() const {
+  for (const auto& entry : fs::recursive_directory_iterator(dir_name)) {
+    auto entry_str = entry.path().string();
 
-/// @todo ENERGY DIAGNOSTIC IS CORRUPTED
-size_t Simulation_backup::load() {
+    if (entry_str.find(result_directory_) != std::string::npos ||
+        entry_str.find(".py") != std::string::npos ||
+        entry_str.find(".sh") != std::string::npos) {
+      continue;
+    }
+
+    if (entry_str.find("energy") != std::string::npos ||
+        entry_str.find("point_") != std::string::npos) {
+      auto begin = entry_str.find_first_not_of(dir_name) - 1;
+      auto end = entry_str.find_last_of("/") + 1;
+
+      auto path = entry_str.substr(begin, (end - begin));
+      auto name = entry_str.substr(end);
+
+      const auto diagnostics = result_directory_ + "/time_diagnostics/";
+      fs::create_directories(diagnostics + path);
+
+      fs::copy(entry_str, diagnostics + path + "/" + name,
+        fs::copy_options::overwrite_existing);
+    }
+  }
+}
+
+
+void Simulation_backup::load() {
   if (!fs::exists(result_directory_)) {
     throw std::runtime_error("Failed to load simulation backup! "
       "No such directory in " + dir_name);
   }
 
-  std::string timestep = get_last_timestep();
+  std::string timestep = get_last_timestep_directory();
   load_particles(timestep);
   load_fields(timestep);
+}
 
-  int from = timestep.find_last_of('/') + 10;  // "timestep_".size() = 10;
+size_t Simulation_backup::get_last_timestep() const {
+  std::string timestep = get_last_timestep_directory();
+  int from = timestep.find_last_of("/") + 10;  // "timestep_".size() = 10;
   return std::stoul(timestep.substr(from));
 }
 
-std::string Simulation_backup::get_last_timestep() {
+std::string Simulation_backup::get_last_timestep_directory() const {
   for (const auto& directory : fs::directory_iterator(result_directory_)) {
     auto directory_str = directory.path().string();
 
@@ -207,5 +237,39 @@ void Simulation_backup::load_fields(const std::string& timestep) {
       comp_y.read(reinterpret_cast<char*>(&field.y(ny, nx)), sizeof(double));
       comp_z.read(reinterpret_cast<char*>(&field.z(ny, nx)), sizeof(double));
     }}
+  }
+}
+
+/* static */ void Simulation_backup::restore_time_diagnostics() {
+  bool should_try = false;
+
+  for (const auto& [_1, sort_description] : config::species_description) {
+  for (const auto& [diag, _2] : sort_description) {
+    if (diag == "energy")
+      should_try = true;
+  }}
+
+  for (const auto& [name, _] : config::fields_diagnostics) {
+    if (name == "energy" || name == "field_at_point")
+      should_try = true;
+  }
+
+  if (!should_try)
+    return;
+
+  const std::string diagnostics = dir_name + "/simulation_backup/time_diagnostics/";
+
+  for (const auto& entry : fs::recursive_directory_iterator(diagnostics)) {
+    if (fs::is_directory(entry))
+      continue;
+
+    auto entry_str = entry.path().string();
+    auto begin = diagnostics.size();
+    auto path = entry_str.substr(begin);
+
+    if (path.find("/") != std::string::npos) {
+      fs::create_directories(dir_name + "/" + path.substr(0, path.find_last_of("/")));
+    }
+    fs::copy(entry, dir_name + "/" + path, fs::copy_options::overwrite_existing);
   }
 }

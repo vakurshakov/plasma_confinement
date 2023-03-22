@@ -26,8 +26,15 @@ fields_energy::fields_energy(
     : energy_parameters_saver(result_directory),
       electric_(electric),
       magnetic_(magnetic) {
+#if !START_FROM_BACKUP
   file_for_results_ = std::make_unique<BIN_File>(
     result_directory_, "fields_energy");
+
+#else
+  file_for_results_ = std::make_unique<BIN_File>(
+    BIN_File::from_backup(result_directory_, "fields_energy"));
+
+#endif
 }
 
 void fields_energy::diagnose(int t) {
@@ -90,8 +97,15 @@ particles_energy::particles_energy(
     const Particles& particles)
     : energy_parameters_saver(result_directory),
       particles_(particles) {
+#if !START_FROM_BACKUP
   file_for_results_ = std::make_unique<BIN_File>(
     result_directory_, sort_name + "_energy");
+
+#else
+  file_for_results_ = std::make_unique<BIN_File>(
+    BIN_File::from_backup(result_directory_, sort_name + "_energy"));
+
+#endif
 }
 
 void particles_energy::diagnose(int t) {

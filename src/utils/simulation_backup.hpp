@@ -14,7 +14,9 @@ class Simulation_backup : public Diagnostic {
     std::unordered_map<std::string, vector3_field&> each_vector_field);
 
   void save(int t);
-  size_t load();
+  void load();
+  size_t get_last_timestep() const;
+  static void restore_time_diagnostics();
 
  private:
   int backup_timestep_;
@@ -26,8 +28,9 @@ class Simulation_backup : public Diagnostic {
 
   void save_particles(int t) const;
   void save_fields(int t) const;
+  void save_time_diagnostics() const;
 
-  std::string get_last_timestep();
+  std::string get_last_timestep_directory() const;
   void load_particles(const std::string& timestep);
   size_t get_number_of_particles(const std::string& filename);
 
