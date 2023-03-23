@@ -34,8 +34,10 @@ void Esirkepov_density_decomposition::decompose_x(
 
   for (int x = -charge_cloud_, y = -charge_cloud_; y <= +charge_cloud_; ++y) {
     node_y = ne_y + y;
+
+    // Give up trying to put (node_x + 0.5) here
     temp_J.x(y,x) = - q * n/Np_ * 0.5 * dx / dt *
-      (shape_at_(r.x() - (node_x + 0.5) * dx, dx) - shape_at_(r0.x() - (node_x + 0.5) * dx, dx)) *
+      (shape_at_(r.x() - node_x * dx, dx) - shape_at_(r0.x() - node_x * dx, dx)) *
       (shape_at_(r.y() - node_y * dy, dy) + shape_at_(r0.y() - node_y * dy, dy));
 
     #pragma omp atomic
@@ -48,9 +50,10 @@ void Esirkepov_density_decomposition::decompose_x(
   for (int x = -charge_cloud_ + 1; x <= +charge_cloud_; ++x) {
     node_x = ne_x + x;
 
-    // Here is only "=" sign (not "+="!).
+    // Here is only "=" sign (not "+=")
+    // Give up trying to put (node_x + 0.5) here
     temp_J.x(y,x) = temp_J.x(y,x-1) - q * n/Np_ * 0.5 * dx / dt *
-      (shape_at_(r.x() - (node_x + 0.5) * dx, dx) - shape_at_(r0.x() - (node_x + 0.5) * dx, dx)) *
+      (shape_at_(r.x() - node_x * dx, dx) - shape_at_(r0.x() - node_x * dx, dx)) *
       (shape_at_(r.y() - node_y * dy, dy) + shape_at_(r0.y() - node_y * dy, dy));
 
     #pragma omp atomic
@@ -70,9 +73,10 @@ void Esirkepov_density_decomposition::decompose_y(
   for (int y = -charge_cloud_, x = -charge_cloud_; x <= +charge_cloud_; ++x) {
     node_x = ne_x + x;
 
+    // Give up trying to put (node_y + 0.5) here
     temp_J.y(y,x) = - q * n/Np_ * 0.5 * dy / dt *
       (shape_at_(r.x() - node_x * dx, dx) + shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - (node_y + 0.5) * dy, dy) - shape_at_(r0.y() - (node_y + 0.5) * dy, dy));
+      (shape_at_(r.y() - node_y * dy, dy) - shape_at_(r0.y() - node_y * dy, dy));
 
     #pragma omp atomic
     J_.y(node_y, node_x) += temp_J.y(y,x);
@@ -84,10 +88,11 @@ void Esirkepov_density_decomposition::decompose_y(
   for (int x = -charge_cloud_; x <= +charge_cloud_; ++x) {
     node_x = ne_x + x;
 
-    // Here is only "=" sign (not "+="!).
+    // Here is only "=" sign (not "+=")
+    // Give up trying to put (node_y + 0.5) here
     temp_J.y(y,x) = temp_J.y(y-1,x) - q * n/Np_ * 0.5 * dy / dt *
       (shape_at_(r.x() - node_x * dx, dx) + shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - (node_y + 0.5) * dy, dy) - shape_at_(r0.y() - (node_y + 0.5) * dy, dy));
+      (shape_at_(r.y() - node_y * dy, dy) - shape_at_(r0.y() - node_y * dy, dy));
 
     #pragma omp atomic
     J_.y(node_y, node_x) += temp_J.y(y,x);
