@@ -90,7 +90,11 @@ for table, name in zip([Jy, Bz, n, Gx, Pxx], ['n', 'Jy', 'Bz', 'Gx', 'Pxx']):
 
 
 # %%
-fig = plt.figure(figsize=(12,10))
+fig = plt.figure(figsize=(12 * 0.7, 10 * 0.7))
+
+plt.rcParams.update({
+    "text.usetex": True,
+})
 
 plt.rc('axes', labelsize=14)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=12)   # fontsize of the tick labels
@@ -98,29 +102,33 @@ plt.rc('ytick', labelsize=12)   # fontsize of the tick labels
 plt.rc('legend', fontsize=12)   # legend fontsize
 
 Bz = load(f'../Bz_{postfix}.npy', allow_pickle=True).item()
-plt.plot(np.array(list(Bz.keys())) / sqrt(mi_me), np.array(list(Bz.values())) / sqrt(2 * Ti / mec2), label='$B_z\,(x)\,/\,B_v$')
+plt.plot(np.array(list(Bz.keys())) / sqrt(mi_me), np.array(list(Bz.values())) / sqrt(2 * Ti / mec2), label='$B(x)\,/\,B_v$')
 # plt.fill_between(np.array(list(Bz.keys())) / sqrt(mi_me), 0, np.array(list(Bz.values())) / sqrt(4 * pi * mi_me * v_th * v_th), alpha = 0.4)
 
 Jy = load(f'../Jy_{postfix}.npy', allow_pickle=True).item()
-plt.plot(np.array(list(Jy.keys())) / sqrt(mi_me), -np.array(list(Jy.values())) / v_th, label='$- J_y\,(x)\,/\,e n_0 v_{th}$')
+plt.plot(np.array(list(Jy.keys())) / sqrt(mi_me), -np.array(list(Jy.values())) / v_th, label='$- J_y(x)\,/\,e n_0 v_{_T}$')
 # plt.fill_between(np.array(list(Jy.keys())) / sqrt(mi_me), 0, -np.array(list(Jy.values())) / v_th, alpha = 0.4)
 
 n = load(f'../n_{postfix}.npy', allow_pickle=True).item()
-plt.plot(np.array(list(n.keys())) / sqrt(mi_me), n.values(), label='$n\,(x)\,/\,n_0$')
+plt.plot(np.array(list(n.keys())) / sqrt(mi_me), n.values(), label='$n(x)\,/\,n_0$')
 # plt.fill_between(np.array(list(n.keys())) / sqrt(mi_me), 0, np.array(list(n.values())), alpha = 0.4)
 
-P = load(f'../P_{postfix}.npy', allow_pickle=True).item()
-plt.plot(np.array(list(P.keys())) / sqrt(mi_me), np.array(list(P.values())) / (Ti / mec2), label='$\\Pi_xx\,(x)\,/\,T_i$')
-# plt.fill_between(np.array(list(n.keys())) / sqrt(mi_me), 0, np.array(list(n.values())), alpha = 0.4)
+# P = load(f'../P_{postfix}.npy', allow_pickle=True).item()
+# plt.plot(np.array(list(P.keys())) / sqrt(mi_me), np.array(list(P.values())) / (Ti / mec2), label='$\\Pi_xx\,(x)\,/\,T_i$')
+# # plt.fill_between(np.array(list(n.keys())) / sqrt(mi_me), 0, np.array(list(n.values())), alpha = 0.4)
 
-plt.xlabel('$\\tilde{x}, c\,/\,\\omega_{pi}$')
+plt.xlabel('$x,~c / \\omega_{pi}$', size=23)
+plt.xticks(size=20)
+plt.yticks(size=20)
 plt.xlim((0, 10))
 plt.grid()
 
-plt.legend()
+plt.tight_layout()
+plt.legend(fontsize=23)
 plt.show()
 
 fig.savefig('distributions.png', dpi=200)
+fig.savefig('distributions.pdf', dpi=200)
 
 
 #%%
