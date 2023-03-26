@@ -126,6 +126,9 @@ void Simulation_backup::save_time_diagnostics() const {
     auto entry_str = entry.path().string();
 
     if (entry_str.find(result_directory_) != std::string::npos ||
+        entry_str.find(".log") != std::string::npos ||
+        entry_str.find(".png") != std::string::npos ||
+        entry_str.find(".pdf") != std::string::npos ||
         entry_str.find(".py") != std::string::npos ||
         entry_str.find(".sh") != std::string::npos) {
       continue;
