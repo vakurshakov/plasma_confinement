@@ -28,7 +28,6 @@ void Open_boundaries_processor::left_right_bounds() {
   // * . . *
   // vy
 
-#if !BEAM_INJECTION_SETUP
   #pragma omp parallel for num_threads(NUM_THREADS)
   for (int y = 0; y < fields_E.size_y(); ++y) {
     for (int x = 0; x < layer.width; ++x) {
@@ -37,7 +36,11 @@ void Open_boundaries_processor::left_right_bounds() {
 
       fields_E.x(y, x) *= coeff;
       fields_E.y(y, x) *= coeff;
+#if !BEAM_INJECTION_SETUP
       fields_B.z(y, x) *= coeff;
+#else
+      fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
+#endif
 
 #if _2D3V
       fields_E.z(y, x) *= coeff;
@@ -59,7 +62,6 @@ void Open_boundaries_processor::left_right_bounds() {
 #endif
     }
   }
-#endif
 }
 
 void Open_boundaries_processor::top_bottom_bounds() {

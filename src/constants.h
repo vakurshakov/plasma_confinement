@@ -77,24 +77,18 @@ inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 
 inline const std::string postfix = "0.01dx_16.0mi_me_10.0Ti.bin";
 
-#if !BEAM_INJECTION_SETUP
 inline const std::string boundaries = "cx_py";
 
 inline const int damping_layer_width = 100;
-inline const double damping_factor = 0.99;
+inline const double damping_factor = 0.8;
 
+#if !BEAM_INJECTION_SETUP
 inline const double density_limit = 0.0001;
 
 inline const double T_electrons = 1e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 #else
-inline const std::string boundaries = "rx_py";
-
-// Here layer_width is treated as death zone for particles
-inline const int damping_layer_width = 1;
-inline const double damping_factor = 0.0;
-
 inline const int INJECTION_START = 0;
 inline const int INJECTION_TIME = 40'000;
 
