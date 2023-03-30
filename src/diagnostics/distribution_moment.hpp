@@ -7,7 +7,6 @@
 struct Moment;
 struct Projector2D;
 
-/// @todo interpolated particle density
 class distribution_moment : public Diagnostic {
  public:
   distribution_moment(
@@ -66,13 +65,13 @@ struct diag_area {
     double dp_x, double dp_y)
     : min{min_x, min_y},
       max{max_x, max_y},
-      dp{dp_x,  dp_y} {}
+      dp{dp_x, dp_y} {}
 };
 
 /**
  * @brief Stores geometry: min and max value of a
- * projection, its step dp and two projectors
- * to an axes.
+ * projection, its step dp and two projectors to
+ * axes.
  * 
  * Projectors are selected depending on the name in the constructor.
  */

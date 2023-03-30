@@ -7,9 +7,11 @@
 #include "src/command/set_particles.hpp"
 #include "src/command/copy_coordinates.hpp"
 
+#include "src/solvers/simple_interpolation.hpp"
+#include "src/solvers/point_interpolation.hpp"
+#include "src/solvers/null_interpolation.hpp"
 #include "src/solvers/Boris_pusher.hpp"
 #include "src/solvers/Esirkepov_density_decomposition.hpp"
-#include "src/solvers/concrete_point_interpolation.hpp"
 
 using std::vector, std::string, std::function, std::make_unique, std::stod, std::stoi;
 
@@ -40,106 +42,76 @@ Particles_builder::get_description(const string& parameter) {
 }
 
 Parameters Particles_builder::build_parameters() {
-  size_t pos = string::npos;
-  string setting = sort_parameters_[0];
+  Parameters parameters;
+  parameters.n_  = stod(sort_parameters_[0]);
+  parameters.q_  = stod(sort_parameters_[1]);
+  parameters.m_  = stod(sort_parameters_[2]);
+  parameters.Np_ = stoi(sort_parameters_[3]);
+  parameters.Tx_ = stod(sort_parameters_[4]);
+  parameters.Ty_ = stod(sort_parameters_[5]);
+  parameters.Tz_ = stod(sort_parameters_[6]);
+  parameters.p0_ = stod(sort_parameters_[7]);
 
-  std::unique_ptr<Variadic_parameter> n;
-  if (pos = setting.find("local"); pos != string::npos) {
-    n = make_unique<Local_parameter>();
-  }
-  else if (pos = setting.find("global, "); pos != string::npos) {
-    pos += string("global, ").length();
-    int end = setting.length();
-
-    double n0 = stod(setting.substr(pos, end - pos));
-    n = make_unique<Global_parameter>(n0);
-  }
-
-  pos = string::npos;
-  setting = sort_parameters_[1];
-
-  std::unique_ptr<Variadic_parameter> q;
-  if (pos = setting.find("local"); pos != string::npos) {
-    q = make_unique<Local_parameter>();
-  }
-  else if (pos = setting.find("global, "); pos != string::npos) {
-    pos += string("global, ").length();
-    int end = setting.length();
-
-    double q0 = stod(setting.substr(pos, end - pos));
-    q = make_unique<Global_parameter>(q0);
-  }
-
-  return Parameters(
-    stoi(sort_parameters_[3]),
-    stod(sort_parameters_[2]),
-    std::move(n), std::move(q),
-    stod(sort_parameters_[7]),
-    stod(sort_parameters_[4]),
-    stod(sort_parameters_[5]),
-    stod(sort_parameters_[6]));
+  parameters.sort_name_ = get_sort_name();
+  return parameters;
 }
 
 std::unique_ptr<Pusher>
 Particles_builder::build_pusher() {
-  const auto& setting = sort_integration_steps_[0];
+  const string& setting = sort_integration_steps_[0];
 
-  if (setting.find("Boris_pusher:") == string::npos)
+  if (setting.find("Boris_pusher") == string::npos)
     throw std::runtime_error("Initialization error: No matching Particle pusher");
-
-  if ( setting.find("+Push_particle") == string::npos )
-    throw std::runtime_error("Initialization error: Known pusher not command");
 
   return make_unique<Boris_pusher>();
 }
 
 std::unique_ptr<Interpolation>
 Particles_builder::build_interpolation(const Parameters& parameters) {
-  // может возникнуть сложность с одновременным использованием
-  // двух интерполяций, нужно будет это поправить.
-
   size_t pos = string::npos;
   const string& setting = sort_integration_steps_[1];
 
   std::unique_ptr<Interpolation> interpolation_up;
-  if ((pos = setting.find("Boris_pusher:")) != string::npos) {
-    if ( setting.find("+Interpolation", pos) == string::npos)
-      throw std::runtime_error("Initialization error: Known pusher not command");
-
-    interpolation_up = make_unique<Boris_interpolation>(parameters, fields_.E(), fields_.B());
+  if ((pos = setting.find("Simple_interpolation")) != string::npos) {
+    interpolation_up = make_unique<Simple_interpolation>(parameters, fields_.E(), fields_.B());
   }
-  else if ((pos = setting.find("Concrete_point_interpolation")) != string::npos ) {
-    if ((pos = setting.find("Homogenius_field", pos)) == string::npos)
+  else if ((pos = setting.find("Point_interpolation, ")) != string::npos) {
+    if ((pos = setting.find("Const_field: ", pos)) == string::npos)
       throw std::runtime_error("\n\t\t\t\twhat():  Known interpolation not adder");
 
-    pos = setting.find("E0=", pos);
-    pos += 3;
+    vector3 E0, B0;
 
-    int divider_1 = setting.find(',', pos);
-    int divider_2 = setting.find(',', divider_1+1);
-    int end     = setting.find(')', divider_2+1);
+    pos = setting.find("E0 = ", pos);
+    if (pos != string::npos) {
+      pos += 5;
 
-    double E0x = stod(setting.substr(pos+1, divider_1-(pos+1)));
-    double E0y = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
-    double E0z = stod(setting.substr(divider_2+1, end-(divider_2+1)));
+      int divider_1 = setting.find(',', pos);
+      int divider_2 = setting.find(',', divider_1+1);
+      int end     = setting.find('}', divider_2+1);
 
-    vector3 E0 = {E0x, E0y, E0z};
+      E0.x() = stod(setting.substr(pos+1, divider_1-(pos+1)));
+      E0.y() = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
+      E0.z() = stod(setting.substr(divider_2+1, end-(divider_2+1)));
+    }
 
-    pos = setting.find("B0=", pos);
-    pos += 3;
+    pos = setting.find("B0 = ", pos);
+    if (pos != string::npos) {
+      pos += 5;
 
-    divider_1 = setting.find(',', pos);
-    divider_2 = setting.find(',', divider_1+1);
-    end     = setting.find(')', divider_2+1);
+      int divider_1 = setting.find(',', pos);
+      int divider_2 = setting.find(',', divider_1+1);
+      int end     = setting.find('}', divider_2+1);
 
-    double B0x = stod(setting.substr(pos+1, divider_1-(pos+1)));
-    double B0y = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
-    double B0z = stod(setting.substr(divider_2+1, end-(divider_2+1)));
+      B0.x() = stod(setting.substr(pos+1, divider_1-(pos+1)));
+      B0.y() = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
+      B0.z() = stod(setting.substr(divider_2+1, end-(divider_2+1)));
+    }
 
-    vector3 B0 = {B0x, B0y, B0z};
-
-    std::unique_ptr<Local_field_adder> adder = make_unique<Homogenius_field_adder>(E0, B0);
-    interpolation_up = make_unique<Concrete_point_interpolation>(std::move(adder));
+    auto adder = make_unique<Const_field_adder>(E0, B0);
+    interpolation_up = make_unique<Point_interpolation>(std::move(adder));
+  }
+  else if ((pos = setting.find("Null_interpolation")) != string::npos ) {
+    interpolation_up = make_unique<Null_interpolation>();
   }
   else
     throw std::runtime_error("Initialization error: No matching interpolation");
@@ -151,7 +123,7 @@ std::unique_ptr<Decomposition>
 Particles_builder::build_decomposition(const Parameters& parameters) {
   const std::string& setting = sort_integration_steps_[2];
 
-  if ( setting.find("Esirkepov_density_decomposition") == string::npos )
+  if (setting.find("Esirkepov_density_decomposition") == string::npos)
     throw std::runtime_error("Initialization error: No matching density decomposition");
 
   return make_unique<Esirkepov_density_decomposition>(parameters, fields_.J());

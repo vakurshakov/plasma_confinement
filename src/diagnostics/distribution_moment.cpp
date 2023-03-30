@@ -4,13 +4,13 @@
 namespace fs = std::filesystem;
 
 distribution_moment::distribution_moment(
-  std::string result_directory,
-  const Particles& particles,
-  std::unique_ptr<Moment> moment,
-  std::unique_ptr<Projector2D> projector)
-  : Diagnostic(result_directory + "/" +
-    moment->name + "_of_" + projector->axes_names),
-    particles_(particles) {
+    std::string result_directory,
+    const Particles& particles,
+    std::unique_ptr<Moment> moment,
+    std::unique_ptr<Projector2D> projector)
+    : Diagnostic(result_directory + "/" +
+      moment->name + "_of_" + projector->axes_names),
+      particles_(particles) {
   moment_ = std::move(moment);
   projector_ = std::move(projector);
 
@@ -62,7 +62,7 @@ void distribution_moment::save_parameters() const {
 
 void distribution_moment::diagnose(int t) {
   PROFILE_FUNCTION();
-  
+
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
@@ -79,7 +79,9 @@ void distribution_moment::diagnose(int t) {
 }
 
 void distribution_moment::collect() {
-  int Np = particles_.get_parameters().Np();
+  const int Np = particles_.get_parameters().Np();
+  const int width = particles_.get_parameters().charge_cloud();
+  const auto& shape = particles_.get_parameters().form_factor();
 
   #pragma omp parallel for
   for (const auto& particle : particles_.get_particles()) {
@@ -90,13 +92,18 @@ void distribution_moment::collect() {
     int npx = int(floor(pr_x / projector_->area.dp[X]));
     int npy = int(floor(pr_y / projector_->area.dp[Y]));
 
-    if ((min_[X] <= npx && npx < max_[X]) &&
-        (min_[Y] <= npy && npy < max_[Y])) {
-      #pragma omp atomic
-      data_[(npy - min_[Y]) * (max_[X] - min_[X]) +
-        (npx - min_[X])] += moment_->get(particle) / Np;
-    }
-    else continue;
+    for (int i = npx - width; i <= npx + width; ++i) {
+    for (int j = npy - width; j <= npy + width; ++j) {
+      if ((min_[X] <= i && i < max_[X]) &&
+          (min_[Y] <= j && j < max_[Y])) {
+        #pragma omp atomic
+        data_[(j - min_[Y]) * (max_[X] - min_[X]) + (i - min_[X])] +=
+          moment_->get(particle) * particle.n() / Np *
+          shape(pr_x - i * dx, dx) *
+          shape(pr_y - j * dy, dy);
+      }
+      else continue;
+    }}
   }
 }
 
@@ -110,35 +117,47 @@ void distribution_moment::reset() {
 
 
 inline double get_zeroth_moment(const Particle& particle) {
-  return particle.n();
+  return 1.0;
 }
 
-inline double get_first_Vx_moment(const Particle& particle) {
+inline double get_Vx_moment(const Particle& particle) {
   return particle.velocity().x();
 }
 
-inline double get_first_Vy_moment(const Particle& particle) {
+inline double get_Vy_moment(const Particle& particle) {
   return particle.velocity().y();
 }
 
-inline double get_first_Vr_moment(const Particle& particle) {
+inline double get_mVxVx_moment(const Particle& particle) {
+  return particle.m() * get_Vx_moment(particle) * get_Vx_moment(particle);
+}
+
+inline double get_mVxVy_moment(const Particle& particle) {
+  return particle.m() * get_Vx_moment(particle) * get_Vy_moment(particle);
+}
+
+inline double get_mVyVy_moment(const Particle& particle) {
+  return particle.m() * get_Vy_moment(particle) * get_Vy_moment(particle);
+}
+
+inline double get_Vr_moment(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
 
-  // Частицы, близкие к центру не учитываются
+  // Particles close to r=0 are not taken into account
   if (!std::isfinite(1. / r)) return 0;
 
   return particle.velocity().x() * (+x / r) +
     particle.velocity().y() * (y / r);
 }
 
-inline double get_first_Vphi_moment(const Particle& particle) {
+inline double get_Vphi_moment(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
 
-  // Частицы, близкие к центру не учитываются
+  // Particles close to r=0 are not taken into account
   if (!std::isfinite(1. / r)) return 0;
 
   return particle.velocity().x() * (-y / r) +
@@ -149,17 +168,26 @@ Moment::Moment(std::string name) : name(name) {
   if (name == "zeroth_moment") {
     get = get_zeroth_moment;
   }
-  else if (name == "first_Vx_moment") {
-    get = get_first_Vx_moment;
+  else if (name == "Vx_moment") {
+    get = get_Vx_moment;
   }
-  else if (name == "first_Vy_moment") {
-    get = get_first_Vy_moment;
+  else if (name == "Vy_moment") {
+    get = get_Vy_moment;
   }
-  else if (name == "first_Vr_moment") {
-    get = get_first_Vr_moment;
+  else if (name == "Vr_moment") {
+    get = get_Vr_moment;
   }
-  else if (name == "first_Vphi_moment") {
-    get = get_first_Vphi_moment;
+  else if (name == "Vphi_moment") {
+    get = get_Vphi_moment;
+  }
+  else if (name == "mVxVx_moment") {
+    get = get_mVxVx_moment;
+  }
+  else if (name == "mVxVy_moment") {
+    get = get_mVxVy_moment;
+  }
+  else if (name == "mVyVy_moment") {
+    get = get_mVyVy_moment;
   }
 }
 

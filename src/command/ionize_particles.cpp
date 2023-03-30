@@ -1,151 +1,105 @@
 #include "ionize_particles.hpp"
 
-#include "../particles/particle/particle.hpp"
-#include "../managers/random_number_generator.hpp"
-#include "../constants.h"
+#if BEAM_INJECTION_SETUP && GLOBAL_DENSITY
 
+#include "src/utils/random_number_generator.hpp"
 
-void set_point_on_annulus(double* x, double* y)
-{
-	// To close the interval of the real distribution we use std::nextafter(double from, double to)
-	static auto distribution = std::uniform_real_distribution(0., std::nextafter(1., 2.));
-	
-	double ra = r_larm - dr; 
-	double rb = r_larm + dr;
-	double r = sqrt(ra * ra + (rb * rb - ra * ra) *
-		distribution(Random_generator::get()));
+Ionize_particles::Ionize_particles(
+  Particles* const ionized, Particles* const ejected,
+  const std::vector<size_t>& per_step_particles_num,
+  std::function<void(double* x, double* y)>&& set_point_of_birth,
+  std::function<double(double x, double y)>&& get_probability,
+  const impulse_loader& load_impulse)
+  :	ionized(ionized), ejected(ejected),
+    per_step_particles_num(per_step_particles_num),
+    set_point_of_birth(std::move(set_point_of_birth)),
+    get_probability(std::move(get_probability)),
+    load_impulse(load_impulse),
+#if !START_FROM_BACKUP
+    ionized_energy(BIN_File(dir_name, "ionized_energy")),
+    ejected_energy(BIN_File(dir_name, "ejected_energy")) {}
 
-	double phi = 2 * M_PI * distribution(Random_generator::get());
+#else  // here offset not needed!
+    ionized_energy(BIN_File::from_backup(dir_name, "ionized_energy", 0)),
+    ejected_energy(BIN_File::from_backup(dir_name, "ejected_energy", 0)) {}
 
-	*x = 0.5 * SIZE_X * dx + r * cos(phi);
-	*y = 0.5 * SIZE_Y * dy + r * sin(phi);
-}
-
-void set_point_on_circle_segment(double* x, double* y)
-{
-	static const double r_plasma = (r_larm + dr) * r_prop;
-	static const double center_x = 0.5 * SIZE_X * dx;
-	static const double center_y = 0.5 * SIZE_Y * dy;
-	static const double plasmas_left_x = center_x - r_plasma;
-	static const double plasmas_height = sqrt(r_plasma * r_plasma - (r_plasma - dr) * (r_plasma - dr));
-
-	// To close the interval of the real distribution we use std::nextafter(double from, double to)
-	static auto x_distribution = std::uniform_real_distribution(plasmas_left_x, plasmas_left_x + dr);
-	static auto y_distribution = std::uniform_real_distribution(center_y - plasmas_height, center_y + plasmas_height);
-
-	double r;
-
-	do
-	{
-		*x = x_distribution(Random_generator::get());
-		*y = y_distribution(Random_generator::get());
-
-		double centered_x = *x - center_x;
-		double centered_y = *y - center_y;
-		
-		r  = sqrt(centered_x * centered_x + centered_y * centered_y);
-	}
-	while(r > r_plasma);
-}
-
-
-double uniform_probability(double _1, double _2)
-{
-	return 1.;
-}
-
-double get_cosine_probability(double x, double y)
-{  
-	static const double r_plasma = (r_larm + dr) * r_prop;
-	static const double center_y = 0.5 * SIZE_Y * dy;
-
-	static const double height = sqrt(r_plasma * r_plasma - (r_plasma - dr) * (r_plasma - dr));
-
-	return 0.5 * (1. + cos(M_PI * (y - center_y) / height)) / (height + 1.);
-}
-
-#if density_beam_profile_is_set
-double density_beam_profile(double x, double y)
-{
-	x -= 0.5 * SIZE_X * dx;
-	y -= 0.5 * SIZE_Y * dy;
-
-	const double r = sqrt(x * x + y * y) - r_larm;
-	static const double sigma2 = dr * dr / 6.25; 
-
-	double ans = 0.;
-
-	if (r * r <  dr * dr)
-		ans = ni * exp(- 0.5 * r * r / sigma2) / sqrt(2. * M_PI * sigma2);
-
-	return ans;
-}
 #endif
 
+void Ionize_particles::execute(int t) {
+  PROFILE_FUNCTION();
 
-std::vector<size_t> set_time_distribution(int t_inj, size_t total_number_of_particles)
-{
-	std::vector<size_t> array_of_particles_to_load(t_inj);
-	std::uniform_int_distribution distribution(0, t_inj-1);
+  if (t < config::INJECTION_START)
+    return;
 
-	for (size_t n = 0; n < total_number_of_particles; ++n) {
-		array_of_particles_to_load[ distribution(Random_generator::get()) ] += 1;
-	}
+  LOG_INFO("Injecting particles, {} particles will be loaded into {} and {}",
+    per_step_particles_num[t-1],  // timestep count starts from 1;
+    ionized->get_parameters().get_name(),
+    ejected->get_parameters().get_name());
 
-	return array_of_particles_to_load;
+  const double mi =   ionized->get_parameters().m();
+  const double Ti_x = ionized->get_parameters().Tx();
+  const double Ti_y = ionized->get_parameters().Ty();
+  const double Ti_z = ionized->get_parameters().Tz();
+  const double pi_0 = ionized->get_parameters().p0();
+
+  const double me =   ejected->get_parameters().m();
+  const double Te_x = ejected->get_parameters().Tx();
+  const double Te_y = ejected->get_parameters().Ty();
+  const double Te_z = ejected->get_parameters().Tz();
+  const double pe_0 = ejected->get_parameters().p0();
+
+  double Wi = 0;
+  double We = 0;
+
+  for (size_t i = 0u; i < per_step_particles_num[t-1]; ++i) {
+    double x, y;
+
+    do {
+      set_point_of_birth(&x, &y);
+    }
+    while (random_01() > get_probability(x, y));
+
+    double pi_x, pi_y, pi_z;
+    double pe_x, pe_y, pe_z;
+    do {
+      load_impulse(x, y, mi, Ti_x, Ti_y, Ti_z, pi_0, &pi_x, &pi_y, &pi_z);
+      load_impulse(x, y, me, Te_x, Te_y, Te_z, pe_0, &pe_x, &pe_y, &pe_z);
+    }
+    while (std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
+           std::isinf(pe_x) || std::isinf(pe_y) || std::isinf(pe_z));
+
+    Wi += (sqrt(mi * mi + (pi_x * pi_x + pi_y * pi_y + pi_z * pi_z)) - mi) * dx * dy / config::Npi;
+    We += (sqrt(me * me + (pe_x * pe_x + pe_y * pe_y + pe_z * pe_z)) - me) * dx * dy / config::Npi;
+
+    ionized->add_particle(Point({x, y}, {pi_x, pi_y, pi_z}));
+    ejected->add_particle(Point({x, y}, {pe_x, pe_y, pe_z}));
+  }
+
+  ionized_energy.write(Wi);
+  ejected_energy.write(We);
+
+  LOG_INFO("Ionized {} energy / step = {}", ionized->get_parameters().get_name(), Wi);
+  LOG_INFO("Ejected {} energy / step = {}", ejected->get_parameters().get_name(), We);
+
+  if (t % diagnose_time_step == 0) {
+    ionized_energy.flush();
+    ejected_energy.flush();
+  }
 }
 
 
-void Ionize_particles::execute(int t) const {
-    const double mi = ionized->get_parameters().m();
-    const double Ti_x = ionized->get_parameters().Tx();
-    const double Ti_y = ionized->get_parameters().Ty();
-    const double Ti_z = ionized->get_parameters().Tz();
-    const double pi_0 = ionized->get_parameters().p0();
- 
-	const double ml = lost->get_parameters().m();
-    const double Tl_x = lost->get_parameters().Tx();
-    const double Tl_y = lost->get_parameters().Ty();
-    const double Tl_z = lost->get_parameters().Tz();
-    const double pl_0 = lost->get_parameters().p0();
-
-	// To close the interval of the real distribution we use std::nextafter(double from, double to)
-	auto distribution = std::uniform_real_distribution(0., std::nextafter(1., 2.));
-
-	int err = 0;
-	for (size_t i = 0; i < amount_of_particles_to_load_per_step[t] + err; ++i) {
-		
-		double x, y;
-		set_point_of_birth(&x, &y);
-		
-		if ( distribution(Random_generator::get()) > get_probability(x, y) ) {
-			++err;
-			continue;
-		}
-		else {
-
-			double pi_x, pi_y, pi_z;
-			double pl_x, pl_y, pl_z;
-			do 
-			{
-				load_impulse(x, y, mi, Ti_x, Ti_y, Ti_z, pi_0, &pi_x, &pi_y, &pi_z);
-				load_impulse(x, y, ml, Tl_x, Tl_y, Tl_z, pl_0, &pl_x, &pl_y, &pl_z);
-			} while (
-				std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
-				std::isinf(pl_x) || std::isinf(pl_y) || std::isinf(pl_z));
-
-
-			ionized->add_particle(Point({x, y}, {pi_x, pi_y, pi_z})
-			#if density_beam_profile_is_set
-				, density_beam_profile(x, y)
-			#endif
-			);
-
-			lost->add_particle(Point({x, y}, {pl_x, pl_y, pl_z})
-			#if density_beam_profile_is_set
-				, density_beam_profile(x, y)
-			#endif
-			);
-		}
-	}
+double uniform_probability(double /* x_coord */, double /* y_coord */) {
+  return 1.;
 }
+
+std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_num) {
+  std::vector<size_t> array_of_particles_to_load(t_inj);
+
+  for (size_t t = 0u; t < t_inj; ++t) {
+    array_of_particles_to_load[t] = config::PER_STEP_PARTICLES;
+  }
+
+  return array_of_particles_to_load;
+}
+
+#endif

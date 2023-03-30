@@ -9,7 +9,8 @@ x0_distribution_function::x0_distribution_function(
   int x0, diag_area area)
   : distribution_moment(
       result_directory, particles, x0,
-      std::make_unique<Projector2D>("VxVy", area)),
+      std::make_unique<Projector2D>("VxVy", area)
+    ),
     x0_(x0) {}
 
 void x0_distribution_function::save_parameters() const {
@@ -38,7 +39,7 @@ void x0_distribution_function::collect() {
 
   #pragma omp parallel for
   for (const auto& particle : particles_.get_particles()) {
-    if (fabs(particle.point.x() / dx - x0_) > 0.25)
+    if (fabs(particle.point.x() / dx - x0_) > 0.5)
       continue;
 
     double pr_x = projector_->get_x(particle);

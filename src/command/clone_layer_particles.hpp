@@ -12,13 +12,13 @@ class Clone_layer_particles : public Command {
   Clone_layer_particles(
     Particles* const particles_inout,
     Domain_geometry geom);
-  
+
   Clone_layer_particles(
     Particles* const particles_in,
     Particles* const particles_out,
     Domain_geometry geom);
 
-  void execute(int /* timestep */) const override;
+  void execute(int /* timestep */) override;
 
  private:
   Particles* const particles_in_;
@@ -26,7 +26,7 @@ class Clone_layer_particles : public Command {
 
   Domain_geometry geom_;
 
-  inline bool particle_be_should_cloned(const Point&) const;
+  inline bool particle_should_be_cloned(const Point&) const;
   inline bool particle_on_the_left(double x, double width) const;
   inline bool particle_on_the_right(double x, double width) const;
 

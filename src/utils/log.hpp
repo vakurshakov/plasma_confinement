@@ -1,12 +1,13 @@
 #ifndef SRC_UTILS_LOG_HPP
 #define SRC_UTILS_LOG_HPP
 
+#include <string>
 #include <memory>
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 class Log {
  public:
-  static void Init(const char * filename);
+  static void Init(const std::string& filename);
 
   inline static std::shared_ptr<spdlog::logger>& GetLogger() { return logger_; }
 
@@ -22,6 +23,7 @@ class Log {
 #define LOG_WARN(...)      ::Log::GetLogger()->warn(__VA_ARGS__)
 #define LOG_ERROR(...)     ::Log::GetLogger()->error(__VA_ARGS__)
 #define LOG_FATAL(...)     ::Log::GetLogger()->critical(__VA_ARGS__)
+#define LOG_FLUSH()        ::Log::GetLogger()->flush()
 
 #else
 #define LOG_INIT(filename)

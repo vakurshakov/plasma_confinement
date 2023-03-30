@@ -15,11 +15,14 @@ class Particles {
 
   Particles(Particles_builder& builder);
 
-  const auto& get_name() const { return sort_name_; }
   const auto& get_particles() const { return particles_; }
   const auto& get_parameters() const { return parameters_; }
 
-  void add_particle(const Point& point, ...);
+#if GLOBAL_DENSITY
+  void add_particle(const Point& point);
+#else
+  void add_particle(const Point& point, double local_n);
+#endif
 
   void push();
 
@@ -33,6 +36,7 @@ class Particles {
   friend class Clone_layer_particles;
   friend class Plasma_boundary_processor;
   friend class Beam_boundary_processor;
+  friend class Simulation_backup;
 
  private:
   std::string sort_name_;

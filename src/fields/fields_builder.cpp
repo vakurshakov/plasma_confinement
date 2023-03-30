@@ -10,8 +10,8 @@ Fields_builder::build_field(std::string type) {
   else if (config::boundaries == "px_py") {
     field = std::make_unique<px_py_vector3_field>(SIZE_X, SIZE_Y);
   }
-  else if (config::boundaries == "rx_ry") {
-    field = std::make_unique<rx_ry_vector3_field>(type, SIZE_X, SIZE_Y);
+  else if (config::boundaries == "rx_py") {
+    field = std::make_unique<rx_py_vector3_field>(type, SIZE_X, SIZE_Y);
   }
   else if (config::boundaries == "cx_py") {
     field = std::make_unique<cx_py_vector3_field>(SIZE_X, SIZE_Y);

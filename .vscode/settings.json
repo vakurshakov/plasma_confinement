@@ -83,6 +83,7 @@
         "span": "cpp",
         "*.ipp": "cpp",
         "petsc*.h": "cpp",
+        "csetjmp": "cpp"
     },
     "cSpell.customDictionaries": {
         "custom-dictionary-workspace": {
@@ -91,5 +92,7 @@
             "addWords": true,
             "scope": "workspace"
         }
-    }
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
 }

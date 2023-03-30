@@ -25,7 +25,13 @@ class Set_particles : public Command {
     std::unique_ptr<Coordinate_generator> coordinate_generator,
     const impulse_loader& load_impulse);
 
-  void execute(int /* timestep */) const override;
+  Set_particles(
+    Particles* const particles,
+    std::size_t num_particles_to_load,
+    const Domain_geometry& geom,
+    const impulse_loader& load_impulse);
+
+  void execute(int /* timestep */) override;
 
  private:
   Particles* const particles_;
@@ -33,6 +39,7 @@ class Set_particles : public Command {
   std::size_t num_particles_to_load_;
 
   std::unique_ptr<Coordinate_generator> coordinate_generator_;
+  Domain_geometry geom_;
 
   impulse_loader load_impulse_;
 };

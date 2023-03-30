@@ -8,7 +8,6 @@
 Particles::Particles(Particles_builder& builder) {
   sort_name_ = builder.get_sort_name();
   parameters_ = builder.build_parameters();
-  parameters_.sort_name_ = sort_name_;
 
   push_ = builder.build_pusher();
   interpolation_ = builder.build_interpolation(this->parameters_);
@@ -48,7 +47,7 @@ void Particles::push() {
       decompose(decomposition_, *it, r0));
 
     ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
-      boundaries_processor_->add(it->point, r0));
+      boundaries_processor_->add(*it, r0));
   }
 }
   boundaries_processor_->remove();
@@ -56,24 +55,19 @@ void Particles::push() {
   LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
 }
 
-/**
- * @brief Adds a particle to the end of the array.
- *
- * @param point Coordinates and impulse of the particle.
- * @param ... Local parameters.
- */
-void Particles::add_particle(const Point& point, ...) {
-  va_list list;
-  va_start(list, point);
-
-  if (parameters_.n_type() == "local")
-    parameters_.set_n(static_cast<double>(va_arg(list, double)));
-
-  if (parameters_.q_type() == "local")
-    parameters_.set_q(static_cast<double>(va_arg(list, double)));
-
-  va_end(list);
-
+#if GLOBAL_DENSITY
+void Particles::add_particle(const Point& point) {
   #pragma omp critical
-  particles_.emplace_back(particles_.size(), point, parameters_);
+  particles_.emplace_back(point, parameters_);
 }
+
+#else
+void Particles::add_particle(const Point& point, double local_n) {
+  #pragma omp critical
+  {
+    Particle& new_particle = particles_.emplace_back(point, parameters_);
+    new_particle.n_ = local_n;
+  }
+}
+
+#endif

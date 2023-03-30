@@ -13,7 +13,7 @@ Diagnostics_builder::Diagnostics_builder(
     std::vector<Particles>& particles_species, Fields& fields)
     : fields_(fields) {
   for (auto& sort : particles_species) {
-    particles_species_.emplace(sort.get_name(), sort);
+    particles_species_.emplace(sort.get_parameters().get_name(), sort);
   }
 }
 
@@ -69,25 +69,40 @@ vector_of_diagnostics Diagnostics_builder::build() {
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "zeroth_moment", "VxVy", diag_description));
     }
-    else if (diag == "first_Vx_moment") {
-      LOG_INFO("Add first_Vx_moment diagnostic for {}", sort);
+    else if (diag == "Vx_moment") {
+      LOG_INFO("Add Vx_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
-        sort, "first_Vx_moment", "XY", diag_description));
+        sort, "Vx_moment", "XY", diag_description));
     }
-    else if (diag == "first_Vy_moment") {
-      LOG_INFO("Add first_Vy_moment diagnostic for {}", sort);
+    else if (diag == "Vy_moment") {
+      LOG_INFO("Add Vy_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
-        sort, "first_Vy_moment", "XY", diag_description));
+        sort, "Vy_moment", "XY", diag_description));
     }
-    else if (diag == "first_Vr_moment") {
-      LOG_INFO("Add first_Vr_moment diagnostic for {}", sort);
+    else if (diag == "Vr_moment") {
+      LOG_INFO("Add Vr_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
-        sort, "first_Vr_moment", "XY", diag_description));
+        sort, "Vr_moment", "XY", diag_description));
     }
-    else if (diag == "first_Vphi_moment") {
-      LOG_INFO("Add first_Vphi_moment diagnostic for {}", sort);
+    else if (diag == "Vphi_moment") {
+      LOG_INFO("Add Vphi_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
-        sort, "first_Vphi_moment", "XY", diag_description));
+        sort, "Vphi_moment", "XY", diag_description));
+    }
+    else if (diag == "mVxVx_moment") {
+      LOG_INFO("Add mVxVx_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVxVx_moment", "XY", diag_description));
+    }
+    else if (diag == "mVxVy_moment") {
+      LOG_INFO("Add mVxVy_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVxVy_moment", "XY", diag_description));
+    }
+    else if (diag == "mVyVy_moment") {
+      LOG_INFO("Add mVyVy_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVyVy_moment", "XY", diag_description));
     }
     else if (diag == "x0_distribution_function") {
       LOG_INFO("Add x0_distribution_function diagnostic for {}", sort);
@@ -128,7 +143,7 @@ Diagnostics_builder::get_component(const std::string& component) {
 
 BUILD_FIELD_DIAG(fields_energy) {
   return std::make_unique<fields_energy>(
-    dir_name + "/fields", fields_.E(), fields_.B());
+    dir_name + "/", fields_.E(), fields_.B());
 }
 
 BUILD_FIELD_DIAG(field_at_point) {
@@ -146,8 +161,8 @@ BUILD_FIELD_DIAG(field_at_point) {
   }
 
   return std::make_unique<field_at_point>(
-    dir_name + "/fields/field_at_point",
-    description[0] + description[1],
+    dir_name + "/" + description[0] + description[1]+ "/",
+    "point_(" + description[2] + "," + description[3] + ")",
     get_field(description[0]),
     get_component(description[1]),
     point);
@@ -170,7 +185,9 @@ BUILD_FIELD_DIAG(field_on_segment) {
   }
 
   return std::make_unique<field_on_segment>(
-    dir_name + "/fields/field_on_segment/" + description[0] + description[1],
+    dir_name + "/" + description[0] + description[1] + "/segment_(" +
+      description[2] + "," + description[3] + ")_(" +
+      description[4] + "," + description[5] + ")/",
     get_field(description[0]),
     get_component(description[1]),
     segment);
@@ -193,7 +210,7 @@ BUILD_FIELD_DIAG(whole_field) {
   }
 
   return std::make_unique<whole_field>(
-    dir_name + "/fields/whole_field/" + description[0] + description[1],
+    dir_name + "/" + description[0] + description[1] + "/whole_field/",
     get_field(description[0]),
     get_component(description[1]),
     diag_segment{
@@ -209,7 +226,7 @@ inline std::unique_ptr<Diagnostic>
 Diagnostics_builder::build_diag_particles_energy(
     const std::string& sort_name) {
   return std::make_unique<particles_energy>(
-    dir_name + "/" + sort_name, sort_name,
+    dir_name + "/", sort_name,
     particles_species_.at(sort_name));
 }
 

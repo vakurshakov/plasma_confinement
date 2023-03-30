@@ -4,7 +4,13 @@ bin/
 # Prerequisites & Compiled object files
 bin-int/
 
+# External dependencies
+external/
+
 log/
 results/
+__pycache__/
 *.bin
 *.npy
+*.png
+*.pdf

@@ -9,11 +9,11 @@ class Magnetic_field_half_step : public Command {
 public:
   Magnetic_field_half_step(Fields* fields)
     : fields_(fields) {};
-    
-  void execute(int /* timestep */) const override;
+
+  void execute(int /* timestep */) override;
 
 private:
-  Fields* const fields_;	
+  Fields* const fields_;
   double Bz0_;
 };
 

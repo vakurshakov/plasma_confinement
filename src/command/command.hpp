@@ -6,7 +6,7 @@
  * 1. To do presets before main calculation cycle;
  * 2. To do presets on each step of the calculation.
  * @todo alias Command_once
- * 
+ *
  * @param t Time from the main cycle.
  */
 class Command {
@@ -16,7 +16,7 @@ public:
   /**
    * @param t Outer time step, optional.
    */
-  virtual void execute(int t) const = 0;
+  virtual void execute(int t) = 0;
 
   /**
    * @brief Checks whether command needs to be
