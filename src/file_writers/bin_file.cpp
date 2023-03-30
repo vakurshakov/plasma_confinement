@@ -9,7 +9,8 @@ BIN_File::BIN_File(std::string directory_path, std::string file_name) {
     std::ios::out | std::ios::trunc | std::ios::binary);
 }
 
-/* static */ BIN_File BIN_File::from_backup(std::string directory_path, std::string file_name) {
+/* static */ BIN_File BIN_File::from_backup(
+    std::string directory_path, std::string file_name, int byte_offset) {
   fs::create_directories(directory_path);
 
   BIN_File result;
@@ -17,7 +18,7 @@ BIN_File::BIN_File(std::string directory_path, std::string file_name) {
   result.bin_file_.open(directory_path + "/" + file_name + ".bin",
     std::ios::in | std::ios::out | std::ios::binary);
 
-  result.bin_file_.seekp(-sizeof(float), std::ios::end);
+  result.bin_file_.seekp(-byte_offset, std::ios::end);
 
   return result;
 }

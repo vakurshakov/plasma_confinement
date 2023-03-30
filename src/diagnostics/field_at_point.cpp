@@ -16,7 +16,7 @@ field_at_point::field_at_point(
 
 #else
   file_for_results_ = std::make_unique<BIN_File>(
-    BIN_File::from_backup(result_directory_, file_name));
+    BIN_File::from_backup(result_directory_, file_name, sizeof(float)));
 
 #endif
 }

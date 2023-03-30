@@ -18,9 +18,11 @@ Ionize_particles::Ionize_particles(
 #if !START_FROM_BACKUP
     ionized_energy(BIN_File(dir_name, "ionized_energy")),
     ejected_energy(BIN_File(dir_name, "ejected_energy")) {}
-#else
-    ionized_energy(BIN_File::from_backup(dir_name, "ionized_energy")),
-    ejected_energy(BIN_File::from_backup(dir_name, "ejected_energy")) {}
+
+#else  // here offset not needed!
+    ionized_energy(BIN_File::from_backup(dir_name, "ionized_energy", 0)),
+    ejected_energy(BIN_File::from_backup(dir_name, "ejected_energy", 0)) {}
+
 #endif
 
 void Ionize_particles::execute(int t) {

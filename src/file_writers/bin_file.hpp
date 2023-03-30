@@ -9,9 +9,10 @@ class BIN_File : public IFile {
  public:
   BIN_File(std::string directory_path, std::string file_name);
 
-  /// @warning should be used only on "one-file" diagnostics
+  /// @param byte_offset The offset made from the last position after opening.
+  /// @warning Should not be used for non-single-file diagnostics.
   static BIN_File
-  from_backup(std::string directory_path, std::string file_name);
+  from_backup(std::string directory_path, std::string file_name, int byte_offset);
 
   void write(double data) override;
   void write_double(double data);

@@ -32,7 +32,7 @@ fields_energy::fields_energy(
 
 #else
   file_for_results_ = std::make_unique<BIN_File>(
-    BIN_File::from_backup(result_directory_, "fields_energy"));
+    BIN_File::from_backup(result_directory_, "fields_energy", sizeof(float)));
 
 #endif
 }
@@ -103,7 +103,7 @@ particles_energy::particles_energy(
 
 #else
   file_for_results_ = std::make_unique<BIN_File>(
-    BIN_File::from_backup(result_directory_, sort_name + "_energy"));
+    BIN_File::from_backup(result_directory_, sort_name + "_energy", sizeof(float)));
 
 #endif
 }
