@@ -82,4 +82,14 @@ class Beam_buffer : public Plasma_boundary {
   std::vector<Particle>& main_beam_vec_;
 };
 
+
+class POL_Beam_boundary : public Particles_boundary {
+ public:
+POL_Beam_boundary(std::vector<Particle>& particles_vec,
+  Parameters& params, Domain_geometry geom);
+
+  void add(Particle& particle, const vector2& r0) override {}
+  void remove() override;
+};
+
 #endif  // SRC_PARTICLES_PARTICLES_BOUNDARY_INTERACTION_HPP

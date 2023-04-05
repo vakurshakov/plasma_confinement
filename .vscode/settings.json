@@ -83,7 +83,8 @@
         "span": "cpp",
         "*.ipp": "cpp",
         "petsc*.h": "cpp",
-        "csetjmp": "cpp"
+        "csetjmp": "cpp",
+        "*.inc": "cpp"
     },
     "cSpell.customDictionaries": {
         "custom-dictionary-workspace": {

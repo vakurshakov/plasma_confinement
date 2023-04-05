@@ -189,3 +189,27 @@ void Beam_buffer::remove() {
 }
 
 
+POL_Beam_boundary::POL_Beam_boundary(
+    std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom)
+    : Particles_boundary(particles_vec, params, geom) {}
+
+void POL_Beam_boundary::remove() {
+  PROFILE_FUNCTION();
+
+  auto new_last = std::remove_if(
+    particles_vec_.begin(),
+    particles_vec_.end(),
+    [&] (const Particle& particle) {
+      const vector2& r = particle.point.r;
+      double x = r.x() - 0.5 * SIZE_X * dx;
+      double y = r.y() - 0.5 * SIZE_Y * dy;
+
+      return x * x + y * y > geom_.x_max * geom_.x_max;
+  });
+
+  if (new_last != particles_vec_.end()) {
+    LOG_TRACE("{} particle(s) removed", particles_vec_.end() - new_last);
+    particles_vec_.erase(new_last, particles_vec_.end());
+  }
+}

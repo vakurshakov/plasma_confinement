@@ -16,8 +16,9 @@
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
+  #define there_are_target_plasma       false
 
-#define there_are_fields                true
+#define there_are_fields                false
   #define fields_are_diagnosed          true
   #define there_are_Bz0                 true
 
@@ -59,6 +60,9 @@ inline const double mi_me  = 16.0;
 inline const double T_ions = 10.0;  // KeV
 inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
+inline const double T_electrons = 50e-3;  // KeV
+inline const double V_electrons = sqrt(T_electrons / me / 511.0);
+
 inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 
 inline const int INJECTION_START = 0;  // 5'000;
@@ -67,8 +71,10 @@ inline const int INJECTION_TIME = 40'000;
 inline const int RADIUS_OF_INJECTION_AREA = 250; //
 inline const int PER_STEP_PARTICLES = 1000; // M_PI * RADIUS_OF_INJECTION_AREA * RADIUS_OF_INJECTION_AREA * Npi / INJECTION_TIME; //
 
-inline const double T_electrons = 1e-3;  // KeV
-inline const double V_electrons = sqrt(T_electrons / me / 511.0);
+#if there_are_target_plasma
+inline const double TARGET_PLASMA_TEMPERATURE = 30e-3;  // KeV
+inline const int RADIUS_OF_TARGET_PLASMA = 500;
+#endif
 
 inline const std::string boundaries = "cx_cy";
 
@@ -141,38 +147,58 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "Vy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "mVxVx_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "mVyVy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
-    { "x0_distribution_function", {
-      to_string(SIZE_X / 2),
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
-    { "x0_distribution_function", {
-#if !BEAM_INJECTION_SETUP
-      to_string(int(domain_left / dx)),
-#else
-      to_string((SIZE_X + WIDTH_OF_INJECTION_AREA) / 2),
+  }},
 #endif
-      to_string(-10 * V_ions), to_string(-10 * V_ions),
-      to_string(+10 * V_ions), to_string(+10 * V_ions),
-      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.)
-    }},
 
+#if there_are_target_plasma
+  { "target_ions", {
+    { "parameters", {
+        to_string(n0),
+        to_string(+e),
+        to_string(mi_me),
+        to_string(Npi),
+        to_string(TARGET_PLASMA_TEMPERATURE),
+        to_string(TARGET_PLASMA_TEMPERATURE),
+        "0",
+        "0"
+    }},
+    { "integration_steps", {
+        "Boris_pusher",
+        "Simple_interpolation",
+        "Esirkepov_density_decomposition",
+    }},
+    // Diagnostics with their config parameters
+    { "energy", { "empty description" }},
+    { "density", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+  }},
+
+  { "target_electrons", {
+    { "parameters", {
+        to_string(n0),
+        to_string(-e),
+        to_string(me),
+        to_string(Npi),
+        to_string(TARGET_PLASMA_TEMPERATURE),
+        to_string(TARGET_PLASMA_TEMPERATURE),
+        "0",
+        "0"
+    }},
+    { "integration_steps", {
+        "Boris_pusher",
+        "Simple_interpolation",
+        "Esirkepov_density_decomposition",
+    }},
+    // Diagnostics with their config parameters
+    { "energy", { "empty description" }},
+    { "density", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
   }},
 #endif
 
