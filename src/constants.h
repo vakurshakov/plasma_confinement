@@ -75,7 +75,8 @@ inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
 inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 
-inline const std::string postfix = "0.01dx_16.0mi_me_10.0Ti.bin";
+inline const int INJECTION_START = 0;  // 5'000;
+inline const int INJECTION_TIME = 40'000;
 
 inline const std::string boundaries = "cx_py";
 

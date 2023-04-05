@@ -37,24 +37,23 @@ void Clone_layer_particles::execute(int /* timestep */) {
 
 inline bool
 Clone_layer_particles::particle_should_be_cloned(const Point& point) const {
-  double width = config::BUFFER_SIZE * dx;
-  return particle_on_the_left(point.x(), width);
+  return particle_on_the_left(point.x());
 }
 
 inline bool
-Clone_layer_particles::particle_on_the_left(double x, double width) const {
-  return x > geom_.left && x < geom_.left + width;
+Clone_layer_particles::particle_on_the_left(double x) const {
+  return x > geom_.x_min && x < geom_.x_min + width_;
 }
 
 inline bool
-Clone_layer_particles::particle_on_the_right(double x, double width) const {
-  return x > geom_.right - width && x < geom_.right;
+Clone_layer_particles::particle_on_the_right(double x) const {
+  return x > geom_.x_max - width_ && x < geom_.x_max;
 }
 
 inline Point
 Clone_layer_particles::configure_point(const Point& point) const {
   return Point{
-    { config::domain_left - random_01() * config::BUFFER_SIZE * dx, random_01() * SIZE_Y * dx },  // 2 * geom_.left - point.x(), point.y()
+    { geom_.x_min - random_01() * width_, random_01() * SIZE_Y * dx },
     { random_sign() * point.px(), random_sign() * point.py(), 0.0 },
   };
 }

@@ -1,7 +1,5 @@
 #include "ionize_particles.hpp"
 
-#if BEAM_INJECTION_SETUP && GLOBAL_DENSITY
-
 #include "src/utils/random_number_generator.hpp"
 
 Ionize_particles::Ionize_particles(
@@ -89,7 +87,7 @@ void Ionize_particles::execute(int t) {
 
 
 double uniform_probability(double /* x_coord */, double /* y_coord */) {
-  return 1.;
+  return 1.0;
 }
 
 std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_num) {
@@ -101,5 +99,3 @@ std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_n
 
   return array_of_particles_to_load;
 }
-
-#endif

@@ -3,18 +3,14 @@
 #include "src/command/set_particles.hpp"
 #include "src/command/copy_coordinates.hpp"
 #include "src/command/ionize_particles.hpp"
-#include "src/command/clone_layer_particles.hpp"
 #include "src/command/set_Bz_distribution.hpp"
 #include "src/command/magnetic_field_half_step.hpp"
 
 #include "src/fields/fields_builder.hpp"
 #include "src/particles/particles_builder.hpp"
-#include "src/particles/particles_load.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
 
-#include "src/utils/transition_layer/particles_distribution.hpp"
-static auto __n = Table_function("src/utils/transition_layer/n_" + config::postfix);
-
+#include "src/particles/particles_load.hpp"
 #include "src/utils/random_number_generator.hpp"
 #include "src/utils/simulation_backup.hpp"
 

@@ -1,13 +1,6 @@
 #include "energy.hpp"
 #include "src/file_writers/bin_file.hpp"
 
-#if !BEAM_INJECTION_SETUP
-
-#include "src/utils/transition_layer/table_function.hpp"
-static auto __Bz = Table_function("src/utils/transition_layer/Bz_" + config::postfix);
-
-#endif
-
 namespace fs = std::filesystem;
 
 energy_parameters_saver::energy_parameters_saver(
