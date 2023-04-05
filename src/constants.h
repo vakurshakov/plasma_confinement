@@ -16,16 +16,16 @@
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
-  #define there_are_target_plasma       false
+  #define there_are_target_plasma       true
 
-#define there_are_fields                false
+#define there_are_fields                true
   #define fields_are_diagnosed          true
   #define there_are_Bz0                 true
 
 #define _2D3V                           false
 #define LOGGING                         true
 #define TIME_PROFILING                  true
-#define MAKE_BACKUPS                    false
+#define MAKE_BACKUPS                    true
 #define START_FROM_BACKUP               false
 
 
@@ -37,10 +37,10 @@ inline const std::string dir_name = "./results/test_dir_name";
 constexpr inline int NUM_THREADS = 16;
 
 constexpr inline double dx = 0.05;
-constexpr inline int SIZE_X = 1000;
+constexpr inline int SIZE_X = 4200;
 
 constexpr inline double dy = dx;
-constexpr inline int SIZE_Y = 1000;
+constexpr inline int SIZE_Y = 4200;
 
 constexpr inline double dt = 0.5 * dx;
 constexpr inline int TIME  = 10'000;
@@ -68,12 +68,12 @@ inline const double Omega_max = sqrt(2 * T_ions / 511.0);
 inline const int INJECTION_START = 0;  // 5'000;
 inline const int INJECTION_TIME = 40'000;
 
-inline const int RADIUS_OF_INJECTION_AREA = 250; //
-inline const int PER_STEP_PARTICLES = 1000; // M_PI * RADIUS_OF_INJECTION_AREA * RADIUS_OF_INJECTION_AREA * Npi / INJECTION_TIME; //
+inline const int RADIUS_OF_INJECTION_AREA = 168;
+inline const int PER_STEP_PARTICLES = M_PI * RADIUS_OF_INJECTION_AREA * RADIUS_OF_INJECTION_AREA * Npi / INJECTION_TIME;
 
 #if there_are_target_plasma
-inline const double TARGET_PLASMA_TEMPERATURE = 30e-3;  // KeV
-inline const int RADIUS_OF_TARGET_PLASMA = 500;
+inline const double TARGET_PLASMA_TEMPERATURE = 50e-3;  // KeV
+inline const int RADIUS_OF_TARGET_PLASMA = 280;
 #endif
 
 inline const std::string boundaries = "cx_cy";

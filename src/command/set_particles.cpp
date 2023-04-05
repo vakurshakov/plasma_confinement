@@ -36,19 +36,35 @@ void Set_particles::execute(int /* timestep */) {
   const double p0   = particles_->get_parameters().p0();
 
   // чтобы не происходило ресайзов неожиданных
-  // particles_->particles_.reserve(num_particles_to_load_ + 100'000);
+  particles_->particles_.reserve(num_particles_to_load_ + 10'000);
 
   /// @todo Think carefully to combine two ways of setting particles:
   /// 1. On the one hand it is hard to load particles randomly in parallel
   /// 2. It is not always possible to describe everything in such a cycle.
 
-  for (int i = int(geom_.x_min); i < int(geom_.x_max); ++i) {
+  if (!coordinate_generator_) {
+    #pragma omp parallel for num_threads(NUM_THREADS)
+    for (int i = int(geom_.x_min); i < int(geom_.x_max); ++i) {
+    for (int j = int(geom_.y_min); j < int(geom_.y_max); ++j) {
+      for (int np = 0; np < config::Npi; ++np) {
+        double x = (i + random_01()) * dx;
+        double y = (j + random_01()) * dy;
 
-  #pragma omp parallel for num_threads(NUM_THREADS)
-  for (int j = int(geom_.y_min); j < int(geom_.y_max); ++j) {
-    for (int np = 0; np < config::Npi; ++np) {
-      double x = (i + random_01()) * dx;
-      double y = (j + random_01()) * dy;
+        double px, py, pz;
+        do {
+          load_impulse_(x, y, mass, Tx, Ty, Tz, p0, &px, &py, &pz);
+        }
+        while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
+
+        particles_->add_particle({{x, y}, {px, py, pz}});
+      }
+    }}
+  }
+  else {
+    #pragma omp parallel for num_threads(NUM_THREADS)
+    for (size_t np = 0u; np < num_particles_to_load_; ++np) {
+      double x, y;
+      coordinate_generator_->load(&x, &y);
 
       double px, py, pz;
       do {
@@ -57,5 +73,6 @@ void Set_particles::execute(int /* timestep */) {
       while (std::isinf(px) || std::isinf(py) || std::isinf(pz));
 
       particles_->add_particle({{x, y}, {px, py, pz}});
-  }}}
+    }
+  }
 }

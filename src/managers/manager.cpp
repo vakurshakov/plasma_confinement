@@ -93,8 +93,11 @@ void Manager::initializes() {
     config::domain_phi_max
   };
 
-  /// @todo target plasma
+#if !there_are_target_plasma
   particles_species_.reserve(2);
+#else
+  particles_species_.reserve(4);
+#endif
 
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
@@ -113,21 +116,23 @@ void Manager::initializes() {
 
   plasma_electrons.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
 
-
-  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
-    &plasma_ions, &plasma_electrons,
-    set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
-    // set_point_of_birth:
-    [] (double *x, double *y) {
+  auto generator_of_circle_setter = [] (double R_max) {
+    return [=] (double *x, double *y) {
       static const double center_x = 0.5 * SIZE_X * dx;
       static const double center_y = 0.5 * SIZE_Y * dy;
 
-      double r = config::RADIUS_OF_INJECTION_AREA * dx * sqrt(random_01());
+      double r = R_max * dx * sqrt(random_01());
       double phi = 2.0 * M_PI * random_01();
 
       *x = center_x + r * cos(phi);
       *y = center_y + r * sin(phi);
-    },
+    };
+  };
+
+  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
+    &plasma_ions, &plasma_electrons,
+    set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
+    generator_of_circle_setter(config::RADIUS_OF_INJECTION_AREA),
     uniform_probability,
     // load_impulse:
     [] (double x, double y,
@@ -151,13 +156,58 @@ void Manager::initializes() {
     }
   ));
 
+
+#if there_are_target_plasma
+  particles_builder.set_sort("target_ions");
+  Particles& target_ions = particles_species_.emplace_back(particles_builder);
+
+  target_ions.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
+    target_ions.particles_, target_ions.parameters_, domain);
+
+  const int total_number_of_ions =
+    M_PI * config::RADIUS_OF_TARGET_PLASMA * config::RADIUS_OF_TARGET_PLASMA * config::Npi;
+
+  struct Set_coordinate_on_circle : public Coordinate_generator {
+    using coordinate_loader = std::function<void(double*, double*)>;
+    coordinate_loader implementation_;
+
+    Set_coordinate_on_circle(const coordinate_loader& implementation)
+      : implementation_(implementation) {}
+
+    void load(double* x, double* y) override {
+      implementation_(x, y);
+    }
+  };
+
+  presets.emplace_back(std::make_unique<Set_particles>(
+    &target_ions, total_number_of_ions,
+    std::make_unique<Set_coordinate_on_circle>(
+      generator_of_circle_setter(config::RADIUS_OF_TARGET_PLASMA)),
+    load_maxwellian_impulse));
+
+
+  particles_builder.set_sort("target_electrons");
+  Particles& target_electrons = particles_species_.emplace_back(particles_builder);
+
+  target_electrons.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
+    target_electrons.particles_, target_electrons.parameters_, domain);
+
+  presets.emplace_back(std::make_unique<Copy_coordinates>(
+    &target_electrons, &target_ions, load_maxwellian_impulse));
+
+#endif
+
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
     /* backup timestep = */ 100 * diagnose_time_step,
     // named particle species to backup:
     std::unordered_map<std::string, Particles&>{
       { plasma_ions.sort_name_, plasma_ions },
-      { plasma_electrons.sort_name_, plasma_electrons }
+      { plasma_electrons.sort_name_, plasma_electrons },
+#if there_are_target_plasma
+      { target_ions.sort_name_, target_ions },
+      { target_electrons.sort_name_, target_electrons },
+#endif
     },
     // named fields to backup:
     std::unordered_map<std::string, vector3_field&>{
