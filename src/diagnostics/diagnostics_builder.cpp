@@ -104,6 +104,21 @@ vector_of_diagnostics Diagnostics_builder::build() {
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "mVyVy_moment", "XY", diag_description));
     }
+    else if (diag == "mVrVr_moment") {
+      LOG_INFO("Add mVrVr_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVrVr_moment", "XY", diag_description));
+    }
+    else if (diag == "mVrVphi_moment") {
+      LOG_INFO("Add mVrVphi_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVrVphi_moment", "XY", diag_description));
+    }
+    else if (diag == "mVphiVphi_moment") {
+      LOG_INFO("Add mVphiVphi_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVphiVphi_moment", "XY", diag_description));
+    }
     else if (diag == "x0_distribution_function") {
       LOG_INFO("Add x0_distribution_function diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_x0_distribution_function(

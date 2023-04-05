@@ -120,6 +120,21 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
     }},
+    { "Vr_moment", {                                                //
+      "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
+      to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
+    }},
+    { "Vphi_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVrVr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
   }},
 #endif
 
@@ -143,6 +158,21 @@ inline const umap<std::string,
     // Diagnostics with their config parameters
     { "energy", { "empty description" }},
     { "density", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vphi_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVrVr_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
@@ -174,6 +204,21 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
+    { "Vr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vphi_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVrVr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
   }},
 
   { "target_electrons", {
@@ -195,6 +240,21 @@ inline const umap<std::string,
     // Diagnostics with their config parameters
     { "energy", { "empty description" }},
     { "density", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "Vphi_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVrVr_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
