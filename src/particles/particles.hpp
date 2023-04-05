@@ -5,7 +5,7 @@
 #include "src/particles/particle/particle.hpp"
 #include "src/solvers/abstract_strategies.hpp"
 
-#include "particle-boundary_processor.hpp"
+#include "particles_boundary_interaction.hpp"
 #include "particles_builder.hpp"
 
 class Particles {
@@ -34,8 +34,8 @@ class Particles {
   friend class Ionize_particles;
 
   friend class Clone_layer_particles;
-  friend class Plasma_boundary_processor;
-  friend class Beam_boundary_processor;
+  friend class Plasma_boundary;
+  friend class Beam_boundary;
   friend class Simulation_backup;
 
  private:
@@ -47,7 +47,7 @@ class Particles {
   std::unique_ptr<Interpolation> interpolation_;
   std::unique_ptr<Decomposition> decomposition_;
 
-  std::unique_ptr<Particle_boundary_processor> boundaries_processor_;
+  std::unique_ptr<Particles_boundary> boundaries_processor_;
 };
 
 #endif  // SRC_PARTICLES_PARTICLES_HPP

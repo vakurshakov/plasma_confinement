@@ -1,16 +1,16 @@
-#include "particle-boundary_processor.hpp"
+#include "particles_boundary_interaction.hpp"
 
 #include <algorithm>
 
 #include "src/utils/random_number_generator.hpp"
 #include "src/particles/particles_load.hpp"
 
-Particle_boundary_processor::Particle_boundary_processor(
+Particles_boundary::Particles_boundary(
     std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom)
     : particles_vec_(particles_vec), params_(params), geom_(geom) {}
 
-vector3 Particle_boundary_processor::
+vector3 Particles_boundary::
 generate_moment(const Particle& particle) {
   double new_px = random_sign() * particle.point.px();
   double new_py = random_sign() * particle.point.py();
@@ -25,17 +25,17 @@ generate_moment(const Particle& particle) {
 }
 
 
-Plasma_boundary_processor::Plasma_boundary_processor(
+Plasma_boundary::Plasma_boundary(
     std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom)
-    : Particle_boundary_processor(particles_vec, params, geom) {}
+    : Particles_boundary(particles_vec, params, geom) {}
 
 // If a particle moves from the zero cell to the first one,
 // a new particle with the shifted x-coordinate is created
-void Plasma_boundary_processor::
+void Plasma_boundary::
 add(Particle& particle, const vector2& r0) {
 
-  periodic_y(particle.point, geom_.bottom, geom_.top);
+  periodic_y(particle.point, geom_.y_min, geom_.y_max);
 
   if (passed_through_left(r0.x(), particle.point.x())) {
     vector2&& new_r = { particle.point.x() - dx, particle.point.y() };
@@ -61,23 +61,23 @@ add(Particle& particle, const vector2& r0) {
   }
 }
 
-inline bool Plasma_boundary_processor::
+inline bool Plasma_boundary::
 passed_through_left(double x0, double ref_x) const {
   return
-    x0    - (geom_.left + dx) < 0 &&
-    ref_x - (geom_.left + dx) > 0;
+    x0    - (geom_.x_min + dx) < 0 &&
+    ref_x - (geom_.x_min + dx) > 0;
 }
 
-inline bool Plasma_boundary_processor::
+inline bool Plasma_boundary::
 passed_through_right(double x0, double ref_x) const {
   return
-    x0    - (geom_.right - dx) > 0 &&
-    ref_x - (geom_.right - dx) < 0;
+    x0    - (geom_.x_max - dx) > 0 &&
+    ref_x - (geom_.x_max - dx) < 0;
 }
 
 // Passing of a particle to the buffer cell is
 // followed by its removing from the simulation
-void Plasma_boundary_processor::remove() {
+void Plasma_boundary::remove() {
   PROFILE_FUNCTION();
 
   auto new_last = std::remove_if(
@@ -85,8 +85,8 @@ void Plasma_boundary_processor::remove() {
     particles_vec_.end(),
     [&] (const Particle& particle) {
       return
-        particle.point.x() <= geom_.left ||
-        particle.point.x() >= geom_.right;
+        particle.point.x() <= geom_.x_min ||
+        particle.point.x() >= geom_.x_max;
   });
 
   if (new_last != particles_vec_.end()) {
@@ -96,23 +96,23 @@ void Plasma_boundary_processor::remove() {
 }
 
 
-Reflective_boundary_processor::Reflective_boundary_processor(
+Reflective_boundary::Reflective_boundary(
     std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom)
-    : Plasma_boundary_processor(particles_vec, params, geom) {}
+    : Plasma_boundary(particles_vec, params, geom) {}
 
-void Reflective_boundary_processor::
+void Reflective_boundary::
 add(Particle& particle, const vector2& r0) {
 
-  periodic_y(particle.point, geom_.bottom, geom_.top);
+  periodic_y(particle.point, geom_.y_min, geom_.y_max);
 
-  if (particle.point.x() < geom_.left) {
+  if (particle.point.x() < geom_.x_min) {
     particle.point.x() += dx;
     particle.point.p = generate_moment(particle);
   }
 }
 
-void Reflective_boundary_processor::remove() {
+void Reflective_boundary::remove() {
   PROFILE_FUNCTION();
 
   auto new_last = std::remove_if(
@@ -120,7 +120,7 @@ void Reflective_boundary_processor::remove() {
     particles_vec_.end(),
     [&] (const Particle& particle) {
       return
-        particle.point.x() > geom_.right;
+        particle.point.x() > geom_.x_max;
   });
 
   if (new_last != particles_vec_.end()) {
@@ -129,35 +129,35 @@ void Reflective_boundary_processor::remove() {
   }
 }
 
-Beam_boundary_processor::Beam_boundary_processor(
+Beam_boundary::Beam_boundary(
     std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom)
-    : Plasma_boundary_processor(particles_vec, params, geom) {}
+    : Plasma_boundary(particles_vec, params, geom) {}
 
-void Beam_boundary_processor::
+void Beam_boundary::
 add(Particle& particle, const vector2& r0) {
-  periodic_y(particle.point, geom_.bottom, geom_.top);
+  periodic_y(particle.point, geom_.y_min, geom_.y_max);
 }
 
 
-Beam_buffer_processor::Beam_buffer_processor(
+Beam_buffer::Beam_buffer(
     std::vector<Particle>& buff_beam_vec,
     std::vector<Particle>& main_beam_vec,
     Parameters& main_params,
     Domain_geometry geom)
-    : Plasma_boundary_processor(buff_beam_vec, main_params, geom),
+    : Plasma_boundary(buff_beam_vec, main_params, geom),
       main_beam_vec_(main_beam_vec) {}
 
-void Beam_buffer_processor::
+void Beam_buffer::
 add(Particle& particle, const vector2& r0) {
-  periodic_y(particle.point, geom_.bottom, geom_.top);
+  periodic_y(particle.point, geom_.y_min, geom_.y_max);
 }
 
-void Beam_buffer_processor::remove() {
+void Beam_buffer::remove() {
   PROFILE_FUNCTION();
 
   // Firstly, we remove particle that wasn't pass the border
-  Plasma_boundary_processor::remove();
+  Plasma_boundary::remove();
 
   // Secondly, we move remaining particles to the main vector
   LOG_TRACE("{} particles will come from buffer", particles_vec_.size());
@@ -187,3 +187,5 @@ void Beam_buffer_processor::remove() {
   // Thirdly, clear the buffer
   particles_vec_.clear();
 }
+
+

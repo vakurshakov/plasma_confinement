@@ -1,31 +1,15 @@
-#ifndef SRC_PARTICLES_PARTICLE_BOUNDARY_PROCESSOR_HPP
-#define SRC_PARTICLES_PARTICLE_BOUNDARY_PROCESSOR_HPP
+#ifndef SRC_PARTICLES_PARTICLES_BOUNDARY_INTERACTION_HPP
+#define SRC_PARTICLES_PARTICLES_BOUNDARY_INTERACTION_HPP
 
 #include "src/pch.h"
 #include "src/particles/particle/parameters.hpp"
 #include "src/particles/particle/particle.hpp"
 #include "src/vectors/vector_classes.hpp"
+#include "src/utils/domain_geometry.hpp"
 
-/**
- * @brief Small structure to represent the internal
- * domain, values should be passed in `c/wp`.
- */
-struct Domain_geometry {
-  double left;
-  double right;
-  double bottom;
-  double top;
-
-  Domain_geometry() = default;
-
-  Domain_geometry(double left, double right, double bottom, double top)
-    : left(left), right(right), bottom(bottom), top(top) {}
-};
-
-
-class Particle_boundary_processor {
+class Particles_boundary {
  public:
-  Particle_boundary_processor(std::vector<Particle>& particles_vec,
+  Particles_boundary(std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom);
 
   virtual void add(Particle& particle, const vector2& r0) = 0;
@@ -40,9 +24,9 @@ class Particle_boundary_processor {
 };
 
 
-class Plasma_boundary_processor : public Particle_boundary_processor {
+class Plasma_boundary : public Particles_boundary {
  public:
-  Plasma_boundary_processor(std::vector<Particle>& particles_vec,
+  Plasma_boundary(std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom);
 
   void add(Particle& particle, const vector2& r0) override;
@@ -54,9 +38,9 @@ class Plasma_boundary_processor : public Particle_boundary_processor {
 };
 
 
-class Reflective_boundary_processor : public Plasma_boundary_processor {
+class Reflective_boundary : public Plasma_boundary {
  public:
-  Reflective_boundary_processor(std::vector<Particle>& particles_vec,
+  Reflective_boundary(std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom);
 
   void add(Particle& particle, const vector2& r0) override;
@@ -64,28 +48,28 @@ class Reflective_boundary_processor : public Plasma_boundary_processor {
 };
 
 
-class Beam_boundary_processor : public Plasma_boundary_processor {
+class Beam_boundary : public Plasma_boundary {
  public:
-  Beam_boundary_processor(std::vector<Particle>& particles_vec,
+  Beam_boundary(std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom);
 
   void add(Particle& particle, const vector2& r0) override;
 };
 
 
-class Plasma_buffer_processor : public Particle_boundary_processor {
+class Plasma_buffer : public Particles_boundary {
  public:
-  Plasma_buffer_processor(std::vector<Particle>& particles_vec, Parameters& params)
-    : Particle_boundary_processor(particles_vec, params, Domain_geometry()) {}
+  Plasma_buffer(std::vector<Particle>& particles_vec, Parameters& params)
+    : Particles_boundary(particles_vec, params, Domain_geometry()) {}
 
   void add(Particle& particle, const vector2& r0) override {}
   void remove() override { particles_vec_.clear(); }
 };
 
 
-class Beam_buffer_processor : public Plasma_boundary_processor {
+class Beam_buffer : public Plasma_boundary {
  public:
-  Beam_buffer_processor(
+  Beam_buffer(
     std::vector<Particle>& buff_beam_vec,
     std::vector<Particle>& main_beam_vec,
     Parameters& main_params,
@@ -98,4 +82,4 @@ class Beam_buffer_processor : public Plasma_boundary_processor {
   std::vector<Particle>& main_beam_vec_;
 };
 
-#endif  // SRC_PARTICLES_PARTICLE_BOUNDARY_PROCESSOR_HPP
+#endif  // SRC_PARTICLES_PARTICLES_BOUNDARY_INTERACTION_HPP

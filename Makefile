@@ -73,9 +73,9 @@ SRCS +=                                                \
   src/particles/particles.cpp                          \
   src/particles/particles_builder.cpp                  \
   src/particles/particles_load.cpp                     \
-  src/particles/particle-boundary_processor.cpp        \
+  src/particles/particles_boundary_interaction.cpp     \
   src/particles/particle/particles_form-factors.cpp    \
-  src/particles/particle/point_bound_interact.cpp      \
+  src/particles/particle/point_boundary_interaction.cpp\
 
 # solvers
 SRCS +=                                                \
@@ -90,9 +90,9 @@ SRCS +=                                                    \
   src/utils/time_manager.cpp                               \
   src/utils/simulation_backup.cpp                          \
   src/utils/configuration_backup.cpp                       \
-  src/utils/transition_layer/table_function.cpp            \
-  src/utils/transition_layer/parameters_table.cpp          \
-  src/utils/transition_layer/particles_distribution.cpp    \
+  # src/utils/transition_layer/table_function.cpp            \
+  # src/utils/transition_layer/parameters_table.cpp          \
+  # src/utils/transition_layer/particles_distribution.cpp    \
 
 # vectors
 SRCS +=                                                \
