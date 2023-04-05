@@ -93,93 +93,13 @@ void Manager::initializes() {
     config::domain_phi_max
   };
 
-
-#if !BEAM_INJECTION_SETUP
-
-#if !there_are_plasma_electrons
-  particles_species_.reserve(2);
-#else
-  particles_species_.reserve(4);
-#endif
-
-  const int total_num_particles = int((__n.get_xmax() - config::domain_left) / dx) * SIZE_Y * config::Npi;
-  LOG_INFO("{} particles will be set in total to each plasma specie", total_num_particles);
-
-  particles_builder.set_sort("plasma_ions");
-  Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
-
-  plasma_ions.particles_.reserve(2 * total_num_particles);
-
-  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  presets.emplace_back(std::make_unique<Set_particles>(
-    &plasma_ions, total_num_particles,
-    Domain_geometry {
-      floor(config::domain_left / dx),
-      floor(__n.get_xmax() / dx),
-      0,
-      SIZE_Y
-    },
-    transition_layer::load_maxwellian_impulse
-  ));
-
-
-  Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
-  buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
-
-  buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
-    buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  const int buffer_ions_size = config::BUFFER_SIZE * SIZE_Y * config::Npi;
-  buffer_ions.particles_.reserve(2 * buffer_ions_size);
-
-  step_presets_.emplace_back(std::make_unique<Set_particles>(
-    &buffer_ions, buffer_ions_size,
-    Domain_geometry {
-      floor(config::domain_left / dx) - config::BUFFER_SIZE,
-      floor(config::domain_left / dx),
-      0,
-      SIZE_Y
-    },
-    transition_layer::load_maxwellian_impulse
-  ));
-
-#if there_are_plasma_electrons
-  particles_builder.set_sort("plasma_electrons");
-  Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
-
-  plasma_electrons.particles_.reserve(2 * total_num_particles);
-
-  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  presets.emplace_back(std::make_unique<Copy_coordinates>(
-    &plasma_electrons, &plasma_ions, load_maxwellian_impulse
-  ));
-
-
-  Particles& buffer_electrons = particles_species_.emplace_back(particles_builder);
-  buffer_electrons.sort_name_ = "buffer_plasma_electrons";  // changed from "plasma_electrons"
-
-  buffer_electrons.particles_.reserve(2 * buffer_ions_size);
-
-  buffer_electrons.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
-    buffer_electrons.particles_, plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  step_presets_.push_back(std::make_unique<Clone_layer_particles>(
-    &plasma_electrons, &buffer_electrons, domain));
-
-#endif
-
-#else  // BEAM_INJECTION_SETUP
-
+  /// @todo target plasma
   particles_species_.reserve(2);
 
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
-  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
+  plasma_ions.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
     plasma_ions.particles_, plasma_ions.parameters_, domain);
 
   plasma_ions.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
@@ -188,7 +108,7 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_electrons");
   Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
 
-  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
+  plasma_electrons.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
     plasma_electrons.particles_, plasma_electrons.parameters_, domain);
 
   plasma_electrons.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
@@ -198,15 +118,38 @@ void Manager::initializes() {
     &plasma_ions, &plasma_electrons,
     set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
     // set_point_of_birth:
-    [](double *x, double *y) {
-      *x = (0.5 * SIZE_X + (random_01() - 0.5) * config::WIDTH_OF_INJECTION_AREA) * dx;
-      *y = random_01() * SIZE_Y * dy;
+    [] (double *x, double *y) {
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+
+      double r = config::RADIUS_OF_INJECTION_AREA * dx * sqrt(random_01());
+      double phi = 2.0 * M_PI * random_01();
+
+      *x = center_x + r * cos(phi);
+      *y = center_y + r * sin(phi);
     },
     uniform_probability,
-    load_maxwellian_impulse
-  ));
+    // load_impulse:
+    [] (double x, double y,
+        double mass, double Tx, double Ty, double Tz,
+        double p0, double* px, double* py, double* pz) {
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
 
+      using namespace config;
+      static const double r0 = RADIUS_OF_INJECTION_AREA * dx;
+      static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
+
+      *px = + mass * u0 * (y - center_y) / r0 + temperature_impulse(Tx, mass);
+      *py = - mass * u0 * (x - center_x) / r0 + temperature_impulse(Ty, mass);
+
+#if _2D3V
+      *pz = temperature_impulse(Tz, mass);
+#else  // _2D2V
+      *pz = 0.0;
 #endif
+    }
+  ));
 
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
