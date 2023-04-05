@@ -155,3 +155,32 @@ vector3 cx_py_vector3_field::operator()(int ny, int nx) const {
   int ind = index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_));
   return {fx_[ind], fy_[ind], fz_[ind]};
 }
+
+
+cx_cy_vector3_field::cx_cy_vector3_field(int size_x, int size_y)
+  : px_py_vector3_field(size_x, size_y) {}
+
+double& cx_cy_vector3_field::x(int ny, int nx) {
+  return fx_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double& cx_cy_vector3_field::y(int ny, int nx) {
+  return fy_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double& cx_cy_vector3_field::z(int ny, int nx) {
+  return fz_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+
+double cx_cy_vector3_field::x(int ny, int nx) const {
+  return fx_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double cx_cy_vector3_field::y(int ny, int nx) const {
+  return fy_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+double cx_cy_vector3_field::z(int ny, int nx) const {
+  return fz_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
+}
+
+vector3 cx_cy_vector3_field::operator()(int ny, int nx) const {
+  int ind = index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_));
+  return {fx_[ind], fy_[ind], fz_[ind]};
+}

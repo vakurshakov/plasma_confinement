@@ -121,4 +121,19 @@ class cx_py_vector3_field : public px_py_vector3_field {
   vector3 operator()(int ny, int nx) const override;
 };
 
+class cx_cy_vector3_field : public px_py_vector3_field {
+ public:
+  cx_cy_vector3_field(int size_x, int size_y);
+
+  double& x(int ny, int nx) override;
+  double& y(int ny, int nx) override;
+  double& z(int ny, int nx) override;
+
+  double x(int ny, int nx) const override;
+  double y(int ny, int nx) const override;
+  double z(int ny, int nx) const override;
+
+  vector3 operator()(int ny, int nx) const override;
+};
+
 #endif  // SRC_VECTORS_VECTOR3_FIELD_HPP
