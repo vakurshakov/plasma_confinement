@@ -67,10 +67,10 @@ void Manager::initializes() {
 
   std::list<Command_up> presets;
 
-#if there_are_fields
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 
+#if there_are_fields
   // We use this to push the magnetic field to
   // the same half-timestep as electric field
   step_presets_.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
@@ -87,10 +87,10 @@ void Manager::initializes() {
   Particles_builder particles_builder(fields_);
 
   Domain_geometry domain {
-    config::domain_left,
-    config::domain_right,
-    config::domain_bottom,
-    config::domain_top
+    config::domain_r_min,
+    config::domain_r_max,
+    config::domain_phi_min,
+    config::domain_phi_max
   };
 
 
@@ -221,16 +221,19 @@ void Manager::initializes() {
       { "E", fields_.E() },
       { "B", fields_.B() }
   });
+
 #endif
 
 #if !START_FROM_BACKUP
   for (const auto& command : presets) {
     command->execute(START_);
   }
+
 #else
   backup->load();
   START_ = backup->get_last_timestep();
   LOG_INFO("Configuration loaded from backup. Simulation will start from t={}", START_);
+
 #endif
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);

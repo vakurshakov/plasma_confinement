@@ -1,9 +1,15 @@
 #include "open_boundaries_processor.hpp"
 
-double Damping_layer::damping_coeff(int x) {
-  return 1.0 - damping_factor *
-    ((double) x / (double) width - 1.0) *
-    ((double) x / (double) width - 1.0);
+double Damping_layer::damping_coeff(double r) {
+  static const double width = 0.5 * SIZE_X - r_beginning;
+  static const double dr_0 = width * (1.0 + 1.0 / sqrt(damping_factor));
+
+  double dr = r - r_beginning;
+
+  if (dr < dr_0)
+    return 1.0 - damping_factor * (dr / width - 1.0) * (dr / width - 1.0);
+
+  return 0.0;
 }
 
 
@@ -19,81 +25,83 @@ void Open_boundaries_processor::process() {
   PROFILE_FUNCTION();
 
   left_right_bounds();
-  // top_bottom_bounds();
+  top_bottom_bounds();
 }
 
 void Open_boundaries_processor::left_right_bounds() {
-  // * . . * >x
-  // *     *
-  // * . . *
-  // vy
+  static const double center_x = 0.5 * SIZE_X;
+  static const double center_y = 0.5 * SIZE_Y;
+  static const int inner_min = int(layer.r_beginning / M_SQRT2);
 
   #pragma omp parallel for num_threads(NUM_THREADS)
-  for (int y = 0; y < fields_E.size_y(); ++y) {
-    for (int x = 0; x < layer.width; ++x) {
-      // left
-      double coeff = layer.damping_coeff(x);
+  for (int y = 0; y < SIZE_Y; ++y) {
+  for (int x = 0; x <= inner_min; ++x) {
 
-      fields_E.x(y, x) *= coeff;
-      fields_E.y(y, x) *= coeff;
-#if !BEAM_INJECTION_SETUP
-      fields_B.z(y, x) *= coeff;
-#else
-      fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
-#endif
+    double r = sqrt((x - center_x) * (x - center_x) + (y - center_y) * (y - center_y));
+    if (r < layer.r_beginning)
+      continue;
 
-#if _2D3V
-      fields_E.z(y, x) *= coeff;
-      fields_B.x(y, x) *= coeff;
-      fields_B.y(y, x) *= coeff;
-#endif
+    // left
+    double coeff = layer.damping_coeff(r);
 
-      // right
-      int right_x = (fields_E.size_x() - 1) - x;
+    fields_E.x(y, x) *= coeff;
+    fields_E.y(y, x) *= coeff;
+    fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
 
-      fields_E.x(y, right_x) *= coeff;
-      fields_E.y(y, right_x) *= coeff;
-      fields_B.z(y, right_x) = fields_B.z(y, right_x) * coeff + config::Omega_max * (1.0 - coeff);
+    // right
+    int right_x = (SIZE_X - 1) - x;
 
-#if _2D3V
-      fields_E.z(y, right_x) *= coeff;
-      fields_B.x(y, right_x) *= coeff;
-      fields_B.y(y, right_x) *= coeff;
-#endif
-    }
-  }
+    fields_E.x(y, right_x) *= coeff;
+    fields_E.y(y, right_x) *= coeff;
+    fields_B.z(y, right_x) = fields_B.z(y, right_x) * coeff + config::Omega_max * (1.0 - coeff);
+
+  #if _2D3V
+    fields_E.z(y, x) *= coeff;
+    fields_B.x(y, x) *= coeff;
+    fields_B.y(y, x) *= coeff;
+
+    fields_E.z(y, right_x) *= coeff;
+    fields_B.x(y, right_x) *= coeff;
+    fields_B.y(y, right_x) *= coeff;
+  #endif
+  }}
 }
 
 void Open_boundaries_processor::top_bottom_bounds() {
-  // 2 * * 2 >x
-  // *     *
-  // 2 * * 2
-  // vy
+  static const double center_x = 0.5 * SIZE_X;
+  static const double center_y = 0.5 * SIZE_Y;
+  static const int inner_min = int(layer.r_beginning / M_SQRT2);
 
-  for (int y = 0; y < layer.width; ++y) {
-    #pragma omp parallel for num_threads(NUM_THREADS)
-    for (int x = 0; x < fields_E.size_x(); ++x) {
-      // top
-      double coeff = layer.damping_coeff(y);
+  #pragma omp parallel for num_threads(NUM_THREADS)
+  for (int x = inner_min; x < (SIZE_X - 1) - inner_min; ++x) {
+  for (int y = 0; y <= inner_min; ++y) {
 
-      fields_E.x(y, x) *= coeff;
-      fields_E.y(y, x) *= coeff;
-      fields_E.z(y, x) *= coeff;
+    double r = sqrt((x - center_x) * (x - center_x) + (y - center_y) * (y - center_y));
+    if (r < layer.r_beginning)
+      continue;
 
-      fields_B.x(y, x) *= coeff;
-      fields_B.y(y, x) *= coeff;
-      fields_B.z(y, x) *= coeff;
+    // bottom
+    double coeff = layer.damping_coeff(r);
 
-      // bottom
-      int bottom_y = (fields_E.size_y() - 1) - y;
+    fields_E.x(y, x) *= coeff;
+    fields_E.y(y, x) *= coeff;
+    fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
 
-      fields_E.x(bottom_y, x) *= coeff;
-      fields_E.y(bottom_y, x) *= coeff;
-      fields_E.z(bottom_y, x) *= coeff;
+    // top
+    int top_y = (SIZE_Y - 1) - y;
 
-      fields_B.x(bottom_y, x) *= coeff;
-      fields_B.y(bottom_y, x) *= coeff;
-      fields_B.z(bottom_y, x) *= coeff;
-    }
-  }
+    fields_E.x(top_y, x) *= coeff;
+    fields_E.y(top_y, x) *= coeff;
+    fields_B.z(top_y, x) = fields_B.z(top_y, x) * coeff + config::Omega_max * (1.0 - coeff);
+
+  #if _2D3V
+    fields_E.z(y, x) *= coeff;
+    fields_B.x(y, x) *= coeff;
+    fields_B.y(y, x) *= coeff;
+
+    fields_E.z(y, right_x) *= coeff;
+    fields_B.x(y, right_x) *= coeff;
+    fields_B.y(y, right_x) *= coeff;
+  #endif
+  }}
 }
