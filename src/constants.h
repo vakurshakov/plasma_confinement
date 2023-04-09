@@ -269,7 +269,6 @@ inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
 #if there_are_fields && fields_are_diagnosed
   { "energy", { "empty description" }},
 
-  { "whole_field", { "J", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "E", "x", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "E", "y", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
   { "whole_field", { "B", "z", "0", "0", to_string(SIZE_X), to_string(SIZE_Y) }},
