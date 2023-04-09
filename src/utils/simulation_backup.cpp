@@ -35,7 +35,7 @@ void Simulation_backup::save_parameters() const {
   param_file << "# particles global parameters: name, n, q, m, Np, p0, Tx, Ty, Tz\n";
 
   for (const auto& [name, container] : particles_) {
-    const Parameters& params = container.get_parameters();
+    const Parameters& params = container.parameters_;
 
     param_file
       << name << " "
@@ -161,6 +161,9 @@ void Simulation_backup::load() {
   std::string timestep = get_last_timestep_directory();
   load_particles(timestep);
   load_fields(timestep);
+
+  /// @todo check current solution, many cells not satisfy the equation div E = q
+  /// check_initial_condition();
 }
 
 size_t Simulation_backup::get_last_timestep() const {
@@ -275,4 +278,73 @@ void Simulation_backup::load_fields(const std::string& timestep) {
     }
     fs::copy(entry, dir_name + "/" + path, fs::copy_options::overwrite_existing);
   }
+}
+
+constexpr int index(int ny, int nx) {
+  return ny * SIZE_X + nx;
+}
+
+void Simulation_backup::check_initial_condition() {
+  scalar_field div_E(SIZE_X * SIZE_Y, 0.0);
+  scalar_field div_B(SIZE_X * SIZE_Y, 0.0);
+  scalar_field charge_density(SIZE_X * SIZE_Y, 0.0);
+
+  collect_charge_density(charge_density);
+  collect_divergence(div_E, div_B);
+
+  for (int ny = 0; ny < SIZE_Y; ++ny) {
+  for (int nx = 0; nx < SIZE_X; ++nx) {
+    if (fabs(div_E[index(ny, nx)] - charge_density[index(ny, nx)]) > cell_epsilon) {
+      throw std::runtime_error("Initial condition: div E(x, y) = q(x, y) not"
+        "satisfied for cell (" + std::to_string(nx) + ", " + std::to_string(ny) + ")!");
+    }
+
+    if (fabs(div_B[index(ny, nx)]) > cell_epsilon) {
+      throw std::runtime_error("Initial condition: div B(x, y) = 0 not satisfied "
+        "for cell (" + std::to_string(nx) + ", " + std::to_string(ny) + ")!");
+    }
+  }}
+}
+
+void Simulation_backup::collect_charge_density(scalar_field& charge_density) {
+  for (const auto& [_, container] : particles_) {
+    const int Np = container.parameters_.Np();
+    const int width = container.parameters_.charge_cloud();
+    const auto& shape = container.parameters_.form_factor();
+
+    for (const auto& particle : container.get_particles()) {
+      double x = particle.point.x();
+      double y = particle.point.y();
+
+      int nx = int(floor(x / dx));
+      int ny = int(floor(y / dy));
+
+      for (int i = nx - width; i <= nx + width; ++i) {
+      for (int j = ny - width; j <= ny + width; ++j) {
+        if ((0 <= i && i < SIZE_X) && (0 <= j && j < SIZE_Y)) {
+          charge_density[index(ny, nx)] +=
+            particle.n() * particle.q() / Np *
+            shape(x - i * dx, dx) *
+            shape(y - j * dy, dy);
+        }
+        else continue;
+      }}
+    }
+  }
+}
+
+void Simulation_backup::collect_divergence(scalar_field& div_E, scalar_field& div_B) {
+  vector3_field& E = fields_.at("E");
+  vector3_field& B = fields_.at("B");
+
+  for (int ny = 0; ny < SIZE_Y; ++ny) {
+  for (int nx = 0; nx < SIZE_X; ++nx) {
+    div_E[index(ny, nx)] =
+      (E.x(ny, nx) - E.x(ny, nx-1)) / dx +
+      (E.y(ny, nx) - E.y(ny-1, nx)) / dy;
+
+    div_B[index(ny, nx)] =
+      (B.x(ny, nx) - B.x(ny, nx-1)) / dx +
+      (B.y(ny, nx) - B.y(ny-1, nx)) / dy;
+  }}
 }

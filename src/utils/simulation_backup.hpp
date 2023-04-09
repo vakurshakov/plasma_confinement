@@ -14,6 +14,7 @@ class Simulation_backup : public Diagnostic {
     std::unordered_map<std::string, vector3_field&> each_vector_field);
 
   void save(int t);
+
   void load();
   size_t get_last_timestep() const;
   static void restore_time_diagnostics();
@@ -35,6 +36,13 @@ class Simulation_backup : public Diagnostic {
   size_t get_number_of_particles(const std::string& filename);
 
   void load_fields(const std::string& timestep);
+
+  using scalar_field = std::vector<double>;
+
+  double cell_epsilon = 1e-1;
+  void check_initial_condition();
+  void collect_charge_density(scalar_field& charge_density);
+  void collect_divergence(scalar_field& div_E, scalar_field& div_B);
 };
 
 #endif  // SRC_UTILS_SIMULATION_BACKUP_HPP
