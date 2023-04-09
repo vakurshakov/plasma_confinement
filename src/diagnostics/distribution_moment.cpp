@@ -76,6 +76,8 @@ void distribution_moment::diagnose(int t) {
   }}
 
   reset();
+
+  file_for_results_->close();
 }
 
 void distribution_moment::collect() {

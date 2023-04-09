@@ -9,7 +9,7 @@ whole_field::whole_field(std::string result_directory,
 
 void whole_field::diagnose(int t) {
   PROFILE_FUNCTION();
-  
+
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
@@ -20,5 +20,5 @@ void whole_field::diagnose(int t) {
     file_for_results_->write(field_(ny, nx).vec[component_]);
   }}
 
-  file_for_results_->flush();
+  file_for_results_->close();
 }

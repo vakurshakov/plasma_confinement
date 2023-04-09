@@ -17,9 +17,8 @@ class BIN_File : public IFile {
   void write(double data) override;
   void write_double(double data);
 
-  virtual void flush() override;
-
-  file_type get_type() override;
+  void flush() override;
+  void close() override;
 
  private:
   std::ofstream bin_file_;

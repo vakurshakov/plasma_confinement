@@ -36,6 +36,8 @@ void BIN_File::flush() {
   bin_file_.flush();
 }
 
-file_type BIN_File::get_type() {
-  return file_type::bin;
+void BIN_File::close() {
+  flush();
+  bin_file_.close();
 }
+
