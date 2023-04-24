@@ -1,9 +1,11 @@
 SIMULATION_DIR := $(PWD)
 SPDLOG_DIR     := $(PWD)/external/spdlog
+JSON_DIR       := $(PWD)/external/json
 
 INC_PATH :=
 INC_PATH += -I$(SIMULATION_DIR)/
 INC_PATH += -I$(SPDLOG_DIR)/include
+INC_PATH += -I$(JSON_DIR)/include
 
 LIB_PATH :=
 LIB_PATH += -L$(SPDLOG_DIR)/lib

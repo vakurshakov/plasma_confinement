@@ -6,18 +6,14 @@ To have everything up and running without explicitly configuring \
 Makefile, the `external` directory must be created.
 
 ```console
-$ mkdir external && cd external
+mkdir external && cd external
 ```
 
-### 1. Install [CMake](https://cmake.org/)
-
-## TODO
-
-### 2. Install [spdlog](https://github.com/gabime/spdlog)
+### 1. Install [spdlog](https://github.com/gabime/spdlog)
 
 ```console
-$ git clone https://github.com/gabime/spdlog.git
-$ cd spdlog && mkdir build && cd build
+git clone https://github.com/gabime/spdlog.git
+cd spdlog && mkdir build && cd build
 ```
 
 The following options force spdlog cmake to: \
@@ -27,9 +23,15 @@ The following options force spdlog cmake to: \
   `4.` Enable compiler warnings.
 
 ```console
-$ cmake ../ -DSPDLOG_BUILD_SHARED=ON -DSPDLOG_ENABLE_PCH=ON -DSPDLOG_BUILD_PIC=ON -DSPDLOG_BUILD_WARNINGS=ON
+cmake ../ -DSPDLOG_BUILD_SHARED=ON -DSPDLOG_ENABLE_PCH=ON -DSPDLOG_BUILD_PIC=ON -DSPDLOG_BUILD_WARNINGS=ON
 
-$ make [-j]
+make [-j]
+```
+
+### 2. Install [nlohmann/json](https://github.com/nlohmann/json)
+
+```console
+git clone https://github.com/nlohmann/json
 ```
 
 ### 3. Compiling and running `simulation.out`
@@ -38,12 +40,12 @@ After this steps, the executable can built successfully. To do so, \
 run the following commands from the home directory.
 
 ```console
-$ make [-j]
+make [-j]
 ```
 
 The binary file will be created in the bin folder. Execution of \
 the code should be performed from the home directory too
 
 ```console
-$ bin/simulation.out
+./bin/simulation.out
 ```
