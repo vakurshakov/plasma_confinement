@@ -37,13 +37,13 @@ inline const std::string dir_name = "./results/test_dir_name";
 constexpr inline int NUM_THREADS = 16;
 
 constexpr inline double dx = 0.05;
-constexpr inline int SIZE_X = 4200;
+constexpr inline int SIZE_X = 2100;
 
 constexpr inline double dy = dx;
-constexpr inline int SIZE_Y = 4200;
+constexpr inline int SIZE_Y = 2100;
 
 constexpr inline double dt = 0.5 * dx;
-constexpr inline int TIME  = 10'000;
+constexpr inline int TIME  = 400'000;
 
 static_assert(dx == dy, "Current setup works only with equal grid step!");
 static_assert(SIZE_X == SIZE_Y, "Current setup works only with square grid!");
@@ -63,17 +63,18 @@ inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 inline const double T_electrons = 50e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
-inline const double Omega_max = sqrt(2 * T_ions / 511.0);
+inline const double integral_of_current = 3.11436;
+inline const double Omega_max = sqrt(integral_of_current * T_ions / 511.0);
 
-inline const int INJECTION_START = 0;  // 5'000;
-inline const int INJECTION_TIME = 40'000;
+inline const int INJECTION_START = 5'000;
+inline const int INJECTION_TIME = 2 * 40'000;
 
-inline const int RADIUS_OF_INJECTION_AREA = 168;
-inline const int PER_STEP_PARTICLES = M_PI * RADIUS_OF_INJECTION_AREA * RADIUS_OF_INJECTION_AREA * Npi / INJECTION_TIME;
+inline const double RADIUS_OF_INJECTION_AREA = 2.0 * sqrt(mi_me / integral_of_current);
+inline const int PER_STEP_PARTICLES = M_PI * RADIUS_OF_INJECTION_AREA * RADIUS_OF_INJECTION_AREA * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
 inline const double TARGET_PLASMA_TEMPERATURE = 50e-3;  // KeV
-inline const int RADIUS_OF_TARGET_PLASMA = 280;
+inline const double RADIUS_OF_TARGET_PLASMA = RADIUS_OF_INJECTION_AREA;
 #endif
 
 inline const std::string boundaries = "cx_cy";
@@ -84,7 +85,7 @@ inline const double damping_factor = 0.4;
 // Domain_geometry
 inline const double domain_r_min   = 0.0;
 inline const double domain_r_max   = (0.5 * SIZE_X - damping_layer_width) * dx;
-inline const double domain_phi_min = 0;
+inline const double domain_phi_min = 0.0;
 inline const double domain_phi_max = 2.0 * M_PI;
 
 
@@ -115,25 +116,25 @@ inline const umap<std::string,
     }},
     // Diagnostics with their config parameters
     { "energy", { "empty description" }},
-    { "density", {                                                  //
-      "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
-      to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
+    { "density", {                                       //
+      "0", "0",                                          // minimal captured coordinate [in units of c/ωₚ]
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),    // maximum captured coordinate [in units of c/ωₚ]
+      to_string(dx), to_string(dy),                      // step between nearest coordinates [in units of c/ωₚ]
     }},
-    { "Vr_moment", {                                                //
-      "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
-      to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
+    { "Vphi_moment", {                                   //
+      "0", "0",                                          // minimal captured coordinate [in units of c/ωₚ]
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),    // maximum captured coordinate [in units of c/ωₚ]
+      to_string(dx), to_string(dy),                      // step between nearest coordinates [in units of c/ωₚ]
     }},
-    { "Vphi_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
+    { "mVrVr_moment", {                                  //
+      "0", "0",                                          // minimal captured coordinate [in units of c/ωₚ]
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),    // maximum captured coordinate [in units of c/ωₚ]
+      to_string(dx), to_string(dy),                      // step between nearest coordinates [in units of c/ωₚ]
     }},
-    { "mVrVr_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
+    { "mVphiVphi_moment", {                              //
+      "0", "0",                                          // minimal captured coordinate [in units of c/ωₚ]
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),    // maximum captured coordinate [in units of c/ωₚ]
+      to_string(dx), to_string(dy),                      // step between nearest coordinates [in units of c/ωₚ]
     }},
   }},
 #endif
@@ -162,17 +163,17 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "Vr_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
     { "Vphi_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
     { "mVrVr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVphiVphi_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
@@ -204,17 +205,17 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "Vr_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
     { "Vphi_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
     { "mVrVr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVphiVphi_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
@@ -244,17 +245,17 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "Vr_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
     { "Vphi_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
     { "mVrVr_moment", {
+      "0", "0",
+      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
+      to_string(dx), to_string(dy),
+    }},
+    { "mVphiVphi_moment", {
       "0", "0",
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),

@@ -121,7 +121,7 @@ void Manager::initializes() {
       static const double center_x = 0.5 * SIZE_X * dx;
       static const double center_y = 0.5 * SIZE_Y * dy;
 
-      double r = R_max * dx * sqrt(random_01());
+      double r = R_max * sqrt(random_01());
       double phi = 2.0 * M_PI * random_01();
 
       *x = center_x + r * cos(phi);
@@ -133,20 +133,27 @@ void Manager::initializes() {
     &plasma_ions, &plasma_electrons,
     set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
     generator_of_circle_setter(config::RADIUS_OF_INJECTION_AREA),
-    uniform_probability,
+    // get_probability,
+    [] (double x, double y) {
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double r0 = config::RADIUS_OF_INJECTION_AREA;
+
+      x -= center_x;
+      y -= center_y;
+      double r = sqrt(x * x + y * y);
+
+      return (1.0 - cos(2 * M_PI * r / r0)) / r0;
+    },
     // load_impulse:
     [] (double x, double y,
         double mass, double Tx, double Ty, double Tz,
         double p0, double* px, double* py, double* pz) {
-      static const double center_x = 0.5 * SIZE_X * dx;
-      static const double center_y = 0.5 * SIZE_Y * dy;
-
       using namespace config;
-      static const double r0 = RADIUS_OF_INJECTION_AREA * dx;
       static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
 
-      *px = + mass * u0 * (y - center_y) / r0 + temperature_impulse(Tx, mass);
-      *py = - mass * u0 * (x - center_x) / r0 + temperature_impulse(Ty, mass);
+      *px = + mass * u0 + temperature_impulse(Tx, mass);
+      *py = - mass * u0 + temperature_impulse(Ty, mass);
 
 #if _2D3V
       *pz = temperature_impulse(Tz, mass);
@@ -165,7 +172,7 @@ void Manager::initializes() {
     target_ions.particles_, target_ions.parameters_, domain);
 
   const int total_number_of_ions =
-    M_PI * config::RADIUS_OF_TARGET_PLASMA * config::RADIUS_OF_TARGET_PLASMA * config::Npi;
+    M_PI * config::RADIUS_OF_TARGET_PLASMA * config::RADIUS_OF_TARGET_PLASMA * config::Npi / (dx * dy);
 
   struct Set_coordinate_on_circle : public Coordinate_generator {
     using coordinate_loader = std::function<void(double*, double*)>;
