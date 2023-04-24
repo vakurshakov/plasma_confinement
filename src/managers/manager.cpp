@@ -133,34 +133,8 @@ void Manager::initializes() {
     &plasma_ions, &plasma_electrons,
     set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
     generator_of_circle_setter(config::RADIUS_OF_INJECTION_AREA),
-    // get_probability,
-    [] (double x, double y) {
-      static const double center_x = 0.5 * SIZE_X * dx;
-      static const double center_y = 0.5 * SIZE_Y * dy;
-      static const double r0 = config::RADIUS_OF_INJECTION_AREA;
-
-      x -= center_x;
-      y -= center_y;
-      double r = sqrt(x * x + y * y);
-
-      return (1.0 - cos(2 * M_PI * r / r0)) / r0;
-    },
-    // load_impulse:
-    [] (double x, double y,
-        double mass, double Tx, double Ty, double Tz,
-        double p0, double* px, double* py, double* pz) {
-      using namespace config;
-      static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
-
-      *px = + mass * u0 + temperature_impulse(Tx, mass);
-      *py = - mass * u0 + temperature_impulse(Ty, mass);
-
-#if _2D3V
-      *pz = temperature_impulse(Tz, mass);
-#else  // _2D2V
-      *pz = 0.0;
-#endif
-    }
+    uniform_probability,
+    load_maxwellian_impulse
   ));
 
 

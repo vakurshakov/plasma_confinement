@@ -63,18 +63,18 @@ inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 inline const double T_electrons = 50e-3;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
-inline const double integral_of_current = 3.11436;
-inline const double Omega_max = sqrt(integral_of_current * T_ions / 511.0);
+inline const double Omega_max = sqrt(2.0 * T_ions / 511.0);
+inline const double ions_larmor_radius = mi_me * V_ions / Omega_max;
 
-inline const int INJECTION_START = 5'000;
-inline const int INJECTION_TIME = 2 * 40'000;
+inline const int INJECTION_START = 0; // 5'000;
+inline const int INJECTION_TIME = 40'000;
 
-inline const double RADIUS_OF_INJECTION_AREA = 2.0 * sqrt(mi_me / integral_of_current);
+inline const double RADIUS_OF_INJECTION_AREA = 1.5 * ions_larmor_radius;
 inline const int PER_STEP_PARTICLES = M_PI * RADIUS_OF_INJECTION_AREA * RADIUS_OF_INJECTION_AREA * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
 inline const double TARGET_PLASMA_TEMPERATURE = 50e-3;  // KeV
-inline const double RADIUS_OF_TARGET_PLASMA = RADIUS_OF_INJECTION_AREA;
+inline const double RADIUS_OF_TARGET_PLASMA = 2.5 * ions_larmor_radius;
 #endif
 
 inline const std::string boundaries = "cx_cy";
@@ -100,14 +100,14 @@ inline const umap<std::string,
 #if there_are_plasma_ions
   { "plasma_ions", {
     { "parameters", {
-        to_string(n0),      // Particle density [in units of n₀]
-        to_string(+e),      // Particle charge [in units of e]
-        to_string(mi_me),   // Particle mass [in units mₑ]
-        to_string(Npi),     // Number of particles representing the density n₀
-        "0",                // Temperature in x, y and z direction [in KeV]
-        "0",                //
-        "0",                //
-        "0"                 // Absolute value of the initial impulse [in units of mₑc]
+        to_string(n0),        // Particle density [in units of n₀]
+        to_string(+e),        // Particle charge [in units of e]
+        to_string(mi_me),     // Particle mass [in units mₑ]
+        to_string(Npi),       // Number of particles representing the density n₀
+        to_string(T_ions),    // Temperature in x, y and z direction [in KeV]
+        to_string(T_ions),    //
+        "0",                  //
+        "0"                   // Absolute value of the initial impulse [in units of mₑc]
     }},
     { "integration_steps", {
         "Boris_pusher",
