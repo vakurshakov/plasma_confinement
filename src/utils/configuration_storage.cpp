@@ -1,24 +1,28 @@
-#include "configuration_backup.hpp"
+#include "configuration_storage.hpp"
 
 namespace fs = std::filesystem;
 
-Configuration_backup::Configuration_backup(std::string to_directory)
-    : to_directory_(to_directory) {}
+Configuration_storage::Configuration_storage(const std::string& config_path)
+  : config_path_(config_path) {
+  std::ifstream file(config_path);
+  config_ = json::parse(file);
+}
 
-void Configuration_backup::save_constants() {
-  save("src/constants.h",
+void Configuration_storage::save_constants() {
+  save(config_path_,
     fs::copy_options::overwrite_existing);
 }
 
-void Configuration_backup::save_sources() {
+void Configuration_storage::save_sources() {
   save("src",
     fs::copy_options::overwrite_existing |
     fs::copy_options::recursive);
 }
 
-void Configuration_backup::save(std::string from, fs::copy_options options) {
+void Configuration_storage::save(const std::string& from, fs::copy_options options) {
   try {
-    fs::copy(from, to_directory_, options);
+    fs::create_directories(config_.at("Out_dir"));
+    fs::copy(from, config_.at("Out_dir"), options);
   }
   catch(const fs::filesystem_error& ex) {
     std::stringstream ss;
@@ -33,5 +37,3 @@ void Configuration_backup::save(std::string from, fs::copy_options options) {
     throw std::runtime_error(ss.str());
   }
 }
-
-

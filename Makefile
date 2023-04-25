@@ -38,68 +38,65 @@ PCH := src/pch.h
 SRCS := src/main.cpp
 
 # commands
-SRCS +=                                       \
-  src/command/set_particles.cpp               \
-  src/command/copy_coordinates.cpp            \
-  src/command/clone_layer_particles.cpp       \
-  src/command/magnetic_field_half_step.cpp    \
-  src/command/set_Bz_distribution.cpp         \
-  src/command/ionize_particles.cpp            \
+# SRCS +=                                       \
+#   src/command/set_particles.cpp               \
+#   src/command/copy_coordinates.cpp            \
+#   src/command/clone_layer_particles.cpp       \
+#   src/command/magnetic_field_half_step.cpp    \
+#   src/command/set_Bz_distribution.cpp         \
+#   src/command/ionize_particles.cpp            \
 
 # diagnostics
-SRCS +=                                       \
-  src/diagnostics/energy.cpp                  \
-  src/diagnostics/whole_field.cpp             \
-  src/diagnostics/field_on_segment.cpp        \
-  src/diagnostics/field_at_point.cpp          \
-  src/diagnostics/chosen_particles.cpp        \
-  src/diagnostics/distribution_moment.cpp     \
-  src/diagnostics/x0_distribution_function.cpp\
-  src/diagnostics/diagnostics_builder.cpp     \
+# SRCS +=                                       \
+#   src/diagnostics/energy.cpp                  \
+#   src/diagnostics/whole_field.cpp             \
+#   src/diagnostics/field_on_segment.cpp        \
+#   src/diagnostics/field_at_point.cpp          \
+#   src/diagnostics/chosen_particles.cpp        \
+#   src/diagnostics/distribution_moment.cpp     \
+#   src/diagnostics/x0_distribution_function.cpp\
+#   src/diagnostics/diagnostics_builder.cpp     \
 
 # fields
-SRCS +=                                       \
-  src/fields/fields.cpp                       \
-  src/fields/fields_builder.cpp               \
-  src/fields/add_Bz0.cpp                      \
-  src/fields/open_boundaries_processor.cpp    \
+# SRCS +=                                       \
+#   src/fields/fields.cpp                       \
+#   src/fields/fields_builder.cpp               \
+#   src/fields/add_Bz0.cpp                      \
+#   src/fields/open_boundaries_processor.cpp    \
 
 # filewriters
-SRCS += src/file_writers/bin_file.cpp
+# SRCS += src/file_writers/bin_file.cpp
 
 # managers
-SRCS += src/managers/manager.cpp
+# SRCS += src/managers/manager.cpp
 
 # particles
-SRCS +=                                                \
-  src/particles/particles.cpp                          \
-  src/particles/particles_builder.cpp                  \
-  src/particles/particles_load.cpp                     \
-  src/particles/particles_boundary_interaction.cpp     \
-  src/particles/particle/particles_form-factors.cpp    \
-  src/particles/particle/point_boundary_interaction.cpp\
+# SRCS +=                                                \
+#   src/particles/particles.cpp                          \
+#   src/particles/particles_builder.cpp                  \
+#   src/particles/particles_load.cpp                     \
+#   src/particles/particles_boundary_interaction.cpp     \
+#   src/particles/particle/particles_form-factors.cpp    \
+#   src/particles/particle/point_boundary_interaction.cpp\
 
 # solvers
-SRCS +=                                                \
-  src/solvers/FDTD.cpp                                 \
-  src/solvers/simple_interpolation.cpp                 \
-  src/solvers/Boris_pusher.cpp                         \
-  src/solvers/Esirkepov_density_decomposition.cpp      \
+# SRCS +=                                                \
+#   src/solvers/FDTD.cpp                                 \
+#   src/solvers/simple_interpolation.cpp                 \
+#   src/solvers/Boris_pusher.cpp                         \
+#   src/solvers/Esirkepov_density_decomposition.cpp      \
 
 # utils
-SRCS +=                                                    \
-  src/utils/log.cpp                                        \
-  src/utils/time_manager.cpp                               \
-  src/utils/simulation_backup.cpp                          \
-  src/utils/configuration_backup.cpp                       \
-  # src/utils/transition_layer/table_function.cpp            \
-  # src/utils/transition_layer/parameters_table.cpp          \
-  # src/utils/transition_layer/particles_distribution.cpp    \
+SRCS +=                                                \
+  src/utils/log.cpp                                    \
+  src/utils/time_manager.cpp                           \
+  src/utils/configuration_storage.cpp                  \
+  # src/utils/simulation_backup.cpp                      \
 
 # vectors
-SRCS +=                                                \
-  src/vectors/vector_classes.cpp                       \
-  src/vectors/vector3_field.cpp                        \
+# SRCS +=                                                \
+#   src/vectors/vector_classes.cpp                       \
+#   src/vectors/vector3_field.cpp                        \
 
 OBJS := $(SRCS:%.cpp=$(OBJDIR)/%.o)
 DEPS := $(SRCS:%.cpp=$(OBJDIR)/%.d)

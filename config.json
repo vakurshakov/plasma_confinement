@@ -1,0 +1,40 @@
+{
+  "Name": "simple_rectangle",
+
+  "__description": "test config to create one-sort plasma in periodic boundaries",
+  "__date": "April 25, 2023",
+
+  "Out_dir": "results/simple_rectangle",
+
+  "Geometry": {
+    "dx":     0.05,
+    "size_x": 2100,
+
+    "dy":     0.05,
+    "size_y": 2100,
+
+    "dt":   0.025,
+    "time": 10000,
+
+    "boundaries": "px_py"
+  },
+
+  "Particles": [
+    {
+      "Name": "plasma_electrons",
+      "Parameters": {
+        "density":  1.00,
+        "charge":  -1.00,
+        "mass":     1.00,
+        "Np":       50,
+        "T_x":      50e-3,
+        "T_y":      50e-3
+      },
+      "Integration_steps": [
+        "Boris_pusher",
+        "Simple_interpolation",
+        "Esirkepov_density_decomposition"
+      ]
+    }
+  ]
+}

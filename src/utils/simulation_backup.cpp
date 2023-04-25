@@ -1,6 +1,6 @@
 #include "simulation_backup.hpp"
 
-#include "src/utils/configuration_backup.hpp"
+#include "src/utils/configuration_storage.hpp"
 #include "src/file_writers/bin_file.hpp"
 
 #include "src/particles/particle/point.hpp"
@@ -22,7 +22,7 @@ Simulation_backup::Simulation_backup(
 void Simulation_backup::save_parameters() const {
   fs::create_directories(result_directory_);
 
-  Configuration_backup config(result_directory_ + "/src/");
+  Configuration_storage config(result_directory_ + "/src/");
   config.save_sources();
 
   std::ofstream param_file((result_directory_ +
