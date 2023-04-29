@@ -84,7 +84,26 @@
         "*.ipp": "cpp",
         "petsc*.h": "cpp",
         "csetjmp": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "*.def": "cpp",
+        "*.tpp": "cpp",
+        "core": "cpp",
+        "eigen2support": "cpp",
+        "sparsecore": "cpp",
+        "cassert": "cpp",
+        "ccomplex": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "ciso646": "cpp",
+        "climits": "cpp",
+        "cstdbool": "cpp",
+        "filesystem": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "version": "cpp",
+        "*.rh": "cpp"
     },
     "cSpell.customDictionaries": {
         "custom-dictionary-workspace": {
