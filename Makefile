@@ -34,8 +34,10 @@ OBJDIR := bin-int
 # precompiled header
 PCH := src/pch.h
 
-# main
-SRCS := src/main.cpp
+# main and constants
+SRCS :=
+	src/main.cpp         \
+	src/constants.cpp
 
 # commands
 # SRCS +=                                       \
