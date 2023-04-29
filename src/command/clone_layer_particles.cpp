@@ -23,7 +23,7 @@ void Clone_layer_particles::execute(int /* timestep */) {
 
   auto particles_fixed_end = particles_in_->particles_.end();
 
-  #pragma omp parallel for num_threads(NUM_THREADS)
+  #pragma omp parallel for num_threads(OMP_NUM_THREADS)
   for (auto it = particles_in_->particles_.begin(); it != particles_fixed_end; ++it) {
     if (particle_should_be_cloned(it->point)) {
 #if GLOBAL_DENSITY

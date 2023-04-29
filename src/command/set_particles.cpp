@@ -43,7 +43,7 @@ void Set_particles::execute(int /* timestep */) {
   /// 2. It is not always possible to describe everything in such a cycle.
 
   if (!coordinate_generator_) {
-    #pragma omp parallel for num_threads(NUM_THREADS)
+    #pragma omp parallel for num_threads(OMP_NUM_THREADS)
     for (int i = int(geom_.x_min); i < int(geom_.x_max); ++i) {
     for (int j = int(geom_.y_min); j < int(geom_.y_max); ++j) {
       for (int np = 0; np < config::Npi; ++np) {
@@ -61,7 +61,7 @@ void Set_particles::execute(int /* timestep */) {
     }}
   }
   else {
-    #pragma omp parallel for num_threads(NUM_THREADS)
+    #pragma omp parallel for num_threads(OMP_NUM_THREADS)
     for (size_t np = 0u; np < num_particles_to_load_; ++np) {
       double x, y;
       coordinate_generator_->load(&x, &y);

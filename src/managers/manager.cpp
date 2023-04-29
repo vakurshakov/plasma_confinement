@@ -149,7 +149,7 @@ void Manager::calculates() {
 void Manager::diagnose(size_t t) const {
   PROFILE_FUNCTION();
 
-  #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
+  #pragma omp parallel for shared(diagnostics_), num_threads(OMP_NUM_THREADS)
   for (const auto& diagnostic : diagnostics_) {
     diagnostic->diagnose(t);
   }

@@ -28,7 +28,7 @@ void Particles::push() {
 
 // firstprivate attribute initializes the thread-local variables
 // with the values of the original object outside of this scope
-#pragma omp parallel num_threads(NUM_THREADS),\
+#pragma omp parallel num_threads(OMP_NUM_THREADS),\
   firstprivate(push, interpolate, decompose)
 {
   #pragma omp for

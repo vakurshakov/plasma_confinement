@@ -5,7 +5,7 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
   vector3_field& E = fields_->E();
   vector3_field& B = fields_->B();
 
-#pragma omp parallel shared(E, B), num_threads(NUM_THREADS)
+#pragma omp parallel shared(E, B), num_threads(OMP_NUM_THREADS)
 {
 #if _2D3V
   // Bx(y, x+1/2) at t+1/2
