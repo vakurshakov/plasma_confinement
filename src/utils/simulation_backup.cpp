@@ -1,6 +1,6 @@
 #include "simulation_backup.hpp"
 
-#include "src/utils/configuration_storage.hpp"
+#include "src/utils/configuration.hpp"
 #include "src/file_writers/bin_file.hpp"
 
 #include "src/particles/particle/point.hpp"
@@ -11,7 +11,8 @@ Simulation_backup::Simulation_backup(
     int backup_timestep,
     std::unordered_map<std::string, Particles&> each_particles_sort,
     std::unordered_map<std::string, vector3_field&> each_vector_field)
-    : Diagnostic(dir_name + "/simulation_backup"),
+    : Diagnostic(Configuration::out_dir() + "/simulation_backup"),
+      out_dir_(Configuration::out_dir()),
       backup_timestep_(backup_timestep),
       particles_(each_particles_sort),
       fields_(each_vector_field) {
@@ -22,8 +23,7 @@ Simulation_backup::Simulation_backup(
 void Simulation_backup::save_parameters() const {
   fs::create_directories(result_directory_);
 
-  Configuration_storage config(result_directory_ + "/src/");
-  config.save_sources();
+  Configuration::instance().save_sources();
 
   std::ofstream param_file((result_directory_ +
     "/parameters.txt").c_str(), std::ios::out);
@@ -72,7 +72,7 @@ void Simulation_backup::diagnose(int t) {
 #if LOGGING
   LOG_FLUSH();
 
-  fs::copy(dir_name + "/simulation.log", result_directory_,
+  fs::copy(out_dir_ + "/simulation.log", result_directory_,
     fs::copy_options::overwrite_existing);
 #endif
 
@@ -122,7 +122,7 @@ void Simulation_backup::save_fields(int t) const {
 }
 
 void Simulation_backup::save_time_diagnostics() const {
-  for (const auto& entry : fs::recursive_directory_iterator(dir_name)) {
+  for (const auto& entry : fs::recursive_directory_iterator(out_dir_)) {
     auto entry_str = entry.path().string();
 
     if (entry_str.find(result_directory_) != std::string::npos ||
@@ -136,7 +136,7 @@ void Simulation_backup::save_time_diagnostics() const {
 
     if (entry_str.find("energy") != std::string::npos ||
         entry_str.find("point_") != std::string::npos) {
-      auto begin = dir_name.size() + 1;
+      auto begin = out_dir_.size() + 1;
       auto end = entry_str.find_last_of("/") + 1;
 
       auto path = entry_str.substr(begin, (end - begin));
@@ -155,7 +155,7 @@ void Simulation_backup::save_time_diagnostics() const {
 void Simulation_backup::load() {
   if (!fs::exists(result_directory_)) {
     throw std::runtime_error("Failed to load simulation backup! "
-      "No such directory in " + dir_name);
+      "No such directory in " + out_dir_);
   }
 
   std::string timestep = get_last_timestep_directory();
@@ -246,7 +246,8 @@ void Simulation_backup::load_fields(const std::string& timestep) {
   }
 }
 
-/* static */ void Simulation_backup::restore_time_diagnostics() {
+/*
+void Simulation_backup::restore_time_diagnostics() {
   bool should_try = false;
 
   for (const auto& [_1, sort_description] : config::species_description) {
@@ -263,7 +264,7 @@ void Simulation_backup::load_fields(const std::string& timestep) {
   if (!should_try)
     return;
 
-  const std::string diagnostics = dir_name + "/simulation_backup/time_diagnostics/";
+  const std::string diagnostics = out_dir_ + "/simulation_backup/time_diagnostics/";
 
   for (const auto& entry : fs::recursive_directory_iterator(diagnostics)) {
     if (fs::is_directory(entry))
@@ -274,13 +275,15 @@ void Simulation_backup::load_fields(const std::string& timestep) {
     auto path = entry_str.substr(begin);
 
     if (path.find("/") != std::string::npos) {
-      fs::create_directories(dir_name + "/" + path.substr(0, path.find_last_of("/")));
+      fs::create_directories(out_dir_ + "/" + path.substr(0, path.find_last_of("/")));
     }
-    fs::copy(entry, dir_name + "/" + path, fs::copy_options::overwrite_existing);
+    fs::copy(entry, out_dir_ + "/" + path, fs::copy_options::overwrite_existing);
   }
 }
+*/
 
-constexpr int index(int ny, int nx) {
+
+inline int index(int ny, int nx) {
   return ny * SIZE_X + nx;
 }
 

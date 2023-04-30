@@ -31,7 +31,6 @@ class Particles_builder {
   std::vector<std::string> get_description(const std::string& parameter);
 
   std::string sort_name_ = "undefined";
-  config::umap<std::string, std::vector<std::string>> sort_description_;
   std::vector<std::string> sort_parameters_;
   std::vector<std::string> sort_integration_steps_;
 };

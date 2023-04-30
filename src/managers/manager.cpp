@@ -1,18 +1,11 @@
 #include "manager.hpp"
 
-#include "src/command/set_particles.hpp"
-#include "src/command/copy_coordinates.hpp"
-#include "src/command/ionize_particles.hpp"
-#include "src/command/set_Bz_distribution.hpp"
-#include "src/command/magnetic_field_half_step.hpp"
+#include "src/utils/configuration.hpp"
+#include "src/utils/simulation_backup.hpp"
 
 #include "src/fields/fields_builder.hpp"
 #include "src/particles/particles_builder.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
-
-#include "src/particles/particles_load.hpp"
-#include "src/utils/random_number_generator.hpp"
-#include "src/utils/simulation_backup.hpp"
 
 
 void Manager::log_information() const {
@@ -47,33 +40,7 @@ void Manager::initializes() {
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 
-  // We use this to push the magnetic field to
-  // the same half-timestep as electric field
-  step_presets_.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
-
-  presets.push_back(std::make_unique<Set_Bz_distribution>(&fields_));
-
-  Particles_builder particles_builder(fields_);
-
-  Domain_geometry domain {
-    config::domain_r_min,
-    config::domain_r_max,
-    config::domain_phi_min,
-    config::domain_phi_max
-  };
-
-  std::unordered_map<std::string, Particles&>{
-    // ???
-  },
-
-  particles_builder.set_sort("plasma_electrons");
-  Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
-
-  plasma_electrons.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
-    plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  plasma_electrons.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
-
+  /// @todo make factory for commands
 
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
@@ -87,19 +54,16 @@ void Manager::initializes() {
       { "E", fields_.E() },
       { "B", fields_.B() }
   });
-
 #endif
 
 #if !START_FROM_BACKUP
   for (const auto& command : presets) {
     command->execute(START_);
   }
-
 #else
   backup->load();
   START_ = backup->get_last_timestep();
   LOG_INFO("Configuration loaded from backup. Simulation will start from t={}", START_);
-
 #endif
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);

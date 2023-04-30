@@ -46,14 +46,14 @@ void Open_boundaries_processor::left_right_bounds() {
 
     fields_E.x(y, x) *= coeff;
     fields_E.y(y, x) *= coeff;
-    fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
+    // fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
 
     // right
     int right_x = (SIZE_X - 1) - x;
 
     fields_E.x(y, right_x) *= coeff;
     fields_E.y(y, right_x) *= coeff;
-    fields_B.z(y, right_x) = fields_B.z(y, right_x) * coeff + config::Omega_max * (1.0 - coeff);
+    // fields_B.z(y, right_x) = fields_B.z(y, right_x) * coeff + config::Omega_max * (1.0 - coeff);
 
   #if _2D3V
     fields_E.z(y, x) *= coeff;
@@ -85,14 +85,14 @@ void Open_boundaries_processor::top_bottom_bounds() {
 
     fields_E.x(y, x) *= coeff;
     fields_E.y(y, x) *= coeff;
-    fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
+    // fields_B.z(y, x) = fields_B.z(y, x) * coeff + config::Omega_max * (1.0 - coeff);
 
     // top
     int top_y = (SIZE_Y - 1) - y;
 
     fields_E.x(top_y, x) *= coeff;
     fields_E.y(top_y, x) *= coeff;
-    fields_B.z(top_y, x) = fields_B.z(top_y, x) * coeff + config::Omega_max * (1.0 - coeff);
+    // fields_B.z(top_y, x) = fields_B.z(top_y, x) * coeff + config::Omega_max * (1.0 - coeff);
 
   #if _2D3V
     fields_E.z(y, x) *= coeff;

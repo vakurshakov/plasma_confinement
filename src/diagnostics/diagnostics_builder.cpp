@@ -1,5 +1,7 @@
 #include "diagnostics_builder.hpp"
 
+#include "src/utils/configuration.hpp"
+
 #include "src/diagnostics/energy.hpp"
 #include "src/diagnostics/field_at_point.hpp"
 #include "src/diagnostics/field_on_segment.hpp"
@@ -11,7 +13,7 @@
 
 Diagnostics_builder::Diagnostics_builder(
     std::vector<Particles>& particles_species, Fields& fields)
-    : fields_(fields) {
+    : fields_(fields), out_dir_(Configuration::out_dir()) {
   for (auto& sort : particles_species) {
     particles_species_.emplace(sort.get_parameters().get_name(), sort);
   }
@@ -25,7 +27,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
 
   vector_of_diagnostics diagnostics;
 
-#if there_are_fields && fields_are_diagnosed
+#if THERE_ARE_FIELDS
   if (config::fields_diagnostics.empty())
     throw std::runtime_error("Initialization error: fields are diagnosed but no fields_diagnostics in file constants.h");
 
@@ -49,7 +51,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
   }
 #endif
 
-#if there_are_particles && particles_are_diagnosed
+#if THERE_ARE_PARTICLES
   if (config::species_description.empty())
     throw std::runtime_error("Initialization error: particles are diagnosed but no species_description in file constants.h");
 
@@ -158,7 +160,7 @@ Diagnostics_builder::get_component(const std::string& component) {
 
 BUILD_FIELD_DIAG(fields_energy) {
   return std::make_unique<fields_energy>(
-    dir_name + "/", fields_.E(), fields_.B());
+    out_dir_ + "/", fields_.E(), fields_.B());
 }
 
 BUILD_FIELD_DIAG(field_at_point) {
@@ -176,7 +178,7 @@ BUILD_FIELD_DIAG(field_at_point) {
   }
 
   return std::make_unique<field_at_point>(
-    dir_name + "/" + description[0] + description[1]+ "/",
+    out_dir_ + "/" + description[0] + description[1]+ "/",
     "point_(" + description[2] + "," + description[3] + ")",
     get_field(description[0]),
     get_component(description[1]),
@@ -200,7 +202,7 @@ BUILD_FIELD_DIAG(field_on_segment) {
   }
 
   return std::make_unique<field_on_segment>(
-    dir_name + "/" + description[0] + description[1] + "/segment_(" +
+    out_dir_ + "/" + description[0] + description[1] + "/segment_(" +
       description[2] + "," + description[3] + ")_(" +
       description[4] + "," + description[5] + ")/",
     get_field(description[0]),
@@ -225,7 +227,7 @@ BUILD_FIELD_DIAG(whole_field) {
   }
 
   return std::make_unique<whole_field>(
-    dir_name + "/" + description[0] + description[1] + "/whole_field/",
+    out_dir_ + "/" + description[0] + description[1] + "/whole_field/",
     get_field(description[0]),
     get_component(description[1]),
     diag_segment{
@@ -241,7 +243,7 @@ inline std::unique_ptr<Diagnostic>
 Diagnostics_builder::build_diag_particles_energy(
     const std::string& sort_name) {
   return std::make_unique<particles_energy>(
-    dir_name + "/", sort_name,
+    out_dir_ + "/", sort_name,
     particles_species_.at(sort_name));
 }
 
@@ -274,7 +276,7 @@ Diagnostics_builder::build_diag_distribution_moment(
   }
 
   return std::make_unique<distribution_moment>(
-    dir_name + "/" + sort_name,
+    out_dir_ + "/" + sort_name,
     particles_species_.at(sort_name),
     std::make_unique<Moment>(moment_name),
     std::make_unique<Projector2D>(axes_names, area));
@@ -293,7 +295,7 @@ Diagnostics_builder::build_diag_x0_distribution_function(
   };
 
   return std::make_unique<x0_distribution_function>(
-    dir_name + "/" + sort_name,
+    out_dir_ + "/" + sort_name,
     particles_species_.at(sort_name),
     x0, area);
 }

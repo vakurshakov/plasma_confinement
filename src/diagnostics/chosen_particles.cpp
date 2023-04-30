@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 std::vector<int> choose_indexes(const std::vector<Particle>& particles) {
   std::vector<int> indexes_of_chosen_particles;
 
-  for(size_t i = 0u; i < particles.size(); i += config::Npi) {
+  for(size_t i = 0u; i < particles.size(); i += 1) {
     auto& point = particles[i].point;
 
     double x = round(point.x() / dx);

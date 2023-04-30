@@ -1,5 +1,6 @@
 #include "ionize_particles.hpp"
 
+#include "src/utils/configuration.hpp"
 #include "src/utils/random_number_generator.hpp"
 
 Ionize_particles::Ionize_particles(
@@ -14,33 +15,34 @@ Ionize_particles::Ionize_particles(
     get_probability(std::move(get_probability)),
     load_impulse(load_impulse),
 #if !START_FROM_BACKUP
-    ionized_energy(BIN_File(dir_name, "ionized_energy")),
-    ejected_energy(BIN_File(dir_name, "ejected_energy")) {}
-
+    ionized_energy(BIN_File(Configuration::out_dir(), "ionized_energy")),
+    ejected_energy(BIN_File(Configuration::out_dir(), "ejected_energy")) {}
 #else  // here offset not needed!
-    ionized_energy(BIN_File::from_backup(dir_name, "ionized_energy", 0)),
-    ejected_energy(BIN_File::from_backup(dir_name, "ejected_energy", 0)) {}
-
+    ionized_energy(BIN_File::from_backup(Configuration::out_dir(), "ionized_energy", 0)),
+    ejected_energy(BIN_File::from_backup(Configuration::out_dir(), "ejected_energy", 0)) {}
 #endif
 
 void Ionize_particles::execute(int t) {
   PROFILE_FUNCTION();
 
-  if (t < config::INJECTION_START)
-    return;
+  /// @todo add via config file
+  // if (t < config::INJECTION_START)
+  //   return;
 
   LOG_INFO("Injecting particles, {} particles will be loaded into {} and {}",
     per_step_particles_num[t-1],  // timestep count starts from 1;
     ionized->get_parameters().get_name(),
     ejected->get_parameters().get_name());
 
-  const double mi =   ionized->get_parameters().m();
+  const int Npi     = ionized->get_parameters().Np();
+  const double mi   = ionized->get_parameters().m();
   const double Ti_x = ionized->get_parameters().Tx();
   const double Ti_y = ionized->get_parameters().Ty();
   const double Ti_z = ionized->get_parameters().Tz();
   const double pi_0 = ionized->get_parameters().p0();
 
-  const double me =   ejected->get_parameters().m();
+  const int Npe     = ejected->get_parameters().Np();
+  const double me   = ejected->get_parameters().m();
   const double Te_x = ejected->get_parameters().Tx();
   const double Te_y = ejected->get_parameters().Ty();
   const double Te_z = ejected->get_parameters().Tz();
@@ -66,8 +68,8 @@ void Ionize_particles::execute(int t) {
     while (std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
            std::isinf(pe_x) || std::isinf(pe_y) || std::isinf(pe_z));
 
-    Wi += (sqrt(mi * mi + (pi_x * pi_x + pi_y * pi_y + pi_z * pi_z)) - mi) * dx * dy / config::Npi;
-    We += (sqrt(me * me + (pe_x * pe_x + pe_y * pe_y + pe_z * pe_z)) - me) * dx * dy / config::Npi;
+    Wi += (sqrt(mi * mi + (pi_x * pi_x + pi_y * pi_y + pi_z * pi_z)) - mi) * dx * dy / Npi;
+    We += (sqrt(me * me + (pe_x * pe_x + pe_y * pe_y + pe_z * pe_z)) - me) * dx * dy / Npe;
 
     ionized->add_particle(Point({x, y}, {pi_x, pi_y, pi_z}));
     ejected->add_particle(Point({x, y}, {pe_x, pe_y, pe_z}));
@@ -94,7 +96,7 @@ std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_n
   std::vector<size_t> array_of_particles_to_load(t_inj);
 
   for (size_t t = 0u; t < t_inj; ++t) {
-    array_of_particles_to_load[t] = config::PER_STEP_PARTICLES;
+    array_of_particles_to_load[t] = 0; // config::PER_STEP_PARTICLES;
   }
 
   return array_of_particles_to_load;

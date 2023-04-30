@@ -29,6 +29,7 @@ void Set_particles::execute(int /* timestep */) {
   PROFILE_FUNCTION();
   LOG_TRACE("Setting {} distribution", particles_->get_parameters().get_name());
 
+  const int Np      = particles_->get_parameters().Np();
   const double mass = particles_->get_parameters().m();
   const double Tx   = particles_->get_parameters().Tx();
   const double Ty   = particles_->get_parameters().Ty();
@@ -46,7 +47,7 @@ void Set_particles::execute(int /* timestep */) {
     #pragma omp parallel for num_threads(OMP_NUM_THREADS)
     for (int i = int(geom_.x_min); i < int(geom_.x_max); ++i) {
     for (int j = int(geom_.y_min); j < int(geom_.y_max); ++j) {
-      for (int np = 0; np < config::Npi; ++np) {
+      for (int np = 0; np < Np; ++np) {
         double x = (i + random_01()) * dx;
         double y = (j + random_01()) * dy;
 

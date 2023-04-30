@@ -19,6 +19,7 @@ class Diagnostics_builder {
  private:
   std::map<std::string, const Particles&> particles_species_;
   Fields& fields_;
+  std::string out_dir_;
 
   inline const vector3_field& get_field(const std::string& name);
   inline Axis get_component(const std::string& component);

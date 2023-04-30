@@ -17,9 +17,12 @@ class Simulation_backup : public Diagnostic {
 
   void load();
   size_t get_last_timestep() const;
-  static void restore_time_diagnostics();
+
+  /// @todo Refactor with config
+  // static void restore_time_diagnostics();
 
  private:
+  std::string out_dir_;
   int backup_timestep_;
   std::unordered_map<std::string, Particles&> particles_;
   std::unordered_map<std::string, vector3_field&> fields_;

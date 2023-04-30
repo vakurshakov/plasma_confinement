@@ -20,6 +20,12 @@
     "boundaries": "px_py"
   },
 
+  "Damping": {
+    "__coordinates": "polar",
+    "layer_width": 100,
+    "factor": 0.4
+  },
+
   "Particles": [
     {
       "Name": "plasma_electrons",

@@ -20,26 +20,26 @@ Particles_builder::Particles_builder(Fields& fields)
     : fields_(fields) {}
 
 void Particles_builder::set_sort(const string& sort_name) {
-  auto it = config::species_description.find(sort_name);
-  if (it == config::species_description.end()) {
-    throw std::runtime_error("Initialization error: "
-      + sort_name + " not found in constants.h");
-  }
+  // auto it = config::species_description.find(sort_name);
+  // if (it == config::species_description.end()) {
+  //   throw std::runtime_error("Initialization error: "
+  //     + sort_name + " not found in constants.h");
+  // }
 
-  sort_name_ = sort_name;
-  sort_description_ = it->second;
-  sort_parameters_ = get_description("parameters");
-  sort_integration_steps_ = get_description("integration_steps");
+  // sort_name_ = sort_name;
+  // sort_description_ = it->second;
+  // sort_parameters_ = get_description("parameters");
+  // sort_integration_steps_ = get_description("integration_steps");
 }
 
 std::vector<std::string>
 Particles_builder::get_description(const string& parameter) {
-  auto description_it = sort_description_.find(parameter);
+  // auto description_it = sort_description_.find(parameter);
 
-  if (description_it == sort_description_.end())
-    throw std::runtime_error("Initialization error: Parameter " + parameter + "isn't defined on sort " + sort_name_ + " in constants.h");
+  // if (description_it == sort_description_.end())
+  //   throw std::runtime_error("Initialization error: Parameter " + parameter + "isn't defined on sort " + sort_name_ + " in constants.h");
 
-  return description_it->second;
+  return {}; //description_it->second;
 }
 
 Parameters Particles_builder::build_parameters() {
