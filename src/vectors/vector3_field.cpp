@@ -74,13 +74,13 @@ double& px_py_vector3_field::z(int ny, int nx) {
   return fz_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
 }
 
-double px_py_vector3_field::x(int ny, int nx) const {
+const double& px_py_vector3_field::x(int ny, int nx) const {
   return fx_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
 }
-double px_py_vector3_field::y(int ny, int nx) const {
+const double& px_py_vector3_field::y(int ny, int nx) const {
   return fy_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
 }
-double px_py_vector3_field::z(int ny, int nx) const {
+const double& px_py_vector3_field::z(int ny, int nx) const {
   return fz_[index(periodic(ny, 0, size_y_), periodic(nx, 0, size_x_))];
 }
 
@@ -127,9 +127,9 @@ double& rx_py_vector3_field::x(int ny, int nx) { return get_proxied(X, ny, nx); 
 double& rx_py_vector3_field::y(int ny, int nx) { return get_proxied(Y, ny, nx); }
 double& rx_py_vector3_field::z(int ny, int nx) { return get_proxied(Z, ny, nx); }
 
-double rx_py_vector3_field::x(int ny, int nx) const { return get_proxied(X, ny, nx); }
-double rx_py_vector3_field::y(int ny, int nx) const { return get_proxied(Y, ny, nx); }
-double rx_py_vector3_field::z(int ny, int nx) const { return get_proxied(Z, ny, nx); }
+const double& rx_py_vector3_field::x(int ny, int nx) const { return get_proxied(X, ny, nx); }
+const double& rx_py_vector3_field::y(int ny, int nx) const { return get_proxied(Y, ny, nx); }
+const double& rx_py_vector3_field::z(int ny, int nx) const { return get_proxied(Z, ny, nx); }
 
 
 cx_py_vector3_field::cx_py_vector3_field(int size_x, int size_y)
@@ -145,13 +145,13 @@ double& cx_py_vector3_field::z(int ny, int nx) {
   return fz_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
 
-double cx_py_vector3_field::x(int ny, int nx) const {
+const double& cx_py_vector3_field::x(int ny, int nx) const {
   return fx_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
-double cx_py_vector3_field::y(int ny, int nx) const {
+const double& cx_py_vector3_field::y(int ny, int nx) const {
   return fy_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
-double cx_py_vector3_field::z(int ny, int nx) const {
+const double& cx_py_vector3_field::z(int ny, int nx) const {
   return fz_[index(periodic(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
 
@@ -169,12 +169,12 @@ double& cx_cy_vector3_field::z(int ny, int nx) {
   return fz_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
 
-double cx_cy_vector3_field::x(int ny, int nx) const {
+const double& cx_cy_vector3_field::x(int ny, int nx) const {
   return fx_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
-double cx_cy_vector3_field::y(int ny, int nx) const {
+const double& cx_cy_vector3_field::y(int ny, int nx) const {
   return fy_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
-double cx_cy_vector3_field::z(int ny, int nx) const {
+const double& cx_cy_vector3_field::z(int ny, int nx) const {
   return fz_[index(continuous(ny, 0, size_y_), continuous(nx, 0, size_x_))];
 }
