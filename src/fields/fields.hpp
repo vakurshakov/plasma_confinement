@@ -24,7 +24,6 @@ public:
 
   // additional
   friend class Magnetic_field_half_step;
-  void add_Bz0(double Bz0);
 
 private:
   v3f_up E_, B_, J_;
