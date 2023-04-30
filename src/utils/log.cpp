@@ -5,7 +5,7 @@
 std::shared_ptr<spdlog::logger> Log::logger_;
 
 void Log::Init(const std::string& filename) {
-  // basic logger that will write everything to simulation.log
+  // basic logger that will write everything to %filename%
   logger_ = spdlog::basic_logger_mt("Plasma_simulation", filename, /* truncate = */ true);
 
   logger_->set_pattern("%^[%D %T]: %v %$");
