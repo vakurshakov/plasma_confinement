@@ -1,14 +1,15 @@
-#include "configuration_storage.hpp"
+#include "configuration.hpp"
 
 namespace fs = std::filesystem;
 
-Configuration_storage::Configuration_storage(const std::string& config_path)
-  : config_path_(config_path) {
+Configuration::Configuration(const char* config_path)
+    : config_path_(config_path) {
   std::ifstream file(config_path);
   config_ = json::parse(file);
+  out_dir_ = get("Out_dir");
 }
 
-void Configuration_storage::init_geometry() const {
+void Configuration::init_geometry() const {
   dx = get<double>("Geometry.dx");
   assert(dx > 0 && "Grid step dx is incorrect!");
 
@@ -37,18 +38,18 @@ void Configuration_storage::init_geometry() const {
   assert(SIZE_X == SIZE_Y && "Current setup works only with square grid!");
 }
 
-void Configuration_storage::save_configuration() const {
+void Configuration::save() const {
   save(config_path_,
     fs::copy_options::overwrite_existing);
 }
 
-void Configuration_storage::save_sources() const {
+void Configuration::save_sources() const {
   save("src",
     fs::copy_options::overwrite_existing |
     fs::copy_options::recursive);
 }
 
-void Configuration_storage::save(const std::string& from, fs::copy_options options) const {
+void Configuration::save(const std::string& from, fs::copy_options options) const {
   try {
     fs::create_directories(get("Out_dir"));
     fs::copy(from, get("Out_dir"), options);
@@ -66,3 +67,4 @@ void Configuration_storage::save(const std::string& from, fs::copy_options optio
     throw std::runtime_error(ss.str());
   }
 }
+

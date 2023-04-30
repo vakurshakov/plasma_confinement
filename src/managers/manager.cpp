@@ -115,7 +115,7 @@ void Manager::initializes() {
 
 
 void Manager::calculates() {
-  for (size_t t = START_ + 1u; t <= TIME; ++t) {
+  for (int t = START_ + 1; t <= TIME; ++t) {
     LOG_TRACE("------------------------------------ one timestep ------------------------------------");
     PROFILE_SCOPE("one timestep");
 
@@ -146,7 +146,7 @@ void Manager::calculates() {
 }
 
 
-void Manager::diagnose(size_t t) const {
+void Manager::diagnose(int t) const {
   PROFILE_FUNCTION();
 
   #pragma omp parallel for shared(diagnostics_), num_threads(OMP_NUM_THREADS)

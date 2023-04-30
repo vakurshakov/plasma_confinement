@@ -2,7 +2,7 @@
 
 #include "src/pch.h"
 // #include "src/managers/manager.hpp"
-#include "src/utils/configuration_storage.hpp"
+#include "src/utils/configuration.hpp"
 
 int main(int argc, const char** argv) {
   if (argc == 1) {
@@ -10,8 +10,8 @@ int main(int argc, const char** argv) {
     return EXIT_FAILURE;
   }
 
-  Configuration_storage config(argv[1]);
-  config.save_configuration();
+  Configuration& config = Configuration::instance(argv[1]);
+  config.save();
   config.init_geometry();
 
   LOG_INIT(config.get("Out_dir") + "/simulation.log");

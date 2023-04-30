@@ -1,18 +1,15 @@
 #ifndef SRC_CONSTANTS_H
 #define SRC_CONSTANTS_H
 
-#define THERE_ARE_PARTICLES             true
-#define THERE_ARE_FIELDS                true
-
-#define GLOBAL_DENSITY                  true
-
-#define _2D3V                           false
-#define LOGGING                         true
-#define TIME_PROFILING                  true
-#define MAKE_BACKUPS                    true
-#define START_FROM_BACKUP               false
-
-#define OMP_NUM_THREADS                 16
+#define THERE_ARE_PARTICLES    false
+#define GLOBAL_DENSITY         true
+#define THERE_ARE_FIELDS       false
+#define _2D3V                  false
+#define LOGGING                true
+#define TIME_PROFILING         true
+#define MAKE_BACKUPS           true
+#define START_FROM_BACKUP      false
+#define OMP_NUM_THREADS        16
 
 // Global geometry variables declaration
 extern double dx;

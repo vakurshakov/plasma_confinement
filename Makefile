@@ -35,9 +35,9 @@ OBJDIR := bin-int
 PCH := src/pch.h
 
 # main and constants
-SRCS :=
-	src/main.cpp         \
-	src/constants.cpp
+SRCS :=                \
+  src/main.cpp         \
+  src/constants.cpp    \
 
 # commands
 # SRCS +=                                       \
@@ -92,7 +92,7 @@ SRCS :=
 SRCS +=                                                \
   src/utils/log.cpp                                    \
   src/utils/time_manager.cpp                           \
-  src/utils/configuration_storage.cpp                  \
+  src/utils/configuration.cpp                          \
   # src/utils/simulation_backup.cpp                      \
 
 # vectors

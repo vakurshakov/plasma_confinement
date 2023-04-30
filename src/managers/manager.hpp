@@ -17,7 +17,7 @@ class Manager {
  private:
   void log_information() const;
 
-  size_t START_ = 0u;
+  int START_ = 0u;
 
   Fields fields_;
   std::vector<Particles> particles_species_;
@@ -25,7 +25,7 @@ class Manager {
   using Diagnostic_up = std::unique_ptr<Diagnostic>;
   std::vector<Diagnostic_up> diagnostics_;
 
-  void diagnose(size_t t) const;
+  void diagnose(int t) const;
 
   using Command_up = std::unique_ptr<Command>;
   std::list<Command_up> step_presets_;
