@@ -2,6 +2,11 @@
 #define SRC_VECTORS_VECTOR_CLASSES_HPP
 
 enum Axis { X = 0, Y, Z };
+Axis operator++(Axis& axis);
+Axis operator*(Axis axis);
+Axis begin(Axis _);
+Axis end(Axis _);
+
 enum Axes { XY = 0, YZ, XZ };
 
 struct vector2 {

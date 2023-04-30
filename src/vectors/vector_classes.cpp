@@ -2,6 +2,24 @@
 
 #include <cmath>
 
+Axis operator++(Axis& axis) {
+  return axis = static_cast<Axis>(axis + 1);
+}
+
+Axis operator*(Axis axis) {
+  return axis;
+}
+
+Axis begin(Axis _) {
+  return Axis::X;
+}
+
+Axis end(Axis _) {
+  Axis last = Axis::Z;
+  return ++last;
+}
+
+
 vector2::vector2(double x, double y)
   : vec{x, y} {}
 
