@@ -2,10 +2,15 @@
 
 namespace fs = std::filesystem;
 
+Configuration_item::Configuration_item(const json& json) {
+  item_ = json;
+}
+
+
 Configuration::Configuration(const char* config_path)
     : config_path_(config_path) {
   std::ifstream file(config_path);
-  config_ = json::parse(file);
+  item_ = json::parse(file);
   out_dir_ = get("Out_dir");
 }
 
@@ -67,4 +72,3 @@ void Configuration::save(const std::string& from, fs::copy_options options) cons
     throw std::runtime_error(ss.str());
   }
 }
-

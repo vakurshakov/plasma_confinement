@@ -7,14 +7,10 @@
   "Out_dir": "results/simple_rectangle",
 
   "Geometry": {
-    "dx":     0.05,
-    "size_x": 2100,
+    "size_x": 2100,   "dx": 0.05,
+    "size_y": 2100,   "dy": 0.05,
+    "time":   10000,  "dt": 0.025,
 
-    "dy":     0.05,
-    "size_y": 2100,
-
-    "dt":   0.025,
-    "time": 10000,
     "diagnose_time_step": 100,
 
     "boundaries": "px_py"
@@ -42,6 +38,15 @@
         "Simple_interpolation",
         "Esirkepov_density_decomposition"
       ]
+    }
+  ],
+
+  "Presets": [
+    {
+      "Set_fields_distribution": {
+        "__distribution": "uniform",
+        "B": { "x": 0.0, "y": 0.0, "z": 0.1 }
+      }
     }
   ]
 }

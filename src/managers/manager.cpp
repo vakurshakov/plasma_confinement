@@ -6,6 +6,7 @@
 #include "src/fields/fields_builder.hpp"
 #include "src/particles/particles_builder.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
+#include "src/command/commands_builder.hpp"
 
 
 void Manager::log_information() const {
@@ -35,12 +36,17 @@ void Manager::initializes() {
   Manager::log_information();
   LOG_TRACE("Initialization process...");
 
-  std::list<Command_up> presets;
-
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 
-  /// @todo make factory for commands
+  /// @todo Particles
+
+  Commands_builder commands_builder(particles_species_, fields_);
+  step_presets_ = commands_builder.build_step_presets();
+  auto presets = commands_builder.build_presets();
+
+  Diagnostics_builder diagnostics_builder(particles_species_, fields_);
+  diagnostics_ = diagnostics_builder.build();
 
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
@@ -65,9 +71,6 @@ void Manager::initializes() {
   START_ = backup->get_last_timestep();
   LOG_INFO("Configuration loaded from backup. Simulation will start from t={}", START_);
 #endif
-
-  Diagnostics_builder diagnostics_builder(particles_species_, fields_);
-  diagnostics_ = diagnostics_builder.build();
 
 #if MAKE_BACKUPS
   diagnostics_.emplace_back(std::move(backup));

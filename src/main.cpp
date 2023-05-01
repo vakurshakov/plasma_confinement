@@ -10,7 +10,7 @@ int main(int argc, const char** argv) {
     return EXIT_FAILURE;
   }
 
-  Configuration& config = Configuration::instance(argv[1]);
+  const Configuration& config = Configuration::instance(argv[1]);
   config.save();
   config.init_geometry();
 

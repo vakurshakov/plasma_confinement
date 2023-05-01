@@ -47,6 +47,7 @@ SRCS +=                                       \
   src/command/magnetic_field_half_step.cpp    \
   src/command/set_fields_distribution.cpp     \
   src/command/ionize_particles.cpp            \
+  src/command/commands_builder.cpp            \
 
 # diagnostics
 SRCS +=                                       \

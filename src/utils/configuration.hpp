@@ -5,24 +5,48 @@
 
 #include "src/pch.h"
 
-class Configuration {
+class Configuration_item {
  public:
-  static Configuration& instance(const char* config_path = "");
-  static const std::string& out_dir();
+  template<typename T = std::string>
+  T get(const std::string& key) const;
 
   template<typename T = std::string>
-  inline T get(const std::string& key) const;
+  T get(const std::string& key, T default_value) const;
+
+  bool contains(const std::string& key) const;
+
+  template<typename Function>
+  void for_each(const std::string& key, Function func) const;
+
+ protected:
+  using json = nlohmann::json;
+  json item_;
+
+  json::json_pointer to_pointer(const std::string& key) const;
+
+  Configuration_item() = default;
+  Configuration_item(const json& item);
+
+  Configuration_item(const Configuration_item&) = delete;
+  Configuration_item& operator=(const Configuration_item&) = delete;
+
+  Configuration_item(Configuration_item&&) = delete;
+  Configuration_item& operator=(Configuration_item&&) = delete;
+};
+
+
+class Configuration : public Configuration_item {
+ public:
+  static const Configuration& instance(const char* config_path = "");
+  static const std::string& out_dir();
 
   void save() const;
   void save_sources() const;
   void init_geometry() const;
 
  private:
-  using json = nlohmann::json;
-  json config_;
-  std::string config_path_;
-
   std::string out_dir_;
+  std::string config_path_;
 
   void save(const std::string& from,
     std::filesystem::copy_options options) const;
@@ -37,30 +61,6 @@ class Configuration {
 };
 
 
-/* static */ inline Configuration& Configuration::instance(const char* config_path) {
-  static Configuration instance(config_path);
-  return instance;
-}
-
-/* static */ inline const std::string& Configuration::out_dir() {
-  return instance().out_dir_;
-}
-
-template<typename T>
-inline T Configuration::get(const std::string& key) const {
-  json result = config_;
-
-  size_t start = 0;
-  size_t end = -1;
-  do {
-    end = key.find(".", start);
-
-    result = result.at(key.substr(start, end - start));
-    start = end + 1;
-  }
-  while (end != std::string::npos);
-
-  return result.get<T>();
-}
+#include "configuration.inl"
 
 #endif // SRC_UTILS_CONFIGURATION_HPP
