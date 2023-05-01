@@ -49,6 +49,7 @@ const double& vector3_field::operator()(Axis axis, int ny, int nx) const {
     case Axis::Y: return y(ny, nx);
     case Axis::Z: return z(ny, nx);
   }
+  return z(ny, nx);
 }
 
 constexpr int vector3_field::index(int ny, int nx) const {

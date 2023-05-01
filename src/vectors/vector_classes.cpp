@@ -48,6 +48,11 @@ vector2 operator*(double a, const vector2& v) {
 vector3::vector3(double x, double y, double z)
   : vec{x, y, z} {}
 
+const vector3 vector3::zero = {0.0, 0.0, 0.0};
+const vector3 vector3::orth_x = {1.0, 0.0, 0.0};
+const vector3 vector3::orth_y = {0.0, 1.0, 0.0};
+const vector3 vector3::orth_z = {0.0, 0.0, 1.0};
+
 double vector3::dot(const vector3 &other) const {
   return
     this->vec[X] * other.vec[X] +
@@ -96,6 +101,14 @@ vector3 vector3::operator+(const vector3& other) const {
 
 vector3 vector3::operator/(double a) const {
   return (*this) * (1.0 / a);
+}
+
+bool vector3::operator==(const vector3& other) const {
+  static const double equal_tolerance = 1e-8;
+  return
+    fabs(this->vec[X] - other.vec[X]) < equal_tolerance &&
+    fabs(this->vec[Y] - other.vec[Y]) < equal_tolerance &&
+    fabs(this->vec[Z] - other.vec[Z]) < equal_tolerance;
 }
 
 vector2 vector3::squeeze(const Axes axes) const {

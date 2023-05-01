@@ -40,7 +40,6 @@ struct vector3 {
   inline double y() const { return vec[Y]; }
   inline double z() const { return vec[Z]; }
 
-  /// @todo tolerance on other == zero?
   double dot(const vector3& other) const;
   double square() const;
   double l2_norm() const;
@@ -51,10 +50,15 @@ struct vector3 {
   vector3& operator+=(const vector3& other);
   vector3 operator+(const vector3& other) const;
   vector3 operator/(double a) const;
+  bool operator==(const vector3& other) const;
 
-  vector2  squeeze(const Axes axes) const;
+  vector2 squeeze(const Axes axes) const;
 
   double vec[3] = {0.0, 0.0, 0.0};
+  static const vector3 zero;
+  static const vector3 orth_x;
+  static const vector3 orth_y;
+  static const vector3 orth_z;
 };
 
 vector3 operator*(const vector3& v, double a);
