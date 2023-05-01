@@ -10,9 +10,7 @@
 /// @todo description length check to pass predefined values
 class Diagnostics_builder {
  public:
-  Diagnostics_builder(
-    std::vector<Particles>& particles_species,
-    Fields& fields);
+  Diagnostics_builder(std::vector<Particles>& particles_species, Fields& fields);
 
   std::vector<std::unique_ptr<Diagnostic>> build();
 
@@ -25,7 +23,7 @@ class Diagnostics_builder {
   inline Axis get_component(const std::string& component);
 
 #define BUILD_FIELD_DIAG(diag)                                    \
-  inline std::unique_ptr<Diagnostic>                              \
+  std::unique_ptr<Diagnostic>                                     \
   build_diag_##diag(const std::vector<std::string>& description)  \
 
   BUILD_FIELD_DIAG(fields_energy);
@@ -35,17 +33,17 @@ class Diagnostics_builder {
 
 #undef BUILD_FIELD_DIAG
 
-  inline std::unique_ptr<Diagnostic>
+  std::unique_ptr<Diagnostic>
   build_diag_particles_energy(const std::string& sort_name);
 
-  inline std::unique_ptr<Diagnostic>
+  std::unique_ptr<Diagnostic>
   build_diag_distribution_moment(
     const std::string& sort_name,
     const std::string& moment_name,
     const std::string& axes_names,
     const std::vector<std::string>& description);
 
-  inline std::unique_ptr<Diagnostic>
+  std::unique_ptr<Diagnostic>
   build_diag_x0_distribution_function(
     const std::string& sort_name,
     const std::vector<std::string>& description);

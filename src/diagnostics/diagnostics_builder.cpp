@@ -154,7 +154,7 @@ Diagnostics_builder::get_component(const std::string& component) {
 
 
 #define BUILD_FIELD_DIAG(diag)                    \
-  inline std::unique_ptr<Diagnostic>              \
+  std::unique_ptr<Diagnostic>              \
   Diagnostics_builder::build_diag_##diag(         \
     const std::vector<std::string>& description)  \
 
@@ -239,7 +239,7 @@ BUILD_FIELD_DIAG(whole_field) {
 #undef BUILD_FIELD_DIAG
 
 
-inline std::unique_ptr<Diagnostic>
+std::unique_ptr<Diagnostic>
 Diagnostics_builder::build_diag_particles_energy(
     const std::string& sort_name) {
   return std::make_unique<particles_energy>(
@@ -247,7 +247,7 @@ Diagnostics_builder::build_diag_particles_energy(
     particles_species_.at(sort_name));
 }
 
-inline std::unique_ptr<Diagnostic>
+std::unique_ptr<Diagnostic>
 Diagnostics_builder::build_diag_distribution_moment(
     const std::string& sort_name,
     const std::string& moment_name,
@@ -282,7 +282,7 @@ Diagnostics_builder::build_diag_distribution_moment(
     std::make_unique<Projector2D>(axes_names, area));
 }
 
-inline std::unique_ptr<Diagnostic>
+std::unique_ptr<Diagnostic>
 Diagnostics_builder::build_diag_x0_distribution_function(
     const std::string& sort_name,
     const std::vector<std::string>& description) {
