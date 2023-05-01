@@ -5,15 +5,6 @@
 #include "src/vectors/vector_classes.hpp"
 #include "src/particles/particles_load.hpp"
 
-Particles::Particles(Particles_builder& builder) {
-  sort_name_ = builder.get_sort_name();
-  parameters_ = builder.build_parameters();
-
-  push_ = builder.build_pusher();
-  interpolation_ = builder.build_interpolation(this->parameters_);
-  decomposition_ = builder.build_decomposition(this->parameters_);
-}
-
 /// @warning Algorithm ends up with seg. fault
 /// if reallocation of particles array happens
 void Particles::push() {
@@ -60,7 +51,6 @@ void Particles::add_particle(const Point& point) {
   #pragma omp critical
   particles_.emplace_back(point, parameters_);
 }
-
 #else
 void Particles::add_particle(const Point& point, double local_n) {
   #pragma omp critical
@@ -69,5 +59,4 @@ void Particles::add_particle(const Point& point, double local_n) {
     new_particle.n_ = local_n;
   }
 }
-
 #endif

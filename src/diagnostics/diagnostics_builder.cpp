@@ -27,7 +27,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
 
   vector_of_diagnostics diagnostics;
 
-#if THERE_ARE_FIELDS
+#if 0
   if (config::fields_diagnostics.empty())
     throw std::runtime_error("Initialization error: fields are diagnosed but no fields_diagnostics in file constants.h");
 
@@ -51,7 +51,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
   }
 #endif
 
-#if THERE_ARE_PARTICLES
+#if 0
   if (config::species_description.empty())
     throw std::runtime_error("Initialization error: particles are diagnosed but no species_description in file constants.h");
 

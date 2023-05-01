@@ -33,11 +33,9 @@
         "T_x":      50e-3,
         "T_y":      50e-3
       },
-      "Integration_steps": [
-        "Boris_pusher",
-        "Simple_interpolation",
-        "Esirkepov_density_decomposition"
-      ]
+      "Pusher": "Boris_pusher",
+      "Interpolation": "Simple_interpolation",
+      "Decomposition": "Esirkepov_density_decomposition"
     }
   ],
 

@@ -1,9 +1,9 @@
 #ifndef SRC_CONSTANTS_H
 #define SRC_CONSTANTS_H
 
-#define THERE_ARE_PARTICLES    false
+#define THERE_ARE_PARTICLES    true
 #define GLOBAL_DENSITY         true
-#define THERE_ARE_FIELDS       false
+#define THERE_ARE_FIELDS       true
 #define _2D3V                  false
 #define LOGGING                true
 #define TIME_PROFILING         true

@@ -6,14 +6,10 @@
 #include "src/solvers/abstract_strategies.hpp"
 
 #include "particles_boundary_interaction.hpp"
-#include "particles_builder.hpp"
 
 class Particles {
  public:
-
   Particles() = default;
-
-  Particles(Particles_builder& builder);
 
   const auto& get_particles() const { return particles_; }
   const auto& get_parameters() const { return parameters_; }
@@ -28,6 +24,7 @@ class Particles {
 
   /// @todo REFACTOR THIS OUT!
   friend class Manager;
+  friend class Particles_builder;
 
   friend class Set_particles;
   friend class Copy_coordinates;

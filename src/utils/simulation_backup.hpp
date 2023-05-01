@@ -10,8 +10,8 @@ class Simulation_backup : public Diagnostic {
  public:
   Simulation_backup(
     int backup_timestep,
-    std::unordered_map<std::string, Particles&> each_particles_sort,
-    std::unordered_map<std::string, vector3_field&> each_vector_field);
+    std::vector<Particles>& each_particles_sort,
+    std::map<std::string, vector3_field&> each_vector_field);
 
   void save(int t);
 
@@ -24,8 +24,8 @@ class Simulation_backup : public Diagnostic {
  private:
   std::string out_dir_;
   int backup_timestep_;
-  std::unordered_map<std::string, Particles&> particles_;
-  std::unordered_map<std::string, vector3_field&> fields_;
+  std::map<std::string, Particles&> particles_;
+  std::map<std::string, vector3_field&> fields_;
 
   void diagnose(int t) override;
   void save_parameters() const override;

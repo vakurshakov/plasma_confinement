@@ -4,147 +4,145 @@
 #include "src/particles/particles_load.hpp"
 #include "src/particles/particle/particle.hpp"
 
-#include "src/command/set_particles.hpp"
-#include "src/command/copy_coordinates.hpp"
-
 #include "src/solvers/Boris_pusher.hpp"
+
 #include "src/solvers/simple_interpolation.hpp"
 #include "src/solvers/point_interpolation.hpp"
 #include "src/solvers/null_interpolation.hpp"
+
 #include "src/solvers/Esirkepov_density_decomposition.hpp"
 #include "src/solvers/null_decomposition.hpp"
 
-using std::vector, std::string, std::function, std::make_unique, std::stod, std::stoi;
+using std::vector, std::string, std::make_unique;
 
 Particles_builder::Particles_builder(Fields& fields)
     : fields_(fields) {}
 
-void Particles_builder::set_sort(const string& sort_name) {
-  // auto it = config::species_description.find(sort_name);
-  // if (it == config::species_description.end()) {
-  //   throw std::runtime_error("Initialization error: "
-  //     + sort_name + " not found in constants.h");
-  // }
+vector<Particles> Particles_builder::build() {
+  PROFILE_FUNCTION();
+  LOG_TRACE("Building particles...");
 
-  // sort_name_ = sort_name;
-  // sort_description_ = it->second;
-  // sort_parameters_ = get_description("parameters");
-  // sort_integration_steps_ = get_description("integration_steps");
+  const Configuration& config = Configuration::instance();
+
+  vector<Particles> particles_species;
+
+  if (!config.contains("Particles"))
+    return particles_species;
+
+  config.for_each("Particles", [&](const Configuration_item& description) {
+    Particles& particles = particles_species.emplace_back();
+
+    particles.sort_name_ = description.get("Name");
+    particles.parameters_ = build_parameters(description);
+
+    particles.push_ = build_pusher(description);
+    particles.interpolation_ = build_interpolation(description, particles.parameters_);
+    particles.decomposition_ = build_decomposition(description, particles.parameters_);
+  });
+
+  return particles_species;
 }
 
-std::vector<std::string>
-Particles_builder::get_description(const string& parameter) {
-  // auto description_it = sort_description_.find(parameter);
 
-  // if (description_it == sort_description_.end())
-  //   throw std::runtime_error("Initialization error: Parameter " + parameter + "isn't defined on sort " + sort_name_ + " in constants.h");
-
-  return {}; //description_it->second;
-}
-
-Parameters Particles_builder::build_parameters() {
+Parameters
+Particles_builder::build_parameters(const Configuration_item& description) {
   Parameters parameters;
-  parameters.n_  = stod(sort_parameters_[0]);
-  parameters.q_  = stod(sort_parameters_[1]);
-  parameters.m_  = stod(sort_parameters_[2]);
-  parameters.Np_ = stoi(sort_parameters_[3]);
-  parameters.Tx_ = stod(sort_parameters_[4]);
-  parameters.Ty_ = stod(sort_parameters_[5]);
-  parameters.Tz_ = stod(sort_parameters_[6]);
-  parameters.p0_ = stod(sort_parameters_[7]);
+  parameters.Np_ = description.get<int>("Parameters.Np");
+  parameters.n_  = description.get<double>("Parameters.density");
+  parameters.q_  = description.get<double>("Parameters.charge");
+  parameters.m_  = description.get<double>("Parameters.mass");
+  parameters.Tx_ = description.get<double>("Parameters.T_x");
+  parameters.Ty_ = description.get<double>("Parameters.T_y");
+  parameters.p0_ = description.get<double>("Parameters.p0", 0.0);
 
-  parameters.sort_name_ = get_sort_name();
+#if _2D3V
+  parameters.Tz_ = description.get<double>("Parameters.T_z");
+#endif
+
+  parameters.sort_name_ = description.get("Name");
   return parameters;
 }
 
 std::unique_ptr<Pusher>
-Particles_builder::build_pusher() {
-  const string& setting = sort_integration_steps_[0];
+Particles_builder::build_pusher(const Configuration_item& description) {
+  string setting = description.get("Pusher");
 
-  if (setting.find("Boris_pusher") == string::npos)
+  if (setting != "Boris_pusher")
     throw std::runtime_error("Initialization error: No matching Particle pusher");
 
   return make_unique<Boris_pusher>();
 }
 
 std::unique_ptr<Interpolation>
-Particles_builder::build_interpolation(const Parameters& parameters) {
-#if there_are_fields
-  size_t pos = string::npos;
-  const string& setting = sort_integration_steps_[1];
+Particles_builder::build_interpolation(
+  const Configuration_item& description, const Parameters& parameters) {
+#if THERE_ARE_FIELDS
+  string setting = description.get("Interpolation");
 
   std::unique_ptr<Interpolation> interpolation_up;
-  if ((pos = setting.find("Simple_interpolation")) != string::npos) {
+  if (setting == "Simple_interpolation") {
     interpolation_up = make_unique<Simple_interpolation>(parameters, fields_.E(), fields_.B());
   }
-  else if ((pos = setting.find("Point_interpolation, ")) != string::npos) {
-    if ((pos = setting.find("Const_field: ", pos)) == string::npos)
-      throw std::runtime_error("\n\t\t\t\twhat():  Known interpolation not adder");
-
-    vector3 E0, B0;
-
-    pos = setting.find("E0 = ", pos);
-    if (pos != string::npos) {
-      pos += 5;
-
-      int divider_1 = setting.find(',', pos);
-      int divider_2 = setting.find(',', divider_1+1);
-      int end     = setting.find('}', divider_2+1);
-
-      E0.x() = stod(setting.substr(pos+1, divider_1-(pos+1)));
-      E0.y() = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
-      E0.z() = stod(setting.substr(divider_2+1, end-(divider_2+1)));
-    }
-
-    pos = setting.find("B0 = ", pos);
-    if (pos != string::npos) {
-      pos += 5;
-
-      int divider_1 = setting.find(',', pos);
-      int divider_2 = setting.find(',', divider_1+1);
-      int end     = setting.find('}', divider_2+1);
-
-      B0.x() = stod(setting.substr(pos+1, divider_1-(pos+1)));
-      B0.y() = stod(setting.substr(divider_1+1, divider_2-(divider_1+1)));
-      B0.z() = stod(setting.substr(divider_2+1, end-(divider_2+1)));
-    }
-
-    auto adder = make_unique<Const_field_adder>(E0, B0);
-    interpolation_up = make_unique<Point_interpolation>(std::move(adder));
-  }
-  else if ((pos = setting.find("Null_interpolation")) != string::npos ) {
+/** @todo fix the problem via config file
+*  else if (setting == "Point_interpolation") {
+*    if (!description.contains(setting + ".Const_field"))
+*      throw std::runtime_error("Initialization error: No adder for " + setting);
+*
+*    setting += ".Const_field";
+*    if (!description.contains(setting + ".E0") &&
+*        !description.contains(setting + ".B0"))
+*      throw std::runtime_error("Initialization error: Neither E0 nor B0 is described to add in " + setting);
+*
+*    vector3 E0, B0;
+*    if (description.contains(setting + ".E0")) {
+*      E0.x() = description.get(setting + ".E0.x", 0.0);
+*      E0.y() = description.get(setting + ".E0.y", 0.0);
+*      E0.z() = description.get(setting + ".E0.z", 0.0);
+*    }
+*
+*    if (description.contains(setting + ".B0")) {
+*      B0.x() = description.get(setting + ".B0.x", 0.0);
+*      B0.y() = description.get(setting + ".B0.y", 0.0);
+*      B0.z() = description.get(setting + ".B0.z", 0.0);
+*    }
+*
+*    if (E0 == vector3::zero && B0 == vector3::zero)
+*      throw std::runtime_error("Initialization error: Both E0 and B0 are zero for " + setting);
+*
+*    auto adder = make_unique<Const_field_adder>(E0, B0);
+*    interpolation_up = make_unique<Point_interpolation>(std::move(adder));
+*  }
+*/
+  else if (setting == "Null_interpolation") {
     interpolation_up = make_unique<Null_interpolation>();
   }
   else
     throw std::runtime_error("Initialization error: No matching interpolation");
 
   return interpolation_up;
-
 #else
   return make_unique<Null_interpolation>();
-
 #endif
 }
 
 std::unique_ptr<Decomposition>
-Particles_builder::build_decomposition(const Parameters& parameters) {
-#if there_are_fields
-  const std::string& setting = sort_integration_steps_[2];
+Particles_builder::build_decomposition(
+  const Configuration_item& description, const Parameters& parameters) {
+#if THERE_ARE_FIELDS
+  string setting = description.get("Decomposition");
 
   std::unique_ptr<Decomposition> decomposition_up;
-  if (setting.find("Esirkepov_density_decomposition") != string::npos) {
+  if (setting == "Esirkepov_density_decomposition") {
     decomposition_up = make_unique<Esirkepov_density_decomposition>(parameters, fields_.J());
   }
-  else if (setting.find("Null_decomposition") != string::npos) {
+  else if (setting == "Null_decomposition") {
     decomposition_up = make_unique<Null_decomposition>();
   }
   else
     throw std::runtime_error("Initialization error: No matching density decomposition");
 
   return decomposition_up;
-
 #else
   return make_unique<Null_decomposition>();
-
 #endif
 }

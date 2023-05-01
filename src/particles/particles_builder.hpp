@@ -2,37 +2,34 @@
 #define SRC_PARTICLES_PARTICLES_BUILDER_HPP
 
 #include "src/pch.h"
-#include "src/particles/particle/parameters.hpp"
-#include "src/solvers/abstract_strategies.hpp"
-#include "src/command/command.hpp"
+#include "src/utils/configuration.hpp"
+
 #include "src/fields/fields.hpp"
+#include "src/particles/particles.hpp"
+#include "src/solvers/abstract_strategies.hpp"
 
 class Particles_builder {
  public:
   Particles_builder(Fields& fields);
 
-  void set_sort(const std::string& sort_name);
-  const std::string& get_sort_name() const { return sort_name_; }
-
-  Parameters build_parameters();
-
-  std::unique_ptr<Pusher>
-  build_pusher();
-
-  std::unique_ptr<Interpolation>
-  build_interpolation(const Parameters&);
-
-  std::unique_ptr<Decomposition>
-  build_decomposition(const Parameters&);
+  std::vector<Particles> build();
 
  private:
   Fields& fields_;
 
-  std::vector<std::string> get_description(const std::string& parameter);
+  Parameters
+  build_parameters(const Configuration_item& description);
 
-  std::string sort_name_ = "undefined";
-  std::vector<std::string> sort_parameters_;
-  std::vector<std::string> sort_integration_steps_;
+  std::unique_ptr<Pusher>
+  build_pusher(const Configuration_item& description);
+
+  std::unique_ptr<Interpolation>
+  build_interpolation(const Configuration_item& description, const Parameters& params);
+
+  std::unique_ptr<Decomposition>
+  build_decomposition(const Configuration_item& description, const Parameters& params);
+
+  /// @todo particles.boundaries_processor_
 };
 
 #endif  // SRC_PARTICLES_PARTICLES_BUILDER_HPP

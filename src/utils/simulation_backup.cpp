@@ -9,14 +9,16 @@ namespace fs = std::filesystem;
 
 Simulation_backup::Simulation_backup(
     int backup_timestep,
-    std::unordered_map<std::string, Particles&> each_particles_sort,
-    std::unordered_map<std::string, vector3_field&> each_vector_field)
+    std::vector<Particles>& each_particles_sort,
+    std::map<std::string, vector3_field&> each_vector_field)
     : Diagnostic(Configuration::out_dir() + "/simulation_backup"),
       out_dir_(Configuration::out_dir()),
       backup_timestep_(backup_timestep),
-      particles_(each_particles_sort),
       fields_(each_vector_field) {
   save_parameters();
+  for (auto& sort : each_particles_sort) {
+    particles_.emplace(sort.get_parameters().get_name(), sort);
+  }
 }
 
 

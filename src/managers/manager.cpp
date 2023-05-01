@@ -39,7 +39,8 @@ void Manager::initializes() {
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 
-  /// @todo Particles
+  Particles_builder particles_builder(fields_);
+  particles_species_ = particles_builder.build();
 
   Commands_builder commands_builder(particles_species_, fields_);
   step_presets_ = commands_builder.build_step_presets();
@@ -51,12 +52,9 @@ void Manager::initializes() {
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
     /* backup timestep = */ 100 * diagnose_time_step,
-    // named particle species to backup:
-    std::unordered_map<std::string, Particles&>{
-      // ???
-    },
+    particles_species_,
     // named fields to backup:
-    std::unordered_map<std::string, vector3_field&>{
+    std::map<std::string, vector3_field&>{
       { "E", fields_.E() },
       { "B", fields_.B() }
   });
@@ -86,7 +84,7 @@ void Manager::calculates() {
     LOG_TRACE("------------------------------------ one timestep ------------------------------------");
     PROFILE_SCOPE("one timestep");
 
-  #if there_are_fields
+  #if THERE_ARE_FIELDS
     fields_.clear_sources();
   #endif
 
@@ -100,7 +98,7 @@ void Manager::calculates() {
     }
   #endif
 
-  #if there_are_fields
+  #if THERE_ARE_FIELDS
     fields_.propagate();
   #endif
 
