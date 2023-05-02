@@ -7,13 +7,14 @@
 #include "src/vectors/vector_classes.hpp"
 #include "src/utils/domain_geometry.hpp"
 
+/// @todo use strategy pattern here
 class Particles_boundary {
  public:
   Particles_boundary(std::vector<Particle>& particles_vec,
     Parameters& params, Domain_geometry geom);
 
-  virtual void add(Particle& particle, const vector2& r0) = 0;
-  virtual void remove() = 0;
+  virtual void add(Particle& particle, const vector2& r0) {}
+  virtual void remove() {}
 
  protected:
   std::vector<Particle>& particles_vec_;
@@ -85,8 +86,8 @@ class Beam_buffer : public Plasma_boundary {
 
 class POL_Beam_boundary : public Particles_boundary {
  public:
-POL_Beam_boundary(std::vector<Particle>& particles_vec,
-  Parameters& params, Domain_geometry geom);
+  POL_Beam_boundary(std::vector<Particle>& particles_vec,
+    Parameters& params, Domain_geometry geom);
 
   void add(Particle& particle, const vector2& r0) override {}
   void remove() override;

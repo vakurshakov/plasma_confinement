@@ -1,6 +1,4 @@
 {
-  "Name": "simple_rectangle",
-
   "__description": "test config to create one-sort plasma in periodic boundaries",
   "__date": "April 25, 2023",
 
@@ -36,7 +34,8 @@
       "Integration_steps" : [
         { "Pusher": "Boris_pusher" },
         { "Interpolation": "Simple_interpolation" },
-        { "Decomposition": "Esirkepov_density_decomposition" }
+        { "Decomposition": "Esirkepov_density_decomposition" },
+        { "Boundaries_processor": "Particles_boundary" }
       ]
     }
   ],

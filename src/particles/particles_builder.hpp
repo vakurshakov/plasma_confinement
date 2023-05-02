@@ -7,6 +7,7 @@
 #include "src/fields/fields.hpp"
 #include "src/particles/particles.hpp"
 #include "src/solvers/abstract_strategies.hpp"
+#include "src/particles/particles_boundary_interaction.hpp"
 
 class Particles_builder {
  public:
@@ -29,7 +30,9 @@ class Particles_builder {
   std::unique_ptr<Decomposition>
   build_decomposition(const Configuration_item& description, const Parameters& params);
 
-  /// @todo particles.boundaries_processor_
+  std::unique_ptr<Particles_boundary>
+  build_particles_boundary(const Configuration_item& description,
+    std::vector<Particle>& particles_vec, Parameters& params);
 };
 
 #endif  // SRC_PARTICLES_PARTICLES_BUILDER_HPP

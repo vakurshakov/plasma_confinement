@@ -37,18 +37,22 @@ vector<Particles> Particles_builder::build() {
     particles.sort_name_ = description.get("Name");
     particles.parameters_ = build_parameters(description);
 
-    if (!description.contains("Integration_steps")) {
+    // Default version of integration steps
+    particles.push_ = make_unique<Boris_pusher>();
+
+    particles.interpolation_ = make_unique<Simple_interpolation>(
+      particles.parameters_, fields_.E(), fields_.B());
+
+    particles.decomposition_ = make_unique<Esirkepov_density_decomposition>(
+      particles.parameters_, fields_.J());
+
+    particles.boundaries_processor_ = make_unique<Particles_boundary>(
+      particles.particles_, particles.parameters_, Domain_geometry{});
+
+    if (!description.contains("Integration_steps"))
       LOG_WARN("Integration_steps setting not found for {}, using default ones: "
-        "Boris pusher, simple interpolation and Esirkepov density decomposition", particles.sort_name_);
-
-      particles.push_ = make_unique<Boris_pusher>();
-
-      particles.interpolation_ = make_unique<Simple_interpolation>(
-        particles.parameters_, fields_.E(), fields_.B());
-
-      particles.decomposition_ = make_unique<Esirkepov_density_decomposition>(
-        particles.parameters_, fields_.J());
-    }
+        "Boris pusher, simple interpolation, Esirkepov density decomposition "
+        "and no boundary processor for particles", particles.sort_name_);
 
     description.for_each("Integration_steps", [&](const Configuration_item& step_description) {
       if (step_description.contains("Pusher")) {
@@ -59,6 +63,10 @@ vector<Particles> Particles_builder::build() {
       }
       else if (step_description.contains("Decomposition")) {
         particles.decomposition_ = build_decomposition(step_description, particles.parameters_);
+      }
+      else if (step_description.contains("Boundaries_processor")) {
+        particles.boundaries_processor_ = build_particles_boundary(
+          step_description, particles.particles_, particles.parameters_);
       }
       else {
         throw std::runtime_error("Initialization error: No corresponding integration "
@@ -170,4 +178,65 @@ Particles_builder::build_decomposition(
 #else
   return make_unique<Null_decomposition>();
 #endif
+}
+
+std::unique_ptr<Particles_boundary>
+Particles_builder::build_particles_boundary(
+  const Configuration_item& description,
+  std::vector<Particle>& particles_vec, Parameters& parameters) {
+  string setting = description.get("Boundaries_processor");
+
+  auto get_domain_geometry = [&]() {
+    return Domain_geometry{
+      description.get<double>("Domain.x_min"),
+      description.get<double>("Domain.x_max"),
+      description.get<double>("Domain.y_min"),
+      description.get<double>("Domain.y_max")
+    };
+  };
+
+  std::unique_ptr<Particles_boundary> boundary_processor_up;
+
+  /// @todo rethink after strategy pattern for Particles_boundary
+  if (setting == "Particles_boundary") {
+    boundary_processor_up = make_unique<Particles_boundary>(
+      particles_vec, parameters, Domain_geometry{});
+  }
+  else if (setting == "Plasma_boundary") {
+    boundary_processor_up = make_unique<Plasma_boundary>(
+      particles_vec, parameters, get_domain_geometry());
+  }
+  else if (setting == "Beam_boundary") {
+    if (description.contains("Coordinates") &&
+        description.get("Coordinates") == "polar") {
+      boundary_processor_up = make_unique<POL_Beam_boundary>(
+        particles_vec, parameters, Domain_geometry{
+          description.get<double>("Domain.r_min"),
+          description.get<double>("Domain.r_max"),
+          description.get<double>("Domain.phi_min"),
+          description.get<double>("Domain.phi_max")
+        });
+    }
+    else {
+      boundary_processor_up = make_unique<Beam_boundary>(
+        particles_vec, parameters, get_domain_geometry());
+    }
+  }
+  else if (setting == "Reflective_boundary") {
+    boundary_processor_up = make_unique<Reflective_boundary>(
+      particles_vec, parameters, get_domain_geometry());
+  }
+  else if (setting == "Plasma_buffer") {
+    boundary_processor_up = make_unique<Plasma_buffer>(
+      particles_vec, parameters);
+  }
+  /// @todo fix problem via config
+  // else if (setting == "Beam_buffer") {
+  //   boundary_processor_up = make_unique<Beam_buffer>(
+  //     buff_beam_vec, main_beam_vec, main_params, get_domain_geometry());
+  // }
+  else
+    throw std::runtime_error("Initialization error: No matching boundary processor");
+
+  return boundary_processor_up;
 }
