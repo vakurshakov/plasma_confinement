@@ -35,9 +35,31 @@ vector<Particles> Particles_builder::build() {
     particles.sort_name_ = description.get("Name");
     particles.parameters_ = build_parameters(description);
 
-    particles.push_ = build_pusher(description);
-    particles.interpolation_ = build_interpolation(description, particles.parameters_);
-    particles.decomposition_ = build_decomposition(description, particles.parameters_);
+    if (!description.contains("Integration_steps")) {
+      particles.push_ = make_unique<Boris_pusher>();
+
+      particles.interpolation_ = make_unique<Simple_interpolation>(
+        particles.parameters_, fields_.E(), fields_.B());
+
+      particles.decomposition_ = make_unique<Esirkepov_density_decomposition>(
+        particles.parameters_, fields_.J());
+    }
+
+    description.for_each("Integration_steps", [&](const Configuration_item& step_description) {
+      if (step_description.contains("Pusher")) {
+        particles.push_ = build_pusher(step_description);
+      }
+      else if (step_description.contains("Interpolation")) {
+        particles.interpolation_ = build_interpolation(step_description, particles.parameters_);
+      }
+      else if (step_description.contains("Decomposition")) {
+        particles.decomposition_ = build_decomposition(step_description, particles.parameters_);
+      }
+      else {
+        throw std::runtime_error("Initialization error: No corresponding integration "
+          "step for " + description.get("Name"));
+      }
+    });
   });
 
   return particles_species;
@@ -83,36 +105,34 @@ Particles_builder::build_interpolation(
   if (setting == "Simple_interpolation") {
     interpolation_up = make_unique<Simple_interpolation>(parameters, fields_.E(), fields_.B());
   }
-/** @todo fix the problem via config file
-*  else if (setting == "Point_interpolation") {
-*    if (!description.contains(setting + ".Const_field"))
-*      throw std::runtime_error("Initialization error: No adder for " + setting);
-*
-*    setting += ".Const_field";
-*    if (!description.contains(setting + ".E0") &&
-*        !description.contains(setting + ".B0"))
-*      throw std::runtime_error("Initialization error: Neither E0 nor B0 is described to add in " + setting);
-*
-*    vector3 E0, B0;
-*    if (description.contains(setting + ".E0")) {
-*      E0.x() = description.get(setting + ".E0.x", 0.0);
-*      E0.y() = description.get(setting + ".E0.y", 0.0);
-*      E0.z() = description.get(setting + ".E0.z", 0.0);
-*    }
-*
-*    if (description.contains(setting + ".B0")) {
-*      B0.x() = description.get(setting + ".B0.x", 0.0);
-*      B0.y() = description.get(setting + ".B0.y", 0.0);
-*      B0.z() = description.get(setting + ".B0.z", 0.0);
-*    }
-*
-*    if (E0 == vector3::zero && B0 == vector3::zero)
-*      throw std::runtime_error("Initialization error: Both E0 and B0 are zero for " + setting);
-*
-*    auto adder = make_unique<Const_field_adder>(E0, B0);
-*    interpolation_up = make_unique<Point_interpolation>(std::move(adder));
-*  }
-*/
+  else if (setting == "Point_interpolation") {
+    if (!description.contains("Const_field"))
+      throw std::runtime_error("Initialization error: No adder for " + setting);
+
+    setting = "Const_field";
+    if (!description.contains(setting + ".E0") &&
+        !description.contains(setting + ".B0"))
+      throw std::runtime_error("Initialization error: Neither E0 nor B0 is described to add in " + setting);
+
+    vector3 E0, B0;
+    if (description.contains(setting + ".E0")) {
+      E0.x() = description.get(setting + ".E0.x", 0.0);
+      E0.y() = description.get(setting + ".E0.y", 0.0);
+      E0.z() = description.get(setting + ".E0.z", 0.0);
+    }
+
+    if (description.contains(setting + ".B0")) {
+      B0.x() = description.get(setting + ".B0.x", 0.0);
+      B0.y() = description.get(setting + ".B0.y", 0.0);
+      B0.z() = description.get(setting + ".B0.z", 0.0);
+    }
+
+    if (E0 == vector3::zero && B0 == vector3::zero)
+      throw std::runtime_error("Initialization error: Both E0 and B0 are zero for " + setting);
+
+    auto adder = make_unique<Const_field_adder>(E0, B0);
+    interpolation_up = make_unique<Point_interpolation>(std::move(adder));
+  }
   else if (setting == "Null_interpolation") {
     interpolation_up = make_unique<Null_interpolation>();
   }
