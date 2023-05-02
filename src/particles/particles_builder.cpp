@@ -26,8 +26,10 @@ vector<Particles> Particles_builder::build() {
 
   vector<Particles> particles_species;
 
-  if (!config.contains("Particles"))
+  if (!config.contains("Particles")) {
+    LOG_WARN("Particles section not found in config file, continuing without them");
     return particles_species;
+  }
 
   config.for_each("Particles", [&](const Configuration_item& description) {
     Particles& particles = particles_species.emplace_back();
@@ -36,6 +38,9 @@ vector<Particles> Particles_builder::build() {
     particles.parameters_ = build_parameters(description);
 
     if (!description.contains("Integration_steps")) {
+      LOG_WARN("Integration_steps setting not found for {}, using default ones: "
+        "Boris pusher, simple interpolation and Esirkepov density decomposition", particles.sort_name_);
+
       particles.push_ = make_unique<Boris_pusher>();
 
       particles.interpolation_ = make_unique<Simple_interpolation>(
