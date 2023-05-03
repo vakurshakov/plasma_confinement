@@ -32,9 +32,16 @@ vector<Particles> Particles_builder::build() {
   }
 
   config.for_each("Particles", [&](const Configuration_item& description) {
-    Particles& particles = particles_species.emplace_back();
+    if (named_species_.contains(description.get("Name"))) {
+      throw std::runtime_error("Initialization error: Two particle species share "
+        "the same name " + description.get("Name"));
+    }
 
+    Particles& particles = particles_species.emplace_back();
     particles.sort_name_ = description.get("Name");
+
+    named_species_.emplace(particles.sort_name_, particles);
+
     particles.parameters_ = build_parameters(description);
 
     // Default version of integration steps
@@ -59,14 +66,16 @@ vector<Particles> Particles_builder::build() {
         particles.push_ = build_pusher(step_description);
       }
       else if (step_description.contains("Interpolation")) {
-        particles.interpolation_ = build_interpolation(step_description, particles.parameters_);
+        particles.interpolation_ = build_interpolation(
+          step_description, particles.sort_name_);
       }
       else if (step_description.contains("Decomposition")) {
-        particles.decomposition_ = build_decomposition(step_description, particles.parameters_);
+        particles.decomposition_ = build_decomposition(
+          step_description, particles.sort_name_);
       }
       else if (step_description.contains("Boundaries_processor")) {
         particles.boundaries_processor_ = build_particles_boundary(
-          step_description, particles.particles_, particles.parameters_);
+          step_description, particles.sort_name_);
       }
       else {
         throw std::runtime_error("Initialization error: No corresponding integration "
@@ -109,12 +118,13 @@ Particles_builder::build_pusher(const Configuration_item& description) {
 }
 
 std::unique_ptr<Interpolation>
-Particles_builder::build_interpolation(
-  const Configuration_item& description, const Parameters& parameters) {
+Particles_builder::build_interpolation(const Configuration_item& description, const std::string& sort_name) {
 #if THERE_ARE_FIELDS
-  string setting = description.get("Interpolation");
+  const Parameters& parameters = named_species_.at(sort_name).get_parameters();
 
+  string setting = description.get("Interpolation");
   std::unique_ptr<Interpolation> interpolation_up;
+
   if (setting == "Simple_interpolation") {
     interpolation_up = make_unique<Simple_interpolation>(parameters, fields_.E(), fields_.B());
   }
@@ -159,12 +169,13 @@ Particles_builder::build_interpolation(
 }
 
 std::unique_ptr<Decomposition>
-Particles_builder::build_decomposition(
-  const Configuration_item& description, const Parameters& parameters) {
+Particles_builder::build_decomposition(const Configuration_item& description, const std::string& sort_name) {
 #if THERE_ARE_FIELDS
-  string setting = description.get("Decomposition");
+  const Parameters& parameters = named_species_.at(sort_name).get_parameters();
 
+  string setting = description.get("Decomposition");
   std::unique_ptr<Decomposition> decomposition_up;
+
   if (setting == "Esirkepov_density_decomposition") {
     decomposition_up = make_unique<Esirkepov_density_decomposition>(parameters, fields_.J());
   }
@@ -181,10 +192,9 @@ Particles_builder::build_decomposition(
 }
 
 std::unique_ptr<Particles_boundary>
-Particles_builder::build_particles_boundary(
-  const Configuration_item& description,
-  std::vector<Particle>& particles_vec, Parameters& parameters) {
-  string setting = description.get("Boundaries_processor");
+Particles_builder::build_particles_boundary(const Configuration_item& description, const std::string& sort_name) {
+  auto& particles_vec = named_species_.at(sort_name).particles_;
+  auto& parameters = named_species_.at(sort_name).parameters_;
 
   auto get_domain_geometry = [&]() {
     return Domain_geometry{
@@ -195,6 +205,7 @@ Particles_builder::build_particles_boundary(
     };
   };
 
+  string setting = description.get("Boundaries_processor");
   std::unique_ptr<Particles_boundary> boundary_processor_up;
 
   /// @todo rethink after strategy pattern for Particles_boundary
@@ -230,11 +241,14 @@ Particles_builder::build_particles_boundary(
     boundary_processor_up = make_unique<Plasma_buffer>(
       particles_vec, parameters);
   }
-  /// @todo fix problem via config
-  // else if (setting == "Beam_buffer") {
-  //   boundary_processor_up = make_unique<Beam_buffer>(
-  //     buff_beam_vec, main_beam_vec, main_params, get_domain_geometry());
-  // }
+  else if (setting == "Beam_buffer") {
+    std::string main_beam_name = description.get("from_buffer_to");
+    auto& main_beam_vec = named_species_.at(main_beam_name).particles_;
+    auto& main_beam_params = named_species_.at(main_beam_name).parameters_;
+
+    boundary_processor_up = make_unique<Beam_buffer>(
+      particles_vec, main_beam_vec, main_beam_params, get_domain_geometry());
+  }
   else
     throw std::runtime_error("Initialization error: No matching boundary processor");
 
