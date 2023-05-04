@@ -116,25 +116,46 @@ void Manager::initializes() {
 
   plasma_electrons.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
 
-  auto generator_of_circle_setter = [] (double R_max) {
-    return [=] (double *x, double *y) {
+  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
+    &plasma_ions, &plasma_electrons,
+    set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
+    // set_point_on_annulus:
+    [](double* x, double* y) {
       static const double center_x = 0.5 * SIZE_X * dx;
       static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double ra = config::R0 - config::DR;
+      static const double rb = config::R0 + config::DR;
 
-      double r = R_max * sqrt(random_01());
+      double r = sqrt(ra * ra + (rb * rb - ra * ra) * random_01());
       double phi = 2.0 * M_PI * random_01();
 
       *x = center_x + r * cos(phi);
       *y = center_y + r * sin(phi);
-    };
-  };
-
-  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
-    &plasma_ions, &plasma_electrons,
-    set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
-    generator_of_circle_setter(config::RADIUS_OF_INJECTION_AREA),
+    },
     uniform_probability,
-    load_maxwellian_impulse
+    // load_angular_momentum:
+    [] (double x, double y,
+        double mass, double Tx, double Ty, double Tz,
+        double p0, double* px, double* py, double* pz) {
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+
+      using namespace config;
+      static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
+
+      x -= center_x;
+      y -= center_y;
+      double r = sqrt(x * x + y * y);
+
+      *px = +mass * u0 * y / r + temperature_impulse(Tx, mass);
+      *py = -mass * u0 * x / r + temperature_impulse(Ty, mass);
+
+#if _2D3V
+      *pz = temperature_impulse(Tz, mass);
+#else  // _2D2V
+      *pz = 0.0;
+#endif
+    }
   ));
 
 
@@ -149,21 +170,24 @@ void Manager::initializes() {
     M_PI * config::RADIUS_OF_TARGET_PLASMA * config::RADIUS_OF_TARGET_PLASMA * config::Npi / (dx * dy);
 
   struct Set_coordinate_on_circle : public Coordinate_generator {
-    using coordinate_loader = std::function<void(double*, double*)>;
-    coordinate_loader implementation_;
+    const double center_x = 0.5 * SIZE_X * dx;
+    const double center_y = 0.5 * SIZE_Y * dy;
+    const double R_max = config::RADIUS_OF_TARGET_PLASMA;
 
-    Set_coordinate_on_circle(const coordinate_loader& implementation)
-      : implementation_(implementation) {}
+    Set_coordinate_on_circle() = default;
 
     void load(double* x, double* y) override {
-      implementation_(x, y);
+      double r = R_max * sqrt(random_01());
+      double phi = 2.0 * M_PI * random_01();
+
+      *x = center_x + r * cos(phi);
+      *y = center_y + r * sin(phi);
     }
   };
 
   presets.emplace_back(std::make_unique<Set_particles>(
     &target_ions, total_number_of_ions,
-    std::make_unique<Set_coordinate_on_circle>(
-      generator_of_circle_setter(config::RADIUS_OF_TARGET_PLASMA)),
+    std::make_unique<Set_coordinate_on_circle>(),
     load_maxwellian_impulse));
 
 
