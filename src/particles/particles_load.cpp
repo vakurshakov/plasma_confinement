@@ -1,51 +1,141 @@
 #include "particles_load.hpp"
 
-#include "src/pch.h"
 #include "src/utils/random_number_generator.hpp"
 
-void fill_randomly(int sequential_number, int Np,
-    int cell_number_nx, int cell_number_ny,
-    double* x, double* y) {
-  *x = (cell_number_nx + random_01()) * dx;
-  *y = (cell_number_ny + random_01()) * dy;
+#define TO_CELL(c_wp, ds) static_cast<int>(floor(c_wp / ds))
+
+Fill_rectangle::Fill_rectangle(
+  double x_min, double x_max,
+  double y_min, double y_max)
+  : x_min_(TO_CELL(x_min, dx)), x_max_(TO_CELL(x_max, dx)),
+    y_min_(TO_CELL(y_min, dy)), y_max_(TO_CELL(y_max, dy)) {}
+
+#undef TO_CELL
+
+bool Fill_rectangle::operator()(int nx, int ny) {
+  return
+    x_min_ <= nx && nx <= x_max_ &&
+    y_min_ <= ny && ny <= y_max_;
 }
 
-void fill_periodically(int sequential_number, int Np,
-  int cell_number_nx, int cell_number_ny,
-  double* x, double* y) {
-  /**
-   * i%Np -- номер от нуля до Np-1 частицы в одной ячейке
-   * i/Np -- список индексов, эквивалентный перебору ячеек
-   * индекс ячейки по Ox: (i/Np % divider), Oy: (i/Np / divider).
-   *
-   * Cколько по длинне в ячейку влазит? Это надо искать делители Np
-   * при том лучше, конечно, от половины Np начинать в обе стороны искать
-   * Пока эта проблема решена так: divider -- число, показывающее
-   * сколько частиц будет уложено в одну ячейку вдоль оси Ox;
-   */
+Fill_annulus::Fill_annulus(
+  double radius,
+  double center_x,
+  double center_y)
+  : inner_radius_(0),
+    outer_radius_(radius),
+    center_x_(center_x),
+    center_y_(center_y) {}
 
-  int divider = 2;
-  *x = cell_number_nx * dx + ((sequential_number % Np) % divider) * dx / divider;
-  *y = cell_number_ny * dy + ((sequential_number % Np) / divider) * dy / (Np / divider);
+Fill_annulus::Fill_annulus(
+  double inner_radius,
+  double outer_radius,
+  double center_x,
+  double center_y)
+  : inner_radius_(inner_radius),
+    outer_radius_(outer_radius),
+    center_x_(center_x),
+    center_y_(center_y) {}
+
+bool Fill_annulus::operator()(int nx, int ny) {
+  double x = nx * dx - center_x_;
+  double y = ny * dy - center_y_;
+  double rr = x * x + y * y;
+  return
+    rr <= outer_radius_ * outer_radius_ &&
+    rr >= inner_radius_ * inner_radius_;
 }
 
 
-double temperature_impulse(double temperature, double mass) {
+double uniform_profile(int nx, int ny) {
+  return 1.0;
+}
+
+Cosine_r_profile::Cosine_r_profile(
+  double cos_width,
+  double cos_center,
+  double center_x,
+  double center_y)
+  : cos_width_(cos_width),
+    cos_center_(cos_center),
+    center_x_(center_x),
+    center_y_(center_y) {}
+
+double Cosine_r_profile::operator()(int nx, int ny) {
+  double x = nx * dx - center_x_;
+  double y = ny * dy - center_y_;
+  double r = sqrt(x * x + y * y);
+
+  if (fabs(r - cos_center_) >= cos_width_) {
+    return 0.0;
+  }
+  return 0.5 * (1.0 + cos(2.0 * M_PI * (r - cos_center_) / cos_width_));
+}
+
+
+vector2 load_randomly(int nx, int ny) {
+  return {
+    (nx + random_01()) * dx,
+    (ny + random_01()) * dy
+  };
+}
+
+
+double temperature_momentum(double temperature, double mass) {
   static const double mec2 = 511.0;  // KeV
-  return sqrt(-2.0 * (temperature * mass / mec2) * log(random_01()));
+
+  double p = 0.0;
+  do {
+    p = sqrt(-2.0 * (temperature * mass / mec2) * log(random_01()));
+  }
+  while (std::isinf(p));
+
+  return p;
 }
 
-void load_maxwellian_impulse(double x, double y,
-    double mass, double Tx, double Ty, double Tz,
-    double p0, double* px, double* py, double* pz) {
-  *px = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tx, mass);
-  *py = sin(2.0 * M_PI * random_01()) * temperature_impulse(Ty, mass);
+Load_maxwellian_momentum::Load_maxwellian_momentum(const Parameters& parameters)
+  : mass_(parameters.m()),
+    Tx_(parameters.Tx()),
+    Ty_(parameters.Ty()),
+    Tz_(parameters.Tz()) {}
+
+vector3 Load_maxwellian_momentum::operator()(const vector2& coordinate) {
+  double px, py, pz;
+  px = sin(2.0 * M_PI * random_01()) * temperature_momentum(Tx_, mass_);
+  py = sin(2.0 * M_PI * random_01()) * temperature_momentum(Ty_, mass_);
+#if _2D3V
+  pz = sin(2.0 * M_PI * random_01()) * temperature_momentum(Tz_, mass_);
+#else  // _2D2V
+  pz = 0.0;
+#endif
+  return {px, py, pz};
+}
+
+Load_angular_momentum::Load_angular_momentum(
+  const Parameters& parameters,
+  double center_x,
+  double center_y)
+  : mass_(parameters.m()),
+    Tx_(parameters.Tx()),
+    Ty_(parameters.Ty()),
+    Tz_(parameters.Tz()),
+    p0_(parameters.p0()),
+    center_x_(center_x),
+    center_y_(center_y) {}
+
+vector3 Load_angular_momentum::operator()(const vector2& coordinate) {
+  double x = coordinate.x() - center_x_;
+  double y = coordinate.y() - center_y_;
+  double r = sqrt(x * x + y * y);
+
+  double px, py, pz;
+  px = -p0_ * (y / r) + temperature_momentum(Tx_, mass_);
+  py = +p0_ * (x / r) + temperature_momentum(Ty_, mass_);
 
 #if _2D3V
-  *pz = sin(2.0 * M_PI * random_01()) * temperature_impulse(Tz, mass);
-
+  pz = temperature_momentum(Tz_, mass_);
 #else  // _2D2V
-  *pz = 0.0;
-
+  pz = 0.0;
 #endif
+  return {px, py, pz};
 }

@@ -36,6 +36,7 @@ void Manager::initializes() {
   Manager::log_information();
   LOG_TRACE("Initialization process...");
 
+  /// @todo Add usage description into runtime exception
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 

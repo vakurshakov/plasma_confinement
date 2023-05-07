@@ -41,11 +41,7 @@
   ],
 
   "Presets": [
-    {
-      "Set_fields_distribution": {
-        "__distribution": "uniform",
-        "B": { "x": 0.0, "y": 0.0, "z": 0.1 }
-      }
-    }
+    { "Set_fields_distribution": { "B": { "z": 0.1 }} },
+    { "Set_particles": "plasma_electrons" }
   ]
 }
