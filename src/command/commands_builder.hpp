@@ -25,9 +25,12 @@ class Commands_builder {
 
   command_up build_set_fields_distribution(const Configuration_item& item);
   command_up build_set_particles(const Configuration_item& item);
-  // command_up build_copy_coordinates(const Configuration_item& item);
+  command_up build_copy_coordinates(const Configuration_item& item);
   // command_up build_ionize_particles(const Configuration_item& item);
   // command_up build_clone_layer_particles(const Configuration_item& item);
+
+  std::function<vector3(const vector2& r)>
+  build_momentum_generator(Particles* const particles, const Configuration_item& item);
 };
 
 #endif // SRC_COMMAND_COMMAND_BUILDER_HPP

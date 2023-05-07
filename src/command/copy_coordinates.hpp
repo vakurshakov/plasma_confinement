@@ -5,38 +5,38 @@
 
 #include "src/pch.h"
 #include "src/particles/particles.hpp"
-#include "src/particles/particles_load.hpp"
 
 /**
- * @brief Command to copy coordinates from another particles.
+ * @brief Copies coordinates from another particles.
  */
 class Copy_coordinates : public Command {
  public:
+  using Momentum_generator = std::function<vector3(const vector2& r)>;
 
-  /**
-   * @brief Constructor of the command.
-   *
-   * @param particles_copy_to Pointer on particles that will copy coordinates.
-   * @param particles_copy_from Pointer on particles which will share coordinates.
-   * @param load_impulse Impulse distribution function.
-   */
   Copy_coordinates(
     Particles* const particles_copy_to,
-    const Particles* const particles_copy_from,
-    const impulse_loader& load_impulse);
+    const Particles* particles_copy_from,
+    const Momentum_generator& load_momentum);
 
   /**
-   * @brief Passes through every particle of particles_copy_from vector,
-   *  copies coordinates from it to particles_copy_to and
-   *  gives to this points another impulse.
+   * @brief Passes through particles_copy_from vector and
+   * copies coordinates from it to particles_copy_to,
+   * giving to this points momentum from load_momentum.
    */
   void execute(int /* timestep */) override;
 
+  /**
+   * @brief Must be used once, so it is not needed after execution.
+   */
+  bool needs_to_be_removed(int t) const override {
+    return true;
+  }
+
  private:
   Particles* const particles_copy_to_;
-  const Particles* const particles_copy_from_;
+  const Particles* particles_copy_from_;
 
-  impulse_loader load_impulse_;
+  Momentum_generator load_momentum_;
 };
 
 #endif // COMMAND_COPY_COORDINATES_HPP

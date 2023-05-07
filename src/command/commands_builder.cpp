@@ -58,7 +58,7 @@ list_of_commands Commands_builder::build(const std::string& name) {
       commands.emplace_back(build_set_particles(item));
     }
     else if (item.contains("Copy_coordinates")) {
-      // commands.emplace_back(build_copy_coordinates(item))
+      commands.emplace_back(build_copy_coordinates(item));
     }
     else if (item.contains("Ionize_particles")) {
       // commands.emplace_back(build_ionize_particles(item))
@@ -102,6 +102,31 @@ Commands_builder::build_set_fields_distribution(const Configuration_item& item) 
 
   return std::make_unique<Set_fields_distribution>(
     &fields_, E0, B0);
+}
+
+std::function<vector3(const vector2& r)>
+Commands_builder::build_momentum_generator(
+    Particles* const particles, const Configuration_item& item) {
+  const Parameters& parameters = particles->get_parameters();
+
+  std::function<vector3(const vector2& r)> momentum_generator;
+  if (item.contains("Load_maxwellian_momentum")) {
+    momentum_generator = Load_maxwellian_momentum{parameters};
+  }
+  else if (item.contains("Load_angular_momentum")) {
+    momentum_generator = Load_angular_momentum{
+      parameters,
+      item.get<double>("Load_angular_momentum.center_x", 0.5 * SIZE_X * dx),
+      item.get<double>("Load_angular_momentum.center_y", 0.5 * SIZE_Y * dy),
+    };
+  }
+  else {
+    LOG_WARN("Momentum_generator not specified or unknown for {}, using the "
+      "default one: Load_maxwellian_momentum", parameters.get_name());
+
+    momentum_generator = Load_maxwellian_momentum{parameters};
+  }
+  return momentum_generator;
 }
 
 command_up
@@ -175,23 +200,8 @@ Commands_builder::build_set_particles(const Configuration_item& item) {
   // No diversity currently
   Set_particles::Coordinate_generator coordinate_generator = load_randomly;
 
-  Set_particles::Momentum_generator momentum_generator;
-  if (item.contains("Load_maxwellian_momentum")) {
-    momentum_generator = Load_maxwellian_momentum{particles->get_parameters()};
-  }
-  else if (item.contains("Load_angular_momentum")) {
-    momentum_generator = Load_angular_momentum{
-      particles->get_parameters(),
-      item.get<double>("Load_angular_momentum.center_x", 0.5 * SIZE_X * dx),
-      item.get<double>("Load_angular_momentum.center_y", 0.5 * SIZE_Y * dy),
-    };
-  }
-  else {
-    LOG_WARN("Momentum_generator not specified or unknown for {}, using the "
-      "default one: Load_maxwellian_momentum", particles_name);
-
-    momentum_generator = Load_maxwellian_momentum{particles->get_parameters()};
-  }
+  Set_particles::Momentum_generator momentum_generator =
+    build_momentum_generator(particles, item);
 
   return std::make_unique<Set_particles>(
     particles,
@@ -199,6 +209,26 @@ Commands_builder::build_set_particles(const Configuration_item& item) {
     filling_condition,
     density_profile,
     coordinate_generator,
+    momentum_generator
+  );
+}
+
+command_up
+Commands_builder::build_copy_coordinates(const Configuration_item& item) {
+  static const std::string command_name = "Copy_coordinates";
+
+  Particles* const particles_copy_to = &particles_species_.at(
+    item.get(command_name + ".to"));
+
+  Particles* const particles_copy_from = &particles_species_.at(
+    item.get(command_name + ".from"));
+
+  Copy_coordinates::Momentum_generator momentum_generator =
+    build_momentum_generator(particles_copy_to, item);
+
+  return std::make_unique<Copy_coordinates>(
+    particles_copy_to,
+    particles_copy_from,
     momentum_generator
   );
 }
