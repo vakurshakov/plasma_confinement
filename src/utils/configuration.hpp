@@ -19,7 +19,7 @@ class Configuration_item {
   void for_each(const std::string& key, Function func) const;
 
  protected:
-  using json = nlohmann::json;
+  using json = nlohmann::ordered_json;
   json item_;
 
   json::json_pointer to_pointer(const std::string& key) const;
