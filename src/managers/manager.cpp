@@ -132,7 +132,19 @@ void Manager::initializes() {
       *x = center_x + r * cos(phi);
       *y = center_y + r * sin(phi);
     },
-    uniform_probability,
+    // get_cosine_probability:
+    [] (double x, double y) {
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double r0 = config::R0;
+      static const double dr = config::DR;
+
+      x -= center_x;
+      y -= center_y;
+      double r = sqrt(x * x + y * y);
+
+      return 0.5 * (1.0 + cos(M_PI * (r - r0) / dr));
+    },
     // load_angular_momentum:
     [] (double x, double y,
         double mass, double Tx, double Ty, double Tz,

@@ -70,8 +70,8 @@ inline const int INJECTION_START = 10'000;
 inline const int INJECTION_TIME = 40'000;
 
 inline const double R0 = ions_larmor_radius;
-inline const double DR = 0.1 * ions_larmor_radius;
-inline const int PER_STEP_PARTICLES = M_PI * 4.0 * R0 * DR * Npi / (dx * dy * INJECTION_TIME);
+inline const double DR = ions_larmor_radius;
+inline const int PER_STEP_PARTICLES = 2.0 * M_PI * R0 * R0 * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
 inline const double TARGET_PLASMA_TEMPERATURE = 50e-3;  // KeV
