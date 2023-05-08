@@ -4,100 +4,86 @@
 #include "src/utils/random_number_generator.hpp"
 
 Ionize_particles::Ionize_particles(
-  Particles* const ionized, Particles* const ejected,
-  const std::vector<size_t>& per_step_particles_num,
-  std::function<void(double* x, double* y)>&& set_point_of_birth,
-  std::function<double(double x, double y)>&& get_probability,
-  const impulse_loader& load_impulse)
-  :	ionized(ionized), ejected(ejected),
-    per_step_particles_num(per_step_particles_num),
-    set_point_of_birth(std::move(set_point_of_birth)),
-    get_probability(std::move(get_probability)),
-    load_impulse(load_impulse),
+  Particles* const ionized,
+  Particles* const ejected,
+  int injection_start,
+  int injection_end,
+  int per_step_particles_num,
+  const Random_coordinate_generator& set_point_of_birth,
+  const Density_profile& get_probability,
+  const Momentum_generator& load_momentum_i,
+  const Momentum_generator& load_momentum_e)
+  :	ionized_(ionized),
+    ejected_(ejected),
+    injection_start_(injection_start),
+    injection_end_(injection_end),
+    per_step_particles_num_(per_step_particles_num),
+    set_point_of_birth_(set_point_of_birth),
+    get_probability_(get_probability),
+    load_momentum_i_(load_momentum_i),
+    load_momentum_e_(load_momentum_e),
 #if !START_FROM_BACKUP
-    ionized_energy(BIN_File(Configuration::out_dir(), "ionized_energy")),
-    ejected_energy(BIN_File(Configuration::out_dir(), "ejected_energy")) {}
+    ionized_energy_(BIN_File(Configuration::out_dir(), "ionized_energy")),
+    ejected_energy_(BIN_File(Configuration::out_dir(), "ejected_energy"))
 #else  // here offset not needed!
-    ionized_energy(BIN_File::from_backup(Configuration::out_dir(), "ionized_energy", 0)),
-    ejected_energy(BIN_File::from_backup(Configuration::out_dir(), "ejected_energy", 0)) {}
+    ionized_energy_(BIN_File::from_backup(Configuration::out_dir(), "ionized_energy", 0)),
+    ejected_energy_(BIN_File::from_backup(Configuration::out_dir(), "ejected_energy", 0))
 #endif
+{
+  ionized_->particles_.reserve(per_step_particles_num_ * (injection_end_ - injection_start_) + 10'000);
+  ejected_->particles_.reserve(per_step_particles_num_ * (injection_end_ - injection_start_) + 10'000);
+}
 
 void Ionize_particles::execute(int t) {
   PROFILE_FUNCTION();
 
-  /// @todo add via config file
-  // if (t < config::INJECTION_START)
-  //   return;
+  static const int Npi   = ionized_->get_parameters().Np();
+  static const double mi = ionized_->get_parameters().m();
+
+  static const int Npe   = ejected_->get_parameters().Np();
+  static const double me = ejected_->get_parameters().m();
+
+  if (t < injection_start_)
+    return;
 
   LOG_INFO("Injecting particles, {} particles will be loaded into {} and {}",
-    per_step_particles_num[t-1],  // timestep count starts from 1;
-    ionized->get_parameters().get_name(),
-    ejected->get_parameters().get_name());
+    per_step_particles_num_,
+    ionized_->get_parameters().get_name(),
+    ejected_->get_parameters().get_name());
 
-  const int Npi     = ionized->get_parameters().Np();
-  const double mi   = ionized->get_parameters().m();
-  const double Ti_x = ionized->get_parameters().Tx();
-  const double Ti_y = ionized->get_parameters().Ty();
-  const double Ti_z = ionized->get_parameters().Tz();
-  const double pi_0 = ionized->get_parameters().p0();
+  /// @todo turn off energy diagnostic via config file
+  double loaded_energy_i = 0;
+  double loaded_energy_e = 0;
 
-  const int Npe     = ejected->get_parameters().Np();
-  const double me   = ejected->get_parameters().m();
-  const double Te_x = ejected->get_parameters().Tx();
-  const double Te_y = ejected->get_parameters().Ty();
-  const double Te_z = ejected->get_parameters().Tz();
-  const double pe_0 = ejected->get_parameters().p0();
-
-  double Wi = 0;
-  double We = 0;
-
-  for (size_t i = 0u; i < per_step_particles_num[t-1]; ++i) {
+  for (int p = 0; p < per_step_particles_num_; ++p) {
     double x, y;
 
+    #define TO_CELL(c_wp, ds) static_cast<int>(floor(c_wp / ds))
     do {
-      set_point_of_birth(&x, &y);
+      set_point_of_birth_(x, y);
     }
-    while (random_01() > get_probability(x, y));
+    while (random_01() > get_probability_(TO_CELL(x, dx), TO_CELL(y, dy)));
+    #undef TO_CELL
 
-    double pi_x, pi_y, pi_z;
-    double pe_x, pe_y, pe_z;
-    do {
-      load_impulse(x, y, mi, Ti_x, Ti_y, Ti_z, pi_0, &pi_x, &pi_y, &pi_z);
-      load_impulse(x, y, me, Te_x, Te_y, Te_z, pe_0, &pe_x, &pe_y, &pe_z);
-    }
-    while (std::isinf(pi_x) || std::isinf(pi_y) || std::isinf(pi_z) ||
-           std::isinf(pe_x) || std::isinf(pe_y) || std::isinf(pe_z));
+    vector2 shared_coordinate{x, y};
+    vector3 momentum_i = load_momentum_i_(shared_coordinate);
+    vector3 momentum_e = load_momentum_e_(shared_coordinate);
 
-    Wi += (sqrt(mi * mi + (pi_x * pi_x + pi_y * pi_y + pi_z * pi_z)) - mi) * dx * dy / Npi;
-    We += (sqrt(me * me + (pe_x * pe_x + pe_y * pe_y + pe_z * pe_z)) - me) * dx * dy / Npe;
+    loaded_energy_i += (sqrt(mi * mi + (momentum_i.square())) - mi) * dx * dy / Npi;
+    loaded_energy_e += (sqrt(me * me + (momentum_e.square())) - me) * dx * dy / Npe;
 
-    ionized->add_particle(Point({x, y}, {pi_x, pi_y, pi_z}));
-    ejected->add_particle(Point({x, y}, {pe_x, pe_y, pe_z}));
+    ionized_->add_particle(Point{shared_coordinate, std::move(momentum_i)});
+    ejected_->add_particle(Point{shared_coordinate, std::move(momentum_e)});
   }
 
-  ionized_energy.write(Wi);
-  ejected_energy.write(We);
+  ionized_energy_.write(loaded_energy_i);
+  ejected_energy_.write(loaded_energy_e);
 
-  LOG_INFO("Ionized {} energy / step = {}", ionized->get_parameters().get_name(), Wi);
-  LOG_INFO("Ejected {} energy / step = {}", ejected->get_parameters().get_name(), We);
+  LOG_INFO("Ionized {} energy / step = {}", ionized_->get_parameters().get_name(), loaded_energy_i);
+  LOG_INFO("Ejected {} energy / step = {}", ejected_->get_parameters().get_name(), loaded_energy_e);
 
   if (t % diagnose_time_step == 0) {
-    ionized_energy.flush();
-    ejected_energy.flush();
+    ionized_energy_.flush();
+    ejected_energy_.flush();
   }
-}
-
-
-double uniform_probability(double /* x_coord */, double /* y_coord */) {
-  return 1.0;
-}
-
-std::vector<size_t> set_time_distribution(size_t t_inj, size_t total_particles_num) {
-  std::vector<size_t> array_of_particles_to_load(t_inj);
-
-  for (size_t t = 0u; t < t_inj; ++t) {
-    array_of_particles_to_load[t] = 0; // config::PER_STEP_PARTICLES;
-  }
-
-  return array_of_particles_to_load;
 }

@@ -61,7 +61,7 @@ list_of_commands Commands_builder::build(const std::string& name) {
       commands.emplace_back(build_copy_coordinates(item));
     }
     else if (item.contains("Ionize_particles")) {
-      // commands.emplace_back(build_ionize_particles(item))
+      commands.emplace_back(build_ionize_particles(item));
     }
     else if (item.contains("Clone_layer_particles")) {
       // commands.emplace_back(build_clone_layer_particles(item))
@@ -105,8 +105,7 @@ Commands_builder::build_set_fields_distribution(const Configuration_item& item) 
 }
 
 std::function<vector3(const vector2& r)>
-Commands_builder::build_momentum_generator(
-    Particles* const particles, const Configuration_item& item) {
+build_momentum_generator(Particles* const particles, const Configuration_item& item) {
   const Parameters& parameters = particles->get_parameters();
 
   std::function<vector3(const vector2& r)> momentum_generator;
@@ -122,11 +121,36 @@ Commands_builder::build_momentum_generator(
   }
   else {
     LOG_WARN("Momentum_generator not specified or unknown for {}, using the "
-      "default one: Load_maxwellian_momentum", parameters.get_name());
+      "default one: Load_maxwellian_momentum.", parameters.get_name());
 
     momentum_generator = Load_maxwellian_momentum{parameters};
   }
   return momentum_generator;
+}
+
+std::function<double(int nx, int ny)>
+build_density_profile(const Configuration_item& item) {
+  std::function<double(int nx, int ny)> density_profile;
+  if (item.contains("Uniform_profile")) {
+    density_profile = uniform_profile;
+  }
+  else if (item.contains("Cosine_r_profile")) {
+    double cos_width = item.get<double>("Cosine_r_profile.width");
+    double cos_center = item.get<double>("Cosine_r_profile.center");
+    density_profile = Cosine_r_profile{
+      cos_width,
+      cos_center,
+      item.get<double>("Cosine_r_profile.center_x", 0.5 * SIZE_X * dx),
+      item.get<double>("Cosine_r_profile.center_y", 0.5 * SIZE_Y * dy),
+    };
+  }
+  else {
+    LOG_WARN("Density_profile not specified or unknown, "
+      "using the default one: uniform_profile.");
+
+    density_profile = uniform_profile;
+  }
+  return density_profile;
 }
 
 command_up
@@ -152,7 +176,7 @@ Commands_builder::build_set_particles(const Configuration_item& item) {
     };
   }
   else if (item.contains("Fill_circle")) {
-    double r = item.get<double>("Fill_circle.r");
+    double r = item.get<double>("Fill_circle.radius");
     filling_condition = Fill_annulus{
       r,
       item.get<double>("Fill_circle.center_x", 0.5 * SIZE_X * dx),
@@ -171,31 +195,12 @@ Commands_builder::build_set_particles(const Configuration_item& item) {
   }
   else {
     LOG_WARN("Filling_condition not specified or unknown for {}, using the "
-      "default one: Fill_rectangle(0, size_x, 0, size_y)", particles_name);
+      "default one: Fill_rectangle(0, size_x, 0, size_y).", particles_name);
 
     filling_condition = Fill_rectangle{0.0, SIZE_X * dx, 0.0, SIZE_Y * dy};
   }
 
-  Set_particles::Density_profile density_profile;
-  if (item.contains("Uniform_profile")) {
-    density_profile = uniform_profile;
-  }
-  else if (item.contains("Cosine_r_profile")) {
-    double cos_width = item.get<double>("Cosine_r_profile.cos_width");
-    double cos_center = item.get<double>("Cosine_r_profile.cos_center");
-    density_profile = Cosine_r_profile{
-      cos_width,
-      cos_center,
-      item.get<double>("Cosine_r_profile.center_x", 0.5 * SIZE_X * dx),
-      item.get<double>("Cosine_r_profile.center_y", 0.5 * SIZE_Y * dy),
-    };
-  }
-  else {
-    LOG_WARN("Density_profile not specified or unknown for {}, using the "
-      "default one: uniform_profile", particles_name);
-
-    density_profile = uniform_profile;
-  }
+  Set_particles::Density_profile density_profile = build_density_profile(item);
 
   // No diversity currently
   Set_particles::Coordinate_generator coordinate_generator = load_randomly;
@@ -230,5 +235,75 @@ Commands_builder::build_copy_coordinates(const Configuration_item& item) {
     particles_copy_to,
     particles_copy_from,
     momentum_generator
+  );
+}
+
+command_up
+Commands_builder::build_ionize_particles(const Configuration_item& item) {
+  static const std::string command_name = "Ionize_particles";
+
+  Particles* const particles_ionized = &particles_species_.at(
+    item.get(command_name + ".ionized"));
+
+  Particles* const particles_ejected = &particles_species_.at(
+    item.get(command_name + ".ejected"));
+
+  int start = item.get<int>(command_name + ".start", 0);
+  int end = item.get<int>(command_name + ".end", TIME);
+  int rate = item.get<int>(command_name + ".rate");
+
+  Ionize_particles::Random_coordinate_generator coordinate_generator;
+  if (item.contains("On_rectangle")) {
+    coordinate_generator = Coordinate_on_rectangle{
+      item.get<double>("On_rectangle.x_min", 0.0),
+      item.get<double>("On_rectangle.x_max", SIZE_X * dx),
+      item.get<double>("On_rectangle.y_min", 0.0),
+      item.get<double>("On_rectangle.y_max", SIZE_Y * dy),
+    };
+  }
+  else if (item.contains("On_circle")) {
+    double r = item.get<double>("On_circle.radius");
+    coordinate_generator = Coordinate_on_circle{
+      r,
+      item.get<double>("On_circle.center_x", 0.5 * SIZE_X * dx),
+      item.get<double>("On_circle.center_y", 0.5 * SIZE_Y * dy),
+    };
+  }
+  else if (item.contains("On_annulus")) {
+    double inner_radius = item.get<double>("On_annulus.inner_radius");
+    double outer_radius = item.get<double>("On_annulus.outer_radius");
+    coordinate_generator = Coordinate_on_annulus{
+      inner_radius,
+      outer_radius,
+      item.get<double>("On_annulus.center_x", 0.5 * SIZE_X * dx),
+      item.get<double>("On_annulus.center_y", 0.5 * SIZE_Y * dy),
+    };
+  }
+  else {
+    LOG_WARN("Random_coordinate_generator not specified or unknown, using the "
+      "default one: Coordinate_on_rectangle(0, size_x, 0, size_y).");
+
+    coordinate_generator = Coordinate_on_rectangle{0.0, SIZE_X * dx, 0.0, SIZE_Y * dy};
+  }
+
+  Ionize_particles::Density_profile density_profile = build_density_profile(item);
+
+  /// @todo Build generators for each particles specie?
+  Ionize_particles::Momentum_generator i_momentum_generator =
+    build_momentum_generator(particles_ionized, item);
+
+  Ionize_particles::Momentum_generator e_momentum_generator =
+    build_momentum_generator(particles_ejected, item);
+
+  return std::make_unique<Ionize_particles>(
+    particles_ionized,
+    particles_ejected,
+    start,
+    end,
+    rate,
+    coordinate_generator,
+    density_profile,
+    i_momentum_generator,
+    e_momentum_generator
   );
 }

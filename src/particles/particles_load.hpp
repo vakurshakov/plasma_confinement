@@ -54,6 +54,41 @@ class Cosine_r_profile final : Density_profile {
 vector2 load_randomly(int nx, int ny);
 
 
+class Random_coordinate_generator {
+ public:
+  virtual ~Random_coordinate_generator() = default;
+  virtual void operator()(double& x, double& y) = 0;
+};
+
+class Coordinate_on_rectangle final : public Random_coordinate_generator {
+ public:
+  Coordinate_on_rectangle(double x_min, double x_max, double y_min, double y_max);
+  void operator()(double& x, double& y) override;
+
+ private:
+  double x_min_, x_max_, y_min_, y_max_;
+};
+
+class Coordinate_on_circle final : public Random_coordinate_generator {
+ public:
+  Coordinate_on_circle(double radius, double center_x, double center_y);
+  void operator()(double& x, double& y) override;
+
+ private:
+  double radius_, center_x_, center_y_;
+};
+
+class Coordinate_on_annulus final : public Random_coordinate_generator {
+ public:
+  Coordinate_on_annulus(double inner_radius, double outer_radius, double center_x, double center_y);
+  void operator()(double& x, double& y) override;
+
+ private:
+  double inner_radius_squared_, outer_radius_squared_;
+  double center_x_, center_y_;
+};
+
+
 double temperature_momentum(double temperature, double mass);
 
 class Moment_generator {

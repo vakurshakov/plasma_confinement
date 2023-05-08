@@ -51,6 +51,51 @@ double uniform_profile(int nx, int ny) {
   return 1.0;
 }
 
+
+Coordinate_on_rectangle::Coordinate_on_rectangle(
+  double x_min, double x_max,
+  double y_min, double y_max)
+  : x_min_(x_min), x_max_(x_min),
+    y_min_(y_min), y_max_(y_min) {}
+
+void Coordinate_on_rectangle::operator()(double& x, double& y) {
+  x = x_min_ + random_01() * (x_max_ - x_min_);
+  y = y_min_ + random_01() * (y_max_ - y_min_);
+}
+
+Coordinate_on_circle::Coordinate_on_circle(
+  double radius,
+  double center_x,
+  double center_y)
+  : radius_(radius),
+    center_x_(center_x),
+    center_y_(center_y) {}
+
+void Coordinate_on_circle::operator()(double& x, double& y) {
+  double r = radius_ * sqrt(random_01());
+  double phi = 2.0 * M_PI * random_01();
+  x = center_x_ + r * cos(phi);
+  y = center_y_ + r * sin(phi);
+}
+
+Coordinate_on_annulus::Coordinate_on_annulus(
+  double inner_radius,
+  double outer_radius,
+  double center_x,
+  double center_y)
+  : inner_radius_squared_(inner_radius * inner_radius),
+    outer_radius_squared_(outer_radius * outer_radius),
+    center_x_(center_x),
+    center_y_(center_y) {}
+
+void Coordinate_on_annulus::operator()(double& x, double& y) {
+  double r = sqrt(inner_radius_squared_ + (outer_radius_squared_ - inner_radius_squared_) * random_01());
+  double phi = 2.0 * M_PI * random_01();
+  x = center_x_ + r * cos(phi);
+  y = center_y_ + r * sin(phi);
+}
+
+
 Cosine_r_profile::Cosine_r_profile(
   double cos_width,
   double cos_center,
