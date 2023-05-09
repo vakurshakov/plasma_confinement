@@ -18,29 +18,29 @@ void Configuration::init_geometry() const {
   dx = get<double>("Geometry.dx");
   assert(dx > 0 && "Grid step dx is incorrect!");
 
-  SIZE_X = get<int>("Geometry.size_x");
-  assert(SIZE_X > 0 && "Grid size along x-axis is incorrect!");
-
   dy = get<double>("Geometry.dy");
   assert(dy > 0 && "Grid step dy is incorrect!");
-
-  SIZE_Y = get<int>("Geometry.size_y");
-  assert(SIZE_Y > 0 && "Grid size along y-axis is incorrect!");
 
   dt = get<double>("Geometry.dt");
   assert(dt > 0 && "Time step is incorrect!");
   assert(dt * sqrt(1.0 / (dx * dx) + 1.0 / (dy * dy)) <= 1.0 &&
     "2D Courant-Friedrichs-Lewy condition not satisfied!");
 
-  TIME = get<int>("Geometry.time");
+#define TO_STEP(c_wp, ds) static_cast<int>(floor(c_wp / ds))
+
+  SIZE_X = TO_STEP(get<double>("Geometry.size_x"), dx);
+  assert(SIZE_X > 0 && "Grid size along x-axis is incorrect!");
+
+  SIZE_Y = TO_STEP(get<double>("Geometry.size_y"), dy);
+  assert(SIZE_Y > 0 && "Grid size along y-axis is incorrect!");
+
+  TIME = TO_STEP(get<double>("Geometry.time"), dt);
   assert(TIME > 0 && "Total number of time steps is incorrect!");
 
-  diagnose_time_step = get<int>("Geometry.diagnose_time_step");
+  diagnose_time_step = TO_STEP(get<double>("Geometry.diagnose_time_step"), dt);
   assert(diagnose_time_step > 0 && "Diagnose time step is incorrect!");
 
-  // Specific asserts for current setup
-  assert(dx == dy && "Current setup works only with equal grid step!");
-  assert(SIZE_X == SIZE_Y && "Current setup works only with square grid!");
+#undef TO_STEP
 }
 
 void Configuration::save() const {

@@ -5,11 +5,11 @@
   "Out_dir": "results/simple_rectangle",
 
   "Geometry": {
-    "size_x": 2100,   "dx": 0.05,
-    "size_y": 2100,   "dy": 0.05,
-    "time":   10000,  "dt": 0.025,
+    "size_x": 100,  "dx": 0.05,   "__units.x": "c_wp",
+    "size_y": 100,  "dy": 0.05,   "__units.y": "c_wp",
+    "time":   250,  "dt": 0.025,  "__units.t": "1/wp",
 
-    "diagnose_time_step": 100,
+    "diagnose_time_step": 2.5,  "__units.dts": "1/wp",
 
     "boundaries": "px_py"
   },
