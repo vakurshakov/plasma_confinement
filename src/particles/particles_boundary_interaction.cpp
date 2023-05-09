@@ -35,6 +35,7 @@ Plasma_boundary::Plasma_boundary(
 void Plasma_boundary::
 add(Particle& particle, const vector2& r0) {
 
+  /// @todo vary via config file
   periodic_y(particle.point, geom_.y_min, geom_.y_max);
 
   if (passed_through_left(r0.x(), particle.point.x())) {
@@ -102,6 +103,7 @@ Reflective_boundary::Reflective_boundary(
 void Reflective_boundary::
 add(Particle& particle, const vector2& r0) {
 
+  /// @todo vary via config file
   periodic_y(particle.point, geom_.y_min, geom_.y_max);
 
   if (particle.point.x() < geom_.x_min) {
@@ -134,6 +136,7 @@ Beam_boundary::Beam_boundary(
 
 void Beam_boundary::
 add(Particle& particle, const vector2& r0) {
+  /// @todo vary via config file
   periodic_y(particle.point, geom_.y_min, geom_.y_max);
 }
 
@@ -148,6 +151,7 @@ Beam_buffer::Beam_buffer(
 
 void Beam_buffer::
 add(Particle& particle, const vector2& r0) {
+  /// @todo vary via config file
   periodic_y(particle.point, geom_.y_min, geom_.y_max);
 }
 

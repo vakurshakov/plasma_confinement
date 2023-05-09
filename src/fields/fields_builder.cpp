@@ -35,6 +35,7 @@ Fields_builder::build_boundary_processor(vector3_field& E, vector3_field& B) {
 
   const Configuration& config = Configuration::instance();
 
+  /// @todo vary via config file
   layer.r_beginning = 0.5 * SIZE_X - config.get<double>("Damping.layer_width");
   layer.damping_factor = config.get<double>("Damping.factor");
 
