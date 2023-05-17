@@ -84,13 +84,16 @@ void distribution_moment::collect() {
   const int width = particles_.get_parameters().charge_cloud();
   const auto& shape = particles_.get_parameters().form_factor();
 
+  const double& area_dx = projector_->area.dp[X];
+  const double& area_dy = projector_->area.dp[Y];
+
   #pragma omp parallel for
   for (const auto& particle : particles_.get_particles()) {
     double pr_x = projector_->get_x(particle);
     double pr_y = projector_->get_y(particle);
 
-    int npx = int(round(pr_x / a_dx));
-    int npy = int(round(pr_y / a_dy));
+    int npx = int(round(pr_x / area_dx));
+    int npy = int(round(pr_y / area_dy));
 
     for (int i = npx - width; i <= npx + width; ++i) {
     for (int j = npy - width; j <= npy + width; ++j) {
@@ -99,8 +102,8 @@ void distribution_moment::collect() {
         #pragma omp atomic
         data_[(j - min_[Y]) * (max_[X] - min_[X]) + (i - min_[X])] +=
           moment_->get(particle) * particle.n() / Np *
-          shape(pr_x - i * dx, dx) *
-          shape(pr_y - j * dy, dy);
+          shape(pr_x - i * area_dx, area_dx) *
+          shape(pr_y - j * area_dy, area_dy);
       }
       else continue;
     }}
