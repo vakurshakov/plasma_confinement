@@ -43,12 +43,12 @@ constexpr inline double dy = dx;
 constexpr inline int SIZE_Y = 2100;
 
 constexpr inline double dt = 0.5 * dx;
-constexpr inline int TIME  = 100;
+constexpr inline int TIME  = 400'000;
 
 static_assert(dx == dy, "Current setup works only with equal grid step!");
 static_assert(SIZE_X == SIZE_Y, "Current setup works only with square grid!");
 
-constexpr inline int diagnose_time_step = 10;
+constexpr inline int diagnose_time_step = 200;
 
 namespace config {
 
@@ -66,8 +66,8 @@ inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 inline const double Omega_max = sqrt(2.0 * T_ions / 511.0);
 inline const double ions_larmor_radius = mi_me * V_ions / Omega_max;
 
-inline const int INJECTION_START = 0; // 10'000;
-inline const int INJECTION_TIME = 1'000;
+inline const int INJECTION_START = 10'000;
+inline const int INJECTION_TIME = 40'000;
 
 inline const double R0 = ions_larmor_radius;
 inline const double DR = ions_larmor_radius;
@@ -138,9 +138,9 @@ inline const umap<std::string,
       to_string(dx), to_string(dy),                      // step between nearest coordinates [in units of c/ωₚ]
     }},
     { "VrVphi_distribution", {                                     //
-      to_string(-5 * V_ions), to_string(-5 * V_ions),              // minimal captured velocity [in units of c]
-      to_string(+5 * V_ions), to_string(+5 * V_ions),              // maximum captured velocity [in units of c]
-      to_string(10 * V_ions / 500.), to_string(10 * V_ions / 500.),  // step between nearest velocities [in units of c]
+      to_string(-10 * V_ions), to_string(-10 * V_ions),            // minimal captured velocity [in units of c]
+      to_string(+10 * V_ions), to_string(+10 * V_ions),            // maximum captured velocity [in units of c]
+      to_string(20 * V_ions / 500.), to_string(20 * V_ions / 500.),  // step between nearest velocities [in units of c]
     }},
   }},
 #endif
