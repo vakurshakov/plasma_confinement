@@ -6,9 +6,6 @@
 
 struct diag_point {
   int x, y;
-
-  diag_point(int x, int y)
-    : x(x), y(y) {}
 };
 
 class field_at_point : public Diagnostic {

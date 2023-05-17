@@ -4,12 +4,16 @@ inline nlohmann::json::json_pointer
 Configuration_item::to_pointer(const std::string& key) const {
   std::string copy(key);
   std::replace(copy.begin(), copy.end(), '.', '/');
-  return json::json_pointer("/" + copy);
+  return json::json_pointer{"/" + copy};
 }
 
 template<typename T>
 inline T Configuration_item::get(const std::string& key) const {
   return item_.at(to_pointer(key)).get<T>();
+}
+
+inline Configuration_item Configuration_item::get_item(const std::string& key) const {
+  return Configuration_item{item_.at(to_pointer(key))};
 }
 
 template<typename T>
@@ -22,13 +26,25 @@ inline T Configuration_item::get(const std::string& key, T default_value) const 
 }
 
 inline bool Configuration_item::contains(const std::string& key) const {
-  return item_.contains(to_pointer(key));
+  if (item_.is_object()) {
+    return item_.contains(to_pointer(key));
+  }
+  else if (item_.is_string()) {
+    return key == item_.get<std::string>();
+  }
+
+  return false;
 }
 
-template<typename Function>
-inline void Configuration_item::for_each(const std::string& key, Function func) const {
+inline void Configuration_item::for_each(const std::string& key, string_parser func) const {
   for (const auto& element : item_.at(to_pointer(key))) {
-    func(Configuration_item(element));
+    func(element.get<std::string>());
+  }
+}
+
+inline void Configuration_item::for_each(const std::string& key, item_parser func) const {
+  for (const auto& element : item_.at(to_pointer(key))) {
+    func(Configuration_item{element});
   }
 }
 

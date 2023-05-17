@@ -11,6 +11,8 @@
 #include "src/diagnostics/distribution_moment.hpp"
 #include "src/diagnostics/x0_distribution_function.hpp"
 
+using std::to_string;
+
 Diagnostics_builder::Diagnostics_builder(
     std::vector<Particles>& particles_species, Fields& fields)
     : fields_(fields), out_dir_(Configuration::out_dir()) {
@@ -19,173 +21,172 @@ Diagnostics_builder::Diagnostics_builder(
   }
 }
 
-using vector_of_diagnostics = std::vector<std::unique_ptr<Diagnostic>>;
+using diagnostic_up = std::unique_ptr<Diagnostic>;
+using vector_of_diagnostics = std::vector<diagnostic_up>;
 
 vector_of_diagnostics Diagnostics_builder::build() {
   PROFILE_FUNCTION();
   LOG_TRACE("Building diagnostics...");
 
+  const Configuration& config = Configuration::instance();
+
   vector_of_diagnostics diagnostics;
 
-#if 0
-  if (config::fields_diagnostics.empty())
-    throw std::runtime_error("Initialization error: fields are diagnosed but no fields_diagnostics in file constants.h");
-
-  for (const auto& [name, description] : config::fields_diagnostics) {
-    if (name == "energy") {
-      LOG_INFO("Add fields energy diagnostic");
-      diagnostics.emplace_back(build_diag_fields_energy(description));
-    }
-    else if (name == "field_at_point") {
-      LOG_INFO("Add field_at_point diagnostic for {}", description[0] + description[1]);
-      diagnostics.emplace_back(build_diag_field_at_point(description));
-    }
-    else if (name == "field_on_segment") {
-      LOG_INFO("Add field_on_segment diagnostic for {}", description[0] + description[1]);
-      diagnostics.emplace_back(build_diag_field_on_segment(description));
-    }
-    else if (name == "whole_field") {
-      LOG_INFO("Add whole_field diagnostic for {}", description[0] + description[1]);
-      diagnostics.emplace_back(build_diag_whole_field(description));
-    }
+  if (!config.contains("Diagnostics")) {
+    LOG_WARN("Diagnostics section not found in config file, continuing without them");
+    return diagnostics;
   }
+
+  config.for_each("Diagnostics", [&](const Configuration_item& description) {
+#if THERE_ARE_FIELDS
+    if (description.contains("fields_energy")) {
+      diagnostics.emplace_back(build_fields_energy());
+    }
+    else if (description.contains("field_at_point")) {
+      build_field_at_point(description.get_item("field_at_point"), diagnostics);
+    }
+    else if (description.contains("field_on_segment")) {
+      // build_field_on_segment(description, diagnostics);
+    }
+    else if (description.contains("whole_field")) {
+      // build_whole_field(description, diagnostics);
+    }
 #endif
 
 #if 0
-  if (config::species_description.empty())
-    throw std::runtime_error("Initialization error: particles are diagnosed but no species_description in file constants.h");
-
-  for (const auto& [sort, sort_description] : config::species_description) {
-  for (const auto& [diag, diag_description] : sort_description) {
-    if (diag == "energy") {
-      LOG_INFO("Add {} energy diagnostics", sort);
-      diagnostics.emplace_back(build_diag_particles_energy(sort));
+    else if (description.contains("energy")) {
+      diagnostics.emplace_back(build_particles_energy(sort));
     }
-    else if (diag == "density") {
-      LOG_INFO("Add density diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("density")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "zeroth_moment", "XY", diag_description));
     }
-    else if (diag == "velocity_distribution") {
-      LOG_INFO("Add velocity_distribution diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("velocity_distribution")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "zeroth_moment", "VxVy", diag_description));
     }
-    else if (diag == "Vx_moment") {
-      LOG_INFO("Add Vx_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("Vx_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "Vx_moment", "XY", diag_description));
     }
-    else if (diag == "Vy_moment") {
-      LOG_INFO("Add Vy_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("Vy_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "Vy_moment", "XY", diag_description));
     }
-    else if (diag == "Vr_moment") {
-      LOG_INFO("Add Vr_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("Vr_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "Vr_moment", "XY", diag_description));
     }
-    else if (diag == "Vphi_moment") {
-      LOG_INFO("Add Vphi_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("Vphi_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "Vphi_moment", "XY", diag_description));
     }
-    else if (diag == "mVxVx_moment") {
-      LOG_INFO("Add mVxVx_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("mVxVx_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "mVxVx_moment", "XY", diag_description));
     }
-    else if (diag == "mVxVy_moment") {
-      LOG_INFO("Add mVxVy_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("mVxVy_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "mVxVy_moment", "XY", diag_description));
     }
-    else if (diag == "mVyVy_moment") {
-      LOG_INFO("Add mVyVy_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("mVyVy_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "mVyVy_moment", "XY", diag_description));
     }
-    else if (diag == "mVrVr_moment") {
-      LOG_INFO("Add mVrVr_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("mVrVr_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "mVrVr_moment", "XY", diag_description));
     }
-    else if (diag == "mVrVphi_moment") {
-      LOG_INFO("Add mVrVphi_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("mVrVphi_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "mVrVphi_moment", "XY", diag_description));
     }
-    else if (diag == "mVphiVphi_moment") {
-      LOG_INFO("Add mVphiVphi_moment diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_distribution_moment(
+    else if (description.contains("mVphiVphi_moment")) {
+      diagnostics.emplace_back(build_distribution_moment(
         sort, "mVphiVphi_moment", "XY", diag_description));
     }
-    else if (diag == "x0_distribution_function") {
-      LOG_INFO("Add x0_distribution_function diagnostic for {}", sort);
-      diagnostics.emplace_back(build_diag_x0_distribution_function(
+    else if (description.contains("x0_distribution_function")) {
+      diagnostics.emplace_back(build_x0_distribution_function(
         sort, diag_description));
     }
-  }}
 #endif
+  });
 
   diagnostics.shrink_to_fit();
   return diagnostics;
 }
 
 
-inline const vector3_field&
-Diagnostics_builder::get_field(const std::string& name) {
-  if      (name == "E") { return fields_.E(); }
-  else if (name == "B") { return fields_.B(); }
-  else if (name == "J") { return fields_.J(); }
-  else
-    throw std::runtime_error("Incorrect field name in diagnostic description");
-}
-
-inline Axis
-Diagnostics_builder::get_component(const std::string& component) {
-  if      (component == "x") { return Axis::X; }
-  else if (component == "y") { return Axis::Y; }
-  else if (component == "z") { return Axis::Z; }
-  else
-    throw std::runtime_error("Incorrect field component specified in diagnostic description");
-}
-
-
-#define BUILD_FIELD_DIAG(diag)                    \
-  std::unique_ptr<Diagnostic>              \
-  Diagnostics_builder::build_diag_##diag(         \
-    const std::vector<std::string>& description)  \
-
-BUILD_FIELD_DIAG(fields_energy) {
+diagnostic_up Diagnostics_builder::build_fields_energy() {
   return std::make_unique<fields_energy>(
     out_dir_ + "/", fields_.E(), fields_.B());
 }
 
-BUILD_FIELD_DIAG(field_at_point) {
-  if (description.size() < 2)
-    throw std::runtime_error("Initialization error: No point specified on field_at_point diagnostic for " + description[0] + description[1]);
+#define TO_CELL(dim, ds) static_cast<int>(round(dim / ds))
 
-  diag_point point{
-    std::stoi(description[2]),
-    std::stoi(description[3])
-  };
+void Diagnostics_builder::build_field_at_point(
+    const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container) {
+  std::list<std::string> field_names = collect_field_names(description);
+  std::list<std::string> axis_names = collect_axis_names(description);
 
-  if ((0 > point.x || point.x >= SIZE_X) ||
-      (0 > point.y || point.y >= SIZE_Y)) {
-    throw std::runtime_error("Initialization error: Invalid point for field_at_point diagnostic on " + description[0] + description[1] + " is set");
+  bool check_point = description.contains("point");
+  bool check_points = description.contains("points");
+
+  if (!check_point && !check_points) {
+    throw std::runtime_error("Initialization error: Point not specified "
+      "for point_at_point diagnostic.");
+  }
+  else if (check_point && check_points) {
+    throw std::runtime_error("Initialization error: Both \"point\" and \"points\" "
+      "are specified for point_at_point diagnostic.");
   }
 
-  return std::make_unique<field_at_point>(
-    out_dir_ + "/" + description[0] + description[1]+ "/",
-    "point_(" + description[2] + "," + description[3] + ")",
-    get_field(description[0]),
-    get_component(description[1]),
-    point);
+  std::list<diag_point> points;
+  auto construct_point = [](const Configuration_item& desc) {
+    diag_point point;
+    point.x = TO_CELL(desc.get<double>("x"), dx);
+    point.y = TO_CELL(desc.get<double>("y"), dy);
+
+    if ((0 > point.x || point.x >= SIZE_X) ||
+        (0 > point.y || point.y >= SIZE_Y)) {
+      throw std::runtime_error("Initialization error: Invalid point for "
+        "field_at_point diagnostic is set.");
+    }
+
+    return point;
+  };
+
+  if (check_point) {
+    points.emplace_back(construct_point(description.get_item("point")));
+  }
+  else {
+    description.for_each("points", [&](const Configuration_item& point_desc) {
+      points.emplace_back(construct_point(point_desc));
+    });
+  }
+
+  for (const auto& field_name : field_names) {
+  for (const auto& axis_name : axis_names) {
+  for (const auto& point : points) {
+    LOG_INFO("Add field_on_segment diagnostic for {}", field_name + axis_name);
+
+    const vector3_field& field = get_field(field_name);
+    Axis component = get_component(axis_name);
+
+    diagnostics_container.emplace_back(std::make_unique<field_at_point>(
+      out_dir_ + "/" + field_name + axis_name + "/",
+      "point_(" + to_string(point.x) + "," + to_string(point.y) + ")",
+      field, component, point
+    ));
+  }}}
 }
 
-BUILD_FIELD_DIAG(field_on_segment) {
+#if 0
+
+void Diagnostics_builder::build_field_on_segment(
+    const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container) {
   if (description.size() < 2)
     throw std::runtime_error("Initialization error: No segment specified for " + description[0] + description[1] + " diagnostic");
 
@@ -210,7 +211,9 @@ BUILD_FIELD_DIAG(field_on_segment) {
     segment);
 }
 
-BUILD_FIELD_DIAG(whole_field) {
+void Diagnostics_builder::build_whole_field(
+    const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container) {
   if (description.size() < 2)
     throw std::runtime_error("Initialization error: No area specified for " + description[0] + description[1] + " whole_field diagnostic");
 
@@ -235,12 +238,85 @@ BUILD_FIELD_DIAG(whole_field) {
       std::stoi(description[4]), std::stoi(description[5])
     });
 }
+#endif
+
+inline const vector3_field&
+Diagnostics_builder::get_field(const std::string& name) {
+  if      (name == "E") { return fields_.E(); }
+  else if (name == "B") { return fields_.B(); }
+  else if (name == "J") { return fields_.J(); }
+  else
+    throw std::runtime_error("Initialization error: Incorrect field "
+      "name in diagnostic description.");
+}
+
+std::list<std::string>
+Diagnostics_builder::collect_field_names(const Configuration_item& description) {
+  bool check_field = description.contains("field");
+  bool check_fields = description.contains("fields");
+
+  if (!check_field && !check_fields) {
+    throw std::runtime_error("Initialization error: Field not specified "
+      "for field_at_point diagnostic.");
+  }
+  else if (check_field && check_fields) {
+    throw std::runtime_error("Initialization error: Both \"field\" and \"fields\" "
+      "are specified for field_at_point diagnostic.");
+  }
+
+  std::list<std::string> field_names;
+  if (check_field) {
+    field_names.emplace_back(description.get("field"));
+  }
+  else {
+    description.for_each("fields", [&](const std::string& field_name) {
+      field_names.emplace_back(field_name);
+    });
+  }
+  return field_names;
+}
+
+inline Axis
+Diagnostics_builder::get_component(const std::string& component) {
+  if      (component == "x") { return Axis::X; }
+  else if (component == "y") { return Axis::Y; }
+  else if (component == "z") { return Axis::Z; }
+  else
+    throw std::runtime_error("Initialization error: Incorrect field "
+      "component specified in diagnostic description.");
+}
+
+std::list<std::string>
+Diagnostics_builder::collect_axis_names(const Configuration_item& description) {
+  bool check_component = description.contains("component");
+  bool check_components = description.contains("components");
+
+  if (!check_component && !check_components) {
+    throw std::runtime_error("Initialization error: Field not specified "
+      "for field_at_point diagnostic.");
+  }
+  else if (check_component && check_components) {
+    throw std::runtime_error("Initialization error: Both \"component\" and \"components\" "
+      "are specified for field_at_point diagnostic.");
+  }
+
+  std::list<std::string> axis_names;
+  if (check_component) {
+    axis_names.emplace_back(description.get("component"));
+  }
+  else {
+    description.for_each("components", [&](const std::string& comp_name) {
+      axis_names.emplace_back(comp_name);
+    });
+  }
+  return axis_names;
+}
 
 #undef BUILD_FIELD_DIAG
 
 
 std::unique_ptr<Diagnostic>
-Diagnostics_builder::build_diag_particles_energy(
+Diagnostics_builder::build_particles_energy(
     const std::string& sort_name) {
   return std::make_unique<particles_energy>(
     out_dir_ + "/", sort_name,
@@ -248,7 +324,7 @@ Diagnostics_builder::build_diag_particles_energy(
 }
 
 std::unique_ptr<Diagnostic>
-Diagnostics_builder::build_diag_distribution_moment(
+Diagnostics_builder::build_distribution_moment(
     const std::string& sort_name,
     const std::string& moment_name,
     const std::string& axes_names,
@@ -282,20 +358,22 @@ Diagnostics_builder::build_diag_distribution_moment(
     std::make_unique<Projector2D>(axes_names, area));
 }
 
-std::unique_ptr<Diagnostic>
-Diagnostics_builder::build_diag_x0_distribution_function(
-    const std::string& sort_name,
-    const std::vector<std::string>& description) {
-  int x0 = std::stoi(description[0]);
+// std::unique_ptr<Diagnostic>
+// Diagnostics_builder::build_x0_distribution_function(
+//     const std::string& sort_name,
+//     const std::vector<std::string>& description) {
+//   int x0 = std::stoi(description[0]);
 
-  diag_area area{
-    std::stod(description[1]), std::stod(description[2]),
-    std::stod(description[3]), std::stod(description[4]),
-    std::stod(description[5]), std::stod(description[6]),
-  };
+//   diag_area area{
+//     std::stod(description[1]), std::stod(description[2]),
+//     std::stod(description[3]), std::stod(description[4]),
+//     std::stod(description[5]), std::stod(description[6]),
+//   };
 
-  return std::make_unique<x0_distribution_function>(
-    out_dir_ + "/" + sort_name,
-    particles_species_.at(sort_name),
-    x0, area);
-}
+//   return std::make_unique<x0_distribution_function>(
+//     out_dir_ + "/" + sort_name,
+//     particles_species_.at(sort_name),
+//     x0, area);
+// }
+
+#undef TO_CELL

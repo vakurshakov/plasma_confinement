@@ -43,5 +43,15 @@
   "Presets": [
     { "Set_fields_distribution": { "B": { "z": 0.1 }} },
     { "Set_particles": "plasma_electrons" }
+  ],
+
+  "Diagnostics": [
+    "fields_energy",
+
+    { "field_at_point": {
+        "fields": ["E", "B"],
+        "components": ["x", "y"],
+        "points": [{"x": 25, "y": 25}, {"x": 50, "y": 50}]
+    }}
   ]
 }

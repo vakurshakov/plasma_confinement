@@ -10,13 +10,18 @@ class Configuration_item {
   template<typename T = std::string>
   T get(const std::string& key) const;
 
+  Configuration_item get_item(const std::string& key) const;
+
   template<typename T = std::string>
   T get(const std::string& key, T default_value) const;
 
   bool contains(const std::string& key) const;
 
-  template<typename Function>
-  void for_each(const std::string& key, Function func) const;
+  using string_parser = std::function<void(const std::string&)>;
+  void for_each(const std::string& key, string_parser func) const;
+
+  using item_parser = std::function<void(const Configuration_item&)>;
+  void for_each(const std::string& key, item_parser func) const;
 
  protected:
   using json = nlohmann::ordered_json;
