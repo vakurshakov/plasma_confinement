@@ -16,7 +16,7 @@
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
-  #define there_are_target_plasma       true
+  #define there_are_target_plasma       false
 
 #define there_are_fields                true
   #define fields_are_diagnosed          true
@@ -69,8 +69,7 @@ inline const double ions_larmor_radius = mi_me * V_ions / Omega_max;
 inline const int INJECTION_START = 10'000;
 inline const int INJECTION_TIME = 40'000;
 
-inline const double R0 = ions_larmor_radius;
-inline const double DR = ions_larmor_radius;
+inline const double R0 = 1.5 * ions_larmor_radius;
 inline const int PER_STEP_PARTICLES = 2.0 * M_PI * R0 * R0 * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
@@ -105,8 +104,8 @@ inline const umap<std::string,
         to_string(+e),       // Particle charge [in units of e]
         to_string(mi_me),    // Particle mass [in units mₑ]
         to_string(Npi),      // Number of particles representing the density n₀
-        "0.0",               // Temperature in x, y and z direction [in KeV]
-        "0.0",               //
+        to_string(T_ions),   // Temperature in x, y and z direction [in KeV]
+        to_string(T_ions),   //
         "0.0",               //
         "0.0"                // Absolute value of the initial impulse [in units of mₑc]
     }},
