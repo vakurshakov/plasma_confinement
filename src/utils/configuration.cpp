@@ -26,7 +26,7 @@ void Configuration::init_geometry() const {
   assert(dt * sqrt(1.0 / (dx * dx) + 1.0 / (dy * dy)) <= 1.0 &&
     "2D Courant-Friedrichs-Lewy condition not satisfied!");
 
-#define TO_STEP(c_wp, ds) static_cast<int>(floor(c_wp / ds))
+#define TO_STEP(dim, ds) static_cast<int>(floor(dim / ds))
 
   SIZE_X = TO_STEP(get<double>("Geometry.size_x"), dx);
   assert(SIZE_X > 0 && "Grid size along x-axis is incorrect!");
@@ -43,21 +43,22 @@ void Configuration::init_geometry() const {
 #undef TO_STEP
 }
 
-void Configuration::save() const {
-  save(config_path_,
+void Configuration::save(const std::string& to) const {
+  save(config_path_, to,
     fs::copy_options::overwrite_existing);
 }
 
-void Configuration::save_sources() const {
-  save("src",
+void Configuration::save_sources(const std::string& to) const {
+  save("src/", to,
     fs::copy_options::overwrite_existing |
     fs::copy_options::recursive);
 }
 
-void Configuration::save(const std::string& from, fs::copy_options options) const {
+void Configuration::save(const std::string& from, const std::string& to,
+    fs::copy_options options) const {
   try {
-    fs::create_directories(get("Out_dir"));
-    fs::copy(from, get("Out_dir"), options);
+    fs::create_directories(out_dir() + "/" + to + "/");
+    fs::copy(from, out_dir() + "/" + to + "/", options);
   }
   catch(const fs::filesystem_error& ex) {
     std::stringstream ss;

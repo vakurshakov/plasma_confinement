@@ -40,15 +40,15 @@ class Configuration : public Configuration_item {
   static const Configuration& instance(const char* config_path = "");
   static const std::string& out_dir();
 
-  void save() const;
-  void save_sources() const;
+  void save(const std::string& to = "") const;
+  void save_sources(const std::string& to = "") const;
   void init_geometry() const;
 
  private:
   std::string out_dir_;
   std::string config_path_;
 
-  void save(const std::string& from,
+  void save(const std::string& from, const std::string& to,
     std::filesystem::copy_options options) const;
 
   Configuration(const char* config_path);

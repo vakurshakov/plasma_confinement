@@ -25,37 +25,8 @@ Simulation_backup::Simulation_backup(
 void Simulation_backup::save_parameters() const {
   fs::create_directories(result_directory_);
 
-  Configuration::instance().save_sources();
-
-  std::ofstream param_file((result_directory_ +
-    "/parameters.txt").c_str(), std::ios::out);
-
-  param_file << "# TIME, dt\n";
-  param_file << TIME << " " << dt << " \n\n";
-  param_file << "# field parameters: SIZE_X, dx, SIZE_Y, dy\n";
-  param_file << SIZE_X << " " << dx << " " << SIZE_Y << " " << dy << " \n\n";
-  param_file << "# particles global parameters: name, n, q, m, Np, p0, Tx, Ty, Tz\n";
-
-  for (const auto& [name, container] : particles_) {
-    const Parameters& params = container.parameters_;
-
-    param_file
-      << name << " "
-      << params.n() << " "
-      << params.q() << " "
-      << params.m() << " "
-      << params.Np() << " "
-      << params.p0() << " "
-      << params.Tx() << " "
-      << params.Ty() << " "
-      << params.Tz() << " \n";
-  }
-
-  param_file << "\n";
-  param_file << "# is density global:\n";
-  param_file << std::boolalpha << GLOBAL_DENSITY << "\n\n";
-  param_file << "# sizeof(double)\n";
-  param_file << sizeof(double) << std::endl;
+  Configuration::instance().save("simulation_backup");
+  Configuration::instance().save_sources("simulation_backup");
 }
 
 void Simulation_backup::save(int t) {
