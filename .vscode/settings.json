@@ -103,7 +103,8 @@
         "queue": "cpp",
         "stack": "cpp",
         "version": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp",
+        "stacktrace": "cpp"
     },
     "cSpell.customDictionaries": {
         "custom-dictionary-workspace": {
