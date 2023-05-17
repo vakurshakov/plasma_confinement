@@ -149,18 +149,14 @@ void Manager::initializes() {
     [] (double x, double y,
         double mass, double Tx, double Ty, double Tz,
         double p0, double* px, double* py, double* pz) {
-      static const double center_x = 0.5 * SIZE_X * dx;
-      static const double center_y = 0.5 * SIZE_Y * dy;
-
       using namespace config;
       static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
 
-      x -= center_x;
-      y -= center_y;
-      double r = sqrt(x * x + y * y);
+      double cos_phi = 2.0 * (random_01() - 0.5);
+      double sin_phi = sqrt(1.0 - cos_phi * cos_phi);
 
-      *px = +mass * u0 * y / r + temperature_impulse(Tx, mass);
-      *py = -mass * u0 * x / r + temperature_impulse(Ty, mass);
+      *px = +mass * u0 * cos_phi + temperature_impulse(Tx, mass);
+      *py = -mass * u0 * sin_phi + temperature_impulse(Ty, mass);
 
 #if _2D3V
       *pz = temperature_impulse(Tz, mass);
