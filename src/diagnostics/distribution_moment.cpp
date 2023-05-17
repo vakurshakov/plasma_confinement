@@ -14,10 +14,10 @@ distribution_moment::distribution_moment(
   moment_ = std::move(moment);
   projector_ = std::move(projector);
 
-  min_[X] = int(projector_->area.min[X] / projector_->area.dp[X]);
-  min_[Y] = int(projector_->area.min[Y] / projector_->area.dp[Y]);
-  max_[X] = int(projector_->area.max[X] / projector_->area.dp[X]);
-  max_[Y] = int(projector_->area.max[Y] / projector_->area.dp[Y]);
+  min_[X] = int(round(projector_->area.min[X] / projector_->area.dp[X]));
+  min_[Y] = int(round(projector_->area.min[Y] / projector_->area.dp[Y]));
+  max_[X] = int(round(projector_->area.max[X] / projector_->area.dp[X]));
+  max_[Y] = int(round(projector_->area.max[Y] / projector_->area.dp[Y]));
   data_.reserve((max_[X] - min_[X]) * (max_[Y] - min_[Y]));
 
   save_parameters();
@@ -32,10 +32,10 @@ distribution_moment::distribution_moment(
   moment_ = nullptr;
   projector_ = std::move(projector);
 
-  min_[X] = int(projector_->area.min[X] / projector_->area.dp[X]);
-  min_[Y] = int(projector_->area.min[Y] / projector_->area.dp[Y]);
-  max_[X] = int(projector_->area.max[X] / projector_->area.dp[X]);
-  max_[Y] = int(projector_->area.max[Y] / projector_->area.dp[Y]);
+  min_[X] = int(round(projector_->area.min[X] / projector_->area.dp[X]));
+  min_[Y] = int(round(projector_->area.min[Y] / projector_->area.dp[Y]));
+  max_[X] = int(round(projector_->area.max[X] / projector_->area.dp[X]));
+  max_[Y] = int(round(projector_->area.max[Y] / projector_->area.dp[Y]));
   data_.reserve((max_[X] - min_[X]) * (max_[Y] - min_[Y]));
 
   save_parameters();
@@ -90,9 +90,8 @@ void distribution_moment::collect() {
     double pr_x = projector_->get_x(particle);
     double pr_y = projector_->get_y(particle);
 
-    // floor(x) here to avoid problems on borders with rounding up and down
-    int npx = int(floor(pr_x / projector_->area.dp[X]));
-    int npy = int(floor(pr_y / projector_->area.dp[Y]));
+    int npx = int(round(pr_x / a_dx));
+    int npy = int(round(pr_y / a_dy));
 
     for (int i = npx - width; i <= npx + width; ++i) {
     for (int j = npy - width; j <= npy + width; ++j) {

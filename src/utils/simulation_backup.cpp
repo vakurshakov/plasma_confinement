@@ -316,8 +316,8 @@ void Simulation_backup::collect_charge_density(scalar_field& charge_density) {
       double x = particle.point.x();
       double y = particle.point.y();
 
-      int nx = int(floor(x / dx));
-      int ny = int(floor(y / dy));
+      int nx = int(round(x / dx));
+      int ny = int(round(y / dy));
 
       for (int i = nx - width; i <= nx + width; ++i) {
       for (int j = ny - width; j <= ny + width; ++j) {
