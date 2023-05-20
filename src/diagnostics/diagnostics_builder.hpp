@@ -27,11 +27,11 @@ class Diagnostics_builder {
   void build_field_at_point(const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container);
 
-  // void build_field_on_segment(const Configuration_item& description,
-  //   vector_of_diagnostics& diagnostics_container);
+  void build_field_on_segment(const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container);
 
-  // void build_whole_field(const Configuration_item& description,
-  //   vector_of_diagnostics& diagnostics_container);
+  void build_whole_field(const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container);
 
   struct Field_description {
     std::pair<std::string, const vector3_field*> field;
@@ -40,7 +40,6 @@ class Diagnostics_builder {
   Field_description create_field_description(const Configuration_item& description);
   std::list<Field_description> collect_field_descriptions(const Configuration_item& description);
 
-#undef BUILD_FIELD_DIAG
 
   diagnostic_up
   build_particles_energy(const std::string& sort_name);

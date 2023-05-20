@@ -7,9 +7,6 @@
 struct diag_segment {
   int begin[2];
   int end[2];
-
-  diag_segment(int begin_x, int begin_y, int end_x, int end_y)
-    : begin{begin_x, begin_y}, end{end_x, end_y} {}
 };
 
 class field_on_segment : public Diagnostic {

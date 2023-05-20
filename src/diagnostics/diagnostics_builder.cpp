@@ -46,10 +46,10 @@ vector_of_diagnostics Diagnostics_builder::build() {
       build_field_at_point(description.get_item("field_at_point"), diagnostics);
     }
     else if (description.contains("field_on_segment")) {
-      // build_field_on_segment(description, diagnostics);
+      build_field_on_segment(description.get_item("field_on_segment"), diagnostics);
     }
     else if (description.contains("whole_field")) {
-      // build_whole_field(description, diagnostics);
+      build_whole_field(description.get_item("whole_field"), diagnostics);
     }
 #endif
 
@@ -134,11 +134,11 @@ void Diagnostics_builder::build_field_at_point(
 
   if (!check_point && !check_points) {
     throw std::runtime_error("Initialization error: Point not specified "
-      "for point_at_point diagnostic.");
+      "for field_at_point diagnostic.");
   }
   else if (check_point && check_points) {
     throw std::runtime_error("Initialization error: Both \"point\" and \"points\" "
-      "are specified for point_at_point diagnostic.");
+      "are specified for field_at_point diagnostic.");
   }
 
   auto construct_point = [&](const Configuration_item& desc) {
@@ -151,7 +151,6 @@ void Diagnostics_builder::build_field_at_point(
       throw std::runtime_error("Initialization error: Invalid point for "
         "field_at_point diagnostic is set.");
     }
-
     return point;
   };
 
@@ -178,63 +177,110 @@ void Diagnostics_builder::build_field_at_point(
   }}}
 }
 
-#if 0
-
 void Diagnostics_builder::build_field_on_segment(
     const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container) {
-  if (description.size() < 2)
-    throw std::runtime_error("Initialization error: No segment specified for " + description[0] + description[1] + " diagnostic");
+    std::list<Field_description> field_descriptions = collect_field_descriptions(description);
 
-  diag_segment segment{
-    std::stoi(description[2]), std::stoi(description[3]),
-    std::stoi(description[4]), std::stoi(description[5])
-  };
+  bool check_segment = description.contains("segment");
+  bool check_segments = description.contains("segments");
 
-  if ((0 > segment.begin[X] || segment.begin[X] > SIZE_X) ||
-      (0 > segment.begin[Y] || segment.begin[Y] > SIZE_Y) ||
-      (0 > segment.end[X]   || segment.end[X]   > SIZE_X) ||
-      (0 > segment.end[Y]   || segment.end[Y]   > SIZE_Y)) {
-    throw std::runtime_error("Initialization error: Invalid segment values for " + description[0] + description[1] + " is set");
+  if (!check_segment && !check_segments) {
+    throw std::runtime_error("Initialization error: Segment not specified "
+      "for field_on_segment diagnostic.");
+  }
+  else if (check_segment && check_segments) {
+    throw std::runtime_error("Initialization error: Both \"segment\" and \"segments\" "
+      "are specified for field_on_segment diagnostic.");
   }
 
-  return std::make_unique<field_on_segment>(
-    out_dir_ + "/" + description[0] + description[1] + "/segment_(" +
-      description[2] + "," + description[3] + ")_(" +
-      description[4] + "," + description[5] + ")/",
-    get_field(description[0]),
-    get_component(description[1]),
-    segment);
+  auto construct_segment = [&](const Configuration_item& desc) {
+    diag_segment segment;
+    segment.begin[X] = TO_CELL(desc.get<double>("begin.x"), dx);
+    segment.begin[Y] = TO_CELL(desc.get<double>("begin.y"), dx);
+    segment.end[X] = TO_CELL(desc.get<double>("end.x"), dx);
+    segment.end[Y] = TO_CELL(desc.get<double>("end.y"), dy);
+
+    if ((segment.begin[X] < 0 || segment.begin[X] > SIZE_X) ||
+        (segment.begin[Y] < 0 || segment.begin[Y] > SIZE_Y) ||
+        (segment.end[X] < 0 || segment.end[X] > SIZE_X) ||
+        (segment.end[Y] < 0 || segment.end[Y] > SIZE_Y) ||
+        (segment.end[X] < segment.begin[X]) ||
+        (segment.end[Y] < segment.begin[Y])) {
+      throw std::runtime_error("Initialization error: Invalid segment "
+        "for field_on_segment diagnostic is set.");
+    }
+    return segment;
+  };
+
+  std::list<diag_segment> segments;
+  if (check_segment) {
+    segments.emplace_back(construct_segment(description.get_item("segment")));
+  }
+  else {
+    description.for_each("segments", [&](const Configuration_item& segment_desc) {
+      segments.emplace_back(construct_segment(segment_desc));
+    });
+  }
+
+  for (const auto& segment : segments) {
+  for (const auto& field_description : field_descriptions) {
+  for (const auto& [comp_name, comp_axis] : field_description.components) {
+    LOG_INFO("Add field_on_segment diagnostic for {}", field_description.field.first + comp_name);
+
+    diagnostics_container.emplace_back(std::make_unique<field_on_segment>(
+      out_dir_ + "/" + field_description.field.first + comp_name + "/segment_(" +
+      to_string(segment.begin[X]) + "," + to_string(segment.begin[Y]) + ")_(" +
+      to_string(segment.end[X]) + "," + to_string(segment.end[Y]) + ")/",
+      *field_description.field.second, comp_axis, segment));
+  }}}
 }
 
 void Diagnostics_builder::build_whole_field(
     const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container) {
-  if (description.size() < 2)
-    throw std::runtime_error("Initialization error: No area specified for " + description[0] + description[1] + " whole_field diagnostic");
+  std::list<Field_description> field_descriptions = collect_field_descriptions(description);
 
-  diag_segment area{
-    std::stoi(description[2]), std::stoi(description[3]),
-    std::stoi(description[4]), std::stoi(description[5])
+  auto construct_area = [&](const Configuration_item& desc) {
+    diag_segment area;
+    area.begin[X] = TO_CELL(desc.get<double>("begin.x"), dx);
+    area.begin[Y] = TO_CELL(desc.get<double>("begin.y"), dx);
+    area.end[X] = TO_CELL(desc.get<double>("end.x"), dx);
+    area.end[Y] = TO_CELL(desc.get<double>("end.y"), dy);
+
+    if ((area.begin[X] < 0 || area.begin[X] > SIZE_X) ||
+        (area.begin[Y] < 0 || area.begin[Y] > SIZE_Y) ||
+        (area.end[X] < 0 || area.end[X] > SIZE_X) ||
+        (area.end[Y] < 0 || area.end[Y] > SIZE_Y) ||
+        (area.end[X] <= area.begin[X]) ||
+        (area.end[Y] <= area.begin[Y])) {
+      throw std::runtime_error("Initialization error: Invalid area "
+        "for whole_field diagnostic is set.");
+    }
+    return area;
   };
 
-  if ((0 > area.begin[X] || area.begin[X] > SIZE_X) ||
-      (0 > area.begin[Y] || area.begin[Y] > SIZE_Y) ||
-      (0 > area.end[X]   || area.end[X]   > SIZE_X) ||
-      (0 > area.end[Y]   || area.end[Y]   > SIZE_Y)) {
-    throw std::runtime_error("Initialization error: Invalid area values for " + description[0] + description[1] + " whole_field diagnostic is set");
+  diag_segment area;
+  if (description.contains("area")) {
+    area = construct_area(description.get_item("area"));
+  }
+  else {
+    area.begin[X] = 0;
+    area.begin[Y] = 0;
+    area.end[X] = SIZE_X;
+    area.end[Y] = SIZE_Y;
   }
 
-  return std::make_unique<whole_field>(
-    out_dir_ + "/" + description[0] + description[1] + "/whole_field/",
-    get_field(description[0]),
-    get_component(description[1]),
-    diag_segment{
-      std::stoi(description[2]), std::stoi(description[3]),
-      std::stoi(description[4]), std::stoi(description[5])
-    });
+  for (const auto& field_description : field_descriptions) {
+  for (const auto& [comp_name, comp_axis] : field_description.components) {
+    LOG_INFO("Add whole_field diagnostic for {}", field_description.field.first + comp_name);
+
+    diagnostics_container.emplace_back(std::make_unique<whole_field>(
+      out_dir_ + "/" + field_description.field.first + comp_name + "/whole_field/",
+      *field_description.field.second, comp_axis, area
+    ));
+  }}
 }
-#endif
 
 Diagnostics_builder::Field_description
 Diagnostics_builder::create_field_description(const Configuration_item& field_desc) {
