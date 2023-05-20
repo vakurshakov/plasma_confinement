@@ -124,22 +124,29 @@ diagnostic_up Diagnostics_builder::build_fields_energy() {
 
 #define TO_CELL(dim, ds) static_cast<int>(round(dim / ds))
 
+bool check_consistency(const Configuration_item& description,
+    const std::string& desc_name, const std::string& diag_name) {
+  bool check_singular = description.contains(desc_name);
+  bool check_plural = description.contains(desc_name + "s");
+
+  if (!check_singular && !check_plural) {
+    throw std::runtime_error("Initialization error: \"" + desc_name + "\" "
+      "not specified for " + diag_name + " diagnostic.");
+  }
+  else if (check_singular && check_plural) {
+    throw std::runtime_error("Initialization error: Both \"" + desc_name + "\" "
+      "and \"" + desc_name + "s\" are specified for " + diag_name + " diagnostic.");
+  }
+  return check_singular;
+}
+
 void Diagnostics_builder::build_field_at_point(
     const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container) {
-  std::list<Field_description> field_descriptions = collect_field_descriptions(description);
+  std::list<Field_description> field_descriptions =
+    collect_field_descriptions(description, "field_at_point");
 
-  bool check_point = description.contains("point");
-  bool check_points = description.contains("points");
-
-  if (!check_point && !check_points) {
-    throw std::runtime_error("Initialization error: Point not specified "
-      "for field_at_point diagnostic.");
-  }
-  else if (check_point && check_points) {
-    throw std::runtime_error("Initialization error: Both \"point\" and \"points\" "
-      "are specified for field_at_point diagnostic.");
-  }
+  bool check_point = check_consistency(description, "point", "field_at_point");
 
   auto construct_point = [&](const Configuration_item& desc) {
     diag_point point;
@@ -177,49 +184,49 @@ void Diagnostics_builder::build_field_at_point(
   }}}
 }
 
+diag_segment construct_segment(const Configuration_item& desc,
+    const std::string& diag_name, bool is_touching_allowed) {
+  diag_segment segment;
+  segment.begin[X] = TO_CELL(desc.get<double>("begin.x"), dx);
+  segment.begin[Y] = TO_CELL(desc.get<double>("begin.y"), dx);
+  segment.end[X] = TO_CELL(desc.get<double>("end.x"), dx);
+  segment.end[Y] = TO_CELL(desc.get<double>("end.y"), dy);
+
+  bool is_begin_end_reversed =
+    !is_touching_allowed ?
+    (segment.end[X] <= segment.begin[X]) ||
+    (segment.end[Y] <= segment.begin[Y]) :
+    (segment.end[X] < segment.begin[X]) ||
+    (segment.end[Y] < segment.begin[Y]);
+
+  if ((segment.begin[X] < 0 || segment.begin[X] > SIZE_X) ||
+      (segment.begin[Y] < 0 || segment.begin[Y] > SIZE_Y) ||
+      (segment.end[X] < 0 || segment.end[X] > SIZE_X) ||
+      (segment.end[Y] < 0 || segment.end[Y] > SIZE_Y) ||
+      is_begin_end_reversed) {
+    throw std::runtime_error("Initialization error: Invalid region "
+      "for " + diag_name + " diagnostic is set.");
+  }
+  return segment;
+}
+
 void Diagnostics_builder::build_field_on_segment(
     const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container) {
-    std::list<Field_description> field_descriptions = collect_field_descriptions(description);
+  std::list<Field_description> field_descriptions =
+    collect_field_descriptions(description, "field_on_segment");
 
-  bool check_segment = description.contains("segment");
-  bool check_segments = description.contains("segments");
-
-  if (!check_segment && !check_segments) {
-    throw std::runtime_error("Initialization error: Segment not specified "
-      "for field_on_segment diagnostic.");
-  }
-  else if (check_segment && check_segments) {
-    throw std::runtime_error("Initialization error: Both \"segment\" and \"segments\" "
-      "are specified for field_on_segment diagnostic.");
-  }
-
-  auto construct_segment = [&](const Configuration_item& desc) {
-    diag_segment segment;
-    segment.begin[X] = TO_CELL(desc.get<double>("begin.x"), dx);
-    segment.begin[Y] = TO_CELL(desc.get<double>("begin.y"), dx);
-    segment.end[X] = TO_CELL(desc.get<double>("end.x"), dx);
-    segment.end[Y] = TO_CELL(desc.get<double>("end.y"), dy);
-
-    if ((segment.begin[X] < 0 || segment.begin[X] > SIZE_X) ||
-        (segment.begin[Y] < 0 || segment.begin[Y] > SIZE_Y) ||
-        (segment.end[X] < 0 || segment.end[X] > SIZE_X) ||
-        (segment.end[Y] < 0 || segment.end[Y] > SIZE_Y) ||
-        (segment.end[X] < segment.begin[X]) ||
-        (segment.end[Y] < segment.begin[Y])) {
-      throw std::runtime_error("Initialization error: Invalid segment "
-        "for field_on_segment diagnostic is set.");
-    }
-    return segment;
-  };
+  bool check_segment = check_consistency(description, "segment", "field_on_segment");
 
   std::list<diag_segment> segments;
   if (check_segment) {
-    segments.emplace_back(construct_segment(description.get_item("segment")));
+    segments.emplace_back(construct_segment(description.get_item("segment"),
+      "field_on_segment", /* is_touching_allowed */ true));
   }
   else {
     description.for_each("segments", [&](const Configuration_item& segment_desc) {
-      segments.emplace_back(construct_segment(segment_desc));
+      segments.emplace_back(construct_segment(segment_desc,
+        "field_on_segment", /* is_touching_allowed */ true));
     });
   }
 
@@ -239,30 +246,13 @@ void Diagnostics_builder::build_field_on_segment(
 void Diagnostics_builder::build_whole_field(
     const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container) {
-  std::list<Field_description> field_descriptions = collect_field_descriptions(description);
-
-  auto construct_area = [&](const Configuration_item& desc) {
-    diag_segment area;
-    area.begin[X] = TO_CELL(desc.get<double>("begin.x"), dx);
-    area.begin[Y] = TO_CELL(desc.get<double>("begin.y"), dx);
-    area.end[X] = TO_CELL(desc.get<double>("end.x"), dx);
-    area.end[Y] = TO_CELL(desc.get<double>("end.y"), dy);
-
-    if ((area.begin[X] < 0 || area.begin[X] > SIZE_X) ||
-        (area.begin[Y] < 0 || area.begin[Y] > SIZE_Y) ||
-        (area.end[X] < 0 || area.end[X] > SIZE_X) ||
-        (area.end[Y] < 0 || area.end[Y] > SIZE_Y) ||
-        (area.end[X] <= area.begin[X]) ||
-        (area.end[Y] <= area.begin[Y])) {
-      throw std::runtime_error("Initialization error: Invalid area "
-        "for whole_field diagnostic is set.");
-    }
-    return area;
-  };
+  std::list<Field_description> field_descriptions =
+    collect_field_descriptions(description, "whole_field");
 
   diag_segment area;
   if (description.contains("area")) {
-    area = construct_area(description.get_item("area"));
+    area = construct_segment(description.get_item("area"),
+      "whole_field", /* is_touching_allowed */ false);
   }
   else {
     area.begin[X] = 0;
@@ -319,18 +309,9 @@ Diagnostics_builder::create_field_description(const Configuration_item& field_de
 }
 
 std::list<Diagnostics_builder::Field_description>
-Diagnostics_builder::collect_field_descriptions(const Configuration_item& description) {
-  bool check_field = description.contains("field");
-  bool check_fields = description.contains("fields");
-
-  if (!check_field && !check_fields) {
-    throw std::runtime_error("Initialization error: Field not specified "
-      "for field_at_point diagnostic.");
-  }
-  else if (check_field && check_fields) {
-    throw std::runtime_error("Initialization error: Both \"field\" and \"fields\" "
-      "are specified for field_at_point diagnostic.");
-  }
+Diagnostics_builder::collect_field_descriptions(
+    const Configuration_item& description, const std::string& diag_name) {
+  bool check_field = check_consistency(description, "field", diag_name);
 
   std::set<std::string> field_names;
   std::list<Field_description> field_descriptions;
@@ -343,7 +324,7 @@ Diagnostics_builder::collect_field_descriptions(const Configuration_item& descri
       const auto& [_, success] = field_names.emplace(desc.field.first);
       if (!success) {
         throw std::runtime_error("Initialization error: Field name was "
-          "used twice in \"fields\" for diagnostic description.");
+          "used twice in \"fields\" for " + diag_name + " diagnostic.");
       }
     });
   }

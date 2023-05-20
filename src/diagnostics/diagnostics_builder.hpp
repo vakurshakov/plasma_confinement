@@ -38,7 +38,8 @@ class Diagnostics_builder {
     std::map<std::string, Axis> components;
   };
   Field_description create_field_description(const Configuration_item& description);
-  std::list<Field_description> collect_field_descriptions(const Configuration_item& description);
+  std::list<Field_description> collect_field_descriptions(
+    const Configuration_item& description, const std::string& diag_name);
 
 
   diagnostic_up
