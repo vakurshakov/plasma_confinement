@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 #define there_are_particles             true
-  #define GLOBAL_DENSITY                true
+  #define GLOBAL_DENSITY                false
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
@@ -29,7 +29,7 @@
 #define START_FROM_BACKUP               false
 
 
-#define BEAM_INJECTION_SETUP            true
+#define BEAM_INJECTION_SETUP            false
 #if BEAM_INJECTION_SETUP && !(GLOBAL_DENSITY && there_are_plasma_electrons)
   #error "Beam injection setup only works with global density!"
 #endif
@@ -51,12 +51,12 @@ inline const int SIZE_X = 4200;
 #endif
 
 inline const double dy  = dx;
-inline const int SIZE_Y = 400;
+inline const int SIZE_Y = 800;
 
 inline const double dt = 0.5 * dx;
-inline const int TIME  = 0;
+inline const int TIME  = 100'000;
 
-inline const int diagnose_time_step = 1;
+inline const int diagnose_time_step = 100;
 
 namespace config {
 
@@ -149,11 +149,6 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
       to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
     }},
-    { "mVyVy_moment", {                                             //
-      "0", "0",                                                     // minimal captured coordinate [in units of c/ωₚ]
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),               // maximum captured coordinate [in units of c/ωₚ]
-      to_string(dx), to_string(dy),                                 // step between nearest coordinates [in units of c/ωₚ]
-    }},
     { "x0_distribution_function", {                                 //
       to_string(SIZE_X / 2),                                        // x0 [in cells]
       to_string(-10 * V_ions), to_string(-10 * V_ions),             // minimal captured velocity [in units of c]
@@ -208,11 +203,6 @@ inline const umap<std::string,
       to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
       to_string(dx), to_string(dy),
     }},
-    { "mVyVy_moment", {
-      "0", "0",
-      to_string(SIZE_X * dx), to_string(SIZE_Y * dy),
-      to_string(dx), to_string(dy),
-    }},
     { "x0_distribution_function", {
       to_string(SIZE_X / 2),
       to_string(-10 * V_ions), to_string(-10 * V_ions),
@@ -259,6 +249,22 @@ inline const umap<std::string, std::vector<std::string>> fields_diagnostics = {
     "B", "z",
     to_string(SIZE_X / 2), "0",
     to_string(SIZE_X / 2), to_string(SIZE_Y)
+  }},
+
+  { "field_on_segment", {
+    "E", "x",
+    to_string(SIZE_X / 2 + 400), "0",
+    to_string(SIZE_X / 2 + 400), to_string(SIZE_Y)
+  }},
+  { "field_on_segment", {
+    "E", "y",
+    to_string(SIZE_X / 2 + 400), "0",
+    to_string(SIZE_X / 2 + 400), to_string(SIZE_Y)
+  }},
+  { "field_on_segment", {
+    "B", "z",
+    to_string(SIZE_X / 2 + 400), "0",
+    to_string(SIZE_X / 2 + 400), to_string(SIZE_Y)
   }},
 #endif
 };
