@@ -14,6 +14,8 @@ struct vector2 {
   inline double x() const { return vec[X]; }
   inline double y() const { return vec[Y]; }
 
+  double length() const;
+
   vector2& operator+=(const vector2& other);
   vector2 operator/(double a) const;
 
@@ -38,7 +40,7 @@ struct vector3 {
   /// @todo tolerance on other == zero?
   double dot(const vector3& other) const;
   double square() const;
-  double l2_norm() const;
+  double length() const;
 
   vector3 cross(const vector3& other) const;
   vector3 element_wise(const vector3& other) const;
