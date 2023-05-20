@@ -127,8 +127,7 @@ diagnostic_up Diagnostics_builder::build_fields_energy() {
 void Diagnostics_builder::build_field_at_point(
     const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container) {
-  std::list<std::string> field_names = collect_field_names(description);
-  std::list<std::string> axis_names = collect_axis_names(description);
+  std::list<Field_description> field_descriptions = collect_field_descriptions(description);
 
   bool check_point = description.contains("point");
   bool check_points = description.contains("points");
@@ -142,8 +141,7 @@ void Diagnostics_builder::build_field_at_point(
       "are specified for point_at_point diagnostic.");
   }
 
-  std::list<diag_point> points;
-  auto construct_point = [](const Configuration_item& desc) {
+  auto construct_point = [&](const Configuration_item& desc) {
     diag_point point;
     point.x = TO_CELL(desc.get<double>("x"), dx);
     point.y = TO_CELL(desc.get<double>("y"), dy);
@@ -157,6 +155,7 @@ void Diagnostics_builder::build_field_at_point(
     return point;
   };
 
+  std::list<diag_point> points;
   if (check_point) {
     points.emplace_back(construct_point(description.get_item("point")));
   }
@@ -166,18 +165,15 @@ void Diagnostics_builder::build_field_at_point(
     });
   }
 
-  for (const auto& field_name : field_names) {
-  for (const auto& axis_name : axis_names) {
   for (const auto& point : points) {
-    LOG_INFO("Add field_on_segment diagnostic for {}", field_name + axis_name);
-
-    const vector3_field& field = get_field(field_name);
-    Axis component = get_component(axis_name);
+  for (const auto& field_description : field_descriptions) {
+  for (const auto& [comp_name, comp_axis] : field_description.components) {
+    LOG_INFO("Add field_on_segment diagnostic for {}", field_description.field.first + comp_name);
 
     diagnostics_container.emplace_back(std::make_unique<field_at_point>(
-      out_dir_ + "/" + field_name + axis_name + "/",
+      out_dir_ + "/" + field_description.field.first + comp_name + "/",
       "point_(" + to_string(point.x) + "," + to_string(point.y) + ")",
-      field, component, point
+      *field_description.field.second, comp_axis, point
     ));
   }}}
 }
@@ -240,18 +236,44 @@ void Diagnostics_builder::build_whole_field(
 }
 #endif
 
-inline const vector3_field&
-Diagnostics_builder::get_field(const std::string& name) {
-  if      (name == "E") { return fields_.E(); }
-  else if (name == "B") { return fields_.B(); }
-  else if (name == "J") { return fields_.J(); }
-  else
+Diagnostics_builder::Field_description
+Diagnostics_builder::create_field_description(const Configuration_item& field_desc) {
+  auto get_component = [&](const Configuration_item& component_desc) {
+    if      (component_desc.contains("x")) { return std::make_pair("x", Axis::X); }
+    else if (component_desc.contains("y")) { return std::make_pair("y", Axis::Y); }
+    else if (component_desc.contains("z")) { return std::make_pair("z", Axis::Z); }
+    else {
+      throw std::runtime_error("Initialization error: Incorrect field "
+        "component specified in diagnostic description.");
+    }
+  };
+
+  Field_description result;
+  if      (field_desc.contains("E")) { result.field = std::make_pair("E", &fields_.E()); }
+  else if (field_desc.contains("B")) { result.field = std::make_pair("B", &fields_.B()); }
+  else if (field_desc.contains("J")) { result.field = std::make_pair("J", &fields_.J()); }
+  else {
     throw std::runtime_error("Initialization error: Incorrect field "
       "name in diagnostic description.");
+  }
+
+  if (Configuration_item item = field_desc.get_item(result.field.first); !item.is_array()) {
+    result.components.emplace(get_component(item));
+  }
+  else {
+    item.for_each([&](const Configuration_item& subitem) {
+      const auto& [_, success] = result.components.emplace(get_component(subitem));
+      if (!success) {
+        throw std::runtime_error("Initialization error: Component was used twice "
+          "in diagnostic description for " + result.field.first + " field.");
+      }
+    });
+  }
+  return result;
 }
 
-std::list<std::string>
-Diagnostics_builder::collect_field_names(const Configuration_item& description) {
+std::list<Diagnostics_builder::Field_description>
+Diagnostics_builder::collect_field_descriptions(const Configuration_item& description) {
   bool check_field = description.contains("field");
   bool check_fields = description.contains("fields");
 
@@ -264,55 +286,23 @@ Diagnostics_builder::collect_field_names(const Configuration_item& description) 
       "are specified for field_at_point diagnostic.");
   }
 
-  std::list<std::string> field_names;
+  std::set<std::string> field_names;
+  std::list<Field_description> field_descriptions;
   if (check_field) {
-    field_names.emplace_back(description.get("field"));
+    field_descriptions.emplace_back(create_field_description(description.get_item("field")));
   }
   else {
-    description.for_each("fields", [&](const std::string& field_name) {
-      field_names.emplace_back(field_name);
+    description.for_each("fields", [&](const Configuration_item& field_description) {
+      const auto& desc = field_descriptions.emplace_back(create_field_description(field_description));
+      const auto& [_, success] = field_names.emplace(desc.field.first);
+      if (!success) {
+        throw std::runtime_error("Initialization error: Field name was "
+          "used twice in \"fields\" for diagnostic description.");
+      }
     });
   }
-  return field_names;
+  return field_descriptions;
 }
-
-inline Axis
-Diagnostics_builder::get_component(const std::string& component) {
-  if      (component == "x") { return Axis::X; }
-  else if (component == "y") { return Axis::Y; }
-  else if (component == "z") { return Axis::Z; }
-  else
-    throw std::runtime_error("Initialization error: Incorrect field "
-      "component specified in diagnostic description.");
-}
-
-std::list<std::string>
-Diagnostics_builder::collect_axis_names(const Configuration_item& description) {
-  bool check_component = description.contains("component");
-  bool check_components = description.contains("components");
-
-  if (!check_component && !check_components) {
-    throw std::runtime_error("Initialization error: Field not specified "
-      "for field_at_point diagnostic.");
-  }
-  else if (check_component && check_components) {
-    throw std::runtime_error("Initialization error: Both \"component\" and \"components\" "
-      "are specified for field_at_point diagnostic.");
-  }
-
-  std::list<std::string> axis_names;
-  if (check_component) {
-    axis_names.emplace_back(description.get("component"));
-  }
-  else {
-    description.for_each("components", [&](const std::string& comp_name) {
-      axis_names.emplace_back(comp_name);
-    });
-  }
-  return axis_names;
-}
-
-#undef BUILD_FIELD_DIAG
 
 
 std::unique_ptr<Diagnostic>

@@ -9,6 +9,9 @@ Configuration_item::to_pointer(const std::string& key) const {
 
 template<typename T>
 inline T Configuration_item::get(const std::string& key) const {
+  if (key == "") {
+    return item_.get<T>();
+  }
   return item_.at(to_pointer(key)).get<T>();
 }
 
@@ -36,14 +39,21 @@ inline bool Configuration_item::contains(const std::string& key) const {
   return false;
 }
 
-inline void Configuration_item::for_each(const std::string& key, string_parser func) const {
-  for (const auto& element : item_.at(to_pointer(key))) {
-    func(element.get<std::string>());
+inline bool Configuration_item::is_array(const std::string& key) const {
+  if (key == "") {
+    return item_.is_array();
   }
+  return item_.at(to_pointer(key)).is_array();
 }
 
 inline void Configuration_item::for_each(const std::string& key, item_parser func) const {
   for (const auto& element : item_.at(to_pointer(key))) {
+    func(Configuration_item{element});
+  }
+}
+
+inline void Configuration_item::for_each(item_parser func) const {
+  for (const auto& element : item_) {
     func(Configuration_item{element});
   }
 }

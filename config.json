@@ -49,8 +49,7 @@
     "fields_energy",
 
     { "field_at_point": {
-        "fields": ["E", "B"],
-        "components": ["x", "y"],
+        "fields": [{"E": ["x", "y"]}, {"B": "z"}],
         "points": [{"x": 25, "y": 25}, {"x": 50, "y": 50}]
     }}
   ]

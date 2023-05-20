@@ -33,11 +33,12 @@ class Diagnostics_builder {
   // void build_whole_field(const Configuration_item& description,
   //   vector_of_diagnostics& diagnostics_container);
 
-  inline const vector3_field& get_field(const std::string& name);
-  std::list<std::string> collect_field_names(const Configuration_item& description);
-
-  inline Axis get_component(const std::string& component);
-  std::list<std::string> collect_axis_names(const Configuration_item& description);
+  struct Field_description {
+    std::pair<std::string, const vector3_field*> field;
+    std::map<std::string, Axis> components;
+  };
+  Field_description create_field_description(const Configuration_item& description);
+  std::list<Field_description> collect_field_descriptions(const Configuration_item& description);
 
 #undef BUILD_FIELD_DIAG
 
