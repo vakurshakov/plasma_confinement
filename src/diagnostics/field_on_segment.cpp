@@ -36,10 +36,13 @@ void field_on_segment::save_parameters() const {
 void field_on_segment::diagnose(int t) {
   PROFILE_FUNCTION();
 
-  // if (t % diagnose_time_step != 0) return;
+  if (t % diagnose_time_step == 0) {
+    if (file_for_results_)
+      file_for_results_->flush();
 
-  file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+    file_for_results_ = std::make_unique<BIN_File>(
+      result_directory_, std::to_string(t));
+  }
 
   for (double t = 0.0; t < 1.0; t += parameter_step_) {
     int nx, ny;
