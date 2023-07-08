@@ -51,13 +51,14 @@ void Manager::initializes() {
   diagnostics_ = diagnostics_builder.build();
 
 #if MAKE_BACKUPS || START_FROM_BACKUP
+  /// @todo specify backup_time_step via config file
   auto backup =  std::make_unique<Simulation_backup>(
     /* backup timestep = */ 100 * diagnose_time_step,
     particles_species_,
     // named fields to backup:
     std::map<std::string, vector3_field&>{
-      { "E", fields_.E() },
-      { "B", fields_.B() }
+      std::pair<std::string, vector3_field&>{"E", fields_.E()},
+      std::pair<std::string, vector3_field&>{"B", fields_.B()}
   });
 #endif
 
