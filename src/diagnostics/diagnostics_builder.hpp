@@ -24,6 +24,16 @@ class Diagnostics_builder {
 
   diagnostic_up build_fields_energy();
 
+  struct Field_description {
+    std::pair<std::string, const vector3_field*> field;
+    std::map<std::string, Axis> components;
+  };
+
+  std::list<Field_description> collect_field_descriptions(
+    const Configuration_item& description, const std::string& diag_name);
+
+  Field_description create_field_description(const Configuration_item& description);
+
   void build_field_at_point(const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container);
 
@@ -33,17 +43,8 @@ class Diagnostics_builder {
   void build_whole_field(const Configuration_item& description,
     vector_of_diagnostics& diagnostics_container);
 
-  struct Field_description {
-    std::pair<std::string, const vector3_field*> field;
-    std::map<std::string, Axis> components;
-  };
-  Field_description create_field_description(const Configuration_item& description);
-  std::list<Field_description> collect_field_descriptions(
-    const Configuration_item& description, const std::string& diag_name);
-
-
-  diagnostic_up
-  build_particles_energy(const std::string& sort_name);
+  void build_particles_energy(const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container);
 
   diagnostic_up
   build_distribution_moment(

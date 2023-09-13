@@ -18,7 +18,7 @@ CFLAGS += -std=c++20 -fPIC -fopenmp -pthread
 
 # `filter X, A B` return those of A, B that are equal to X
 ifeq ($(VERSION), $(filter $(VERSION), "DEBUG" ""))
-CFLAGS += -O0 -ggdb -Wall -pedantic
+CFLAGS += -O0 -ggdb -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror
 endif
 
 ifeq ($(VERSION), RELEASE)

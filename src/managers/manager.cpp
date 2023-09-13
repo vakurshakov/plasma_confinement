@@ -37,6 +37,7 @@ void Manager::initializes() {
   LOG_TRACE("Initialization process...");
 
   /// @todo Add usage description into runtime exception
+  /// @todo Add a wraparound for "Initialization error"
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 
@@ -94,7 +95,7 @@ void Manager::calculates() {
       command->execute(t);
     }
 
-  #if there_are_particles
+  #if THERE_ARE_PARTICLES
     for (auto& sort : particles_species_) {
       sort.push();
     }

@@ -116,6 +116,9 @@
             "scope": "workspace"
         }
     },
+
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
+
+    "diffEditor.experimental.showMoves": true,
 }

@@ -24,6 +24,7 @@ Diagnostics_builder::Diagnostics_builder(
 using diagnostic_up = std::unique_ptr<Diagnostic>;
 using vector_of_diagnostics = std::vector<diagnostic_up>;
 
+/// @todo Remove boilerplate code in diagnostic build up
 vector_of_diagnostics Diagnostics_builder::build() {
   PROFILE_FUNCTION();
   LOG_TRACE("Building diagnostics...");
@@ -53,10 +54,11 @@ vector_of_diagnostics Diagnostics_builder::build() {
     }
 #endif
 
-#if 0
+#if THERE_ARE_PARTICLES
     else if (description.contains("energy")) {
-      diagnostics.emplace_back(build_particles_energy(sort));
+      build_particles_energy(description.get_item("particles_energy"), diagnostics);
     }
+#if 0
     else if (description.contains("density")) {
       diagnostics.emplace_back(build_distribution_moment(
         sort, "zeroth_moment", "XY", diag_description));
@@ -110,6 +112,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
         sort, diag_description));
     }
 #endif
+#endif
   });
 
   diagnostics.shrink_to_fit();
@@ -125,17 +128,17 @@ diagnostic_up Diagnostics_builder::build_fields_energy() {
 #define TO_CELL(dim, ds) static_cast<int>(round(dim / ds))
 
 bool check_consistency(const Configuration_item& description,
-    const std::string& desc_name, const std::string& diag_name) {
+    const std::string& desc_name, const std::string& __diag_name) {
   bool check_singular = description.contains(desc_name);
   bool check_plural = description.contains(desc_name + "s");
 
   if (!check_singular && !check_plural) {
     throw std::runtime_error("Initialization error: \"" + desc_name + "\" "
-      "not specified for " + diag_name + " diagnostic.");
+      "not specified for " + __diag_name + " diagnostic.");
   }
   else if (check_singular && check_plural) {
     throw std::runtime_error("Initialization error: Both \"" + desc_name + "\" "
-      "and \"" + desc_name + "s\" are specified for " + diag_name + " diagnostic.");
+      "and \"" + desc_name + "s\" are specified for " + __diag_name + " diagnostic.");
   }
   return check_singular;
 }
@@ -272,8 +275,39 @@ void Diagnostics_builder::build_whole_field(
   }}
 }
 
+std::list<Diagnostics_builder::Field_description>
+Diagnostics_builder::collect_field_descriptions(
+    const Configuration_item& description, const std::string& __diag_name) {
+  bool check_field = check_consistency(description, "field", __diag_name);
+
+  std::set<std::string> field_names;
+  std::list<Field_description> field_descriptions;
+  if (check_field) {
+    field_descriptions.emplace_back(create_field_description(description.get_item("field")));
+  }
+  else {
+    description.for_each("fields", [&](const Configuration_item& field_description) {
+      const auto& desc = field_descriptions.emplace_back(create_field_description(field_description));
+      if (const auto& [_, success] = field_names.emplace(desc.field.first); !success) {
+        throw std::runtime_error("Initialization error: Field name was "
+          "used twice in \"fields\" for " + __diag_name + " diagnostic.");
+      }
+    });
+  }
+  return field_descriptions;
+}
+
 Diagnostics_builder::Field_description
 Diagnostics_builder::create_field_description(const Configuration_item& field_desc) {
+  Field_description result;
+  if      (field_desc.contains("E")) { result.field = std::make_pair("E", &fields_.E()); }
+  else if (field_desc.contains("B")) { result.field = std::make_pair("B", &fields_.B()); }
+  else if (field_desc.contains("J")) { result.field = std::make_pair("J", &fields_.J()); }
+  else {
+    throw std::runtime_error("Initialization error: Incorrect field "
+      "name in diagnostic description.");
+  }
+
   auto get_component = [&](const Configuration_item& component_desc) {
     if      (component_desc.contains("x")) { return std::make_pair("x", Axis::X); }
     else if (component_desc.contains("y")) { return std::make_pair("y", Axis::Y); }
@@ -284,22 +318,12 @@ Diagnostics_builder::create_field_description(const Configuration_item& field_de
     }
   };
 
-  Field_description result;
-  if      (field_desc.contains("E")) { result.field = std::make_pair("E", &fields_.E()); }
-  else if (field_desc.contains("B")) { result.field = std::make_pair("B", &fields_.B()); }
-  else if (field_desc.contains("J")) { result.field = std::make_pair("J", &fields_.J()); }
-  else {
-    throw std::runtime_error("Initialization error: Incorrect field "
-      "name in diagnostic description.");
-  }
-
   if (Configuration_item item = field_desc.get_item(result.field.first); !item.is_array()) {
     result.components.emplace(get_component(item));
   }
   else {
     item.for_each([&](const Configuration_item& subitem) {
-      const auto& [_, success] = result.components.emplace(get_component(subitem));
-      if (!success) {
+      if (const auto& [_, success] = result.components.emplace(get_component(subitem)); !success) {
         throw std::runtime_error("Initialization error: Component was used twice "
           "in diagnostic description for " + result.field.first + " field.");
       }
@@ -308,36 +332,31 @@ Diagnostics_builder::create_field_description(const Configuration_item& field_de
   return result;
 }
 
-std::list<Diagnostics_builder::Field_description>
-Diagnostics_builder::collect_field_descriptions(
-    const Configuration_item& description, const std::string& diag_name) {
-  bool check_field = check_consistency(description, "field", diag_name);
 
-  std::set<std::string> field_names;
-  std::list<Field_description> field_descriptions;
-  if (check_field) {
-    field_descriptions.emplace_back(create_field_description(description.get_item("field")));
+void Diagnostics_builder::build_particles_energy(
+    const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container) {
+  bool check_name = check_consistency(description, "particles_name", "particles_energy");
+
+  std::set<std::string> particles_names;
+  if (check_name) {
+    particles_names.emplace(description.get("particles_name"));
   }
   else {
-    description.for_each("fields", [&](const Configuration_item& field_description) {
-      const auto& desc = field_descriptions.emplace_back(create_field_description(field_description));
-      const auto& [_, success] = field_names.emplace(desc.field.first);
-      if (!success) {
-        throw std::runtime_error("Initialization error: Field name was "
-          "used twice in \"fields\" for " + diag_name + " diagnostic.");
+    description.for_each("particles_names", [&](const Configuration_item& field_description){
+      if (const auto& [_, success] = particles_names.emplace(field_description.get()); !success) {
+        throw std::runtime_error("Initialization error: Particles name name was "
+          "used twice in \"particles_energy\" diagnostic.");
       }
     });
   }
-  return field_descriptions;
-}
 
+  for (const auto& particles_name : particles_names) {
+    LOG_INFO("Add particles_energy diagnostic for {}", particles_name);
 
-std::unique_ptr<Diagnostic>
-Diagnostics_builder::build_particles_energy(
-    const std::string& sort_name) {
-  return std::make_unique<particles_energy>(
-    out_dir_ + "/", sort_name,
-    particles_species_.at(sort_name));
+    diagnostics_container.emplace_back(std::make_unique<particles_energy>(
+      out_dir_ + "/", particles_name, particles_species_.at(particles_name)));
+  }
 }
 
 std::unique_ptr<Diagnostic>

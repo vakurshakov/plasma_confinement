@@ -54,16 +54,20 @@
     }},
 
     { "field_on_segment": {
-      "fields": [{"E": ["x", "y"]}, {"B": "z"}],
-      "segments": [
-        {"begin": {"x": 25, "y": 25}, "end": {"x": 25, "y": 50}},
-        {"begin": {"x": 25, "y": 25}, "end": {"x": 50, "y": 25}}
-      ]
+        "fields": [{"E": ["x", "y"]}, {"B": "z"}],
+        "segments": [
+          {"begin": {"x": 25, "y": 25}, "end": {"x": 25, "y": 50}},
+          {"begin": {"x": 25, "y": 25}, "end": {"x": 50, "y": 25}}
+        ]
     }},
 
     { "whole_field": {
-      "fields": [{"E": ["x", "y"]}, {"B": "z"}],
-      "area": {"begin": {"x": 25, "y": 25}, "end": {"x": 25, "y": 50}}
+        "fields": [{"E": ["x", "y"]}, {"B": "z"}],
+        "area": {"begin": {"x": 25, "y": 25}, "end": {"x": 25, "y": 50}}
+    }},
+
+    { "particles_energy": {
+        "particles_name": "plasma_electrons"
     }}
   ]
 }
