@@ -78,7 +78,7 @@ np.save(f'../Pxx_{postfix}.npy',  Pxx)
 # Writing table functions to the binary file
 parameters = [0, xmax, dx]
 
-for table, name in zip([Jy, Bz, n, Gx, Pxx], ['n', 'Jy', 'Bz', 'Gx', 'Pxx']):
+for table, name in zip([n, Jy, Bz, Gx, Pxx], ['n', 'Jy', 'Bz', 'Gx', 'Pxx']):
   with open(f'../{name}_{postfix}.bin', 'wb') as file:
     plain_dict = []
     for x, v in table.items():

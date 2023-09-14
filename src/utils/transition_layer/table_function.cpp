@@ -53,25 +53,20 @@ double Table_function::get_value(double x /*, c/wp */) const {
 
   x -= get_x0();
 
-  int pair_index = (int) round((x - x0_) / dx_);
+  int pair_index = (int) round(x / dx_);
 
-  double answer = 0;
+  double answer = 0.0;
 
-  if (0 <= pair_index && pair_index < values_number_ / 2 - 1) {
+  if (0 <= pair_index && pair_index <= values_number_ / 2 - 1) {
+    // Here if x in [gx, gx + dx_/2], then delta_x is positive.
+    // Otherwise, for x in (gx - dx_/2, gx] delta_x is negative.
     double delta_x = x / dx_ - round(x / dx_);
+    bool positive_dx = delta_x >= 0;
+
     answer = linear_interpolation(
-      values_[2 * pair_index + VALUE],
-      values_[2 * (pair_index + 1) + VALUE],
-      delta_x);
-  }
-  // Take into account the last pair with no following values.
-  else if (pair_index == values_number_ / 2 - 1) {
-    // Here x in (xmax-dx/2, xmax], so delta_x is negative.
-    double delta_x = fabs(x / dx_ - round(x / dx_));
-    answer = linear_interpolation(
-      values_[2 * pair_index + VALUE],
-      values_[2 * (pair_index - 1) + VALUE],
-      delta_x);
+      values_[2 * (pair_index + (positive_dx ? -0 : -1)) + VALUE],
+      values_[2 * (pair_index + (positive_dx ? +1 : +0)) + VALUE],
+      fabs(delta_x));
   }
 
   return answer;

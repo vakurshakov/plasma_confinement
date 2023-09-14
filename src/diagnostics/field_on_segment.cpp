@@ -9,6 +9,12 @@ field_on_segment::field_on_segment(
     : Diagnostic(result_directory),
       field_(field), component_(component), segment_(segment) {
   save_parameters();
+
+  direction_ = {
+    static_cast<double>(segment_.end[X] - segment_.begin[X]),
+    static_cast<double>(segment_.end[Y] - segment_.begin[Y])
+  };
+  parameter_step_ = 1.0 / direction_.length();
 }
 
 void field_on_segment::save_parameters() const {
@@ -29,24 +35,23 @@ void field_on_segment::save_parameters() const {
 
 void field_on_segment::diagnose(int t) {
   PROFILE_FUNCTION();
-  
-  // if (t % diagnose_time_step != 0) return;
 
-  file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+  if (t % diagnose_time_step == 0) {
+    if (file_for_results_)
+      file_for_results_->flush();
 
-  for (int ny = 0; ny < field_.size_y(); ++ny) {
-  for (int nx = 0; nx < field_.size_x(); ++nx) {
-    if (belongs_to_segment(nx, ny)) {
-      file_for_results_->write(field_(ny, nx).vec[component_]);
-    }
-  }}
+    file_for_results_ = std::make_unique<BIN_File>(
+      result_directory_, std::to_string(t));
+  }
+
+  for (double t = 0.0; t < 1.0; t += parameter_step_) {
+    int nx, ny;
+    get_point_on_segment(t, nx, ny);
+    file_for_results_->write(field_(ny, nx).vec[component_]);
+  }
 }
 
-constexpr bool field_on_segment::belongs_to_segment(int x, int y) const {
-  return
-    (segment_.begin[X] <= x && x <= segment_.end[X]) &&
-    (segment_.begin[Y] <= y && y <= segment_.end[Y]) &&
-    ((y - segment_.begin[Y]) * (segment_.end[X] - segment_.begin[X]) ==
-     (x - segment_.begin[X]) * (segment_.end[Y] - segment_.begin[Y]));
+void field_on_segment::get_point_on_segment(double t, int& x, int& y) const {
+  x = segment_.begin[X] + static_cast<int>(t * direction_.x());
+  y = segment_.begin[Y] + static_cast<int>(t * direction_.y());
 }

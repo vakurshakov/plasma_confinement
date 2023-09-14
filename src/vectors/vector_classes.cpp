@@ -5,6 +5,10 @@
 vector2::vector2(double x, double y)
   : vec{x, y} {}
 
+double vector2::length() const {
+  return sqrt(vec[X] * vec[X] + vec[Y] * vec[Y]);
+}
+
 vector2& vector2::operator+=(const vector2& other) {
   this->vec[X] += other.vec[X];
   this->vec[Y] += other.vec[Y];
@@ -41,7 +45,7 @@ double vector3::square() const {
   return this->dot(*this);
 }
 
-double vector3::l2_norm() const {
+double vector3::length() const {
   return sqrt(this->square());
 }
 
