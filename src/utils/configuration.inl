@@ -15,10 +15,6 @@ inline T Configuration_item::get(const std::string& key) const {
   return item_.at(to_pointer(key)).get<T>();
 }
 
-inline Configuration_item Configuration_item::get_item(const std::string& key) const {
-  return Configuration_item{item_.at(to_pointer(key))};
-}
-
 template<typename T>
 inline T Configuration_item::get(const std::string& key, T default_value) const {
   auto pointer = to_pointer(key);
@@ -26,6 +22,10 @@ inline T Configuration_item::get(const std::string& key, T default_value) const 
     return item_.at(pointer).get<T>();
   }
   return default_value;
+}
+
+inline Configuration_item Configuration_item::get_item(const std::string& key) const {
+  return Configuration_item{item_.at(to_pointer(key))};
 }
 
 inline bool Configuration_item::contains(const std::string& key) const {

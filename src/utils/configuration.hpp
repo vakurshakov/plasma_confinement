@@ -10,10 +10,10 @@ class Configuration_item {
   template<typename T = std::string>
   T get(const std::string& key = "") const;
 
-  Configuration_item get_item(const std::string& key) const;
-
   template<typename T = std::string>
   T get(const std::string& key, T default_value) const;
+
+  Configuration_item get_item(const std::string& key) const;
 
   bool contains(const std::string& key) const;
   bool is_array(const std::string& key = "") const;
