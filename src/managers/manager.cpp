@@ -38,6 +38,7 @@ void Manager::initializes() {
 
   /// @todo Add usage description into runtime exception
   /// @todo Add a wraparound for "Initialization error"
+  /// @todo Add interpretation of symbolic values into the config
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 

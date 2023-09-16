@@ -58,55 +58,10 @@ vector_of_diagnostics Diagnostics_builder::build() {
     else if (description.contains("energy")) {
       build_particles_energy(description.get_item("particles_energy"), diagnostics);
     }
+    else if (description.contains("distribution_moment")) {
+      build_distribution_moment(description.get_item("distribution_moment"), diagnostics);
+    }
 #if 0
-    else if (description.contains("density")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "zeroth_moment", "XY", diag_description));
-    }
-    else if (description.contains("velocity_distribution")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "zeroth_moment", "VxVy", diag_description));
-    }
-    else if (description.contains("Vx_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "Vx_moment", "XY", diag_description));
-    }
-    else if (description.contains("Vy_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "Vy_moment", "XY", diag_description));
-    }
-    else if (description.contains("Vr_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "Vr_moment", "XY", diag_description));
-    }
-    else if (description.contains("Vphi_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "Vphi_moment", "XY", diag_description));
-    }
-    else if (description.contains("mVxVx_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "mVxVx_moment", "XY", diag_description));
-    }
-    else if (description.contains("mVxVy_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "mVxVy_moment", "XY", diag_description));
-    }
-    else if (description.contains("mVyVy_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "mVyVy_moment", "XY", diag_description));
-    }
-    else if (description.contains("mVrVr_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "mVrVr_moment", "XY", diag_description));
-    }
-    else if (description.contains("mVrVphi_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "mVrVphi_moment", "XY", diag_description));
-    }
-    else if (description.contains("mVphiVphi_moment")) {
-      diagnostics.emplace_back(build_distribution_moment(
-        sort, "mVphiVphi_moment", "XY", diag_description));
-    }
     else if (description.contains("x0_distribution_function")) {
       diagnostics.emplace_back(build_x0_distribution_function(
         sort, diag_description));
@@ -115,6 +70,7 @@ vector_of_diagnostics Diagnostics_builder::build() {
 #endif
   });
 
+  /// @todo check on uniqueness using diagnostic.result_directory_
   diagnostics.shrink_to_fit();
   return diagnostics;
 }
@@ -128,17 +84,17 @@ diagnostic_up Diagnostics_builder::build_fields_energy() {
 #define TO_CELL(dim, ds) static_cast<int>(round(dim / ds))
 
 bool check_consistency(const Configuration_item& description,
-    const std::string& desc_name, const std::string& __diag_name) {
-  bool check_singular = description.contains(desc_name);
-  bool check_plural = description.contains(desc_name + "s");
+    const std::string& description_name, const std::string& __diag_name) {
+  bool check_singular = description.contains(description_name);
+  bool check_plural = description.contains(description_name + "s");
 
   if (!check_singular && !check_plural) {
-    throw std::runtime_error("Initialization error: \"" + desc_name + "\" "
+    throw std::runtime_error("Initialization error: \"" + description_name + "\" "
       "not specified for " + __diag_name + " diagnostic.");
   }
   else if (check_singular && check_plural) {
-    throw std::runtime_error("Initialization error: Both \"" + desc_name + "\" "
-      "and \"" + desc_name + "s\" are specified for " + __diag_name + " diagnostic.");
+    throw std::runtime_error("Initialization error: Both \"" + description_name + "\" "
+      "and \"" + description_name + "s\" are specified for " + __diag_name + " diagnostic.");
   }
   return check_singular;
 }
@@ -169,8 +125,8 @@ void Diagnostics_builder::build_field_at_point(
     points.emplace_back(construct_point(description.get_item("point")));
   }
   else {
-    description.for_each("points", [&](const Configuration_item& point_desc) {
-      points.emplace_back(construct_point(point_desc));
+    description.for_each("points", [&](const Configuration_item& point_description) {
+      points.emplace_back(construct_point(point_description));
     });
   }
 
@@ -187,20 +143,17 @@ void Diagnostics_builder::build_field_at_point(
   }}}
 }
 
-diag_segment construct_segment(const Configuration_item& desc,
-    const std::string& diag_name, bool is_touching_allowed) {
+diag_segment construct_segment(const Configuration_item& description,
+    bool is_touching_allowed, const std::string& __diag_name) {
   diag_segment segment;
-  segment.begin[X] = TO_CELL(desc.get<double>("begin.x"), dx);
-  segment.begin[Y] = TO_CELL(desc.get<double>("begin.y"), dx);
-  segment.end[X] = TO_CELL(desc.get<double>("end.x"), dx);
-  segment.end[Y] = TO_CELL(desc.get<double>("end.y"), dy);
+  segment.begin[X] = TO_CELL(description.get<double>("begin.x"), dx);
+  segment.begin[Y] = TO_CELL(description.get<double>("begin.y"), dx);
+  segment.end[X] = TO_CELL(description.get<double>("end.x"), dx);
+  segment.end[Y] = TO_CELL(description.get<double>("end.y"), dy);
 
-  bool is_begin_end_reversed =
-    !is_touching_allowed ?
-    (segment.end[X] <= segment.begin[X]) ||
-    (segment.end[Y] <= segment.begin[Y]) :
-    (segment.end[X] < segment.begin[X]) ||
-    (segment.end[Y] < segment.begin[Y]);
+  bool is_begin_end_reversed = !is_touching_allowed ?
+    (segment.end[X] <= segment.begin[X]) || (segment.end[Y] <= segment.begin[Y]) :
+    (segment.end[X] < segment.begin[X]) || (segment.end[Y] < segment.begin[Y]);
 
   if ((segment.begin[X] < 0 || segment.begin[X] > SIZE_X) ||
       (segment.begin[Y] < 0 || segment.begin[Y] > SIZE_Y) ||
@@ -208,7 +161,7 @@ diag_segment construct_segment(const Configuration_item& desc,
       (segment.end[Y] < 0 || segment.end[Y] > SIZE_Y) ||
       is_begin_end_reversed) {
     throw std::runtime_error("Initialization error: Invalid region "
-      "for " + diag_name + " diagnostic is set.");
+      "for " + __diag_name + " diagnostic is set.");
   }
   return segment;
 }
@@ -224,12 +177,12 @@ void Diagnostics_builder::build_field_on_segment(
   std::list<diag_segment> segments;
   if (check_segment) {
     segments.emplace_back(construct_segment(description.get_item("segment"),
-      "field_on_segment", /* is_touching_allowed */ true));
+      /* is_touching_allowed */ true, "field_on_segment"));
   }
   else {
-    description.for_each("segments", [&](const Configuration_item& segment_desc) {
-      segments.emplace_back(construct_segment(segment_desc,
-        "field_on_segment", /* is_touching_allowed */ true));
+    description.for_each("segments", [&](const Configuration_item& segment_description) {
+      segments.emplace_back(construct_segment(segment_description,
+        /* is_touching_allowed */ true, "field_on_segment"));
     });
   }
 
@@ -255,9 +208,12 @@ void Diagnostics_builder::build_whole_field(
   diag_segment area;
   if (description.contains("area")) {
     area = construct_segment(description.get_item("area"),
-      "whole_field", /* is_touching_allowed */ false);
+      /* is_touching_allowed */ false, "whole_field");
   }
   else {
+    LOG_WARN("Area for whole_field diagnostic not specified, using");
+    LOG_WARN("  the default one: begin = {0, 0}, end = {Lx, Ly}.");
+
     area.begin[X] = 0;
     area.begin[Y] = 0;
     area.end[X] = SIZE_X;
@@ -333,23 +289,30 @@ Diagnostics_builder::create_field_description(const Configuration_item& field_de
 }
 
 
-void Diagnostics_builder::build_particles_energy(
-    const Configuration_item& description,
-    vector_of_diagnostics& diagnostics_container) {
-  bool check_name = check_consistency(description, "particles_name", "particles_energy");
+std::set<std::string> collect_string_descriptions(const Configuration_item& description,
+    const std::string& description_name, const std::string& __diag_name) {
+  bool check_name = check_consistency(description, description_name, __diag_name);
 
   std::set<std::string> particles_names;
   if (check_name) {
-    particles_names.emplace(description.get("particles_name"));
+    particles_names.emplace(description.get(description_name));
   }
   else {
-    description.for_each("particles_names", [&](const Configuration_item& field_description){
+    description.for_each(description_name + "s", [&](const Configuration_item& field_description){
       if (const auto& [_, success] = particles_names.emplace(field_description.get()); !success) {
-        throw std::runtime_error("Initialization error: Particles name name was "
-          "used twice in \"particles_energy\" diagnostic.");
+        throw std::runtime_error("Initialization error: Particles \"name\" was "
+          "used twice in " + __diag_name + " diagnostic.");
       }
     });
   }
+  return particles_names;
+}
+
+void Diagnostics_builder::build_particles_energy(
+    const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container) {
+  std::set<std::string> particles_names =
+    collect_string_descriptions(description, "particles_name", "particles_energy");
 
   for (const auto& particles_name : particles_names) {
     LOG_INFO("Add particles_energy diagnostic for {}", particles_name);
@@ -359,39 +322,126 @@ void Diagnostics_builder::build_particles_energy(
   }
 }
 
-std::unique_ptr<Diagnostic>
-Diagnostics_builder::build_distribution_moment(
-    const std::string& sort_name,
-    const std::string& moment_name,
-    const std::string& axes_names,
-    const std::vector<std::string>& description) {
-  if (description.size() < 2)
-    throw std::runtime_error("Initialization error: No area specified for " + moment_name + "_of_" + axes_names + " diagnostic");
+diag_area build_diag_area(const Configuration_item& description,
+    const std::string& axes_name) {
+  diag_area area;
+  area.min[X] = description.get<double>("min.x");
+  area.min[Y] = description.get<double>("min.y");
+  area.max[X] = description.get<double>("max.x");
+  area.max[Y] = description.get<double>("max.y");
+  area.dp[X]  = description.get<double>("dp.x");
+  area.dp[Y]  = description.get<double>("dp.y");
 
-  diag_area area{
-    std::stod(description[0]), std::stod(description[1]),
-    std::stod(description[2]), std::stod(description[3]),
-    std::stod(description[4]), std::stod(description[5]),
-  };
+  if ((axes_name == "XY" && (
+      (area.min[X] < 0.0 || area.min[X] > SIZE_X * dx) ||
+      (area.min[Y] < 0.0 || area.min[Y] > SIZE_Y * dy) ||
+      (area.max[X] < 0.0 || area.max[X] > SIZE_X * dx) ||
+      (area.max[Y] < 0.0 || area.max[Y] > SIZE_Y * dy))) ||
+      (axes_name == "VxVy" && (
+      (area.min[X] < -1.0 || area.min[X] > 1.0) ||
+      (area.min[Y] < -1.0 || area.min[Y] > 1.0) ||
+      (area.max[X] < -1.0 || area.max[X] > 1.0) ||
+      (area.max[Y] < -1.0 || area.max[Y] > 1.0))) ||
+      ((area.dp[X] <= 0) || area.dp[Y] <= 0) ||
+      ((area.max[X] < area.min[X]) || (area.max[Y] < area.min[Y]))) {
+    throw std::runtime_error("Initialization error: Invalid \"" + axes_name +
+      "\" area for distribution_moment diagnostic is set.");
+  }
+  return area;
+}
 
-  if ((axes_names == "XY" && (
-      (0 > area.min[X] || area.min[X] > SIZE_X * dx)   ||
-      (0 > area.min[Y] || area.min[Y] > SIZE_Y * dy)   ||
-      (0 > area.max[X] || area.max[X] > SIZE_X * dx)   ||
-      (0 > area.max[Y] || area.max[Y] > SIZE_Y * dy))) ||
-      (axes_names == "VxVy" && (
-      (-1.0 > area.min[X] || area.min[X] > 1.0)   ||
-      (-1.0 > area.min[Y] || area.min[Y] > 1.0)   ||
-      (-1.0 > area.max[X] || area.max[X] > 1.0)   ||
-      (-1.0 > area.max[Y] || area.max[Y] > 1.0)))) {
-    throw std::runtime_error("Initialization error: Invalid area values for " + moment_name + "_of_" + axes_names + " diagnostic on " + sort_name + " is set");
+void Diagnostics_builder::build_distribution_moment(
+    const Configuration_item& description,
+    vector_of_diagnostics& diagnostics_container) {
+  std::set<std::string> particles_names =
+    collect_string_descriptions(description, "particles_name", "distribution_moment");
+
+  std::set<std::string> __moment_names =
+    collect_string_descriptions(description, "moment", "distribution_moment");
+
+  bool has_XY = false;
+  bool has_VxVy = false;
+  std::list<std::pair<std::string, std::string>> moment_names;
+  for (const auto& moment_name : __moment_names) {
+    std::string axes_name;
+    if (moment_name == "density" ||
+        moment_name == "Vx_moment" ||
+        moment_name == "Vy_moment" ||
+        moment_name == "Vr_moment" ||
+        moment_name == "Vphi_moment" ||
+        moment_name == "mVxVx_moment" ||
+        moment_name == "mVxVy_moment" ||
+        moment_name == "mVyVy_moment" ||
+        moment_name == "mVrVr_moment" ||
+        moment_name == "mVrVphi_moment" ||
+        moment_name == "mVphiVphi_moment") {
+      axes_name = "XY";
+      has_XY = true;
+    }
+    else if (moment_name == "velocity_distribution") {
+      axes_name = "VxVy";
+      has_VxVy = true;
+    }
+    else {
+      throw std::runtime_error("Initialization error: Unknown moment name"
+        "for distribution_moment diagnostic.");
+    }
+
+    auto& back = moment_names.emplace_back(std::make_pair(moment_name, axes_name));
+    if (back.first == "density" || back.first == "velocity_distribution") {
+      back.first = "zeroth_moment";
+    }
   }
 
-  return std::make_unique<distribution_moment>(
-    out_dir_ + "/" + sort_name,
-    particles_species_.at(sort_name),
-    std::make_unique<Moment>(moment_name),
-    std::make_unique<Projector2D>(axes_names, area));
+  bool check_area = check_consistency(description, "area", "distribution_moment");
+  diag_area XY_area {
+    .min = {0.0, 0.0},
+    .max = {SIZE_X * dx, SIZE_Y * dy},
+    .dp  = {dx, dy},
+  };
+
+  diag_area VxVy_area {
+    .min = {-1.0, -1.0},
+    .max = {+1.0, +1.0},
+    .dp  = {0.01, 0.01},
+  };
+
+  std::string area = check_area ? "area" : "areas";
+  bool is_XY = false;
+  bool is_VxVy = false;
+
+  if (is_XY = description.contains(area + ".XY"); is_XY && has_XY) {
+    XY_area = build_diag_area(description.get_item(area + ".XY"), "XY");
+  }
+
+  if (is_VxVy = description.contains(area + ".VxVy"); is_VxVy && has_VxVy) {
+    VxVy_area = build_diag_area(description.get_item(area + ".VxVy"), "VxVy");
+  }
+
+  if (is_XY && has_XY && has_VxVy) {
+    LOG_WARN("Diagnostic of distribution_moment without an \"" + area + ".VxVy\" found,");
+    LOG_WARN("  using the default one: min = {-1, -1}, max = {+1, +1}, dp = {1e-2, 1e-2}");
+  }
+  else if (is_VxVy && has_XY && has_VxVy) {
+    LOG_WARN("Diagnostic of distribution_moment without an \"" + area + ".XY\" found,");
+    LOG_WARN("  using the default one: min = {0, 0}, max = {Lx, Ly}, dp = {dx, dy}");
+  }
+  else {
+    throw std::runtime_error("Initialization error: Incorrect use of diagnostic"
+      " \"" + area + "\" for distribution_moment diagnostic.");
+  }
+
+  for (const auto& particles_name : particles_names) {
+  for (const auto& [moment_name, axes_name] : moment_names) {
+    LOG_INFO("Add {}_of_{} diagnostic for {}", moment_name, axes_name, particles_name);
+
+    std::make_unique<distribution_moment>(
+      out_dir_ + "/" + particles_name,
+      particles_species_.at(particles_name),
+      std::make_unique<Moment>(moment_name),
+      std::make_unique<Projector2D>(axes_name,
+        (axes_name == "XY") ? XY_area : VxVy_area));
+  }}
 }
 
 // std::unique_ptr<Diagnostic>

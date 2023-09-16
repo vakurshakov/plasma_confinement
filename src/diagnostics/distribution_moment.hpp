@@ -41,7 +41,7 @@ class distribution_moment : public Diagnostic {
 /**
  * @brief An utility structure to store the moment name
  * along with the pointer to distribution moment getter.
- * 
+ *
  * Getter is chosen depending on the name in the constructor.
  */
 struct Moment {
@@ -58,21 +58,13 @@ struct diag_area {
   double min[2];
   double max[2];
   double dp[2];
-
-  diag_area(
-    double min_x, double min_y,
-    double max_x, double max_y,
-    double dp_x, double dp_y)
-    : min{min_x, min_y},
-      max{max_x, max_y},
-      dp{dp_x, dp_y} {}
 };
 
 /**
  * @brief Stores geometry: min and max value of a
  * projection, its step dp and two projectors to
  * axes.
- * 
+ *
  * Projectors are selected depending on the name in the constructor.
  */
 struct Projector2D {
