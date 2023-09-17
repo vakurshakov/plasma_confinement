@@ -117,6 +117,7 @@ void Manager::initializes() {
 
   plasma_electrons.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
 
+#if !AXIAL_INJECTION
   step_presets_.emplace_back(std::make_unique<Ionize_particles>(
     &plasma_ions, &plasma_electrons,
     set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
@@ -135,7 +136,43 @@ void Manager::initializes() {
     uniform_probability,
     load_maxwellian_impulse
   ));
+#else
+  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
+    &plasma_ions, &plasma_electrons,
+    set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
+    // set_point_on_annulus:
+    [](double* x, double* y) {
+      using namespace config;
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double ra = R0 - DR;
+      static const double rb = R0 + DR;
 
+      double r = sqrt(ra * ra + (rb * rb - ra * ra) * random_01());
+      double phi = 2.0 * M_PI * random_01();
+
+      *x = center_x + r * cos(phi);
+      *y = center_y + r * sin(phi);
+    },
+    uniform_probability,
+    // load_angular_momentum:
+    [] (double x, double y,
+        double mass, double Tx, double Ty, double Tz,
+        double p0, double* px, double* py, double* pz) {
+      using namespace config;
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
+
+      x -= center_x;
+      y -= center_y;
+      double r = sqrt(x * x + y * y);
+
+      *px = +mass * u0 * (y / r); // + temperature_impulse(Tx, mass);
+      *py = -mass * u0 * (x / r); // + temperature_impulse(Ty, mass);
+    }
+  ));
+#endif
 
 #if there_are_target_plasma
   particles_builder.set_sort("target_ions");

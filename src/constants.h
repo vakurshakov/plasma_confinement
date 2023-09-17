@@ -28,6 +28,8 @@
 #define MAKE_BACKUPS                    true
 #define START_FROM_BACKUP               false
 
+#define AXIAL_INJECTION                 true
+
 
 constexpr inline double e   = 1.0;
 constexpr inline double me  = 1.0;
@@ -69,7 +71,13 @@ inline const double ions_larmor_radius = mi_me * V_ions / Omega_max;
 
 inline const int INJECTION_TIME = 40'000;
 
+#if !AXIAL_INJECTION
 inline const double R0 = 1.5 * ions_larmor_radius;
+#else
+inline const double R0 = ions_larmor_radius;
+inline const double DR = 0.05 * ions_larmor_radius;
+#endif
+
 inline const int PER_STEP_PARTICLES = 2.0 * M_PI * R0 * R0 * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
