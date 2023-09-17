@@ -12,7 +12,7 @@ LIBS += -lspdlog
 
 CXX    := g++
 CFLAGS :=
-CFLAGS += -std=c++20 -fPIC -fopenmp -pthread
+CFLAGS += -std=c++20 -fpic -fopenmp -pthread
 
 # `filter X, A B` return those of A, B that are equal to X
 ifeq ($(VERSION), $(filter $(VERSION), "DEBUG" ""))

@@ -49,38 +49,41 @@ static_assert(dx == dy, "Current setup works only with equal grid step!");
 static_assert(SIZE_X == SIZE_Y, "Current setup works only with square grid!");
 
 constexpr inline int diagnose_time_step = 200;
+constexpr inline int backup_time_step = 10'000;
 
 namespace config {
 
 inline const double n0 = 1.0;
-inline const int   Npi = 50;
+inline const int   Npi = 100;
 
-inline const double mi_me  = 16.0;
+inline const double mi_me = 16.0;
 
 inline const double T_ions = 10.0;  // KeV
 inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
-inline const double T_electrons = 50e-3;  // KeV
+inline const double T_electrons = 0.2;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 inline const double Omega_max = sqrt(2.0 * T_ions / 511.0);
 inline const double ions_larmor_radius = mi_me * V_ions / Omega_max;
 
-inline const int INJECTION_START = 10'000;
 inline const int INJECTION_TIME = 40'000;
 
 inline const double R0 = 1.5 * ions_larmor_radius;
 inline const int PER_STEP_PARTICLES = 2.0 * M_PI * R0 * R0 * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
+inline const int INJECTION_START = 1000 / dt;
 inline const double TARGET_PLASMA_TEMPERATURE = 50e-3;  // KeV
 inline const double RADIUS_OF_TARGET_PLASMA = 2.5 * ions_larmor_radius;
+#else
+inline const int INJECTION_START = 0;
 #endif
 
 inline const std::string boundaries = "cx_cy";
 
 inline const double damping_layer_width = 100;
-inline const double damping_factor = 0.4;
+inline const double damping_factor = 0.7;
 
 // Domain_geometry
 inline const double domain_r_min   = 0.0;

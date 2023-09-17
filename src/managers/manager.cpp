@@ -55,6 +55,7 @@ void Manager::log_information() const {
   LOG_INFO("  cyclotron radius,       rho_e = {:.2e} c/w_pe ({} cells)",
     config::V_electrons / config::Omega_max,
     int(config::V_electrons / config::Omega_max / dx));
+
   LOG_FLUSH();
 }
 
@@ -93,10 +94,10 @@ void Manager::initializes() {
     config::domain_phi_max
   };
 
-#if !there_are_target_plasma
-  particles_species_.reserve(2);
-#else
+#if there_are_target_plasma
   particles_species_.reserve(4);
+#else
+  particles_species_.reserve(2);
 #endif
 
   particles_builder.set_sort("plasma_ions");
@@ -181,7 +182,7 @@ void Manager::initializes() {
 
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
-    /* backup timestep = */ 100 * diagnose_time_step,
+    /* backup timestep = */ backup_time_step,
     // named particle species to backup:
     std::unordered_map<std::string, Particles&>{
       { plasma_ions.sort_name_, plasma_ions },
