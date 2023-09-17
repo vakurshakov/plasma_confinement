@@ -259,7 +259,14 @@ void Manager::calculates() {
 void Manager::diagnose(size_t t) const {
   PROFILE_FUNCTION();
 
-  #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
+  /**
+   * @warning This parallelization produces the following problem.
+   * Enabling it with no if condition, reduces the cost of running
+   * _all_ diagnostics (i.e. when t % diagnose_time_step == 0)
+   * by ~3.7, but on other timesteps the cost of thread creation
+   * accumulates and drops the overall performance by ~1.5.
+   */
+  #pragma omp parallel for shared(diagnostics_), if(t % diagnose_time_step == 0)
   for (const auto& diagnostic : diagnostics_) {
     diagnostic->diagnose(t);
   }
