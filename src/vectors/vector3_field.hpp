@@ -36,7 +36,8 @@ class vector3_field {
   virtual double y(int ny, int nx) const = 0;
   virtual double z(int ny, int nx) const = 0;
 
-  virtual vector3 operator()(int ny, int nx) const = 0;
+  vector3 operator()(int ny, int nx) const;
+  double operator()(int ny, int nx, Axis comp) const;
 
  protected:
   constexpr int index(int ny, int nx) const;
@@ -66,8 +67,6 @@ class px_py_vector3_field : public vector3_field {
   double x(int ny, int nx) const override;
   double y(int ny, int nx) const override;
   double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
 };
 
 
@@ -88,8 +87,6 @@ class rx_py_vector3_field : public vector3_field {
   double x(int ny, int nx) const override;
   double y(int ny, int nx) const override;
   double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
 
  private:
   struct index_boundaries {
@@ -117,8 +114,6 @@ class cx_py_vector3_field : public px_py_vector3_field {
   double x(int ny, int nx) const override;
   double y(int ny, int nx) const override;
   double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
 };
 
 class cx_cy_vector3_field : public px_py_vector3_field {
@@ -132,8 +127,6 @@ class cx_cy_vector3_field : public px_py_vector3_field {
   double x(int ny, int nx) const override;
   double y(int ny, int nx) const override;
   double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
 };
 
 #endif  // SRC_VECTORS_VECTOR3_FIELD_HPP

@@ -29,7 +29,7 @@ void field_on_segment::save_parameters() const {
 
 void field_on_segment::diagnose(int t) {
   PROFILE_FUNCTION();
-  
+
   // if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
@@ -38,7 +38,7 @@ void field_on_segment::diagnose(int t) {
   for (int ny = 0; ny < field_.size_y(); ++ny) {
   for (int nx = 0; nx < field_.size_x(); ++nx) {
     if (belongs_to_segment(nx, ny)) {
-      file_for_results_->write(field_(ny, nx).vec[component_]);
+      file_for_results_->write(field_(ny, nx, component_));
     }
   }}
 }
