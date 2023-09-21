@@ -145,8 +145,8 @@ void Manager::initializes() {
       using namespace config;
       static const double center_x = 0.5 * SIZE_X * dx;
       static const double center_y = 0.5 * SIZE_Y * dy;
-      static const double ra = R0 - DR;
-      static const double rb = R0 + DR;
+      static const double ra = R0 - 0.5 * DR;
+      static const double rb = R0 + 0.5 * DR;
 
       double r = sqrt(ra * ra + (rb * rb - ra * ra) * random_01());
       double phi = 2.0 * M_PI * random_01();

@@ -73,12 +73,12 @@ inline const int INJECTION_TIME = 40'000;
 
 #if !AXIAL_INJECTION
 inline const double R0 = 1.5 * ions_larmor_radius;
+inline const int PER_STEP_PARTICLES = M_PI * R0 * R0 * Npi / (dx * dy * INJECTION_TIME);
 #else
 inline const double R0 = ions_larmor_radius;
-inline const double DR = 0.05 * ions_larmor_radius;
+inline const double DR = ions_larmor_radius;
+inline const int PER_STEP_PARTICLES = 4.0 * M_PI * R0 * DR * Npi / (dx * dy * INJECTION_TIME);
 #endif
-
-inline const int PER_STEP_PARTICLES = 2.0 * M_PI * R0 * R0 * Npi / (dx * dy * INJECTION_TIME);
 
 #if there_are_target_plasma
 inline const int INJECTION_START = 1000 / dt;
