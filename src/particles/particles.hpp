@@ -39,6 +39,9 @@ class Particles {
   friend class Simulation_backup;
 
  private:
+  static inline bool particle_comparator(
+    const Particle& left, const Particle& right);
+
   std::string sort_name_;
   Parameters parameters_;
   std::vector<Particle> particles_;

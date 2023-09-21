@@ -1,6 +1,6 @@
 #include "particles.hpp"
 
-#include <cstdarg>
+#include <algorithm>
 
 #include "src/vectors/vector_classes.hpp"
 #include "src/particles/particles_load.hpp"
@@ -10,8 +10,8 @@ Particles::Particles(Particles_builder& builder) {
   parameters_ = builder.build_parameters();
 
   push_ = builder.build_pusher();
-  interpolation_ = builder.build_interpolation(this->parameters_);
-  decomposition_ = builder.build_decomposition(this->parameters_);
+  interpolation_ = builder.build_interpolation(parameters_);
+  decomposition_ = builder.build_decomposition(parameters_);
 }
 
 /// @warning Algorithm ends up with seg. fault
@@ -23,36 +23,45 @@ void Particles::push() {
   auto decompose = std::mem_fn(&Decomposition::process);
   auto interpolate = std::mem_fn(&Interpolation::process);
 
-  auto particles_fixed_end = this->particles_.end();
+  auto particles_fixed_end = particles_.end();
   int size = particles_fixed_end - particles_.begin();
 
-// firstprivate attribute initializes the thread-local variables
-// with the values of the original object outside of this scope
-#pragma omp parallel num_threads(NUM_THREADS),\
-  firstprivate(push, interpolate, decompose)
-{
-  #pragma omp for
-  for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
-    vector2 r0 = it->point.r;
-    vector3 local_E = {0., 0., 0.};
-    vector3 local_B = {0., 0., 0.};
+  // firstprivate attribute initializes the thread-local variables
+  // with the values of the original object outside of this scope
+  #pragma omp parallel num_threads(NUM_THREADS),\
+    firstprivate(push, interpolate, decompose)
+  {
+    #pragma omp for
+    for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
+      vector2 r0 = it->point.r;
+      vector3 local_E = {0., 0., 0.};
+      vector3 local_B = {0., 0., 0.};
 
-    ACCUMULATIVE_PROFILE("field interpolation process", size,
-      interpolate(interpolation_, r0, local_E, local_B));
+      ACCUMULATIVE_PROFILE("field interpolation process", size,
+        interpolate(interpolation_, r0, local_E, local_B));
 
-    ACCUMULATIVE_PROFILE("particle push process", size,
-      push(push_, *it, local_E, local_B));
+      ACCUMULATIVE_PROFILE("particle push process", size,
+        push(push_, *it, local_E, local_B));
 
-    ACCUMULATIVE_PROFILE("current decomposition process", size,
-      decompose(decomposition_, *it, r0));
+      ACCUMULATIVE_PROFILE("current decomposition process", size,
+        decompose(decomposition_, *it, r0));
 
-    ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
-      boundaries_processor_->add(*it, r0));
+      ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
+        boundaries_processor_->add(*it, r0));
+    }
   }
-}
   boundaries_processor_->remove();
 
+  std::sort(particles_.begin(), particles_.end(), particle_comparator);
+
   LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
+}
+
+/* static */ inline bool Particles::particle_comparator(
+    const Particle& left, const Particle& right) {
+  int index_left = int(round(left.point.y() / dy)) * SIZE_X + int(round(left.point.x() / dx));
+  int index_right = int(round(right.point.y() / dy)) * SIZE_X + int(round(right.point.x() / dx));
+  return index_left < index_right;
 }
 
 #if GLOBAL_DENSITY

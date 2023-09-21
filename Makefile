@@ -20,7 +20,7 @@ CFLAGS += -O0 -ggdb -Wall -pedantic
 endif
 
 ifeq ($(VERSION), RELEASE)
-CFLAGS += -O3
+CFLAGS += -ftree-vectorize -O3
 endif
 
 
