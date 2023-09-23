@@ -8,11 +8,11 @@ struct vector2 {
   vector2() = default;
   vector2(double x, double y);
 
-  inline double& x() { return vec[X]; }
-  inline double& y() { return vec[Y]; }
+  constexpr double& x() { return vec[X]; }
+  constexpr double& y() { return vec[Y]; }
 
-  inline double x() const { return vec[X]; }
-  inline double y() const { return vec[Y]; }
+  constexpr double x() const { return vec[X]; }
+  constexpr double y() const { return vec[Y]; }
 
   vector2& operator+=(const vector2& other);
   vector2 operator/(double a) const;
@@ -27,15 +27,14 @@ struct vector3 {
   vector3() = default;
   vector3(double x, double y, double z);
 
-  inline double& x() { return vec[X]; }
-  inline double& y() { return vec[Y]; }
-  inline double& z() { return vec[Z]; }
+  constexpr double& x() { return vec[X]; }
+  constexpr double& y() { return vec[Y]; }
+  constexpr double& z() { return vec[Z]; }
 
-  inline double x() const { return vec[X]; }
-  inline double y() const { return vec[Y]; }
-  inline double z() const { return vec[Z]; }
+  constexpr double x() const { return vec[X]; }
+  constexpr double y() const { return vec[Y]; }
+  constexpr double z() const { return vec[Z]; }
 
-  /// @todo tolerance on other == zero?
   double dot(const vector3& other) const;
   double square() const;
   double l2_norm() const;

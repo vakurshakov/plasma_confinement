@@ -23,18 +23,18 @@ class vector3_field {
   int size_x() const { return size_x_; }
   int size_y() const { return size_y_; }
 
-  virtual int ix_first(Axis axis) const = 0;
-  virtual int iy_first(Axis axis) const = 0;
-  virtual int ix_last(Axis axis) const = 0;
-  virtual int iy_last(Axis axis) const = 0;
+  virtual int ix_first(Axis axis) const;
+  virtual int iy_first(Axis axis) const;
+  virtual int ix_last(Axis axis) const;
+  virtual int iy_last(Axis axis) const;
 
-  virtual double& x(int ny, int nx) = 0;
-  virtual double& y(int ny, int nx) = 0;
-  virtual double& z(int ny, int nx) = 0;
+  virtual double& x(int ny, int nx);
+  virtual double& y(int ny, int nx);
+  virtual double& z(int ny, int nx);
 
-  virtual double x(int ny, int nx) const = 0;
-  virtual double y(int ny, int nx) const = 0;
-  virtual double z(int ny, int nx) const = 0;
+  virtual double x(int ny, int nx) const;
+  virtual double y(int ny, int nx) const;
+  virtual double z(int ny, int nx) const;
 
   vector3 operator()(int ny, int nx) const;
   double operator()(int ny, int nx, Axis comp) const;
@@ -42,7 +42,8 @@ class vector3_field {
  protected:
   constexpr int index(int ny, int nx) const;
 
-  int size_x_, size_y_;
+  int size_x_;
+  int size_y_;
 
   std::vector<double> fx_;
   std::vector<double> fy_;

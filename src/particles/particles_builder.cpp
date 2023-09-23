@@ -75,7 +75,7 @@ Particles_builder::build_interpolation(const Parameters& parameters) {
 
   std::unique_ptr<Interpolation> interpolation_up;
   if ((pos = setting.find("Simple_interpolation")) != string::npos) {
-    interpolation_up = make_unique<Simple_interpolation>(parameters, fields_.E(), fields_.B());
+    interpolation_up = make_unique<Simple_interpolation>(fields_.E(), fields_.B());
   }
   else if ((pos = setting.find("Point_interpolation, ")) != string::npos) {
     if ((pos = setting.find("Const_field: ", pos)) == string::npos)

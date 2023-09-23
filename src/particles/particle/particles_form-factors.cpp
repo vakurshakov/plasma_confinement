@@ -27,7 +27,7 @@ double second_order_spline(double x, double mesh_grid)
   double abs_x = fabs(x / mesh_grid);
 
   if (abs_x <= 0.5) {
-    return ( 0.75 - abs_x * abs_x );
+    return (0.75 - abs_x * abs_x);
   }
   else if (0.5 < abs_x && abs_x < 1.5) {
     return 0.5 * (1.5 - abs_x) * (1.5 - abs_x);
@@ -60,7 +60,7 @@ double fourth_order_spline(double x, double mesh_grid)
 
 
   if (abs_x <= 0.5) {
-    return ( 115. / 192. - 5. / 8. * abs_x2 + 1. / 4. * abs_x4 );
+    return (115. / 192. - 5. / 8. * abs_x2 + 1. / 4. * abs_x4);
   }
   else if (0.5 < abs_x && abs_x <= 1.5) {
     return (55. + 20. * abs_x - 120. * abs_x2 + 80. * abs_x3 - 16. * abs_x4) / 96.;

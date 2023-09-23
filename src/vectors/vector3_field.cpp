@@ -5,7 +5,7 @@ inline int periodic(int g, int begin, int end) {
   int pg = g % end;
 
   if (g < begin)
-    pg += end;  // actually, not funny at all
+    pg += end;
 
   return pg;
 }
@@ -28,7 +28,7 @@ inline bool in_bounds(int g, int begin, int end) {
 
 
 vector3_field::vector3_field(int size_x, int size_y)
-    : size_x_(size_x), size_y_(size_y) {
+    : size_x_{size_x}, size_y_{size_y} {
   fx_.reserve(size_x_ * size_y_);
   fy_.reserve(size_x_ * size_y_);
   fz_.reserve(size_x_ * size_y_);
@@ -36,6 +36,31 @@ vector3_field::vector3_field(int size_x, int size_y)
 
 constexpr int vector3_field::index(int ny, int nx) const {
   return ny * size_x_ + nx;
+}
+
+int vector3_field::ix_first(Axis /* axis */) const { return 0; }
+int vector3_field::iy_first(Axis /* axis */) const { return 0; }
+int vector3_field::ix_last (Axis /* axis */) const { return size_x_; }
+int vector3_field::iy_last (Axis /* axis */) const { return size_y_; }
+
+double& vector3_field::x(int ny, int nx) {
+  return fx_[index(ny, nx)];
+}
+double& vector3_field::y(int ny, int nx) {
+  return fy_[index(ny, nx)];
+}
+double& vector3_field::z(int ny, int nx) {
+  return fz_[index(ny, nx)];
+}
+
+double vector3_field::x(int ny, int nx) const {
+  return fx_[index(ny, nx)];
+}
+double vector3_field::y(int ny, int nx) const {
+  return fy_[index(ny, nx)];
+}
+double vector3_field::z(int ny, int nx) const {
+  return fz_[index(ny, nx)];
 }
 
 vector3 vector3_field::operator()(int ny, int nx) const {
@@ -93,7 +118,7 @@ rx_py_vector3_field::rx_py_vector3_field(std::string type, int size_x, int size_
     bound_.left[Z] = 0;  bound_.right[Z] = size_x_ - 1;
   }
   else if (type == "Magnetic") {
-    bound_.left[X] = 0;  bound_.right[X] = size_x_ -1;
+    bound_.left[X] = 0;  bound_.right[X] = size_x_ - 1;
     bound_.left[Y] = 0;  bound_.right[Y] = size_x_;
     bound_.left[Z] = 0;  bound_.right[Z] = size_x_;
   }

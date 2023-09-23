@@ -309,8 +309,6 @@ void Simulation_backup::check_initial_condition() {
 void Simulation_backup::collect_charge_density(scalar_field& charge_density) {
   for (const auto& [_, container] : particles_) {
     const int Np = container.parameters_.Np();
-    const int width = container.parameters_.charge_cloud();
-    const auto& shape = container.parameters_.form_factor();
 
     for (const auto& particle : container.get_particles()) {
       double x = particle.point.x();
@@ -319,13 +317,13 @@ void Simulation_backup::collect_charge_density(scalar_field& charge_density) {
       int nx = int(round(x / dx));
       int ny = int(round(y / dy));
 
-      for (int i = nx - width; i <= nx + width; ++i) {
-      for (int j = ny - width; j <= ny + width; ++j) {
+      for (int i = nx - shape_radius; i <= nx + shape_radius; ++i) {
+      for (int j = ny - shape_radius; j <= ny + shape_radius; ++j) {
         if ((0 <= i && i < SIZE_X) && (0 <= j && j < SIZE_Y)) {
           charge_density[index(ny, nx)] +=
             particle.n() * particle.q() / Np *
-            shape(x - i * dx, dx) *
-            shape(y - j * dy, dy);
+            shape_function(x - i * dx, dx) *
+            shape_function(y - j * dy, dy);
         }
         else continue;
       }}

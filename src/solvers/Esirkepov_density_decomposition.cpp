@@ -2,107 +2,107 @@
 
 Esirkepov_density_decomposition::Esirkepov_density_decomposition(
   const Parameters& parameters, vector3_field& J)
-  : Np_(parameters.Np()), shape_at_(parameters.form_factor()),
-    charge_cloud_(parameters.charge_cloud()), J_(J) {}
+  : Np_(parameters.Np()), J_(J) {}
 
+static const int shape_width = 2 * shape_radius + 1;
 
 void Esirkepov_density_decomposition::process(const Particle& particle, const vector2& r0) {
   double n = particle.n();
   double q = particle.q();
 
-  const int nearest_edge_to_rx = int(round(particle.point.x() / dx));
-  const int nearest_edge_to_ry = int(round(particle.point.y() / dy));
+  const int node_px = int(round(particle.point.x() / dx));
+  const int node_py = int(round(particle.point.y() / dy));
 
-  p_v3f temp_J(2 * charge_cloud_ + 1, 2 * charge_cloud_ + 1);
+  v3f temp_J(shape_width, shape_width);
 
-  decompose_x(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
-  decompose_y(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+  decompose_x(particle, r0, n, q, node_px, node_py, temp_J);
+  decompose_y(particle, r0, n, q, node_px, node_py, temp_J);
 
 #if _2D3V
-  decompose_z(particle, r0, n, q, nearest_edge_to_rx, nearest_edge_to_ry, temp_J);
+  decompose_z(particle, r0, n, q, node_px, node_py, temp_J);
 #endif
 }
 
-
 void Esirkepov_density_decomposition::decompose_x(
     const Particle& particle, const vector2& r0,
-    double n, double q, int ne_x, int ne_y, p_v3f& temp_J) {
+    double n, double q, int node_px, int node_py, v3f& temp_J) {
   const vector2& r = particle.point.r;
 
-  long int node_x, node_y;
-  node_x = ne_x - charge_cloud_;
+  int node_gx, node_gy;
+  node_gx = node_px - shape_radius;
 
-  for (int x = -charge_cloud_, y = -charge_cloud_; y <= +charge_cloud_; ++y) {
-    node_y = ne_y + y;
+  for (int x = 0, y = 0; y < shape_width; ++y) {
+    node_gy = node_py + (y - shape_radius);
 
-    // Give up trying to put (node_x + 0.5) here
+    // Give up trying to put (node_gx + 0.5) here
     temp_J.x(y,x) = - q * n/Np_ * 0.5 * dx / dt *
-      (shape_at_(r.x() - node_x * dx, dx) - shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - node_y * dy, dy) + shape_at_(r0.y() - node_y * dy, dy));
+      (shape_function(r.x() - node_gx * dx, dx) - shape_function(r0.x() - node_gx * dx, dx)) *
+      (shape_function(r.y() - node_gy * dy, dy) + shape_function(r0.y() - node_gy * dy, dy));
 
     #pragma omp atomic
-    J_.x(node_y,node_x) += temp_J.x(y,x);
+    J_.x(node_gy,node_gx) += temp_J.x(y,x);
   }
 
-  for (int y = -charge_cloud_; y <= +charge_cloud_; ++y) {
-    node_y = ne_y + y;
+  for (int y = 0; y < shape_width; ++y) {
+    node_gy = node_py + (y - shape_radius);
 
-  for (int x = -charge_cloud_ + 1; x <= +charge_cloud_; ++x) {
-    node_x = ne_x + x;
+    for (int x = 1; x < shape_width; ++x) {
+      node_gx = node_px + (x - shape_radius);
 
-    // Here is only "=" sign (not "+=")
-    // Give up trying to put (node_x + 0.5) here
-    temp_J.x(y,x) = temp_J.x(y,x-1) - q * n/Np_ * 0.5 * dx / dt *
-      (shape_at_(r.x() - node_x * dx, dx) - shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - node_y * dy, dy) + shape_at_(r0.y() - node_y * dy, dy));
+      // Here is only "=" sign (not "+=")
+      // Give up trying to put (node_gx + 0.5) here
+      temp_J.x(y,x) = temp_J.x(y,x-1) - q * n/Np_ * 0.5 * dx / dt *
+        (shape_function(r.x() - node_gx * dx, dx) - shape_function(r0.x() - node_gx * dx, dx)) *
+        (shape_function(r.y() - node_gy * dy, dy) + shape_function(r0.y() - node_gy * dy, dy));
 
-    #pragma omp atomic
-    J_.x(node_y, node_x) += temp_J.x(y,x);
-  }}
+      #pragma omp atomic
+      J_.x(node_gy, node_gx) += temp_J.x(y,x);
+    }
+  }
 }
-
 
 void Esirkepov_density_decomposition::decompose_y(
     const Particle& particle, const vector2& r0,
-    double n, double q, int ne_x, int ne_y, p_v3f& temp_J) {
+    double n, double q, int node_px, int node_py, v3f& temp_J) {
   const vector2& r = particle.point.r;
 
-  long int node_x, node_y;
-  node_y = ne_y - charge_cloud_;
+  int node_gx, node_gy;
+  node_gy = node_py - shape_radius;
 
-  for (int y = -charge_cloud_, x = -charge_cloud_; x <= +charge_cloud_; ++x) {
-    node_x = ne_x + x;
+  for (int y = 0, x = 0; x < shape_width; ++x) {
+    node_gx = node_px + (x - shape_radius);
 
-    // Give up trying to put (node_y + 0.5) here
+    // Give up trying to put (node_gy + 0.5) here
     temp_J.y(y,x) = - q * n/Np_ * 0.5 * dy / dt *
-      (shape_at_(r.x() - node_x * dx, dx) + shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - node_y * dy, dy) - shape_at_(r0.y() - node_y * dy, dy));
+      (shape_function(r.x() - node_gx * dx, dx) + shape_function(r0.x() - node_gx * dx, dx)) *
+      (shape_function(r.y() - node_gy * dy, dy) - shape_function(r0.y() - node_gy * dy, dy));
 
     #pragma omp atomic
-    J_.y(node_y, node_x) += temp_J.y(y,x);
+    J_.y(node_gy, node_gx) += temp_J.y(y,x);
   }
 
-  for (int y = -charge_cloud_ + 1; y <= +charge_cloud_; ++y) {
-    node_y = ne_y + y;
+  for (int y = 1; y < shape_width; ++y) {
+    node_gy = node_py + (y - shape_radius);
 
-  for (int x = -charge_cloud_; x <= +charge_cloud_; ++x) {
-    node_x = ne_x + x;
+    for (int x = 0; x < shape_width; ++x) {
+      node_gx = node_px + (x - shape_radius);
 
-    // Here is only "=" sign (not "+=")
-    // Give up trying to put (node_y + 0.5) here
-    temp_J.y(y,x) = temp_J.y(y-1,x) - q * n/Np_ * 0.5 * dy / dt *
-      (shape_at_(r.x() - node_x * dx, dx) + shape_at_(r0.x() - node_x * dx, dx)) *
-      (shape_at_(r.y() - node_y * dy, dy) - shape_at_(r0.y() - node_y * dy, dy));
+      // Here is only "=" sign (not "+=")
+      // Give up trying to put (node_gy + 0.5) here
+      temp_J.y(y,x) = temp_J.y(y-1,x) - q * n/Np_ * 0.5 * dy / dt *
+        (shape_function(r.x() - node_gx * dx, dx) + shape_function(r0.x() - node_gx * dx, dx)) *
+        (shape_function(r.y() - node_gy * dy, dy) - shape_function(r0.y() - node_gy * dy, dy));
 
-    #pragma omp atomic
-    J_.y(node_y, node_x) += temp_J.y(y,x);
-  }}
+      #pragma omp atomic
+      J_.y(node_gy, node_gx) += temp_J.y(y,x);
+    }
+  }
 }
 
 
 void Esirkepov_density_decomposition::decompose_z(
     const Particle& particle, const vector2& r0,
-    double n, double q, int ne_x, int ne_y, p_v3f& temp_J) {
+    double n, double q, int node_px, int node_py, v3f& temp_J) {
   double m = particle.m();
 
   const vector2& r = particle.point.r;
@@ -111,23 +111,22 @@ void Esirkepov_density_decomposition::decompose_z(
   double gamma_m = sqrt(m * m + p.dot(p));
   double vz = p.z() / gamma_m;
 
-  long int node_x, node_y;
+  int node_gx, node_gy;
 
-  for (long int y = -charge_cloud_; y <= +charge_cloud_; ++y) {
-    node_y = ne_y + y;
+  for (int y = 0; y < shape_width; ++y) {
+    node_gy = node_py + (y - shape_radius);
 
-  for (long int x = -charge_cloud_; x <= +charge_cloud_; ++x) {
-    node_x = ne_x + x;
+    for (int x = 0; x < shape_width; ++x) {
+      node_gx = node_px + (x - shape_radius);
 
-    temp_J.z(y,x) = q * n/Np_ * vz *
-    (
-      shape_at_( r.x() - (node_x + 0.5) * dx, dx) * shape_at_( r.y() - (node_y + 0.5) * dy, dy) / 3. +
-      shape_at_(r0.x() - (node_x + 0.5) * dx, dx) * shape_at_( r.y() - (node_y + 0.5) * dy, dy) / 6. +
-      shape_at_( r.x() - (node_x + 0.5) * dx, dx) * shape_at_(r0.y() - (node_y + 0.5) * dy, dy) / 6. +
-      shape_at_(r0.x() - (node_x + 0.5) * dx, dx) * shape_at_(r0.y() - (node_y + 0.5) * dy, dy) / 3.
-    );
+      temp_J.z(y,x) = q * n/Np_ * vz * (
+        shape_function( r.x() - (node_gx + 0.5) * dx, dx) * shape_function( r.y() - (node_gy + 0.5) * dy, dy) / 3. +
+        shape_function(r0.x() - (node_gx + 0.5) * dx, dx) * shape_function( r.y() - (node_gy + 0.5) * dy, dy) / 6. +
+        shape_function( r.x() - (node_gx + 0.5) * dx, dx) * shape_function(r0.y() - (node_gy + 0.5) * dy, dy) / 6. +
+        shape_function(r0.x() - (node_gx + 0.5) * dx, dx) * shape_function(r0.y() - (node_gy + 0.5) * dy, dy) / 3.);
 
-    #pragma omp atomic
-    J_.z(node_y, node_x) += temp_J.z(y,x);
-  }}
+      #pragma omp atomic
+      J_.z(node_gy, node_gx) += temp_J.z(y,x);
+    }
+  }
 }

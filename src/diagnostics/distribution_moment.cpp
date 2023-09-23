@@ -81,8 +81,6 @@ void distribution_moment::diagnose(int t) {
 
 void distribution_moment::collect() {
   const int Np = particles_.get_parameters().Np();
-  const int width = particles_.get_parameters().charge_cloud();
-  const auto& shape = particles_.get_parameters().form_factor();
 
   const double& area_dx = projector_->area.dp[X];
   const double& area_dy = projector_->area.dp[Y];
@@ -95,15 +93,14 @@ void distribution_moment::collect() {
     int npx = int(round(pr_x / area_dx));
     int npy = int(round(pr_y / area_dy));
 
-    for (int i = npx - width; i <= npx + width; ++i) {
-    for (int j = npy - width; j <= npy + width; ++j) {
-      if ((min_[X] <= i && i < max_[X]) &&
-          (min_[Y] <= j && j < max_[Y])) {
+    for (int i = npx - shape_radius; i <= npx + shape_radius; ++i) {
+    for (int j = npy - shape_radius; j <= npy + shape_radius; ++j) {
+      if ((min_[X] <= i && i < max_[X]) && (min_[Y] <= j && j < max_[Y])) {
         #pragma omp atomic
         data_[(j - min_[Y]) * (max_[X] - min_[X]) + (i - min_[X])] +=
           moment_->get(particle) * particle.n() / Np *
-          shape(pr_x - i * area_dx, area_dx) *
-          shape(pr_y - j * area_dy, area_dy);
+          shape_function(pr_x - i * area_dx, area_dx) *
+          shape_function(pr_y - j * area_dy, area_dy);
       }
       else continue;
     }}

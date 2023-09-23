@@ -1,8 +1,7 @@
 #include "simple_interpolation.hpp"
 
-Simple_interpolation::Simple_interpolation(
-    const Parameters& parameters, const v3f& E, const v3f& B)
-    : E_(E), B_(B), shape_at_(parameters.form_factor()), charge_cloud_(parameters.charge_cloud()) {}
+Simple_interpolation::Simple_interpolation(const v3f& E, const v3f& B)
+    : E_(E), B_(B) {}
 
 
 enum shift {
@@ -16,13 +15,13 @@ void Simple_interpolation::process(const vector2& r0, vector3& local_E, vector3&
 
   vector2 shape[2];
 
-  for(int ny = nearest_y - charge_cloud_; ny <= nearest_y + charge_cloud_; ++ny) {
-    shape[shift::no].y() = shape_at_(ny * dy - r0.y(), dy);
-    shape[shift::sh].y() = shape_at_((ny + 0.5) * dy - r0.y(), dy);
+  for(int ny = nearest_y - shape_radius; ny <= nearest_y + shape_radius; ++ny) {
+    shape[shift::no].y() = shape_function(ny * dy - r0.y(), dy);
+    shape[shift::sh].y() = shape_function((ny + 0.5) * dy - r0.y(), dy);
 
-    for(int nx = nearest_x - charge_cloud_; nx <= nearest_x + charge_cloud_; ++nx) {
-      shape[shift::no].x() = shape_at_(nx * dx - r0.x(), dx);
-      shape[shift::sh].x() = shape_at_((nx + 0.5) * dx - r0.x(), dx);
+    for(int nx = nearest_x - shape_radius; nx <= nearest_x + shape_radius; ++nx) {
+      shape[shift::no].x() = shape_function(nx * dx - r0.x(), dx);
+      shape[shift::sh].x() = shape_function((nx + 0.5) * dx - r0.x(), dx);
 
       local_E.x() += E_.x(ny,nx) * shape[shift::no].y() * shape[shift::sh].x();
       local_E.y() += E_.y(ny,nx) * shape[shift::sh].y() * shape[shift::no].x();
