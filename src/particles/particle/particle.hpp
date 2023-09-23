@@ -13,10 +13,28 @@
  */
 class Particle {
  public:
+  Point point;
+
   Particle(const Point& point, const Parameters& parameters)
     : point(point), parameters(&parameters) {}
 
-  Point point;
+  Particle(const Particle& particle)
+    : point(particle.point), parameters(particle.parameters) {}
+
+  Particle(Particle&& particle)
+    : point(std::move(particle.point)), parameters(particle.parameters) {}
+
+  Particle& operator=(const Particle& particle) {
+    point = particle.point;
+    parameters = particle.parameters;
+    return *this;
+  }
+
+  Particle& operator=(Particle&& particle) {
+    point = std::move(particle.point);
+    parameters = particle.parameters;
+    return *this;
+  }
 
 #if GLOBAL_DENSITY
   constexpr double n() const { return parameters->n(); }
@@ -34,12 +52,8 @@ class Particle {
 
  protected:
   /**
-   * pointer here to be able to use move semantic.
-   *
-   * @warning
-   * it will be ok if you move particle, but it
-   * will cause a seg. fault after particles
-   * being moved.
+   * @warning it will be ok if you move particle, but it
+   * will cause a seg. fault after particles being moved.
    */
   const Parameters* parameters;
 };

@@ -1,6 +1,7 @@
 #include "particles.hpp"
 
 #include <algorithm>
+#include <execution>
 
 #include "src/vectors/vector_classes.hpp"
 #include "src/particles/particles_load.hpp"
@@ -24,7 +25,10 @@ void Particles::push() {
   auto interpolate = std::mem_fn(&Interpolation::process);
 
   auto particles_fixed_end = particles_.end();
+
+#if TIME_PROFILING
   int size = particles_fixed_end - particles_.begin();
+#endif
 
   // firstprivate attribute initializes the thread-local variables
   // with the values of the original object outside of this scope
@@ -34,8 +38,8 @@ void Particles::push() {
     #pragma omp for
     for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
       vector2 r0 = it->point.r;
-      vector3 local_E = {0., 0., 0.};
-      vector3 local_B = {0., 0., 0.};
+      vector3 local_E = {0.0, 0.0, 0.0};
+      vector3 local_B = {0.0, 0.0, 0.0};
 
       ACCUMULATIVE_PROFILE("field interpolation process", size,
         interpolate(interpolation_, r0, local_E, local_B));
@@ -51,10 +55,9 @@ void Particles::push() {
     }
   }
   boundaries_processor_->remove();
-
-  std::sort(particles_.begin(), particles_.end(), particle_comparator);
-
   LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
+
+  std::sort(std::execution::par_unseq, particles_.begin(), particles_.end(), particle_comparator);
 }
 
 /* static */ inline bool Particles::particle_comparator(

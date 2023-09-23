@@ -8,7 +8,7 @@ INC_PATH += -I$(SPDLOG_DIR)/include
 LIB_PATH :=
 LIB_PATH += -L$(SPDLOG_DIR)/lib
 
-LIBS += -lspdlog
+LIBS += -lspdlog -ltbb
 
 CXX    := g++
 CFLAGS :=

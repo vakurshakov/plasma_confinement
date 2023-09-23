@@ -27,6 +27,8 @@
 #define TIME_PROFILING                  true
 #define MAKE_BACKUPS                    true
 #define START_FROM_BACKUP               false
+#define PARTICLES_FORM_FACTOR           2
+
 
 #define AXIAL_INJECTION                 true
 
