@@ -57,7 +57,7 @@ void Particles::push() {
   boundaries_processor_->remove();
   LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
 
-  std::sort(std::execution::par_unseq, particles_.begin(), particles_.end(), particle_comparator);
+  std::sort(particles_.begin(), particles_.end(), particle_comparator);
 }
 
 /* static */ inline bool Particles::particle_comparator(
