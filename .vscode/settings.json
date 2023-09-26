@@ -87,7 +87,8 @@
         "*.inc": "cpp",
         "format": "cpp",
         "stacktrace": "cpp",
-        "stdfloat": "cpp"
+        "stdfloat": "cpp",
+        "execution": "cpp"
     },
     "cSpell.customDictionaries": {
         "custom-dictionary-workspace": {

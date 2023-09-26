@@ -8,7 +8,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
 {
 #if _2D3V
   // Bx(y, x+1/2) at t+1/2
-  #pragma omp for
+  #pragma omp for schedule(dynamic)
   for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
     for (int nx = B.ix_first(X); nx < B.ix_last(X); ++nx) {
       B.x(ny, nx) -= 0.5 * (E.z(ny, nx) - E.z(ny-1, nx)) * dt / dy;
@@ -16,7 +16,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
   }
 
   // By(y+1/2, x) at t+1/2
-  #pragma omp for
+  #pragma omp for schedule(dynamic)
   for (int ny = B.iy_first(Y); ny < B.iy_last(Y); ++ny) {
     for (int nx = B.ix_first(Y); nx < B.ix_last(Y); ++nx) {
       B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
@@ -25,7 +25,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
 #endif
 
   // Bz(y, x) at t+1/2
-  #pragma omp for
+  #pragma omp for schedule(dynamic)
   for (int ny = B.iy_first(Z); ny < B.iy_last(Z); ++ny) {
     for (int nx = B.ix_first(Z); nx < B.ix_last(Z); ++nx) {
       B.z(ny, nx) -= 0.5 * (
@@ -36,7 +36,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
 
 
   // Ex(y+1/2, x) at t+1
-  #pragma omp for
+  #pragma omp for schedule(dynamic)
   for (int ny = E.iy_first(X); ny < E.iy_last(X); ++ny) {
     for (int nx = E.ix_first(X); nx < E.ix_last(X); ++nx) {
       E.x(ny, nx) += - J.x(ny, nx) * dt +
@@ -45,7 +45,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
   }
 
   // Ey(y, x+1/2) at t+1
-  #pragma omp for
+  #pragma omp for schedule(dynamic)
   for (int ny = E.iy_first(Y); ny < E.iy_last(Y); ++ny) {
     for (int nx = E.ix_first(Y); nx < E.ix_last(Y); ++nx) {
       E.y(ny, nx) += - J.y(ny, nx) * dt -
@@ -55,7 +55,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
 
 #if _2D3V
   // Ez(y+1/2,x+1/2) at t+1
-  #pragma omp for
+  #pragma omp for schedule(dynamic)
   for (int ny = E.iy_first(Z); ny < E.iy_last(Z); ++ny) {
     for (int nx = E.ix_first(Z); nx < E.ix_last(Z); ++nx) {
       E.z(ny, nx) += - J.z(ny, nx) * dt + (

@@ -30,34 +30,31 @@ void Particles::push() {
   int size = particles_fixed_end - particles_.begin();
 #endif
 
-  // firstprivate attribute initializes the thread-local variables
-  // with the values of the original object outside of this scope
-  #pragma omp parallel num_threads(NUM_THREADS),\
-    firstprivate(push, interpolate, decompose)
-  {
-    #pragma omp for
-    for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
-      vector2 r0 = it->point.r;
-      vector3 local_E = {0.0, 0.0, 0.0};
-      vector3 local_B = {0.0, 0.0, 0.0};
+  #pragma omp parallel for num_threads(NUM_THREADS),\
+    schedule(guided), shared(push, interpolate, decompose)
+  for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
+    vector2 r0 = it->point.r;
+    vector3 local_E = {0.0, 0.0, 0.0};
+    vector3 local_B = {0.0, 0.0, 0.0};
 
-      ACCUMULATIVE_PROFILE("field interpolation process", size,
-        interpolate(interpolation_, r0, local_E, local_B));
+    ACCUMULATIVE_PROFILE("field interpolation process", size,
+      interpolate(interpolation_, r0, local_E, local_B));
 
-      ACCUMULATIVE_PROFILE("particle push process", size,
-        push(push_, *it, local_E, local_B));
+    ACCUMULATIVE_PROFILE("particle push process", size,
+      push(push_, *it, local_E, local_B));
 
-      ACCUMULATIVE_PROFILE("current decomposition process", size,
-        decompose(decomposition_, *it, r0));
+    ACCUMULATIVE_PROFILE("current decomposition process", size,
+      decompose(decomposition_, *it, r0));
 
-      ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
-        boundaries_processor_->add(*it, r0));
-    }
+    ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
+      boundaries_processor_->add(*it, r0));
   }
+  /// @todo can we move this into the parallel section too?
   boundaries_processor_->remove();
   LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
 
-  std::sort(particles_.begin(), particles_.end(), particle_comparator);
+  /// @todo implement OpenMP-parallel sorting algorithm, this is slow
+  // std::sort(particles_.begin(), particles_.end(), particle_comparator);
 }
 
 /* static */ inline bool Particles::particle_comparator(
