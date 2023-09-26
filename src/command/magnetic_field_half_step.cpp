@@ -9,7 +9,7 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
 {
 #if _2D3V
   // Bx(y, x+1/2) at t+1/2
-  #pragma omp for schedule(dynamic), nowait
+  #pragma omp for, nowait
   for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
     for (int nx = B.ix_first(X); nx < B.ix_last(X); ++nx) {
       B.x(ny, nx) -= 0.5 * (E.z(ny, nx) - E.z(ny-1, nx)) * dt / dy;
@@ -17,7 +17,7 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
   }
 
   // By(y+1/2, x) at t+1/2
-  #pragma omp for schedule(dynamic), nowait
+  #pragma omp for, nowait
   for (int ny = B.iy_first(Y); ny < B.iy_last(Y); ++ny) {
     for (int nx = B.ix_first(Y); nx < B.ix_last(Y); ++nx) {
       B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
@@ -26,7 +26,7 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
 #endif
 
   // Bz(y, x) at t+1/2
-  #pragma omp for schedule(dynamic), nowait
+  #pragma omp for, nowait
   for (int ny = B.iy_first(Z); ny < B.iy_last(Z); ++ny) {
     for (int nx = B.ix_first(Z); nx < B.ix_last(Z); ++nx) {
       B.z(ny, nx) -= 0.5 * (

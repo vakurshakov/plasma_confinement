@@ -1,7 +1,6 @@
 #include "particles.hpp"
 
 #include <algorithm>
-#include <execution>
 
 #include "src/vectors/vector_classes.hpp"
 #include "src/particles/particles_load.hpp"
@@ -15,8 +14,6 @@ Particles::Particles(Particles_builder& builder) {
   decomposition_ = builder.build_decomposition(parameters_);
 }
 
-/// @warning Algorithm ends up with seg. fault
-/// if reallocation of particles array happens
 void Particles::push() {
   PROFILE_FUNCTION();
 
@@ -24,6 +21,13 @@ void Particles::push() {
   auto decompose = std::mem_fn(&Decomposition::process);
   auto interpolate = std::mem_fn(&Interpolation::process);
 
+  /**
+   * We fix the end iterator in case of adding particles.
+   *
+   * @warning Capacity should be set in advance. Algorithm
+   * ends up with segfault if reallocation of particles
+   * array happens.
+   */
   auto particles_fixed_end = particles_.end();
 
 #if TIME_PROFILING
@@ -31,7 +35,8 @@ void Particles::push() {
 #endif
 
   #pragma omp parallel for num_threads(NUM_THREADS),\
-    schedule(guided), shared(push, interpolate, decompose)
+    schedule(monotonic: guided, CHUNK_SIZE),\
+    shared(push, interpolate, decompose)
   for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
     vector2 r0 = it->point.r;
     vector3 local_E = {0.0, 0.0, 0.0};

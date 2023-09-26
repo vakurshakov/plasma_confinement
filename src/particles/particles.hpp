@@ -39,6 +39,8 @@ class Particles {
   friend class Simulation_backup;
 
  private:
+  static constexpr int CHUNK_SIZE = 16;
+
   static inline bool particle_comparator(
     const Particle& left, const Particle& right);
 
