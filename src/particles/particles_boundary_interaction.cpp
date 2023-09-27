@@ -46,7 +46,9 @@ add(Particle& particle, const vector2& r0) {
     /// to simplify the process
 #if GLOBAL_DENSITY
     #pragma omp critical
-    particles_vec_.emplace_back(Point{std::move(new_r), std::move(new_p)}, params_);
+    {
+      particles_vec_.emplace_back(Point{std::move(new_r), std::move(new_p)}, params_);
+    }
 
 #else
     #pragma omp critical
