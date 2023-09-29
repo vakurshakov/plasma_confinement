@@ -41,9 +41,6 @@ class Particles {
  private:
   static constexpr int CHUNK_SIZE = 16;
 
-  static inline bool particle_comparator(
-    const Particle& left, const Particle& right);
-
   std::string sort_name_;
   Parameters parameters_;
   std::vector<Particle> particles_;

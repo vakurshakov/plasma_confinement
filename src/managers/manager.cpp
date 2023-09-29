@@ -275,8 +275,11 @@ void Manager::calculates() {
     }
 
   #if there_are_particles
-    for (auto& sort : particles_species_) {
-      sort.push();
+    #pragma omp parallel num_threads(NUM_THREADS)
+    {
+      for (auto& sort : particles_species_) {
+        sort.push();
+      }
     }
   #endif
 
