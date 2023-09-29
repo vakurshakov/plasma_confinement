@@ -28,31 +28,45 @@ struct Parameters {
 };
 
 
-double zeroth_order_spline(double x, double grid_mesh);
-double first_order_spline(double x, double grid_mesh);
-double second_order_spline(double x, double grid_mesh);
-double third_order_spline(double x, double grid_mesh);
-double fourth_order_spline(double x, double grid_mesh);
-double fifth_order_spline(double x, double grid_mesh);
+#pragma omp declare simd uniform(ds), notinbranch
+double __0th_order_spline(double s, double ds);
+
+#pragma omp declare simd uniform(ds), notinbranch
+double __1st_order_spline(double s, double ds);
+
+#pragma omp declare simd uniform(ds), notinbranch
+double __2nd_order_spline(double s, double ds);
+
+#pragma omp declare simd uniform(ds), notinbranch
+double __3rd_order_spline(double s, double ds);
+
+#pragma omp declare simd uniform(ds), notinbranch
+double __4th_order_spline(double s, double ds);
+
+#pragma omp declare simd uniform(ds), notinbranch
+double __5th_order_spline(double s, double ds);
+
 
 #if (PARTICLES_FORM_FACTOR == 0)
   static constexpr int shape_radius = 1;
-  static constexpr const auto& shape_function = zeroth_order_spline;
+  static constexpr const auto& shape_function = __0th_order_spline;
 #elif (PARTICLES_FORM_FACTOR == 1)
   static constexpr int shape_radius = 1;
-  static constexpr const auto& shape_function = first_order_spline;
+  static constexpr const auto& shape_function = __1st_order_spline;
 #elif (PARTICLES_FORM_FACTOR == 2)
   static constexpr int shape_radius = 2;
-  static constexpr const auto& shape_function = second_order_spline;
+  static constexpr const auto& shape_function = __2nd_order_spline;
 #elif (PARTICLES_FORM_FACTOR == 3)
   static constexpr int shape_radius = 2;
-  static constexpr const auto& shape_function = third_order_spline;
+  static constexpr const auto& shape_function = __3rd_order_spline;
 #elif (PARTICLES_FORM_FACTOR == 4)
   static constexpr int shape_radius = 3;
-  static constexpr const auto& shape_function = fourth_order_spline;
+  static constexpr const auto& shape_function = __4th_order_spline;
 #elif (PARTICLES_FORM_FACTOR == 5)
   static constexpr int shape_radius = 3;
-  static constexpr const auto& shape_function = fifth_order_spline;
+  static constexpr const auto& shape_function = __5th_order_spline;
+#else
+  #error "Unknown PARTICLES_FORM_FACTOR is specified!"
 #endif
 
 #endif //GLOBAL_PARAMETERS_HPP

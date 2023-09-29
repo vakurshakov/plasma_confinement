@@ -4,14 +4,15 @@ Esirkepov_density_decomposition::Esirkepov_density_decomposition(
   const Parameters& parameters, vector3_field& J)
   : Np_(parameters.Np()), J_(J) {}
 
+
 static constexpr int shape_width = 2 * shape_radius + 1;
 
 void Esirkepov_density_decomposition::process(const Particle& particle, const vector2& r0) {
   double n = particle.n();
   double q = particle.q();
 
-  const int node_px = int(round(particle.point.x() / dx));
-  const int node_py = int(round(particle.point.y() / dy));
+  const int node_px = int(round(particle.point.x() / dx)) - shape_radius;
+  const int node_py = int(round(particle.point.y() / dy)) - shape_radius;
 
   decompose_x(particle, r0, n, q, node_px, node_py);
   decompose_y(particle, r0, n, q, node_px, node_py);
@@ -29,10 +30,10 @@ void Esirkepov_density_decomposition::decompose_x(
   const vector2& r = particle.point.r;
 
   int node_gx, node_gy;
-  node_gx = node_px - shape_radius;
+  node_gx = node_px;
 
   for (int y = 0; y < shape_width; ++y) {
-    node_gy = node_py + (y - shape_radius);
+    node_gy = node_py + y;
 
     // Give up trying to put (node_gx + 0.5) here
     temp_Jx[y] = - q * n/Np_ * 0.5 * dx / dt *
@@ -44,10 +45,10 @@ void Esirkepov_density_decomposition::decompose_x(
   }
 
   for (int y = 0; y < shape_width; ++y) {
-    node_gy = node_py + (y - shape_radius);
+    node_gy = node_py + y;
 
     for (int x = 1; x < shape_width; ++x) {
-      node_gx = node_px + (x - shape_radius);
+      node_gx = node_px + x;
 
       // Give up trying to put (node_gx + 0.5) here
       temp_Jx[y] += - q * n/Np_ * 0.5 * dx / dt *
@@ -68,10 +69,10 @@ void Esirkepov_density_decomposition::decompose_y(
   const vector2& r = particle.point.r;
 
   int node_gx, node_gy;
-  node_gy = node_py - shape_radius;
+  node_gy = node_py;
 
   for (int x = 0; x < shape_width; ++x) {
-    node_gx = node_px + (x - shape_radius);
+    node_gx = node_px + x;
 
     // Give up trying to put (node_gy + 0.5) here
     temp_Jy[x] = - q * n/Np_ * 0.5 * dy / dt *
@@ -83,10 +84,10 @@ void Esirkepov_density_decomposition::decompose_y(
   }
 
   for (int y = 1; y < shape_width; ++y) {
-    node_gy = node_py + (y - shape_radius);
+    node_gy = node_py + y;
 
     for (int x = 0; x < shape_width; ++x) {
-      node_gx = node_px + (x - shape_radius);
+      node_gx = node_px + x;
 
       // Give up trying to put (node_gy + 0.5) here
       temp_Jy[x] += - q * n/Np_ * 0.5 * dy / dt *
@@ -114,10 +115,10 @@ void Esirkepov_density_decomposition::decompose_z(
   int node_gx, node_gy;
 
   for (int y = 0; y < shape_width; ++y) {
-    node_gy = node_py + (y - shape_radius);
+    node_gy = node_py + y;
 
     for (int x = 0; x < shape_width; ++x) {
-      node_gx = node_px + (x - shape_radius);
+      node_gx = node_px + x;
 
       temp_Jz = q * n/Np_ * vz * (
         shape_function( r.x() - (node_gx + 0.5) * dx, dx) * shape_function( r.y() - (node_gy + 0.5) * dy, dy) / 3. +
