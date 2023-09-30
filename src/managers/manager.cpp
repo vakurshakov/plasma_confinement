@@ -36,6 +36,9 @@ void Manager::log_information() const {
   LOG_INFO("  temperature,              T_i = {:.2e} KeV", config::T_ions);
   LOG_INFO("  thermal velocity,        v_Ti = {:.2e} c", config::V_ions);
   LOG_INFO("  Debye length,            L_di = {:.2e} c/w_pe", config::V_ions * sqrt(config::mi_me));
+  LOG_WARN("  self-heating,     dx / 3 L_di = {:.3f}", dx / (config::V_ions * sqrt(config::mi_me)));
+  LOG_WARN("  self-heating,     dy / 3 L_di = {:.3f}", dy / (config::V_ions * sqrt(config::mi_me)));
+
   LOG_INFO("  cyclotron frequency,     Om_i = {:.2e} w_pe", config::Omega_max / config::mi_me);
   LOG_INFO("  cyclotron period, 2 pi / Om_i = {:.2e} 1/w_pe ({} timesteps)",
     2 * M_PI / (config::Omega_max / config::mi_me),
@@ -48,6 +51,8 @@ void Manager::log_information() const {
   LOG_INFO("  temperature,              T_e = {:.2e} KeV", config::T_electrons);
   LOG_INFO("  thermal velocity,        v_Te = {:.2e} c", config::V_electrons);
   LOG_INFO("  Debye length,            L_de = {:.2e} c/w_pe", config::V_electrons);
+  LOG_WARN("  self-heating,     dx / 3 L_de = {:.3f}", dx / (config::V_electrons));
+  LOG_WARN("  self-heating,     dy / 3 L_de = {:.3f}", dy / (config::V_electrons));
   LOG_INFO("  cyclotron frequency,     Om_e = {:.2e} w_pe", config::Omega_max);
   LOG_INFO("  cyclotron period, 2 pi / Om_e = {:.2e} 1/w_pe ({} timesteps)",
     2 * M_PI / (config::Omega_max),
@@ -162,14 +167,14 @@ void Manager::initializes() {
       using namespace config;
       static const double center_x = 0.5 * SIZE_X * dx;
       static const double center_y = 0.5 * SIZE_Y * dy;
-      static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
+      // static const double u0 = V_ions / sqrt(1.0 - V_ions * V_ions);
 
       x -= center_x;
       y -= center_y;
       double r = sqrt(x * x + y * y);
 
-      *px = +mass * u0 * (y / r); // + temperature_impulse(Tx, mass);
-      *py = -mass * u0 * (x / r); // + temperature_impulse(Ty, mass);
+      *px = +p0 * (y / r); // + temperature_impulse(Tx, mass);
+      *py = -p0 * (x / r); // + temperature_impulse(Ty, mass);
     }
   ));
 #endif

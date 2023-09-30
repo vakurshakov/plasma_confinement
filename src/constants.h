@@ -65,7 +65,7 @@ inline const double mi_me = 16.0;
 inline const double T_ions = 10.0;  // KeV
 inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
-inline const double T_electrons = 0.2;  // KeV
+inline const double T_electrons = 2.0;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 inline const double Omega_max = sqrt(2.0 * T_ions / 511.0);
@@ -120,7 +120,7 @@ inline const umap<std::string,
         to_string(T_ions),   // Temperature in x, y and z direction [in KeV]
         to_string(T_ions),   //
         "0.0",               //
-        "0.0"                // Absolute value of the initial impulse [in units of mₑc]
+        to_string(mi_me * V_ions / sqrt(1.0 - V_ions * V_ions))  // Absolute value of the initial impulse [in units of mₑc]
     }},
     { "integration_steps", {
         "Boris_pusher",
@@ -167,7 +167,7 @@ inline const umap<std::string,
         to_string(T_electrons),
         to_string(T_electrons),
         "0",
-        "0"
+        to_string(me * V_electrons / sqrt(1.0 - V_electrons * V_electrons))
     }},
     { "integration_steps", {
         "Boris_pusher",
