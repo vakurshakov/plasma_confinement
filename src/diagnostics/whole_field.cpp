@@ -13,7 +13,7 @@ void whole_field::diagnose(int t) {
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+    BIN_File::from_timestep(result_directory_, t));
 
   for (int ny = segment_.begin[Y]; ny < segment_.end[Y]; ++ny) {
   for (int nx = segment_.begin[X]; nx < segment_.end[X]; ++nx) {

@@ -33,7 +33,7 @@ void field_on_segment::diagnose(int t) {
   // if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+    BIN_File::from_timestep(result_directory_, t));
 
   for (int ny = 0; ny < field_.size_y(); ++ny) {
   for (int nx = 0; nx < field_.size_x(); ++nx) {

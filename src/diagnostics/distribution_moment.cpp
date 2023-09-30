@@ -66,7 +66,7 @@ void distribution_moment::diagnose(int t) {
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+    BIN_File::from_timestep(result_directory_, t));
 
   clear();
   collect();
