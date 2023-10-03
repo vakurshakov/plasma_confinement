@@ -4,7 +4,7 @@ void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
   PROFILE_FUNCTION();
 
 // in 2D-FDTD fields are independent of z, so every % / dz fractions will be zero
-#pragma omp parallel shared(E, B, J), num_threads(NUM_THREADS)
+#pragma omp parallel shared(E, B, J)
 {
 #if _2D3V
   // Bx(y, x+1/2) at t+1/2

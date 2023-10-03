@@ -33,7 +33,7 @@ void Open_boundaries_processor::left_right_bounds() {
   static const double center_y = 0.5 * SIZE_Y;
   static const int inner_min = int(layer.r_beginning / M_SQRT2);
 
-  #pragma omp parallel for num_threads(NUM_THREADS)
+  #pragma omp parallel for
   for (int y = 0; y < SIZE_Y; ++y) {
   for (int x = 0; x <= inner_min; ++x) {
 
@@ -72,7 +72,7 @@ void Open_boundaries_processor::top_bottom_bounds() {
   static const double center_y = 0.5 * SIZE_Y;
   static const int inner_min = int(layer.r_beginning / M_SQRT2);
 
-  #pragma omp parallel for num_threads(NUM_THREADS)
+  #pragma omp parallel for
   for (int x = inner_min; x < (SIZE_X - 1) - inner_min; ++x) {
   for (int y = 0; y <= inner_min; ++y) {
 

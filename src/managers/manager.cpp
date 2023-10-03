@@ -38,7 +38,6 @@ void Manager::log_information() const {
   LOG_INFO("  Debye length,            L_di = {:.2e} c/w_pe", config::V_ions * sqrt(config::mi_me));
   LOG_WARN("  self-heating,     dx / 3 L_di = {:.3f}", dx / (config::V_ions * sqrt(config::mi_me)));
   LOG_WARN("  self-heating,     dy / 3 L_di = {:.3f}", dy / (config::V_ions * sqrt(config::mi_me)));
-
   LOG_INFO("  cyclotron frequency,     Om_i = {:.2e} w_pe", config::Omega_max / config::mi_me);
   LOG_INFO("  cyclotron period, 2 pi / Om_i = {:.2e} 1/w_pe ({} timesteps)",
     2 * M_PI / (config::Omega_max / config::mi_me),
@@ -280,7 +279,7 @@ void Manager::calculates() {
     }
 
   #if there_are_particles
-    #pragma omp parallel num_threads(NUM_THREADS)
+    #pragma omp parallel
     {
       for (auto& sort : particles_species_) {
         sort.push();
@@ -311,7 +310,7 @@ void Manager::diagnose(size_t t) const {
    * by ~3.7, but on other timesteps the cost of thread creation
    * accumulates and drops the overall performance by ~1.5.
    */
-  #pragma omp parallel for shared(diagnostics_), if(t % diagnose_time_step == 0)
+  #pragma omp parallel for if(t % diagnose_time_step == 0)
   for (const auto& diagnostic : diagnostics_) {
     diagnostic->diagnose(t);
   }

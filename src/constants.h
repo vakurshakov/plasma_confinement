@@ -38,7 +38,6 @@ constexpr inline double me  = 1.0;
 constexpr inline double Mp  = 1836.0;
 
 inline const std::string dir_name = "./results/test_dir_name";
-constexpr inline int NUM_THREADS = 16;
 
 constexpr inline double dx = 0.05;
 constexpr inline int SIZE_X = 2100;
