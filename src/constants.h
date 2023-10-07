@@ -29,6 +29,16 @@
 #define START_FROM_BACKUP               false
 #define PARTICLES_FORM_FACTOR           2
 
+// BOUNDARY_CONDITIONS:
+#define NONE        -1
+#define PEC         +0
+#define PMC         +1
+#define PERIODIC    +2
+#define CONTINUOUS  +3
+
+#define X_BOUNDARY_CONDITION            CONTINUOUS
+#define Y_BOUNDARY_CONDITION            CONTINUOUS
+
 
 #define AXIAL_INJECTION                 true
 
@@ -88,8 +98,6 @@ inline const double RADIUS_OF_TARGET_PLASMA = 2.5 * ions_larmor_radius;
 #else
 inline const int INJECTION_START = 0;
 #endif
-
-inline const std::string boundaries = "cx_cy";
 
 inline const double damping_layer_width = 100;
 inline const double damping_factor = 0.7;

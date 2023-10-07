@@ -38,7 +38,7 @@ void field_on_segment::diagnose(int t) {
   for (int ny = 0; ny < field_.size_y(); ++ny) {
   for (int nx = 0; nx < field_.size_x(); ++nx) {
     if (belongs_to_segment(nx, ny)) {
-      file_for_results_->write(field_(ny, nx, component_));
+      file_for_results_->write(field_(component_, ny, nx));
     }
   }}
 }

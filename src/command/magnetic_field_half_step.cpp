@@ -10,29 +10,26 @@ void Magnetic_field_half_step::execute(int /* timestep */) {
 #if _2D3V
   // Bx(y, x+1/2) at t+1/2
   #pragma omp for nowait
-  for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
-    for (int nx = B.ix_first(X); nx < B.ix_last(X); ++nx) {
-      B.x(ny, nx) -= 0.5 * (E.z(ny, nx) - E.z(ny-1, nx)) * dt / dy;
-    }
-  }
+  for (int ny = B.y_min(X); ny < B.y_max(X); ++ny) {
+  for (int nx = B.x_min(X); nx < B.x_max(X); ++nx) {
+    B.x(ny, nx) -= 0.5 * (E.z(ny, nx) - E.z(ny-1, nx)) * dt / dy;
+  }}
 
   // By(y+1/2, x) at t+1/2
   #pragma omp for nowait
-  for (int ny = B.iy_first(Y); ny < B.iy_last(Y); ++ny) {
-    for (int nx = B.ix_first(Y); nx < B.ix_last(Y); ++nx) {
-      B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
-    }
-  }
+  for (int ny = B.y_min(Y); ny < B.y_max(Y); ++ny) {
+  for (int nx = B.x_min(Y); nx < B.x_max(Y); ++nx) {
+    B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
+  }}
 #endif
 
   // Bz(y, x) at t+1/2
   #pragma omp for nowait
-  for (int ny = B.iy_first(Z); ny < B.iy_last(Z); ++ny) {
-    for (int nx = B.ix_first(Z); nx < B.ix_last(Z); ++nx) {
-      B.z(ny, nx) -= 0.5 * (
-        (E.y(ny, nx+1) - E.y(ny, nx)) / dx -
-        (E.x(ny+1, nx) - E.x(ny, nx)) / dy) * dt;
-    }
-  }
+  for (int ny = B.y_min(Z); ny < B.y_max(Z); ++ny) {
+  for (int nx = B.x_min(Z); nx < B.x_max(Z); ++nx) {
+    B.z(ny, nx) -= 0.5 * (
+      (E.y(ny, nx+1) - E.y(ny, nx)) / dx -
+      (E.x(ny+1, nx) - E.x(ny, nx)) / dy) * dt;
+  }}
 }
 }

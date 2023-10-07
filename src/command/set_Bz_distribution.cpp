@@ -5,8 +5,8 @@ Set_Bz_distribution::Set_Bz_distribution(Fields* const fields) : fields_(fields)
 void Set_Bz_distribution::execute(int /* timestep */) {
   PROFILE_FUNCTION();
 
-  for (int y = fields_->B().iy_first(Z); y < fields_->B().iy_last(Z); ++y) {
-  for (int x = fields_->B().ix_first(Z); x < fields_->B().ix_last(Z); ++x) {
+  for (int y = fields_->B().y_min(Z); y < fields_->B().y_max(Z); ++y) {
+  for (int x = fields_->B().x_min(Z); x < fields_->B().x_max(Z); ++x) {
     fields_->B().z(y, x) = config::Omega_max;
   }}
 }
