@@ -28,16 +28,18 @@ class vector3_field {
   OMP_SIMD constexpr int y_max(Axis axis) const { return bound_.y_max[axis]; }
   #undef OMP_SIMD
 
-  #define OMP_SIMD                                              \
-    _Pragma("omp declare simd linear(ny, nx: 1), inbranch")     \
-    _Pragma("omp declare simd linear(ny, nx: 1), notinbranch")  \
 
-  OMP_SIMD double& x(int ny, int nx);
-  OMP_SIMD double& y(int ny, int nx);
-  OMP_SIMD double& z(int ny, int nx);
-  OMP_SIMD const double& x(int ny, int nx) const;
-  OMP_SIMD const double& y(int ny, int nx) const;
-  OMP_SIMD const double& z(int ny, int nx) const;
+  #define OMP_SIMD                                                       \
+    _Pragma("omp declare simd linear(ny, nx: 1), notinbranch")           \
+    _Pragma("omp declare simd linear(nx: 1), uniform(ny), notinbranch")  \
+    _Pragma("omp declare simd linear(ny: 1), uniform(nx), notinbranch")  \
+
+  OMP_SIMD inline double& x(int ny, int nx);
+  OMP_SIMD inline double& y(int ny, int nx);
+  OMP_SIMD inline double& z(int ny, int nx);
+  OMP_SIMD inline const double& x(int ny, int nx) const;
+  OMP_SIMD inline const double& y(int ny, int nx) const;
+  OMP_SIMD inline const double& z(int ny, int nx) const;
 
   OMP_SIMD double& operator()(Axis comp, int ny, int nx);
   OMP_SIMD const double& operator()(Axis comp, int ny, int nx) const;
@@ -64,5 +66,7 @@ class vector3_field {
   boundaries_indexes bound_;
   mutable double zero_ = 0.0;
 };
+
+#include "vector3_field.inl"
 
 #endif  // SRC_VECTORS_VECTOR3_FIELD_HPP
