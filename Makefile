@@ -6,9 +6,7 @@ INC_PATH += -I$(SIMULATION_DIR)/
 INC_PATH += -I$(SPDLOG_DIR)/include
 
 LIB_PATH :=
-LIB_PATH += -L$(SPDLOG_DIR)/lib
-
-LIBS += -lspdlog
+LIBS :=
 
 CXX    := g++
 CFLAGS :=

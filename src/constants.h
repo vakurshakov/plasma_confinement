@@ -5,7 +5,7 @@
 //! constants other constants should be represented by some
 //! name-accessible class (equivalent to map).
 
-#include <cmath>
+#include <math.h>
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@
   #define particles_are_diagnosed       true
   #define there_are_plasma_ions         true
   #define there_are_plasma_electrons    true
-  #define there_are_target_plasma       false
+  #define there_are_target_plasma       true
 
 #define there_are_fields                true
   #define fields_are_diagnosed          true
@@ -24,7 +24,7 @@
 
 #define _2D3V                           false
 #define LOGGING                         true
-#define TIME_PROFILING                  true
+#define TIME_PROFILING                  false
 #define MAKE_BACKUPS                    true
 #define START_FROM_BACKUP               false
 #define PARTICLES_FORM_FACTOR           2
@@ -43,44 +43,44 @@
 #define AXIAL_INJECTION                 true
 
 
-constexpr inline double e   = 1.0;
-constexpr inline double me  = 1.0;
-constexpr inline double Mp  = 1836.0;
+constexpr double e   = 1.0;
+constexpr double me  = 1.0;
+constexpr double Mp  = 1836.0;
 
 inline const std::string dir_name = "./results/test_dir_name";
 
-constexpr inline double dx = 0.05;
-constexpr inline int SIZE_X = 2100;
+constexpr double dx = 0.025;
+constexpr int SIZE_X = 4200;
 
-constexpr inline double dy = dx;
-constexpr inline int SIZE_Y = 2100;
+constexpr double dy = dx;
+constexpr int SIZE_Y = 4200;
 
-constexpr inline double dt = 0.5 * dx;
-constexpr inline int TIME  = 400'000;
+constexpr double dt = 0.5 * dx;
+constexpr int TIME  = 400'000;
 
 static_assert(dx == dy, "Current setup works only with equal grid step!");
 static_assert(SIZE_X == SIZE_Y, "Current setup works only with square grid!");
 
-constexpr inline int diagnose_time_step = 200;
-constexpr inline int backup_time_step = 10'000;
+constexpr int diagnose_time_step = 200;
+constexpr int backup_time_step = 10'000;
 
 namespace config {
 
 inline const double n0 = 1.0;
-inline const int   Npi = 100;
+inline const int   Npi = 50;
 
 inline const double mi_me = 16.0;
 
 inline const double T_ions = 10.0;  // KeV
 inline const double V_ions = sqrt(T_ions / mi_me / 511.0);
 
-inline const double T_electrons = 2.0;  // KeV
+inline const double T_electrons = dx * dx * 511.0;  // KeV
 inline const double V_electrons = sqrt(T_electrons / me / 511.0);
 
 inline const double Omega_max = sqrt(2.0 * T_ions / 511.0);
 inline const double ions_larmor_radius = mi_me * V_ions / Omega_max;
 
-inline const int INJECTION_TIME = 40'000;
+inline const int INJECTION_TIME = int(1000 / dt);
 
 #if !AXIAL_INJECTION
 inline const double R0 = 1.5 * ions_larmor_radius;
@@ -92,9 +92,9 @@ inline const int PER_STEP_PARTICLES = 4.0 * M_PI * R0 * DR * Npi / (dx * dy * IN
 #endif
 
 #if there_are_target_plasma
-inline const int INJECTION_START = 1000 / dt;
-inline const double TARGET_PLASMA_TEMPERATURE = 50e-3;  // KeV
-inline const double RADIUS_OF_TARGET_PLASMA = 2.5 * ions_larmor_radius;
+inline const int INJECTION_START = int(1000 / dt);
+inline const double TARGET_PLASMA_TEMPERATURE = dx * dx * 511.0;  // KeV
+inline const double RADIUS_OF_TARGET_PLASMA = 2.0 * ions_larmor_radius;
 #else
 inline const int INJECTION_START = 0;
 #endif
@@ -124,8 +124,8 @@ inline const umap<std::string,
         to_string(+e),       // Particle charge [in units of e]
         to_string(mi_me),    // Particle mass [in units mₑ]
         to_string(Npi),      // Number of particles representing the density n₀
-        to_string(T_ions),   // Temperature in x, y and z direction [in KeV]
-        to_string(T_ions),   //
+        "0.0",               // Temperature in x, y and z direction [in KeV]
+        "0.0",               //
         "0.0",               //
         to_string(mi_me * V_ions / sqrt(1.0 - V_ions * V_ions))  // Absolute value of the initial impulse [in units of mₑc]
     }},
@@ -171,10 +171,10 @@ inline const umap<std::string,
         to_string(-e),
         to_string(me),
         to_string(Npi),
-        to_string(T_electrons),
-        to_string(T_electrons),
-        "0",
-        to_string(me * V_electrons / sqrt(1.0 - V_electrons * V_electrons))
+        "0.0",
+        "0.0",
+        "0.0",
+        to_string(me * V_ions / sqrt(1.0 - V_ions * V_ions))
     }},
     { "integration_steps", {
         "Boris_pusher",
@@ -220,8 +220,8 @@ inline const umap<std::string,
         to_string(Npi),
         to_string(TARGET_PLASMA_TEMPERATURE),
         to_string(TARGET_PLASMA_TEMPERATURE),
-        "0",
-        "0"
+        "0.0",
+        "0.0"
     }},
     { "integration_steps", {
         "Boris_pusher",
@@ -265,8 +265,8 @@ inline const umap<std::string,
         to_string(Npi),
         to_string(TARGET_PLASMA_TEMPERATURE),
         to_string(TARGET_PLASMA_TEMPERATURE),
-        "0",
-        "0"
+        "0.0",
+        "0.0"
     }},
     { "integration_steps", {
         "Boris_pusher",
