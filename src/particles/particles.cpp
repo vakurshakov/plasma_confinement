@@ -1,6 +1,6 @@
 #include "particles.hpp"
 
-#include <cstdarg>
+#include <algorithm>
 
 #include "src/vectors/vector_classes.hpp"
 #include "src/particles/particles_load.hpp"
@@ -10,49 +10,52 @@ Particles::Particles(Particles_builder& builder) {
   parameters_ = builder.build_parameters();
 
   push_ = builder.build_pusher();
-  interpolation_ = builder.build_interpolation(this->parameters_);
-  decomposition_ = builder.build_decomposition(this->parameters_);
+  interpolation_ = builder.build_interpolation(parameters_);
+  decomposition_ = builder.build_decomposition(parameters_);
 }
 
-/// @warning Algorithm ends up with seg. fault
-/// if reallocation of particles array happens
 void Particles::push() {
   PROFILE_FUNCTION();
 
-  auto push = std::mem_fn(&Pusher::process);
-  auto decompose = std::mem_fn(&Decomposition::process);
-  auto interpolate = std::mem_fn(&Interpolation::process);
+  /**
+   * We fix the end iterator in case of adding particles.
+   *
+   * @warning Capacity should be set in advance. Algorithm
+   * ends up with segfault if reallocation of particles
+   * array happens.
+   */
+  auto particles_fixed_end = particles_.end();
 
-  auto particles_fixed_end = this->particles_.end();
+#if TIME_PROFILING
   int size = particles_fixed_end - particles_.begin();
+#endif
 
-// firstprivate attribute initializes the thread-local variables
-// with the values of the original object outside of this scope
-#pragma omp parallel num_threads(NUM_THREADS),\
-  firstprivate(push, interpolate, decompose)
-{
-  #pragma omp for
+  #pragma omp for schedule(monotonic: dynamic, CHUNK_SIZE)
   for (auto it = particles_.begin(); it != particles_fixed_end; ++it) {
     vector2 r0 = it->point.r;
-    vector3 local_E = {0., 0., 0.};
-    vector3 local_B = {0., 0., 0.};
+    vector3 local_E = {0.0, 0.0, 0.0};
+    vector3 local_B = {0.0, 0.0, 0.0};
 
     ACCUMULATIVE_PROFILE("field interpolation process", size,
-      interpolate(interpolation_, r0, local_E, local_B));
+      interpolation_->process(r0, local_E, local_B));
 
     ACCUMULATIVE_PROFILE("particle push process", size,
-      push(push_, *it, local_E, local_B));
+      push_->process(*it, local_E, local_B));
 
     ACCUMULATIVE_PROFILE("current decomposition process", size,
-      decompose(decomposition_, *it, r0));
+      decomposition_->process(*it, r0));
 
     ACCUMULATIVE_PROFILE("adding particles via open boundaries", size,
       boundaries_processor_->add(*it, r0));
   }
-}
-  boundaries_processor_->remove();
 
-  LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
+  /// @todo we can put here nowait clause, but we than
+  /// have to carefully trace particles_fixed_end.
+  #pragma omp single
+  {
+    boundaries_processor_->remove();
+    LOG_WARN("Number of {} after `void Particles::push()`: {}",  sort_name_, particles_.size());
+  }
 }
 
 #if GLOBAL_DENSITY

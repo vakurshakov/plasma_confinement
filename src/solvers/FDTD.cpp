@@ -1,68 +1,64 @@
 #include "src/fields/fields.hpp"
 
+// in 2D-FDTD fields are independent of z, so every % / dz fractions will be zero
 void FDTD_2D(vector3_field& E, vector3_field& B, vector3_field& J) {
   PROFILE_FUNCTION();
 
-// in 2D-FDTD fields are independent of z, so every % / dz fractions will be zero
-#pragma omp parallel shared(E, B, J), num_threads(NUM_THREADS)
-{
-#if _2D3V
-  // Bx(y, x+1/2) at t+1/2
-  #pragma omp for
-  for (int ny = B.iy_first(X); ny < B.iy_last(X); ++ny) {
-    for (int nx = B.ix_first(X); nx < B.ix_last(X); ++nx) {
+  #pragma omp parallel shared(E, B, J)
+  {
+  #if _2D3V
+    // Bx(y, x+1/2) at t+1/2
+    #pragma omp for simd nowait
+    for (int ny = B.y_min(X); ny < B.y_max(X); ++ny) {
+    for (int nx = B.x_min(X); nx < B.x_max(X); ++nx) {
       B.x(ny, nx) -= 0.5 * (E.z(ny, nx) - E.z(ny-1, nx)) * dt / dy;
-    }
-  }
+    }}
 
-  // By(y+1/2, x) at t+1/2
-  #pragma omp for
-  for (int ny = B.iy_first(Y); ny < B.iy_last(Y); ++ny) {
-    for (int nx = B.ix_first(Y); nx < B.ix_last(Y); ++nx) {
+    // By(y+1/2, x) at t+1/2
+    #pragma omp for simd nowait
+    for (int ny = B.y_min(Y); ny < B.y_max(Y); ++ny) {
+    for (int nx = B.x_min(Y); nx < B.x_max(Y); ++nx) {
       B.y(ny, nx) += 0.5 * (E.z(ny, nx) - E.z(ny, nx-1)) * dt / dx;
-    }
-  }
-#endif
+    }}
+  #endif
 
-  // Bz(y, x) at t+1/2
-  #pragma omp for
-  for (int ny = B.iy_first(Z); ny < B.iy_last(Z); ++ny) {
-    for (int nx = B.ix_first(Z); nx < B.ix_last(Z); ++nx) {
+    // Bz(y, x) at t+1/2
+    #pragma omp for simd nowait
+    for (int ny = B.y_min(Z); ny < B.y_max(Z); ++ny) {
+    for (int nx = B.x_min(Z); nx < B.x_max(Z); ++nx) {
       B.z(ny, nx) -= 0.5 * (
         (E.y(ny, nx+1) - E.y(ny, nx)) / dx -
         (E.x(ny+1, nx) - E.x(ny, nx)) / dy) * dt;
-    }
-  }
+    }}
 
+    // To ensure all magnetic field components are updated
+    #pragma omp barrier
 
-  // Ex(y+1/2, x) at t+1
-  #pragma omp for
-  for (int ny = E.iy_first(X); ny < E.iy_last(X); ++ny) {
-    for (int nx = E.ix_first(X); nx < E.ix_last(X); ++nx) {
+    // Ex(y+1/2, x) at t+1
+    #pragma omp for simd nowait
+    for (int ny = E.y_min(X); ny < E.y_max(X); ++ny) {
+    for (int nx = E.x_min(X); nx < E.x_max(X); ++nx) {
       E.x(ny, nx) += - J.x(ny, nx) * dt +
         (B.z(ny, nx) - B.z(ny-1, nx)) * dt / dy;
-    }
-  }
+    }}
 
-  // Ey(y, x+1/2) at t+1
-  #pragma omp for
-  for (int ny = E.iy_first(Y); ny < E.iy_last(Y); ++ny) {
-    for (int nx = E.ix_first(Y); nx < E.ix_last(Y); ++nx) {
+    // Ey(y, x+1/2) at t+1
+    #pragma omp for simd nowait
+    for (int ny = E.y_min(Y); ny < E.y_max(Y); ++ny) {
+    for (int nx = E.x_min(Y); nx < E.x_max(Y); ++nx) {
       E.y(ny, nx) += - J.y(ny, nx) * dt -
         (B.z(ny, nx) - B.z(ny, nx-1)) * dt / dx;
-    }
-  }
+    }}
 
-#if _2D3V
-  // Ez(y+1/2,x+1/2) at t+1
-  #pragma omp for
-  for (int ny = E.iy_first(Z); ny < E.iy_last(Z); ++ny) {
-    for (int nx = E.ix_first(Z); nx < E.ix_last(Z); ++nx) {
+  #if _2D3V
+    // Ez(y+1/2,x+1/2) at t+1
+    #pragma omp for simd nowait
+    for (int ny = E.y_min(Z); ny < E.y_max(Z); ++ny) {
+    for (int nx = E.x_min(Z); nx < E.x_max(Z); ++nx) {
       E.z(ny, nx) += - J.z(ny, nx) * dt + (
         (B.y(ny, nx+1) - B.y(ny, nx)) / dx -
         (B.x(ny+1, nx) - B.x(ny, nx)) / dy) * dt;
-    }
+    }}
+  #endif
   }
-#endif
-}
 }

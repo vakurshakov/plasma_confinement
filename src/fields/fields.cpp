@@ -21,7 +21,7 @@ void Fields::clear_sources() {
 
   auto& J = *J_;
 
-  #pragma omp parallel for num_threads(NUM_THREADS)
+  #pragma omp parallel for
   for (int ny = 0; ny < SIZE_Y; ++ny) {
   for (int nx = 0; nx < SIZE_X; ++nx) {
     J.x(ny, nx) = 0.0;

@@ -29,10 +29,7 @@ class field_on_segment : public Diagnostic {
   diag_segment segment_;
 
  private:
-  vector2 direction_;
-  double parameter_step_;
-
-  void get_point_on_segment(double t, int& x, int& y) const;
+  constexpr bool belongs_to_segment(int x, int y) const;
 };
 
 #endif  // SRC_DIAGNOSTICS_FIELD_ON_SEGMENT_HPP

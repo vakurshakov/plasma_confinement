@@ -64,10 +64,15 @@ vector_of_diagnostics Diagnostics_builder::build() {
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "zeroth_moment", "XY", diag_description));
     }
-    else if (diag == "velocity_distribution") {
-      LOG_INFO("Add velocity_distribution diagnostic for {}", sort);
+    else if (diag == "VxVy_distribution") {
+      LOG_INFO("Add VxVy_distribution diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "zeroth_moment", "VxVy", diag_description));
+    }
+    else if (diag == "VrVphi_distribution") {
+      LOG_INFO("Add VrVphi_distribution diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "zeroth_moment", "VrVphi", diag_description));
     }
     else if (diag == "Vx_moment") {
       LOG_INFO("Add Vx_moment diagnostic for {}", sort);
@@ -103,6 +108,21 @@ vector_of_diagnostics Diagnostics_builder::build() {
       LOG_INFO("Add mVyVy_moment diagnostic for {}", sort);
       diagnostics.emplace_back(build_diag_distribution_moment(
         sort, "mVyVy_moment", "XY", diag_description));
+    }
+    else if (diag == "mVrVr_moment") {
+      LOG_INFO("Add mVrVr_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVrVr_moment", "XY", diag_description));
+    }
+    else if (diag == "mVrVphi_moment") {
+      LOG_INFO("Add mVrVphi_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVrVphi_moment", "XY", diag_description));
+    }
+    else if (diag == "mVphiVphi_moment") {
+      LOG_INFO("Add mVphiVphi_moment diagnostic for {}", sort);
+      diagnostics.emplace_back(build_diag_distribution_moment(
+        sort, "mVphiVphi_moment", "XY", diag_description));
     }
     else if (diag == "x0_distribution_function") {
       LOG_INFO("Add x0_distribution_function diagnostic for {}", sort);
@@ -245,16 +265,26 @@ Diagnostics_builder::build_diag_distribution_moment(
     std::stod(description[4]), std::stod(description[5]),
   };
 
+  if (area.min[X] >= area.max[X] ||
+      area.min[Y] >= area.max[Y]) {
+    throw std::runtime_error("Initialization error: Invalid area values for " + moment_name + "_of_" + axes_names + " diagnostic on " + sort_name + " is set");
+  }
+
   if ((axes_names == "XY" && (
-      (0 > area.min[X] || area.min[X] > SIZE_X * dx)   ||
-      (0 > area.min[Y] || area.min[Y] > SIZE_Y * dy)   ||
-      (0 > area.max[X] || area.max[X] > SIZE_X * dx)   ||
-      (0 > area.max[Y] || area.max[Y] > SIZE_Y * dy))) ||
+        (0 > area.min[X] || area.min[X] > SIZE_X * dx)   ||
+        (0 > area.min[Y] || area.min[Y] > SIZE_Y * dy)   ||
+        (0 > area.max[X] || area.max[X] > SIZE_X * dx)   ||
+        (0 > area.max[Y] || area.max[Y] > SIZE_Y * dy))) ||
       (axes_names == "VxVy" && (
-      (-1.0 > area.min[X] || area.min[X] > 1.0)   ||
-      (-1.0 > area.min[Y] || area.min[Y] > 1.0)   ||
-      (-1.0 > area.max[X] || area.max[X] > 1.0)   ||
-      (-1.0 > area.max[Y] || area.max[Y] > 1.0)))) {
+        (-1.0 > area.min[X] || area.min[X] > 1.0)   ||
+        (-1.0 > area.min[Y] || area.min[Y] > 1.0)   ||
+        (-1.0 > area.max[X] || area.max[X] > 1.0)   ||
+        (-1.0 > area.max[Y] || area.max[Y] > 1.0))) ||
+      (axes_names == "VrVphi" && (
+        (-1.0 > area.min[X] || area.min[X] > 1.0)   ||
+        (-1.0 > area.min[Y] || area.min[Y] > 1.0)   ||
+        (-1.0 > area.max[X] || area.max[X] > 1.0)   ||
+        (-1.0 > area.max[Y] || area.max[Y] > 1.0)))) {
     throw std::runtime_error("Initialization error: Invalid area values for " + moment_name + "_of_" + axes_names + " diagnostic on " + sort_name + " is set");
   }
 

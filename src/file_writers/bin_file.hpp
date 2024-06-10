@@ -9,17 +9,17 @@ class BIN_File : public IFile {
  public:
   BIN_File(std::string directory_path, std::string file_name);
 
+  static BIN_File from_timestep(std::string directory_path, int t);
+
   /// @param byte_offset The offset made from the last position after opening.
   /// @warning Should not be used for non-single-file diagnostics.
-  static BIN_File
-  from_backup(std::string directory_path, std::string file_name, int byte_offset);
+  static BIN_File from_backup(std::string directory_path, std::string file_name, int byte_offset);
 
   void write(double data) override;
   void write_double(double data);
 
-  virtual void flush() override;
-
-  file_type get_type() override;
+  void flush() override;
+  void close() override;
 
  private:
   std::ofstream bin_file_;

@@ -10,115 +10,63 @@
  * conditions automatically works.
  *
  * @todo Replace .g(y, x) onto .g(x, y) everywhere.
- * @todo Refactor this class to adopting strategies.
  */
 class vector3_field {
  public:
-  vector3_field() = default;
-
   vector3_field(int size_x, int size_y);
+  vector3_field(const std::string& type, int size_x, int size_y);
 
-  virtual ~vector3_field() = default;
+  #define OMP_SIMD _Pragma("omp declare simd notinbranch")
+  OMP_SIMD constexpr int size_x() const { return size_x_; }
+  OMP_SIMD constexpr int size_y() const { return size_y_; }
+  #undef OMP_SIMD
 
-  int size_x() const { return size_x_; }
-  int size_y() const { return size_y_; }
+  #define OMP_SIMD _Pragma("omp declare simd uniform(axis), notinbranch")
+  OMP_SIMD constexpr int x_min(Axis axis) const { return bound_.x_min[axis]; }
+  OMP_SIMD constexpr int x_max(Axis axis) const { return bound_.x_max[axis]; }
+  OMP_SIMD constexpr int y_min(Axis axis) const { return bound_.y_min[axis]; }
+  OMP_SIMD constexpr int y_max(Axis axis) const { return bound_.y_max[axis]; }
+  #undef OMP_SIMD
 
-  virtual int ix_first(Axis axis) const = 0;
-  virtual int iy_first(Axis axis) const = 0;
-  virtual int ix_last(Axis axis) const = 0;
-  virtual int iy_last(Axis axis) const = 0;
 
-  virtual double& x(int ny, int nx) = 0;
-  virtual double& y(int ny, int nx) = 0;
-  virtual double& z(int ny, int nx) = 0;
+  #define OMP_SIMD                                                       \
+    _Pragma("omp declare simd linear(ny, nx: 1), notinbranch")           \
+    _Pragma("omp declare simd linear(nx: 1), uniform(ny), notinbranch")  \
+    _Pragma("omp declare simd linear(ny: 1), uniform(nx), notinbranch")  \
 
-  virtual double x(int ny, int nx) const = 0;
-  virtual double y(int ny, int nx) const = 0;
-  virtual double z(int ny, int nx) const = 0;
+  OMP_SIMD inline double& x(int ny, int nx);
+  OMP_SIMD inline double& y(int ny, int nx);
+  OMP_SIMD inline double& z(int ny, int nx);
+  OMP_SIMD inline const double& x(int ny, int nx) const;
+  OMP_SIMD inline const double& y(int ny, int nx) const;
+  OMP_SIMD inline const double& z(int ny, int nx) const;
 
-  virtual vector3 operator()(int ny, int nx) const = 0;
+  OMP_SIMD double& operator()(Axis comp, int ny, int nx);
+  OMP_SIMD const double& operator()(Axis comp, int ny, int nx) const;
 
- protected:
-  constexpr int index(int ny, int nx) const;
+  vector3 operator()(int ny, int nx) const;
 
-  int size_x_, size_y_;
+ private:
+  OMP_SIMD constexpr int index(int ny, int nx) const;
+  #undef OMP_SIMD
+
+  int size_x_;
+  int size_y_;
 
   std::vector<double> fx_;
   std::vector<double> fy_;
   std::vector<double> fz_;
-};
 
-
-/// @brief Periodic field along both axis
-class px_py_vector3_field : public vector3_field {
- public:
-  px_py_vector3_field(int size_x, int size_y);
-
-  int ix_first(Axis axis) const override;
-  int iy_first(Axis axis) const override;
-  int ix_last(Axis axis) const override;
-  int iy_last(Axis axis) const override;
-
-  double& x(int ny, int nx) override;
-  double& y(int ny, int nx) override;
-  double& z(int ny, int nx) override;
-
-  double x(int ny, int nx) const override;
-  double y(int ny, int nx) const override;
-  double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
-};
-
-
-/// @brief PEC boundary along x-axis and periodic along y-axis
-class rx_py_vector3_field : public vector3_field {
- public:
-  rx_py_vector3_field(std::string type, int size_x, int size_y);
-
-  int ix_first(Axis axis) const override;
-  int iy_first(Axis axis) const override;
-  int ix_last(Axis axis) const override;
-  int iy_last(Axis axis) const override;
-
-  double& x(int ny, int nx) override;
-  double& y(int ny, int nx) override;
-  double& z(int ny, int nx) override;
-
-  double x(int ny, int nx) const override;
-  double y(int ny, int nx) const override;
-  double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
-
- private:
-  struct index_boundaries {
-    int left[3];
-    int right[3];
+  struct boundaries_indexes {
+    int x_min[3];
+    int y_min[3];
+    int x_max[3];
+    int y_max[3];
   };
-
-  index_boundaries bound_;
+  boundaries_indexes bound_;
   mutable double zero_ = 0.0;
-
-  inline double& get_proxied(Axis axis, int ny, int nx);
-  inline const double& get_proxied(Axis axis, int ny, int nx) const;
 };
 
-
-/// @note uses same index boundaries as px_py_vector3_field
-class cx_py_vector3_field : public px_py_vector3_field {
- public:
-  cx_py_vector3_field(int size_x, int size_y);
-
-  double& x(int ny, int nx) override;
-  double& y(int ny, int nx) override;
-  double& z(int ny, int nx) override;
-
-  double x(int ny, int nx) const override;
-  double y(int ny, int nx) const override;
-  double z(int ny, int nx) const override;
-
-  vector3 operator()(int ny, int nx) const override;
-};
+#include "vector3_field.inl"
 
 #endif  // SRC_VECTORS_VECTOR3_FIELD_HPP

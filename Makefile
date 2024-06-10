@@ -6,21 +6,19 @@ INC_PATH += -I$(SIMULATION_DIR)/
 INC_PATH += -I$(SPDLOG_DIR)/include
 
 LIB_PATH :=
-LIB_PATH += -L$(SPDLOG_DIR)/lib
-
-LIBS += -lspdlog
+LIBS :=
 
 CXX    := g++
 CFLAGS :=
-CFLAGS += -std=c++20 -fPIC -fopenmp -pthread
+CFLAGS += -std=c++20 -fpic -fopenmp -pthread
 
 # `filter X, A B` return those of A, B that are equal to X
 ifeq ($(VERSION), $(filter $(VERSION), "DEBUG" ""))
-CFLAGS += -O0 -ggdb -Wall -pedantic
+CFLAGS += -O0 -ggdb -Wall -Wextra -Wpedantic -Wno-unused-parameter -Werror
 endif
 
 ifeq ($(VERSION), RELEASE)
-CFLAGS += -O3
+CFLAGS += -ftree-vectorize -O3
 endif
 
 
@@ -73,9 +71,9 @@ SRCS +=                                                \
   src/particles/particles.cpp                          \
   src/particles/particles_builder.cpp                  \
   src/particles/particles_load.cpp                     \
-  src/particles/particle-boundary_processor.cpp        \
+  src/particles/particles_boundary_interaction.cpp     \
   src/particles/particle/particles_form-factors.cpp    \
-  src/particles/particle/point_bound_interact.cpp      \
+  src/particles/particle/point_boundary_interaction.cpp\
 
 # solvers
 SRCS +=                                                \
@@ -90,9 +88,9 @@ SRCS +=                                                    \
   src/utils/time_manager.cpp                               \
   src/utils/simulation_backup.cpp                          \
   src/utils/configuration_backup.cpp                       \
-  src/utils/transition_layer/table_function.cpp            \
-  src/utils/transition_layer/parameters_table.cpp          \
-  src/utils/transition_layer/particles_distribution.cpp    \
+  # src/utils/transition_layer/table_function.cpp            \
+  # src/utils/transition_layer/parameters_table.cpp          \
+  # src/utils/transition_layer/particles_distribution.cpp    \
 
 # vectors
 SRCS +=                                                \

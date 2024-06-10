@@ -26,7 +26,7 @@ class distribution_moment : public Diagnostic {
     int x0, std::unique_ptr<Projector2D>);
 
   virtual void collect();
-  void reset();
+  void clear();
 
   const Particles& particles_;
   std::unique_ptr<Moment> moment_;
@@ -41,7 +41,7 @@ class distribution_moment : public Diagnostic {
 /**
  * @brief An utility structure to store the moment name
  * along with the pointer to distribution moment getter.
- * 
+ *
  * Getter is chosen depending on the name in the constructor.
  */
 struct Moment {
@@ -72,7 +72,7 @@ struct diag_area {
  * @brief Stores geometry: min and max value of a
  * projection, its step dp and two projectors to
  * axes.
- * 
+ *
  * Projectors are selected depending on the name in the constructor.
  */
 struct Projector2D {

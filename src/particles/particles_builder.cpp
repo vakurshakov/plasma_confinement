@@ -7,11 +7,12 @@
 #include "src/command/set_particles.hpp"
 #include "src/command/copy_coordinates.hpp"
 
+#include "src/solvers/Boris_pusher.hpp"
 #include "src/solvers/simple_interpolation.hpp"
 #include "src/solvers/point_interpolation.hpp"
 #include "src/solvers/null_interpolation.hpp"
-#include "src/solvers/Boris_pusher.hpp"
 #include "src/solvers/Esirkepov_density_decomposition.hpp"
+#include "src/solvers/null_decomposition.hpp"
 
 using std::vector, std::string, std::function, std::make_unique, std::stod, std::stoi;
 
@@ -68,12 +69,13 @@ Particles_builder::build_pusher() {
 
 std::unique_ptr<Interpolation>
 Particles_builder::build_interpolation(const Parameters& parameters) {
+#if there_are_fields
   size_t pos = string::npos;
   const string& setting = sort_integration_steps_[1];
 
   std::unique_ptr<Interpolation> interpolation_up;
   if ((pos = setting.find("Simple_interpolation")) != string::npos) {
-    interpolation_up = make_unique<Simple_interpolation>(parameters, fields_.E(), fields_.B());
+    interpolation_up = make_unique<Simple_interpolation>(fields_.E(), fields_.B());
   }
   else if ((pos = setting.find("Point_interpolation, ")) != string::npos) {
     if ((pos = setting.find("Const_field: ", pos)) == string::npos)
@@ -117,14 +119,32 @@ Particles_builder::build_interpolation(const Parameters& parameters) {
     throw std::runtime_error("Initialization error: No matching interpolation");
 
   return interpolation_up;
+
+#else
+  return make_unique<Null_interpolation>();
+
+#endif
 }
 
 std::unique_ptr<Decomposition>
 Particles_builder::build_decomposition(const Parameters& parameters) {
+#if there_are_fields
   const std::string& setting = sort_integration_steps_[2];
 
-  if (setting.find("Esirkepov_density_decomposition") == string::npos)
+  std::unique_ptr<Decomposition> decomposition_up;
+  if (setting.find("Esirkepov_density_decomposition") != string::npos) {
+    decomposition_up = make_unique<Esirkepov_density_decomposition>(parameters, fields_.J());
+  }
+  else if (setting.find("Null_decomposition") != string::npos) {
+    decomposition_up = make_unique<Null_decomposition>();
+  }
+  else
     throw std::runtime_error("Initialization error: No matching density decomposition");
 
-  return make_unique<Esirkepov_density_decomposition>(parameters, fields_.J());
+  return decomposition_up;
+
+#else
+  return make_unique<Null_decomposition>();
+
+#endif
 }

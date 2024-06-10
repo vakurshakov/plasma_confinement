@@ -1,13 +1,6 @@
 #include "energy.hpp"
 #include "src/file_writers/bin_file.hpp"
 
-#if !BEAM_INJECTION_SETUP
-
-#include "src/utils/transition_layer/table_function.hpp"
-static auto __Bz = Table_function("src/utils/transition_layer/Bz_" + config::postfix);
-
-#endif
-
 namespace fs = std::filesystem;
 
 energy_parameters_saver::energy_parameters_saver(
@@ -31,8 +24,11 @@ fields_energy::fields_energy(
     result_directory_, "fields_energy");
 
 #else
+  const int number_of_written_components = 7;
+
   file_for_results_ = std::make_unique<BIN_File>(
-    BIN_File::from_backup(result_directory_, "fields_energy", sizeof(float)));
+    BIN_File::from_backup(result_directory_, "fields_energy",
+      number_of_written_components * sizeof(float)));
 
 #endif
 }
@@ -41,9 +37,9 @@ void fields_energy::diagnose(int t) {
   PROFILE_FUNCTION();
 
   double WEx = 0, WEy = 0, WEz = 0;
-  double WBx = 0, WBy = 0, WBz = 0, WdBz = 0;
+  double WBx = 0, WBy = 0, WBz = 0;
 
-  #pragma omp parallel for reduction(+: WEx, WEy, WEz, WBx, WBy, WBz, WdBz)
+  #pragma omp parallel for reduction(+: WEx, WEy, WEz, WBx, WBy, WBz)
   for (int y = 0; y < SIZE_Y; ++y) {
   for (int x = 0; x < SIZE_X; ++x) {
     WEx += 0.5 * electric_.x(y, x) * electric_.x(y, x) * dx * dy;
@@ -53,24 +49,6 @@ void fields_energy::diagnose(int t) {
     WBx += 0.5 * magnetic_.x(y, x) * magnetic_.x(y, x) * dx * dy;
     WBy += 0.5 * magnetic_.y(y, x) * magnetic_.y(y, x) * dx * dy;
     WBz += 0.5 * magnetic_.z(y, x) * magnetic_.z(y, x) * dx * dy;
-
-#if BEAM_INJECTION_SETUP
-    WdBz += 0.5 * (magnetic_.z(y, x) - config::Omega_max) * (magnetic_.z(y, x) - config::Omega_max) * dx * dy;
-#else
-    double B0 = 0.0;
-
-    if (x * dx < __Bz.get_x0()) {
-      B0 = 0.0;
-    }
-    else if (x * dx < __Bz.get_xmax()) {
-      B0 = __Bz(x * dx);
-    }
-    else {
-      B0 = __Bz(__Bz.get_xmax());
-    }
-
-    WdBz += 0.5 * (magnetic_.z(y, x) - B0) * (magnetic_.z(y, x) - B0) * dx * dy;
-#endif
   }}
 
   file_for_results_->write(WEx);
@@ -79,13 +57,13 @@ void fields_energy::diagnose(int t) {
   file_for_results_->write(WBx);
   file_for_results_->write(WBy);
   file_for_results_->write(WBz);
-  file_for_results_->write(WdBz);
 
-  file_for_results_->write(WEx + WEy + WEz + WBx + WBy + WBz);
+  double total = WEx + WEy + WEz + WBx + WBy + WBz;
+  file_for_results_->write(total);
 
   LOG_INFO("Fields energy: Ex = {:.5e}, Ey = {:.5e}, Ez = {:.5e}", WEx, WEy, WEz);
   LOG_INFO("               Bx = {:.5e}, By = {:.5e}, Bz = {:.5e}", WBx, WBy, WBz);
-  LOG_INFO("            Total = {}", WEx + WEy + WEz + WBx + WBy + WBz);
+  LOG_INFO("            Total = {}", total);
 
   if (t % diagnose_time_step == 0)
     file_for_results_->flush();

@@ -2,8 +2,7 @@
 #define SRC_PCH_H
 
 #include <omp.h>
-
-#include <cmath>
+#include <math.h>
 
 #include <map>
 #include <list>

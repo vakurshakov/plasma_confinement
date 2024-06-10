@@ -38,7 +38,7 @@ void field_at_point::save_parameters() const {
 void field_at_point::diagnose(int t) {
   PROFILE_FUNCTION();
 
-  file_for_results_->write(field_(point_.y, point_.x).vec[component_]);
+  file_for_results_->write(field_(component_, point_.y, point_.x));
 
   if (t % diagnose_time_step == 0)
     file_for_results_->flush();

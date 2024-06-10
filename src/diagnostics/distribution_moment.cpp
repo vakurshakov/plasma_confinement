@@ -14,10 +14,10 @@ distribution_moment::distribution_moment(
   moment_ = std::move(moment);
   projector_ = std::move(projector);
 
-  min_[X] = int(projector_->area.min[X] / projector_->area.dp[X]);
-  min_[Y] = int(projector_->area.min[Y] / projector_->area.dp[Y]);
-  max_[X] = int(projector_->area.max[X] / projector_->area.dp[X]);
-  max_[Y] = int(projector_->area.max[Y] / projector_->area.dp[Y]);
+  min_[X] = int(round(projector_->area.min[X] / projector_->area.dp[X]));
+  min_[Y] = int(round(projector_->area.min[Y] / projector_->area.dp[Y]));
+  max_[X] = int(round(projector_->area.max[X] / projector_->area.dp[X]));
+  max_[Y] = int(round(projector_->area.max[Y] / projector_->area.dp[Y]));
   data_.reserve((max_[X] - min_[X]) * (max_[Y] - min_[Y]));
 
   save_parameters();
@@ -32,10 +32,10 @@ distribution_moment::distribution_moment(
   moment_ = nullptr;
   projector_ = std::move(projector);
 
-  min_[X] = int(projector_->area.min[X] / projector_->area.dp[X]);
-  min_[Y] = int(projector_->area.min[Y] / projector_->area.dp[Y]);
-  max_[X] = int(projector_->area.max[X] / projector_->area.dp[X]);
-  max_[Y] = int(projector_->area.max[Y] / projector_->area.dp[Y]);
+  min_[X] = int(round(projector_->area.min[X] / projector_->area.dp[X]));
+  min_[Y] = int(round(projector_->area.min[Y] / projector_->area.dp[Y]));
+  max_[X] = int(round(projector_->area.max[X] / projector_->area.dp[X]));
+  max_[Y] = int(round(projector_->area.max[Y] / projector_->area.dp[Y]));
   data_.reserve((max_[X] - min_[X]) * (max_[Y] - min_[Y]));
 
   save_parameters();
@@ -66,8 +66,9 @@ void distribution_moment::diagnose(int t) {
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+    BIN_File::from_timestep(result_directory_, t));
 
+  clear();
   collect();
 
   for (int npy = 0; npy < (max_[Y] - min_[Y]); ++npy) {
@@ -75,39 +76,38 @@ void distribution_moment::diagnose(int t) {
     file_for_results_->write(data_[npy * (max_[X] - min_[X]) + npx]);
   }}
 
-  reset();
+  file_for_results_->close();
 }
 
 void distribution_moment::collect() {
   const int Np = particles_.get_parameters().Np();
-  const int width = particles_.get_parameters().charge_cloud();
-  const auto& shape = particles_.get_parameters().form_factor();
+
+  const double& area_dx = projector_->area.dp[X];
+  const double& area_dy = projector_->area.dp[Y];
 
   #pragma omp parallel for
   for (const auto& particle : particles_.get_particles()) {
     double pr_x = projector_->get_x(particle);
     double pr_y = projector_->get_y(particle);
 
-    // floor(x) here to avoid problems on borders with rounding up and down
-    int npx = int(floor(pr_x / projector_->area.dp[X]));
-    int npy = int(floor(pr_y / projector_->area.dp[Y]));
+    int npx = int(round(pr_x / area_dx));
+    int npy = int(round(pr_y / area_dy));
 
-    for (int i = npx - width; i <= npx + width; ++i) {
-    for (int j = npy - width; j <= npy + width; ++j) {
-      if ((min_[X] <= i && i < max_[X]) &&
-          (min_[Y] <= j && j < max_[Y])) {
+    for (int i = npx - shape_radius; i <= npx + shape_radius; ++i) {
+    for (int j = npy - shape_radius; j <= npy + shape_radius; ++j) {
+      if ((min_[X] <= i && i < max_[X]) && (min_[Y] <= j && j < max_[Y])) {
         #pragma omp atomic
         data_[(j - min_[Y]) * (max_[X] - min_[X]) + (i - min_[X])] +=
           moment_->get(particle) * particle.n() / Np *
-          shape(pr_x - i * dx, dx) *
-          shape(pr_y - j * dy, dy);
+          shape_function(pr_x - i * area_dx, area_dx) *
+          shape_function(pr_y - j * area_dy, area_dy);
       }
       else continue;
     }}
   }
 }
 
-void distribution_moment::reset() {
+void distribution_moment::clear() {
   #pragma omp parallel for
   for (auto npy = 0; npy < (max_[Y] - min_[Y]); ++npy) {
   for (auto npx = 0; npx < (max_[X] - min_[X]); ++npx) {
@@ -116,78 +116,99 @@ void distribution_moment::reset() {
 }
 
 
-inline double get_zeroth_moment(const Particle& particle) {
+inline double get_zeroth(const Particle&) {
   return 1.0;
 }
 
-inline double get_Vx_moment(const Particle& particle) {
+inline double get_Vx(const Particle& particle) {
   return particle.velocity().x();
 }
 
-inline double get_Vy_moment(const Particle& particle) {
+inline double get_Vy(const Particle& particle) {
   return particle.velocity().y();
 }
 
-inline double get_mVxVx_moment(const Particle& particle) {
-  return particle.m() * get_Vx_moment(particle) * get_Vx_moment(particle);
+inline double get_mVxVx(const Particle& particle) {
+  return particle.m() * get_Vx(particle) * get_Vx(particle);
 }
 
-inline double get_mVxVy_moment(const Particle& particle) {
-  return particle.m() * get_Vx_moment(particle) * get_Vy_moment(particle);
+inline double get_mVxVy(const Particle& particle) {
+  return particle.m() * get_Vx(particle) * get_Vy(particle);
 }
 
-inline double get_mVyVy_moment(const Particle& particle) {
-  return particle.m() * get_Vy_moment(particle) * get_Vy_moment(particle);
+inline double get_mVyVy(const Particle& particle) {
+  return particle.m() * get_Vy(particle) * get_Vy(particle);
 }
 
-inline double get_Vr_moment(const Particle& particle) {
+inline double get_Vr(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
 
   // Particles close to r=0 are not taken into account
-  if (!std::isfinite(1. / r)) return 0;
+  if (std::isinf(1.0 / r))
+    return 0.0;
 
-  return particle.velocity().x() * (+x / r) +
-    particle.velocity().y() * (y / r);
+  return (+x * get_Vx(particle) + y * get_Vy(particle)) / r;
 }
 
-inline double get_Vphi_moment(const Particle& particle) {
+inline double get_Vphi(const Particle& particle) {
   double x = particle.point.x() - 0.5 * SIZE_X * dx;
   double y = particle.point.y() - 0.5 * SIZE_Y * dy;
   double r = sqrt(x * x + y * y);
 
   // Particles close to r=0 are not taken into account
-  if (!std::isfinite(1. / r)) return 0;
+  if (std::isinf(1.0 / r))
+    return 0.0;
 
-  return particle.velocity().x() * (-y / r) +
-    particle.velocity().y() * (x / r);
+  return (-y * get_Vx(particle) + x * get_Vy(particle)) / r;
+}
+
+inline double get_mVrVr(const Particle& particle) {
+  return particle.m() * get_Vr(particle) * get_Vr(particle);
+}
+
+inline double get_mVrVphi(const Particle& particle) {
+  return particle.m() * get_Vr(particle) * get_Vphi(particle);
+}
+
+inline double get_mVphiVphi(const Particle& particle) {
+  return particle.m() * get_Vphi(particle) * get_Vphi(particle);
 }
 
 Moment::Moment(std::string name) : name(name) {
   if (name == "zeroth_moment") {
-    get = get_zeroth_moment;
+    get = get_zeroth;
   }
   else if (name == "Vx_moment") {
-    get = get_Vx_moment;
+    get = get_Vx;
   }
   else if (name == "Vy_moment") {
-    get = get_Vy_moment;
-  }
-  else if (name == "Vr_moment") {
-    get = get_Vr_moment;
-  }
-  else if (name == "Vphi_moment") {
-    get = get_Vphi_moment;
+    get = get_Vy;
   }
   else if (name == "mVxVx_moment") {
-    get = get_mVxVx_moment;
+    get = get_mVxVx;
   }
   else if (name == "mVxVy_moment") {
-    get = get_mVxVy_moment;
+    get = get_mVxVy;
   }
   else if (name == "mVyVy_moment") {
-    get = get_mVyVy_moment;
+    get = get_mVyVy;
+  }
+  else if (name == "Vr_moment") {
+    get = get_Vr;
+  }
+  else if (name == "Vphi_moment") {
+    get = get_Vphi;
+  }
+  else if (name == "mVrVr_moment") {
+    get = get_mVrVr;
+  }
+  else if (name == "mVrVphi_moment") {
+    get = get_mVrVphi;
+  }
+  else if (name == "mVphiVphi_moment") {
+    get = get_mVphiVphi;
   }
 }
 
@@ -200,13 +221,6 @@ inline double project_to_y(const Particle& particle) {
   return particle.point.y();
 }
 
-inline double project_to_vx(const Particle& particle) {
-  return particle.velocity().x();
-}
-
-inline double project_to_vy(const Particle& particle) {
-  return particle.velocity().y();
-}
 
 Projector2D::Projector2D(std::string axes_names, diag_area area)
     : axes_names(axes_names), area(area) {
@@ -215,7 +229,11 @@ Projector2D::Projector2D(std::string axes_names, diag_area area)
     get_y = project_to_y;
   }
   else if (axes_names == "VxVy") {
-    get_x = project_to_vx;
-    get_y = project_to_vy;
+    get_x = get_Vx;
+    get_y = get_Vy;
+  }
+  else if (axes_names == "VrVphi") {
+    get_x = get_Vr;
+    get_y = get_Vphi;
   }
 }

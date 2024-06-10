@@ -5,7 +5,7 @@
 
 #include "src/pch.h"
 #include "src/particles/particles.hpp"
-#include "src/particles/particle-boundary_processor.hpp"
+#include "src/utils/domain_geometry.hpp"
 
 class Clone_layer_particles : public Command {
  public:
@@ -25,10 +25,11 @@ class Clone_layer_particles : public Command {
   Particles* const particles_out_;
 
   Domain_geometry geom_;
+  const double width_ = 2.0 * dx;
 
   inline bool particle_should_be_cloned(const Point&) const;
-  inline bool particle_on_the_left(double x, double width) const;
-  inline bool particle_on_the_right(double x, double width) const;
+  inline bool particle_on_the_left(double x) const;
+  inline bool particle_on_the_right(double x) const;
 
   inline Point configure_point(const Point&) const;
 };

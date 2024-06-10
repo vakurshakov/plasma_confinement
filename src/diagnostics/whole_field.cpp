@@ -9,16 +9,16 @@ whole_field::whole_field(std::string result_directory,
 
 void whole_field::diagnose(int t) {
   PROFILE_FUNCTION();
-  
+
   if (t % diagnose_time_step != 0) return;
 
   file_for_results_ = std::make_unique<BIN_File>(
-    result_directory_, std::to_string(t));
+    BIN_File::from_timestep(result_directory_, t));
 
   for (int ny = segment_.begin[Y]; ny < segment_.end[Y]; ++ny) {
   for (int nx = segment_.begin[X]; nx < segment_.end[X]; ++nx) {
-    file_for_results_->write(field_(ny, nx).vec[component_]);
+    file_for_results_->write(field_(component_, ny, nx));
   }}
 
-  file_for_results_->flush();
+  file_for_results_->close();
 }

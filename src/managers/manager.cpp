@@ -3,18 +3,14 @@
 #include "src/command/set_particles.hpp"
 #include "src/command/copy_coordinates.hpp"
 #include "src/command/ionize_particles.hpp"
-#include "src/command/clone_layer_particles.hpp"
 #include "src/command/set_Bz_distribution.hpp"
 #include "src/command/magnetic_field_half_step.hpp"
 
 #include "src/fields/fields_builder.hpp"
 #include "src/particles/particles_builder.hpp"
-#include "src/particles/particles_load.hpp"
 #include "src/diagnostics/diagnostics_builder.hpp"
 
-#include "src/utils/transition_layer/particles_distribution.hpp"
-static auto __n = Table_function("src/utils/transition_layer/n_" + config::postfix);
-
+#include "src/particles/particles_load.hpp"
 #include "src/utils/random_number_generator.hpp"
 #include "src/utils/simulation_backup.hpp"
 
@@ -40,6 +36,8 @@ void Manager::log_information() const {
   LOG_INFO("  temperature,              T_i = {:.2e} KeV", config::T_ions);
   LOG_INFO("  thermal velocity,        v_Ti = {:.2e} c", config::V_ions);
   LOG_INFO("  Debye length,            L_di = {:.2e} c/w_pe", config::V_ions * sqrt(config::mi_me));
+  LOG_WARN("  self-heating,       dx / L_di = {:.3f}", dx / (config::V_ions * sqrt(config::mi_me)));
+  LOG_WARN("  self-heating,       dy / L_di = {:.3f}", dy / (config::V_ions * sqrt(config::mi_me)));
   LOG_INFO("  cyclotron frequency,     Om_i = {:.2e} w_pe", config::Omega_max / config::mi_me);
   LOG_INFO("  cyclotron period, 2 pi / Om_i = {:.2e} 1/w_pe ({} timesteps)",
     2 * M_PI / (config::Omega_max / config::mi_me),
@@ -52,6 +50,8 @@ void Manager::log_information() const {
   LOG_INFO("  temperature,              T_e = {:.2e} KeV", config::T_electrons);
   LOG_INFO("  thermal velocity,        v_Te = {:.2e} c", config::V_electrons);
   LOG_INFO("  Debye length,            L_de = {:.2e} c/w_pe", config::V_electrons);
+  LOG_WARN("  self-heating,       dx / L_de = {:.3f}", dx / (config::V_electrons));
+  LOG_WARN("  self-heating,       dy / L_de = {:.3f}", dy / (config::V_electrons));
   LOG_INFO("  cyclotron frequency,     Om_e = {:.2e} w_pe", config::Omega_max);
   LOG_INFO("  cyclotron period, 2 pi / Om_e = {:.2e} 1/w_pe ({} timesteps)",
     2 * M_PI / (config::Omega_max),
@@ -59,6 +59,7 @@ void Manager::log_information() const {
   LOG_INFO("  cyclotron radius,       rho_e = {:.2e} c/w_pe ({} cells)",
     config::V_electrons / config::Omega_max,
     int(config::V_electrons / config::Omega_max / dx));
+
   LOG_FLUSH();
 }
 
@@ -71,10 +72,10 @@ void Manager::initializes() {
 
   std::list<Command_up> presets;
 
-#if there_are_fields
   Fields_builder fields_builder;
   fields_ = Fields(fields_builder);
 
+#if there_are_fields
   // We use this to push the magnetic field to
   // the same half-timestep as electric field
   step_presets_.push_front(std::make_unique<Magnetic_field_half_step>(&fields_));
@@ -91,99 +92,22 @@ void Manager::initializes() {
   Particles_builder particles_builder(fields_);
 
   Domain_geometry domain {
-    config::domain_left,
-    config::domain_right,
-    config::domain_bottom,
-    config::domain_top
+    config::domain_r_min,
+    config::domain_r_max,
+    config::domain_phi_min,
+    config::domain_phi_max
   };
 
-
-#if !BEAM_INJECTION_SETUP
-
-#if !there_are_plasma_electrons
-  particles_species_.reserve(2);
-#else
+#if there_are_target_plasma
   particles_species_.reserve(4);
-#endif
-
-  const int total_num_particles = int((__n.get_xmax() - config::domain_left) / dx) * SIZE_Y * config::Npi;
-  LOG_INFO("{} particles will be set in total to each plasma specie", total_num_particles);
-
-  particles_builder.set_sort("plasma_ions");
-  Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
-
-  plasma_ions.particles_.reserve(2 * total_num_particles);
-
-  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  presets.emplace_back(std::make_unique<Set_particles>(
-    &plasma_ions, total_num_particles,
-    Domain_geometry {
-      floor(config::domain_left / dx),
-      floor(__n.get_xmax() / dx),
-      0,
-      SIZE_Y
-    },
-    transition_layer::load_maxwellian_impulse
-  ));
-
-
-  Particles& buffer_ions = particles_species_.emplace_back(particles_builder);
-  buffer_ions.sort_name_ = "buffer_plasma_ions";  // changed from "plasma_ions"
-
-  buffer_ions.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
-    buffer_ions.particles_, plasma_ions.particles_, plasma_ions.parameters_, domain);
-
-  const int buffer_ions_size = config::BUFFER_SIZE * SIZE_Y * config::Npi;
-  buffer_ions.particles_.reserve(2 * buffer_ions_size);
-
-  step_presets_.emplace_back(std::make_unique<Set_particles>(
-    &buffer_ions, buffer_ions_size,
-    Domain_geometry {
-      floor(config::domain_left / dx) - config::BUFFER_SIZE,
-      floor(config::domain_left / dx),
-      0,
-      SIZE_Y
-    },
-    transition_layer::load_maxwellian_impulse
-  ));
-
-#if there_are_plasma_electrons
-  particles_builder.set_sort("plasma_electrons");
-  Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
-
-  plasma_electrons.particles_.reserve(2 * total_num_particles);
-
-  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
-    plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  presets.emplace_back(std::make_unique<Copy_coordinates>(
-    &plasma_electrons, &plasma_ions, load_maxwellian_impulse
-  ));
-
-
-  Particles& buffer_electrons = particles_species_.emplace_back(particles_builder);
-  buffer_electrons.sort_name_ = "buffer_plasma_electrons";  // changed from "plasma_electrons"
-
-  buffer_electrons.particles_.reserve(2 * buffer_ions_size);
-
-  buffer_electrons.boundaries_processor_ = std::make_unique<Beam_buffer_processor>(
-    buffer_electrons.particles_, plasma_electrons.particles_, plasma_electrons.parameters_, domain);
-
-  step_presets_.push_back(std::make_unique<Clone_layer_particles>(
-    &plasma_electrons, &buffer_electrons, domain));
-
-#endif
-
-#else  // BEAM_INJECTION_SETUP
-
+#else
   particles_species_.reserve(2);
+#endif
 
   particles_builder.set_sort("plasma_ions");
   Particles& plasma_ions = particles_species_.emplace_back(particles_builder);
 
-  plasma_ions.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
+  plasma_ions.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
     plasma_ions.particles_, plasma_ions.parameters_, domain);
 
   plasma_ions.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
@@ -192,49 +116,140 @@ void Manager::initializes() {
   particles_builder.set_sort("plasma_electrons");
   Particles& plasma_electrons = particles_species_.emplace_back(particles_builder);
 
-  plasma_electrons.boundaries_processor_ = std::make_unique<Beam_boundary_processor>(
+  plasma_electrons.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
     plasma_electrons.particles_, plasma_electrons.parameters_, domain);
 
   plasma_electrons.particles_.reserve(config::PER_STEP_PARTICLES * TIME + 10'000);
 
-
+#if !AXIAL_INJECTION
   step_presets_.emplace_back(std::make_unique<Ionize_particles>(
     &plasma_ions, &plasma_electrons,
     set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
-    // set_point_of_birth:
-    [](double *x, double *y) {
-      *x = (0.5 * SIZE_X + (random_01() - 0.5) * config::WIDTH_OF_INJECTION_AREA) * dx;
-      *y = random_01() * SIZE_Y * dy;
+    // set_point_on_circle:
+    [](double* x, double* y) {
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double r0 = config::R0;
+
+      double r = r0 * sqrt(random_01());
+      double phi = 2.0 * M_PI * random_01();
+
+      *x = center_x + r * cos(phi);
+      *y = center_y + r * sin(phi);
     },
     uniform_probability,
     load_maxwellian_impulse
   ));
+#else
+  step_presets_.emplace_back(std::make_unique<Ionize_particles>(
+    &plasma_ions, &plasma_electrons,
+    set_time_distribution(TIME, config::PER_STEP_PARTICLES * TIME),
+    // set_point_on_annulus:
+    [](double* x, double* y) {
+      using namespace config;
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+      static const double ra = R0 - 0.5 * DR;
+      static const double rb = R0 + 0.5 * DR;
+
+      double r = sqrt(ra * ra + (rb * rb - ra * ra) * random_01());
+      double phi = 2.0 * M_PI * random_01();
+
+      *x = center_x + r * cos(phi);
+      *y = center_y + r * sin(phi);
+    },
+    uniform_probability,
+    // load_angular_momentum:
+    [] (double x, double y,
+        double mass, double Tx, double Ty, double Tz,
+        double p0, double* px, double* py, double* pz) {
+      using namespace config;
+      static const double center_x = 0.5 * SIZE_X * dx;
+      static const double center_y = 0.5 * SIZE_Y * dy;
+
+      x -= center_x;
+      y -= center_y;
+      double r = sqrt(x * x + y * y);
+
+      *px = +p0 * (y / r) + sin(2.0 * M_PI * random_01()) * temperature_impulse(Tx, mass);
+      *py = -p0 * (x / r) + sin(2.0 * M_PI * random_01()) * temperature_impulse(Ty, mass);
+    }
+  ));
+#endif
+
+#if there_are_target_plasma
+  particles_builder.set_sort("target_ions");
+  Particles& target_ions = particles_species_.emplace_back(particles_builder);
+
+  target_ions.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
+    target_ions.particles_, target_ions.parameters_, domain);
+
+  const int total_number_of_ions =
+    M_PI * config::RADIUS_OF_TARGET_PLASMA * config::RADIUS_OF_TARGET_PLASMA * config::Npi / (dx * dy);
+
+  struct Set_coordinate_on_circle : public Coordinate_generator {
+    const double center_x = 0.5 * SIZE_X * dx;
+    const double center_y = 0.5 * SIZE_Y * dy;
+    const double R_max = config::RADIUS_OF_TARGET_PLASMA;
+
+    Set_coordinate_on_circle() = default;
+
+    void load(double* x, double* y) override {
+      double r = R_max * sqrt(random_01());
+      double phi = 2.0 * M_PI * random_01();
+
+      *x = center_x + r * cos(phi);
+      *y = center_y + r * sin(phi);
+    }
+  };
+
+  presets.emplace_back(std::make_unique<Set_particles>(
+    &target_ions, total_number_of_ions,
+    std::make_unique<Set_coordinate_on_circle>(),
+    load_maxwellian_impulse));
+
+
+  particles_builder.set_sort("target_electrons");
+  Particles& target_electrons = particles_species_.emplace_back(particles_builder);
+
+  target_electrons.boundaries_processor_ = std::make_unique<POL_Beam_boundary>(
+    target_electrons.particles_, target_electrons.parameters_, domain);
+
+  presets.emplace_back(std::make_unique<Copy_coordinates>(
+    &target_electrons, &target_ions, load_maxwellian_impulse));
 
 #endif
 
 #if MAKE_BACKUPS || START_FROM_BACKUP
   auto backup =  std::make_unique<Simulation_backup>(
-    /* backup timestep = */ 100 * diagnose_time_step,
+    /* backup timestep = */ backup_time_step,
     // named particle species to backup:
     std::unordered_map<std::string, Particles&>{
       { plasma_ions.sort_name_, plasma_ions },
-      { plasma_electrons.sort_name_, plasma_electrons }
+      { plasma_electrons.sort_name_, plasma_electrons },
+#if there_are_target_plasma
+      { target_ions.sort_name_, target_ions },
+      { target_electrons.sort_name_, target_electrons },
+#endif
     },
     // named fields to backup:
     std::unordered_map<std::string, vector3_field&>{
       { "E", fields_.E() },
       { "B", fields_.B() }
   });
+
 #endif
 
 #if !START_FROM_BACKUP
   for (const auto& command : presets) {
     command->execute(START_);
   }
+
 #else
   backup->load();
   START_ = backup->get_last_timestep();
   LOG_INFO("Configuration loaded from backup. Simulation will start from t={}", START_);
+
 #endif
 
   Diagnostics_builder diagnostics_builder(particles_species_, fields_);
@@ -263,8 +278,11 @@ void Manager::calculates() {
     }
 
   #if there_are_particles
-    for (auto& sort : particles_species_) {
-      sort.push();
+    #pragma omp parallel
+    {
+      for (auto& sort : particles_species_) {
+        sort.push();
+      }
     }
   #endif
 
@@ -284,7 +302,14 @@ void Manager::calculates() {
 void Manager::diagnose(size_t t) const {
   PROFILE_FUNCTION();
 
-  #pragma omp parallel for shared(diagnostics_), num_threads(NUM_THREADS)
+  /**
+   * @warning This parallelization produces the following problem.
+   * Enabling it with no if condition, reduces the cost of running
+   * _all_ diagnostics (i.e. when t % diagnose_time_step == 0)
+   * by ~3.7, but on other timesteps the cost of thread creation
+   * accumulates and drops the overall performance by ~1.5.
+   */
+  #pragma omp parallel for if(t % diagnose_time_step == 0)
   for (const auto& diagnostic : diagnostics_) {
     diagnostic->diagnose(t);
   }

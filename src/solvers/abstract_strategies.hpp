@@ -13,13 +13,13 @@ class Interpolation {
 class Pusher {
  public:
   virtual ~Pusher() = default;
-  virtual void process(Particle&, const vector3& local_E, const vector3& local_B) const = 0;
+  virtual void process(Particle& particle, const vector3& local_E, const vector3& local_B) const = 0;
 };
 
 class Decomposition {
  public:
   virtual ~Decomposition() = default;
-  virtual void process(const Particle&, const vector2& r0) = 0;
+  virtual void process(const Particle& particle, const vector2& r0) = 0;
 };
 
 #endif // ABSTRACT_STRATEGIES_HPP
